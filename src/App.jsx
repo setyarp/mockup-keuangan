@@ -72,6 +72,91 @@ const NoData = ({ text = "Tidak ada data yang sesuai filter." }) => (
   <div style={{ padding: 40, textAlign: "center", color: COLORS.gray500, fontSize: 14 }}>{text}</div>
 );
 
+// ===== PREVIEW MODAL (reusable) =====
+const PreviewModal = ({ preview, onClose }) => {
+  if (!preview) return null;
+  const { title, subtitle, type, content, fileName } = preview;
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 680, maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>{title}</div>
+            {subtitle && <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>{subtitle}</div>}
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
+        </div>
+        {/* Preview Area */}
+        <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+          <div style={{ border: `1px solid ${COLORS.gray200}`, borderRadius: 8, background: COLORS.gray50, minHeight: 320 }}>
+            {type === "surat" && (
+              <div style={{ padding: "32px 40px", background: COLORS.white, margin: 16, borderRadius: 4, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", fontFamily: "'Times New Roman', serif" }}>
+                <div style={{ textAlign: "center", marginBottom: 24, borderBottom: `2px solid ${COLORS.gray900}`, paddingBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: 1 }}>PT ASABRI (PERSERO)</div>
+                  <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>Jl. Mayjen Sutoyo No.11, Jakarta Timur 13630</div>
+                </div>
+                <div style={{ textAlign: "center", marginBottom: 20 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, textDecoration: "underline" }}>SURAT TAGIHAN</div>
+                  <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>{content?.noSurat || "No. 001/ASABRI/TGH/VII/2026"}</div>
+                </div>
+                <div style={{ fontSize: 12, lineHeight: 1.8, color: COLORS.gray800 }}>
+                  <p>Kepada Yth,<br/><strong>{content?.tujuan || "Direktur Jenderal Perbendaharaan — Kementerian Keuangan RI"}</strong></p>
+                  <p style={{ marginTop: 12 }}>Berdasarkan data kepesertaan per tanggal cut-off <strong>{content?.cutoff || "25 Juni 2026"}</strong>, bersama ini kami sampaikan tagihan iuran untuk periode <strong>{content?.periode || "Juli 2026"}</strong> dengan rincian sebagai berikut:</p>
+                  <table style={{ width: "100%", borderCollapse: "collapse", margin: "16px 0", fontSize: 12 }}>
+                    <thead><tr style={{ background: COLORS.gray100 }}><th style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "left" }}>Jenis Iuran</th><th style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right" }}>Peserta</th><th style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right" }}>Nominal</th></tr></thead>
+                    <tbody>
+                      {(content?.items || [
+                        { jenis: "THT (3,25%)", peserta: "14.328", nominal: "Rp 35.760.000.000" },
+                        { jenis: "Dapen (4,75%)", peserta: "14.328", nominal: "Rp 52.250.000.000" },
+                        { jenis: "JKK (0,24%)", peserta: "14.328", nominal: "Rp 2.630.000.000" },
+                        { jenis: "JKm (0,20%)", peserta: "14.328", nominal: "Rp 2.210.000.000" },
+                      ]).map((r, i) => (
+                        <tr key={i}><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6 }}>{r.jenis}</td><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right" }}>{r.peserta}</td><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right", fontWeight: 600 }}>{r.nominal}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p>Demikian surat tagihan ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.</p>
+                  <div style={{ marginTop: 32, textAlign: "right" }}>
+                    <div>Jakarta, {content?.tanggal || "01 Juli 2026"}</div>
+                    <div style={{ marginTop: 8, fontWeight: 700 }}>Kepala Divisi Keuangan</div>
+                    <div style={{ marginTop: 48, borderBottom: `1px solid ${COLORS.gray800}`, width: 200, marginLeft: "auto" }} />
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>NIP. ___________________</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {type === "table" && (
+              <div style={{ padding: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray700, marginBottom: 12 }}>Preview data yang akan diekspor:</div>
+                <div style={{ background: COLORS.white, borderRadius: 6, padding: 16, border: `1px solid ${COLORS.gray200}` }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                    <thead><tr style={{ background: COLORS.gray100 }}>{(content?.columns || []).map((c, i) => <th key={i} style={{ padding: "6px 10px", textAlign: "left", borderBottom: `1px solid ${COLORS.gray300}`, fontWeight: 600, color: COLORS.gray700 }}>{c}</th>)}</tr></thead>
+                    <tbody>{(content?.rows || []).map((row, i) => <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>{row.map((cell, j) => <td key={j} style={{ padding: "6px 10px", color: COLORS.gray800 }}>{cell}</td>)}</tr>)}</tbody>
+                  </table>
+                  {(content?.totalRows || 0) > 5 && <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 8, textAlign: "center" }}>... dan {content.totalRows - 5} baris lainnya</div>}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Footer */}
+        <div style={{ padding: "16px 24px", borderTop: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+          <div style={{ fontSize: 12, color: COLORS.gray500 }}>
+            <FileText size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />
+            {fileName || "document.pdf"} • {type === "surat" ? "PDF" : "Excel / PDF"}
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <Btn variant="ghost" onClick={onClose}>Batal</Btn>
+            <Btn onClick={onClose}>
+              <Download size={14} /> Unduh File
+            </Btn>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ============ PAGES ============
 
 const DashboardKeuangan = () => (
@@ -79,7 +164,6 @@ const DashboardKeuangan = () => (
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
       <StatCard icon={<DollarSign size={IC} />} label="Total Tagihan Bulan Ini" value="Rp 847,2 M" sub="THT + Dapen + JKK + JKm" color={COLORS.blue} link="Lihat Rincian" />
       <StatCard icon={<BarChart3 size={IC} />} label="Realisasi Penerimaan" value="Rp 812,5 M" sub="95.9% dari tagihan" color={COLORS.green} link="Rekonsiliasi" />
-      <StatCard icon={<AlertTriangle size={IC} />} label="Satker Menunggak" value="12 Satker" sub="3 lebih dari 1 periode" color={COLORS.orange} link="Detail Tunggakan" />
       <StatCard icon={<FileText size={IC} />} label="Klaim Pending" value="156 Berkas" sub="Rp 23,1 M pending pembayaran" color={COLORS.red} link="Proses Klaim" />
     </div>
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
@@ -111,12 +195,38 @@ const DashboardKeuangan = () => (
       </div>
     </div>
     <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-      <SectionTitle action={<Btn variant="outline" size="sm">Lihat Semua</Btn>}>Tagihan Terbaru</SectionTitle>
-      <Table columns={["No. Surat", "Satker", "Jenis", "Nominal", "Status", "Jatuh Tempo"]} data={[
-        ["TGH/2026/07/001", "TNI", "THT + Dapen", "Rp 12.450.000.000", <Badge color="green">Lunas</Badge>, "15 Jul 2026"],
-        ["TGH/2026/07/002", "POLRI", "THT + Dapen", "Rp 8.230.000.000", <Badge color="yellow">Menunggu</Badge>, "15 Jul 2026"],
-        ["TGH/2026/07/003", "ASN Kemenhan", "JKK + JKm", "Rp 5.670.000.000", <Badge color="blue">Terkirim</Badge>, "20 Jul 2026"],
-      ]} />
+      <SectionTitle>Penagihan Iuran ke Kemenkeu — Juli 2026</SectionTitle>
+      <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead><tr style={{ background: COLORS.gray100 }}>
+            {["No. Surat", "Jenis Iuran", "Acuan", "Nominal", "Cut-off", "Status Dokumen", ""].map((c, i) => (
+              <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {[
+              { no: "001/ASABRI/TGH-THT/VII/2026", jenis: "THT", acuan: "SKP-PFK", nominal: "Rp 35.760.000.000", cutoff: "25 Jun 2026", status: "Dokumen di-TTD", color: "green" },
+              { no: "002/ASABRI/TGH-DAP/VII/2026", jenis: "Dapen", acuan: "SKP-PFK", nominal: "Rp 52.250.000.000", cutoff: "25 Jun 2026", status: "Dokumen di-TTD", color: "green" },
+              { no: "003/ASABRI/TGH-JKK/VII/2026", jenis: "JKK", acuan: "Data Klaim", nominal: "Rp 2.630.000.000", cutoff: "25 Jun 2026", status: "Siap Download", color: "blue" },
+              { no: "004/ASABRI/TGH-JKM/VII/2026", jenis: "JKm", acuan: "Data Klaim", nominal: "Rp 2.210.000.000", cutoff: "25 Jun 2026", status: "Draft Tersedia", color: "yellow" },
+            ].map((t, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue, fontWeight: 500 }}>{t.no}</td>
+                <td style={{ padding: "10px 14px", fontWeight: 600 }}>{t.jenis}</td>
+                <td style={{ padding: "10px 14px" }}><Badge color={t.acuan === "SKP-PFK" ? "blue" : "orange"}>{t.acuan}</Badge></td>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontWeight: 600 }}>{t.nominal}</td>
+                <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray500 }}>{t.cutoff}</td>
+                <td style={{ padding: "10px 14px" }}><Badge color={t.color}>{t.status}</Badge></td>
+                <td style={{ padding: "10px 14px" }}><Btn size="sm" variant="ghost">Download</Btn></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ marginTop: 10, fontSize: 12, color: COLORS.gray500, display: "flex", justifyContent: "space-between" }}>
+        <span>THT & Dapen acuan: SKP-PFK Kemenkeu • JKK & JKm acuan: Data Klaim & Kalkulasi Sistem</span>
+        <span style={{ color: COLORS.gray400 }}>Proses pengiriman ke Kemenkeu dilakukan secara manual</span>
+      </div>
     </div>
   </div>
 );
@@ -154,24 +264,33 @@ const KalkulatorIuran = () => {
         { gol: "Golongan III", peserta: 1450, gp: 116.0, tht: 3.77, dapen: 5.51, jkk: 0.28, jkm: 0.23 },
         { gol: "Golongan IV", peserta: 668, gp: 50.7, tht: 1.65, dapen: 2.41, jkk: 0.12, jkm: 0.10 },
       ]},
+    { kode: "PPPK", nama: "PPPK", peserta: 2150, gp: 150.5, tht: 4.89, dapen: 7.15, jkk: 0.36, jkm: 0.30,
+      gol: [
+        { gol: "Golongan IX", peserta: 420, gp: 21.0, tht: 0.68, dapen: 1.00, jkk: 0.05, jkm: 0.04 },
+        { gol: "Golongan X", peserta: 680, gp: 47.6, tht: 1.55, dapen: 2.26, jkk: 0.11, jkm: 0.10 },
+        { gol: "Golongan XI", peserta: 620, gp: 49.6, tht: 1.61, dapen: 2.36, jkk: 0.12, jkm: 0.10 },
+        { gol: "Golongan XII", peserta: 430, gp: 32.3, tht: 1.05, dapen: 1.53, jkk: 0.08, jkm: 0.06 },
+      ]},
   ];
 
   const allPesertaList = [
-    { nrp: "198701234", nama: "Serka Ahmad Fauzi", satker: "TNI", gol: "Gol. II", gp: 3200000, ti: 320000, ta: 192000 },
-    { nrp: "199205678", nama: "Briptu Rina Marlina", satker: "POLRI", gol: "Gol. II", gp: 3050000, ti: 305000, ta: 183000 },
-    { nrp: "197803456", nama: "Letkol Bambang Suharto", satker: "TNI", gol: "Gol. IV", gp: 5800000, ti: 580000, ta: 348000 },
-    { nrp: "198512345", nama: "AKP Dedi Kurniawan", satker: "POLRI", gol: "Gol. III", gp: 4500000, ti: 450000, ta: 270000 },
-    { nrp: "199008765", nama: "Peltu Hendra Wijaya", satker: "TNI", gol: "Gol. II", gp: 3400000, ti: 340000, ta: 204000 },
-    { nrp: "198604321", nama: "Penata Tk.I Siti Nurhaliza", satker: "ASN Kemenhan", gol: "Gol. III", gp: 4200000, ti: 420000, ta: 252000 },
-    { nrp: "199312345", nama: "Praka Rizki Pratama", satker: "TNI", gol: "Gol. I", gp: 2800000, ti: 280000, ta: 168000 },
-    { nrp: "198907654", nama: "Bripda Mega Putri", satker: "POLRI", gol: "Gol. I", gp: 2900000, ti: 290000, ta: 174000 },
-    { nrp: "197506789", nama: "Pengatur Muda Agus Salim", satker: "ASN Kemenhan", gol: "Gol. II", gp: 3100000, ti: 310000, ta: 186000 },
-    { nrp: "198211111", nama: "Pembina Utama Dr. Ratna", satker: "ASN Kemenhan", gol: "Gol. IV", gp: 5500000, ti: 550000, ta: 330000 },
-    { nrp: "199401234", nama: "Kopda Joko Widodo", satker: "TNI", gol: "Gol. I", gp: 2750000, ti: 275000, ta: 165000 },
-    { nrp: "198802345", nama: "Bripka Anwar Ibrahim", satker: "POLRI", gol: "Gol. III", gp: 4100000, ti: 410000, ta: 246000 },
-    { nrp: "199103456", nama: "Pengatur Sri Wahyuni", satker: "ASN Kemenhan", gol: "Gol. I", gp: 2600000, ti: 260000, ta: 156000 },
-    { nrp: "197604567", nama: "Mayor Inf. Surya Darma", satker: "TNI", gol: "Gol. III", gp: 4800000, ti: 480000, ta: 288000 },
-    { nrp: "198705678", nama: "IPTU Dewi Sartika", satker: "POLRI", gol: "Gol. IV", gp: 5200000, ti: 520000, ta: 312000 },
+    { nrp: "198701234", nama: "Serka Ahmad Fauzi", satker: "TNI", unor: "Kodam Jaya", gol: "Gol. II", gp: 3200000, ti: 320000, ta: 192000 },
+    { nrp: "199205678", nama: "Briptu Rina Marlina", satker: "POLRI", unor: "Polda Metro Jaya", gol: "Gol. II", gp: 3050000, ti: 305000, ta: 183000 },
+    { nrp: "197803456", nama: "Letkol Bambang Suharto", satker: "TNI", unor: "Mabes TNI", gol: "Gol. IV", gp: 5800000, ti: 580000, ta: 348000 },
+    { nrp: "198512345", nama: "AKP Dedi Kurniawan", satker: "POLRI", unor: "Polda Jabar", gol: "Gol. III", gp: 4500000, ti: 450000, ta: 270000 },
+    { nrp: "199008765", nama: "Peltu Hendra Wijaya", satker: "TNI", unor: "Kodam Iskandar Muda", gol: "Gol. II", gp: 3400000, ti: 340000, ta: 204000 },
+    { nrp: "198604321", nama: "Penata Tk.I Siti Nurhaliza", satker: "ASN Kemenhan", unor: "Ditjen Strahan", gol: "Gol. III", gp: 4200000, ti: 420000, ta: 252000 },
+    { nrp: "199312345", nama: "Praka Rizki Pratama", satker: "TNI", unor: "Lantamal III", gol: "Gol. I", gp: 2800000, ti: 280000, ta: 168000 },
+    { nrp: "198907654", nama: "Bripda Mega Putri", satker: "POLRI", unor: "Polda Jatim", gol: "Gol. I", gp: 2900000, ti: 290000, ta: 174000 },
+    { nrp: "197506789", nama: "Pengatur Muda Agus Salim", satker: "ASN Kemenhan", unor: "Setjen Kemhan", gol: "Gol. II", gp: 3100000, ti: 310000, ta: 186000 },
+    { nrp: "198211111", nama: "Pembina Utama Dr. Ratna", satker: "ASN Kemenhan", unor: "Bainstrahan", gol: "Gol. IV", gp: 5500000, ti: 550000, ta: 330000 },
+    { nrp: "199401234", nama: "Kopda Joko Widodo", satker: "TNI", unor: "Kodam Diponegoro", gol: "Gol. I", gp: 2750000, ti: 275000, ta: 165000 },
+    { nrp: "198802345", nama: "Bripka Anwar Ibrahim", satker: "POLRI", unor: "Mabes Polri", gol: "Gol. III", gp: 4100000, ti: 410000, ta: 246000 },
+    { nrp: "199103456", nama: "Pengatur Sri Wahyuni", satker: "ASN Kemenhan", unor: "Ditjen Pothan", gol: "Gol. I", gp: 2600000, ti: 260000, ta: 156000 },
+    { nrp: "197604567", nama: "Mayor Inf. Surya Darma", satker: "TNI", unor: "Lanud Halim", gol: "Gol. III", gp: 4800000, ti: 480000, ta: 288000 },
+    { nrp: "198705678", nama: "IPTU Dewi Sartika", satker: "POLRI", unor: "Polda Bali", gol: "Gol. IV", gp: 5200000, ti: 520000, ta: 312000 },
+    { nrp: "199501234", nama: "Danu Prasetyo", satker: "PPPK", unor: "Ditjen Strahan", gol: "Gol. X", gp: 3300000, ti: 330000, ta: 198000 },
+    { nrp: "199602345", nama: "Lestari Handayani", satker: "PPPK", unor: "Setjen Kemhan", gol: "Gol. XI", gp: 3800000, ti: 380000, ta: 228000 },
   ];
 
   const satkerData = filterSatker === "Semua" ? allSatkerData : allSatkerData.filter(s => s.kode === filterSatker || s.nama === filterSatker);
@@ -193,9 +312,11 @@ const KalkulatorIuran = () => {
   const totalPeserta = satkerData.reduce((a, s) => a + s.peserta, 0);
 
   const [detailPeserta, setDetailPeserta] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   return (
     <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
       {/* Modal Detail Peserta */}
       {detailPeserta && (() => {
         const p = detailPeserta;
@@ -209,7 +330,7 @@ const KalkulatorIuran = () => {
               <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.gray900 }}>{p.nama}</div>
-                  <div style={{ fontSize: 13, color: COLORS.gray500, marginTop: 2 }}>NRP/NIP: <span style={{ fontFamily: "monospace" }}>{p.nrp}</span> • <Badge color={p.satker === "TNI" ? "green" : p.satker === "POLRI" ? "blue" : "orange"}>{p.satker}</Badge> • {p.gol}</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray500, marginTop: 2 }}>NRP/NIP: <span style={{ fontFamily: "monospace" }}>{p.nrp}</span> • <Badge color={p.satker === "TNI" ? "green" : p.satker === "POLRI" ? "blue" : p.satker === "PPPK" ? "yellow" : "orange"}>{p.satker}</Badge> • {p.unor && <span style={{ color: COLORS.gray600 }}>{p.unor} • </span>}{p.gol}</div>
                 </div>
                 <button onClick={() => setDetailPeserta(null)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: COLORS.gray500, padding: 4 }}>✕</button>
               </div>
@@ -264,9 +385,15 @@ const KalkulatorIuran = () => {
 
       <div style={{ background: COLORS.white, borderRadius: 10, padding: "14px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20, display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
         <Select label="Periode" value={filterPeriode} onChange={setFilterPeriode} options={["Juli 2026", "Juni 2026", "Mei 2026", "April 2026", "Maret 2026", "Februari 2026", "Januari 2026"]} minW={130} />
-        <Select label="Satker" value={filterSatker} onChange={v => { setFilterSatker(v); setSelectedSatker(null); }} options={["Semua", "TNI", "POLRI", "ASN Kemenhan"]} minW={140} />
+        <Select label="Satker" value={filterSatker} onChange={v => { setFilterSatker(v); setSelectedSatker(null); }} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
         <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["Semua", "THT", "Dapen", "JKK", "JKm"]} minW={120} />
         <Select label="Tanggal Cut-off" value="30 Jun 2026" onChange={() => {}} options={["30 Jun 2026", "31 Mei 2026", "30 Apr 2026"]} minW={130} />
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Data Iuran", subtitle: `Periode ${filterPeriode} • ${filterSatker === "Semua" ? "Seluruh Satker" : filterSatker}`, type: "table", fileName: `Rekap_Iuran_${filterPeriode.replace(" ", "_")}.xlsx`, content: { columns: ["Satker", "Peserta", "THT", "Dapen", "JKK", "JKm", "Total"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), `Rp ${s.tht} M`, `Rp ${s.dapen} M`, `Rp ${s.jkk} M`, `Rp ${s.jkm} M`, `Rp ${(s.tht+s.dapen+s.jkk+s.jkm).toFixed(2)} M`]), totalRows: satkerData.length } })}>Ekspor Data</Btn>
+          <Btn onClick={() => setPreview({ title: "Preview Surat Tagihan Iuran", subtitle: `Periode ${filterPeriode} — Surat Tagihan ke Kemenkeu`, type: "surat", fileName: `Surat_Tagihan_Iuran_${filterPeriode.replace(" ", "_")}.pdf`, content: { noSurat: `001/ASABRI/TGH/${filterPeriode.replace(" ", "/")}`, periode: filterPeriode, cutoff: "25 Jun 2026", tanggal: "01 Jul 2026", items: [ { jenis: "THT (3,25%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalTHT.toFixed(2)} M` }, { jenis: "Dapen (4,75%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalDapen.toFixed(2)} M` }, { jenis: "JKK (0,24%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKK.toFixed(2)} M` }, { jenis: "JKm (0,20%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKM.toFixed(2)} M` } ] } })}>
+            <FileText size={14} /> Buat Tagihan
+          </Btn>
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
@@ -279,7 +406,7 @@ const KalkulatorIuran = () => {
 
       {tab === "rekap" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm">Ekspor Excel</Btn><Btn variant="outline" size="sm">Ekspor PDF</Btn></div>}>Rekap Iuran per Satker & Golongan {filterSatker !== "Semua" && `— ${filterSatker}`} {filterJenis !== "Semua" && `(${filterJenis})`}</SectionTitle>
+          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Iuran", subtitle: "Format Excel (.xlsx)", type: "table", fileName: "Rekap_Iuran_Satker.xlsx", content: { columns: ["Satker", "Peserta", "THT", "Dapen", "JKK", "JKm"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), "Rp "+s.tht+" M", "Rp "+s.dapen+" M", "Rp "+s.jkk+" M", "Rp "+s.jkm+" M"]), totalRows: satkerData.length } })}>Ekspor Excel</Btn><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Iuran", subtitle: "Format PDF", type: "table", fileName: "Rekap_Iuran_Satker.pdf", content: { columns: ["Satker", "Peserta", "THT", "Dapen", "JKK", "JKm"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), "Rp "+s.tht+" M", "Rp "+s.dapen+" M", "Rp "+s.jkk+" M", "Rp "+s.jkm+" M"]), totalRows: satkerData.length } })}>Ekspor PDF</Btn></div>}>Rekap Iuran per Satker & Golongan {filterSatker !== "Semua" && `— ${filterSatker}`} {filterJenis !== "Semua" && `(${filterJenis})`}</SectionTitle>
           {satkerData.length === 0 ? <NoData /> : satkerData.map((s, si) => (
             <div key={si} style={{ marginBottom: si < satkerData.length - 1 ? 20 : 0 }}>
               <div onClick={() => setSelectedSatker(selectedSatker === s.kode ? null : s.kode)} style={{ cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: COLORS.blueDark, borderRadius: selectedSatker === s.kode ? "8px 8px 0 0" : 8, color: COLORS.white }}>
@@ -319,9 +446,9 @@ const KalkulatorIuran = () => {
 
       {tab === "peserta" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm">Ekspor Excel</Btn><Btn variant="outline" size="sm">Ekspor PDF</Btn></div>}>Daftar Iuran per Nama Peserta</SectionTitle>
+          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Daftar Peserta", subtitle: "Data iuran per nama peserta", type: "table", fileName: "Daftar_Iuran_Peserta.xlsx", content: { columns: ["NRP", "Nama", "Satker", "Gol."], rows: pesertaFiltered.slice(0,5).map(p => [p.nrp, p.nama, p.satker, p.gol]), totalRows: pesertaFiltered.length } })}>Ekspor Excel</Btn><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Daftar Peserta", subtitle: "Format PDF", type: "table", fileName: "Daftar_Iuran_Peserta.pdf", content: { columns: ["NRP", "Nama", "Satker", "Gol."], rows: pesertaFiltered.slice(0,5).map(p => [p.nrp, p.nama, p.satker, p.gol]), totalRows: pesertaFiltered.length } })}>Ekspor PDF</Btn></div>}>Daftar Iuran per Nama Peserta</SectionTitle>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
-            <Select label="Satker" value={filterSatkerPeserta} onChange={setFilterSatkerPeserta} options={["Semua", "TNI", "POLRI", "ASN Kemenhan"]} minW={130} />
+            <Select label="Satker" value={filterSatkerPeserta} onChange={setFilterSatkerPeserta} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={130} />
             <Select label="Golongan" value={filterGolPeserta} onChange={setFilterGolPeserta} options={["Semua", "Gol. I", "Gol. II", "Gol. III", "Gol. IV"]} minW={120} />
             <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari NRP/Nama</label><SearchInput value={searchPeserta} onChange={setSearchPeserta} placeholder="Ketik NRP atau nama..." /></div>
           </div>
@@ -330,7 +457,7 @@ const KalkulatorIuran = () => {
             <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead><tr style={{ background: COLORS.gray100 }}>
-                  {["No", "NRP/NIP", "Nama Peserta", "Satker", "Golongan", "Aksi"].map((c, i) => (
+                  {["No", "NRP/NIP", "Nama Peserta", "Satker", "Unor", "Golongan", "Aksi"].map((c, i) => (
                     <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
                   ))}
                 </tr></thead>
@@ -339,7 +466,8 @@ const KalkulatorIuran = () => {
                     <td style={{ padding: "10px 14px", color: COLORS.gray500 }}>{i + 1}</td>
                     <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 12 }}>{p.nrp}</td>
                     <td style={{ padding: "10px 14px", fontWeight: 600, color: COLORS.gray800 }}>{p.nama}</td>
-                    <td style={{ padding: "10px 14px" }}><Badge color={p.satker === "TNI" ? "green" : p.satker === "POLRI" ? "blue" : "orange"}>{p.satker}</Badge></td>
+                    <td style={{ padding: "10px 14px" }}><Badge color={p.satker === "TNI" ? "green" : p.satker === "POLRI" ? "blue" : p.satker === "PPPK" ? "yellow" : "orange"}>{p.satker}</Badge></td>
+                    <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray600 }}>{p.unor || "—"}</td>
                     <td style={{ padding: "10px 14px" }}>{p.gol}</td>
                     <td style={{ padding: "10px 14px" }}><Btn size="sm" variant="outline" onClick={() => setDetailPeserta(p)}>Detail</Btn></td>
                   </tr>
@@ -367,6 +495,7 @@ const KalkulatorIuran = () => {
 // ===== REKONSILIASI IURAN (ALL FILTERS ACTIVE) =====
 const RekonsIuran = () => {
   const [filterJenis, setFilterJenis] = useState("THT");
+  const [preview, setPreview] = useState(null);
   const [filterSatker, setFilterSatker] = useState("Semua");
   const [filterPeriode, setFilterPeriode] = useState("Juli 2026");
 
@@ -375,11 +504,13 @@ const RekonsIuran = () => {
       { satker: "TNI", sistem: 6084500000, skp: 6084500000 },
       { satker: "POLRI", sistem: 4912300000, skp: 4969970000 },
       { satker: "ASN Kemenhan", sistem: 2914200000, skp: 2914200000 },
+      { satker: "PPPK", sistem: 489000000, skp: 489000000 },
     ],
     Dapen: [
       { satker: "TNI", sistem: 8890000000, skp: 8890000000 },
       { satker: "POLRI", sistem: 7180000000, skp: 7250000000 },
       { satker: "ASN Kemenhan", sistem: 4260000000, skp: 4260000000 },
+      { satker: "PPPK", sistem: 715000000, skp: 715000000 },
     ],
   };
 
@@ -391,6 +522,7 @@ const RekonsIuran = () => {
   return (
     <div>
       <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+        <PreviewModal preview={preview} onClose={() => setPreview(null)} />
         <SectionTitle>Rekonsiliasi Iuran vs SKP-PFK Kemenkeu</SectionTitle>
         <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#F57F17", display: "flex", gap: 8, marginBottom: 16 }}>
           <AlertTriangle size={14} />
@@ -399,7 +531,7 @@ const RekonsIuran = () => {
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
           <Select label="Periode" value={filterPeriode} onChange={setFilterPeriode} options={["Juli 2026", "Juni 2026", "Mei 2026", "April 2026"]} minW={130} />
           <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["THT", "Dapen"]} minW={120} />
-          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan"]} minW={140} />
+          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
           <div style={{ background: "#E3F2FD", borderRadius: 8, padding: 16, textAlign: "center" }}>
@@ -432,8 +564,8 @@ const RekonsIuran = () => {
           />
         )}
         <div style={{ marginTop: 14, display: "flex", gap: 10 }}>
-          <Btn variant="outline" size="sm">Unduh Tabel 1 BRS II (Excel)</Btn>
-          <Btn variant="outline" size="sm">Unduh PDF</Btn>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Tabel 1 BRS II", subtitle: "Rekonsiliasi " + filterJenis + " vs SKP-PFK", type: "table", fileName: "Tabel1_BRS_II_Rekon.xlsx", content: { columns: ["Satker", "Hitung Sistem", "SKP-PFK", "Selisih"], rows: rekonRows.map(r => [r.satker, fmtB(r.sistem), fmtB(r.skp), fmtB(Math.abs(r.skp - r.sistem))]), totalRows: rekonRows.length } })}>Unduh Tabel 1 BRS II (Excel)</Btn>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Tabel 1 BRS II", subtitle: "Format PDF", type: "table", fileName: "Tabel1_BRS_II_Rekon.pdf", content: { columns: ["Satker", "Hitung Sistem", "SKP-PFK", "Selisih"], rows: rekonRows.map(r => [r.satker, fmtB(r.sistem), fmtB(r.skp), fmtB(Math.abs(r.skp - r.sistem))]), totalRows: rekonRows.length } })}>Unduh PDF</Btn>
         </div>
       </div>
     </div>
@@ -446,6 +578,7 @@ const GeneratorTagihan = () => {
   const [filterStatus, setFilterStatus] = useState("Semua");
   const [expandedId, setExpandedId] = useState(null);
   const [uploadingId, setUploadingId] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const steps = ["Cut-off Data", "Draft Surat", "Download & Cetak", "Dokumen di-TTD"];
   const stepIcon = (idx, currentStep) => {
@@ -485,6 +618,7 @@ const GeneratorTagihan = () => {
 
   return (
     <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
       <div style={{ background: COLORS.white, borderRadius: 10, padding: "16px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: "#E3F2FD", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📅</div>
@@ -543,7 +677,7 @@ const GeneratorTagihan = () => {
                     <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.blueDark, fontFamily: "monospace" }}>{t.nominal}</div>
                     <div style={{ fontSize: 11, color: COLORS.gray500 }}>Cut-off: {t.cutoff}</div>
                   </div>
-                  {t.currentStep >= 1 && <Btn size="sm" variant="outline" onClick={e => e.stopPropagation()}>Download Surat</Btn>}
+                  {t.currentStep >= 1 && <Btn size="sm" variant="outline" onClick={e => { e.stopPropagation(); setPreview({ title: "Preview Surat Tagihan " + t.jenis, subtitle: t.noSurat + " • Periode " + t.periode, type: "surat", fileName: "Surat_Tagihan_" + t.jenis + "_" + t.periode.replace(" ","_") + ".pdf", content: { noSurat: t.noSurat, periode: t.periode, cutoff: t.cutoff } }); }}>Download Surat</Btn>}
                   <span style={{ fontSize: 14, color: COLORS.gray400 }}>{isExpanded ? "▼" : "▶"}</span>
                 </div>
               </div>
@@ -624,8 +758,8 @@ const GeneratorTagihan = () => {
                   </div>
 
                   <div style={{ display: "flex", gap: 10 }}>
-                    <Btn variant="outline" size="sm">Download Surat Tagihan (PDF)</Btn>
-                    <Btn variant="outline" size="sm">Lihat Rekap Premi</Btn>
+                    <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Surat Tagihan " + t.jenis, subtitle: t.noSurat, type: "surat", fileName: "Surat_Tagihan_" + t.jenis + ".pdf", content: { noSurat: t.noSurat, periode: t.periode, cutoff: t.cutoff } })}>Download Surat Tagihan (PDF)</Btn>
+                    <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Rekap Premi " + t.jenis, subtitle: "Periode " + t.periode + " • " + t.peserta + " peserta", type: "table", fileName: "Rekap_Premi_" + t.jenis + ".xlsx", content: { columns: ["Satker", "Golongan", "Peserta", "Nominal"], rows: [["TNI", "Gol. I-IV", "5.480", "Rp 14,25 M"], ["POLRI", "Gol. I-IV", "4.230", "Rp 11,00 M"], ["ASN Kemenhan", "Gol. I-IV", "4.618", "Rp 10,51 M"]], totalRows: 12 } })}>Lihat Rekap Premi</Btn>
                   </div>
                 </div>
               )}
@@ -645,14 +779,14 @@ const MonitoringKlaim = () => {
   const [searchKlaim, setSearchKlaim] = useState("");
 
   const allKlaim = [
-    { spp: "SPP/2026/07/101", rekap: "RK-001", peserta: "Serma Agus P.", jenisKlaim: "Rawat Inap", nominal: "Rp 45.000.000", status: "Dibayar", riwayat: "4 tahap", pic: "Staf Yarpen A", mitra: "Bank Mandiri" },
-    { spp: "SPP/2026/07/102", rekap: "RK-001", peserta: "Pratu Dedi S.", jenisKlaim: "Rawat Jalan", nominal: "Rp 8.500.000", status: "Disetujui", riwayat: "3 tahap", pic: "Ka. Yarpen", mitra: "BRI" },
-    { spp: "SPP/2026/07/103", rekap: "RK-002", peserta: "Bripka Rina M.", jenisKlaim: "Operasi", nominal: "Rp 120.000.000", status: "Verifikasi", riwayat: "2 tahap", pic: "Staf Yarpen B", mitra: "BNI" },
-    { spp: "SPP/2026/07/104", rekap: "RK-002", peserta: "Koptu Hasan F.", jenisKlaim: "Rawat Inap", nominal: "Rp 32.000.000", status: "Pengajuan", riwayat: "1 tahap", pic: "—", mitra: "Bank Mandiri" },
-    { spp: "SPP/2026/07/105", rekap: "RK-003", peserta: "Kapten Lina W.", jenisKlaim: "Rawat Jalan", nominal: "Rp 5.200.000", status: "Ditolak", riwayat: "3 tahap", pic: "Ka. Yarpen", mitra: "BRI" },
-    { spp: "SPP/2026/07/106", rekap: "RK-003", peserta: "Pelda Susanto", jenisKlaim: "Operasi", nominal: "Rp 87.000.000", status: "Dibayar", riwayat: "4 tahap", pic: "Staf Yarpen A", mitra: "BNI" },
-    { spp: "SPP/2026/07/107", rekap: "RK-004", peserta: "Briptu Mega S.", jenisKlaim: "Rawat Inap", nominal: "Rp 28.000.000", status: "Verifikasi", riwayat: "2 tahap", pic: "Staf Yarpen B", mitra: "BTN" },
-    { spp: "SPP/2026/07/108", rekap: "RK-004", peserta: "Sertu Ahmad R.", jenisKlaim: "Rawat Jalan", nominal: "Rp 12.800.000", status: "Disetujui", riwayat: "3 tahap", pic: "Ka. Yarpen", mitra: "Bank Mandiri" },
+    { spp: "SPP/2026/07/101", rekap: "RK-001", peserta: "Serma Agus P.", satker: "TNI", unor: "Kodam Jaya", jenisKlaim: "Rawat Inap", nominal: "Rp 45.000.000", status: "Dibayar", riwayat: "4 tahap", pic: "Staf Yarpen A", mitra: "Bank Mandiri" },
+    { spp: "SPP/2026/07/102", rekap: "RK-001", peserta: "Pratu Dedi S.", satker: "TNI", unor: "Kodam IM", jenisKlaim: "Rawat Jalan", nominal: "Rp 8.500.000", status: "Disetujui", riwayat: "3 tahap", pic: "Ka. Yarpen", mitra: "BRI" },
+    { spp: "SPP/2026/07/103", rekap: "RK-002", peserta: "Bripka Rina M.", satker: "POLRI", unor: "Polda Metro Jaya", jenisKlaim: "Operasi", nominal: "Rp 120.000.000", status: "Verifikasi", riwayat: "2 tahap", pic: "Staf Yarpen B", mitra: "BNI" },
+    { spp: "SPP/2026/07/104", rekap: "RK-002", peserta: "Koptu Hasan F.", satker: "TNI", unor: "Lantamal III", jenisKlaim: "Rawat Inap", nominal: "Rp 32.000.000", status: "Pengajuan", riwayat: "1 tahap", pic: "—", mitra: "Bank Mandiri" },
+    { spp: "SPP/2026/07/105", rekap: "RK-003", peserta: "Kapten Lina W.", satker: "TNI", unor: "Mabes TNI", jenisKlaim: "Rawat Jalan", nominal: "Rp 5.200.000", status: "Ditolak", riwayat: "3 tahap", pic: "Ka. Yarpen", mitra: "BRI" },
+    { spp: "SPP/2026/07/106", rekap: "RK-003", peserta: "Pelda Susanto", satker: "ASN Kemenhan", unor: "Ditjen Strahan", jenisKlaim: "Operasi", nominal: "Rp 87.000.000", status: "Dibayar", riwayat: "4 tahap", pic: "Staf Yarpen A", mitra: "BNI" },
+    { spp: "SPP/2026/07/107", rekap: "RK-004", peserta: "Briptu Mega S.", satker: "POLRI", unor: "Polda Jabar", jenisKlaim: "Rawat Inap", nominal: "Rp 28.000.000", status: "Verifikasi", riwayat: "2 tahap", pic: "Staf Yarpen B", mitra: "BTN" },
+    { spp: "SPP/2026/07/108", rekap: "RK-004", peserta: "Sertu Ahmad R.", satker: "PPPK", unor: "Setjen Kemhan", jenisKlaim: "Rawat Jalan", nominal: "Rp 12.800.000", status: "Disetujui", riwayat: "3 tahap", pic: "Ka. Yarpen", mitra: "Bank Mandiri" },
   ];
 
   const statusBadge = s => s === "Dibayar" ? "green" : s === "Disetujui" ? "blue" : s === "Verifikasi" ? "orange" : s === "Ditolak" ? "red" : "gray";
@@ -685,8 +819,8 @@ const MonitoringKlaim = () => {
         </div>
         <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allKlaim.length} klaim</div>
         {filtered.length === 0 ? <NoData /> : (
-          <Table columns={["No. SPP", "No. Rekap", "Peserta", "Jenis Klaim", "Nominal", "Mitra Bayar", "Status", "Riwayat", "PIC Terakhir"]}
-            data={filtered.map(k => [k.spp, k.rekap, k.peserta, k.jenisKlaim, k.nominal, k.mitra, <Badge color={statusBadge(k.status)}>{k.status}</Badge>, k.riwayat, k.pic])} />
+          <Table columns={["No. SPP", "No. Rekap", "Peserta", "Satker", "Unor", "Jenis Klaim", "Nominal", "Mitra Bayar", "Status", "Riwayat"]}
+            data={filtered.map(k => [k.spp, k.rekap, k.peserta, <Badge color={k.satker === "TNI" ? "green" : k.satker === "POLRI" ? "blue" : k.satker === "PPPK" ? "yellow" : "orange"}>{k.satker || "—"}</Badge>, <span style={{ fontSize: 12, color: COLORS.gray600 }}>{k.unor || "—"}</span>, k.jenisKlaim, k.nominal, k.mitra, <Badge color={statusBadge(k.status)}>{k.status}</Badge>, k.riwayat])} />
         )}
       </div>
       <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
@@ -713,6 +847,7 @@ const DashboardDana = () => {
   const [filterJenis, setFilterJenis] = useState("Semua");
   const [filterStatusBayar, setFilterStatusBayar] = useState("Semua");
   const [searchRekap, setSearchRekap] = useState("");
+  const [preview, setPreview] = useState(null);
 
   const rekapHarian = [
     { no: 1, noRef: "MND-20260706-00142", nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", jenis: "Pensiun Bulanan", mitra: "Bank Mandiri", nominal: "Rp 8.500.000", status: "Berhasil", waktu: "06:15" },
@@ -735,64 +870,179 @@ const DashboardDana = () => {
     return true;
   });
 
+  const mitraData = [
+    { mitra: "Bank Mandiri", saldo: 820, kebutuhan: 120, status: "Aman", saldoMei: 780, saldoJun: 800, saldoJul: 820 },
+    { mitra: "BRI", saldo: 650, kebutuhan: 95, status: "Aman", saldoMei: 610, saldoJun: 630, saldoJul: 650 },
+    { mitra: "BNI", saldo: 420, kebutuhan: 80, status: "Aman", saldoMei: 400, saldoJun: 410, saldoJul: 420 },
+    { mitra: "BTN", saldo: 180, kebutuhan: 155, status: "Perhatian", saldoMei: 210, saldoJun: 195, saldoJul: 180 },
+    { mitra: "PT Pos Indonesia", saldo: 45, kebutuhan: 62, status: "Kritis", saldoMei: 80, saldoJun: 60, saldoJul: 45 },
+  ];
+  const totalSaldo = mitraData.reduce((a, m) => a + m.saldo, 0);
+  const kebutuhanDapem = 380;
+  const kebutuhanTHR = 0;
+  const totalKebutuhan = kebutuhanDapem + kebutuhanTHR;
+  const surplus = totalSaldo - totalKebutuhan;
+  const alertMitra = mitraData.filter(m => m.status !== "Aman");
+
   return (
     <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Alert Banner for critical mitra */}
+      {alertMitra.some(m => m.status === "Kritis") && (
+        <div style={{ background: COLORS.redLight, border: `1px solid #FFCDD2`, borderRadius: 10, padding: "14px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+          <AlertTriangle size={20} color={COLORS.red} />
+          <div>
+            <div style={{ fontWeight: 700, color: COLORS.red, fontSize: 14 }}>Alert: Saldo Mitra Kritis</div>
+            <div style={{ fontSize: 12, color: COLORS.gray700 }}>{alertMitra.filter(m => m.status === "Kritis").map(m => m.mitra).join(", ")} — saldo di bawah kebutuhan proyeksi. Notifikasi telah dikirim ke Kadiv Keuangan.</div>
+          </div>
+        </div>
+      )}
+
+      {/* Stat Cards */}
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard icon={<Building2 size={IC} />} label="Total Saldo Mitra Bayar" value="Rp 2,34 T" sub="8 Mitra Bayar aktif" color={COLORS.blue} />
-        <StatCard icon={<TrendingUp size={IC} />} label="Kebutuhan Minggu Depan" value="Rp 412 M" sub="Proyeksi klaim disetujui" color={COLORS.orange} />
-        <StatCard icon={<CheckCircle2 size={IC} />} label="Pembayaran Hari Ini" value="825 Transaksi" sub="Rp 42,55 M tersalurkan" color={COLORS.green} />
-        <StatCard icon={<CircleAlert size={IC} />} label="Gagal Bayar" value="3 Transaksi" sub="Perlu tindak lanjut" color={COLORS.red} />
+        <StatCard icon={<Building2 size={IC} />} label="Total Saldo Mitra" value={`Rp ${totalSaldo} M`} sub={`${mitraData.length} Mitra Bayar aktif`} color={COLORS.blue} />
+        <StatCard icon={<TrendingUp size={IC} />} label="Total Kebutuhan Prox" value={`Rp ${totalKebutuhan} M`} sub="Proyeksi bulan berjalan" color={COLORS.orange} />
+        <StatCard icon={surplus >= 0 ? <CheckCircle2 size={IC} /> : <AlertTriangle size={IC} />} label="Surplus / Defisit" value={`${surplus >= 0 ? "+" : ""}Rp ${surplus} M`} sub={surplus >= 0 ? "Dana mencukupi" : "Perlu top-up"} color={surplus >= 0 ? COLORS.green : COLORS.red} />
+        <StatCard icon={<CircleAlert size={IC} />} label="Mitra Perlu Perhatian" value={alertMitra.length.toString()} sub={alertMitra.map(m => m.mitra).join(", ") || "Semua aman"} color={alertMitra.length > 0 ? COLORS.red : COLORS.green} />
       </div>
 
-      {/* Trend Pembayaran 3 Bulan Terakhir */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-        <SectionTitle>Trend Pembayaran Manfaat — 3 Bulan Terakhir</SectionTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
-          {[
-            { bulan: "Mei 2026", total: 38.2, trx: 12450, gagal: 8, pct: 99.9 },
-            { bulan: "Juni 2026", total: 41.8, trx: 12820, gagal: 5, pct: 99.96 },
-            { bulan: "Juli 2026", total: 42.55, trx: 13100, gagal: 3, pct: 99.98 },
-          ].map((m, i) => (
-            <div key={i} style={{ padding: 16, borderRadius: 8, border: `1px solid ${COLORS.gray200}`, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: `${(m.total / 45) * 100}%`, background: `${COLORS.blue}08`, transition: "height 0.4s" }} />
-              <div style={{ position: "relative" }}>
-                <div style={{ fontSize: 12, color: COLORS.gray500, fontWeight: 600, marginBottom: 8 }}>{m.bulan}</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.blueDark, fontFamily: "monospace" }}>Rp {m.total} M</div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12 }}>
-                  <span style={{ color: COLORS.gray500 }}>{m.trx.toLocaleString()} trx</span>
-                  <span style={{ color: COLORS.green, fontWeight: 600 }}>{m.pct}% berhasil</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 12 }}>
-                  <span style={{ color: COLORS.gray500 }}>Gagal: <span style={{ color: COLORS.red, fontWeight: 600 }}>{m.gagal}</span></span>
-                  {i > 0 && <span style={{ color: COLORS.green, fontWeight: 600 }}>+{((m.total / [38.2, 38.2, 41.8][i]) * 100 - 100).toFixed(1)}%</span>}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 16, fontSize: 12, color: COLORS.gray500 }}>
-          <span>Total 3 bulan: <strong style={{ color: COLORS.gray900 }}>Rp 122,55 M</strong></span>
-          <span>•</span>
-          <span>Rata-rata: <strong style={{ color: COLORS.gray900 }}>Rp 40,85 M/bulan</strong></span>
-          <span>•</span>
-          <span>Trend: <strong style={{ color: COLORS.green }}>Naik +5,9%</strong></span>
-        </div>
-      </div>
+      {/* Tabs */}
       <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
-        {[{ id: "monitoring", label: "📊 Monitoring Saldo" }, { id: "rekap", label: "📋 Rekap Harian Rekening Koran" }, { id: "upload", label: "📤 Upload Rekening Koran" }].map(t => (
+        {[{ id: "monitoring", label: "Monitoring Saldo" }, { id: "rekap", label: "Rekap Harian Rekening Koran" }, { id: "upload", label: "Upload Rekening Koran" }].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "12px 24px", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, background: "transparent", color: activeTab === t.id ? COLORS.blue : COLORS.gray500, borderBottom: activeTab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent", marginBottom: -2 }}>{t.label}</button>
         ))}
       </div>
+
       {activeTab === "monitoring" && (
-        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle>Saldo & Proyeksi per Mitra Bayar</SectionTitle>
-          <Table columns={["Mitra Bayar", "Saldo Terkini", "Kebutuhan 7 Hari", "Kebutuhan 30 Hari", "Coverage", "Status", "Update"]} data={[
-            ["Bank Mandiri", "Rp 820 M", "Rp 120 M", "Rp 480 M", "170%", <Badge color="green">Aman</Badge>, "14:30"],
-            ["BRI", "Rp 650 M", "Rp 95 M", "Rp 380 M", "171%", <Badge color="green">Aman</Badge>, "14:28"],
-            ["BNI", "Rp 420 M", "Rp 80 M", "Rp 320 M", "131%", <Badge color="green">Aman</Badge>, "14:31"],
-            ["BTN", "Rp 180 M", "Rp 55 M", "Rp 220 M", "82%", <Badge color="yellow">Perhatian</Badge>, "14:29"],
-            [<span style={{ fontWeight: 700, color: COLORS.red }}>PT Pos Indonesia</span>, "Rp 45 M", "Rp 62 M", "Rp 248 M", <span style={{ color: COLORS.red, fontWeight: 700 }}>18%</span>, <Badge color="red">Kritis</Badge>, "14:25"],
-          ]} />
+        <div>
+          {/* PANEL 1 — Saldo Per Mitra Bayar (Real-time) */}
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+            <SectionTitle action={<span style={{ fontSize: 11, color: COLORS.green, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><CircleDot size={10} /> Real-time</span>}>
+              Panel 1 — Saldo Per Mitra Bayar
+            </SectionTitle>
+            <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead><tr style={{ background: COLORS.gray100 }}>
+                  {["Mitra", "Saldo Tersedia", "Kebutuhan Prox", "Coverage", "Status"].map((c, i) => (
+                    <th key={i} style={{ padding: "12px 16px", textAlign: i >= 1 && i <= 3 ? "right" : "left", fontWeight: 700, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}` }}>{c}</th>
+                  ))}
+                </tr></thead>
+                <tbody>{mitraData.map((m, i) => {
+                  const cov = ((m.saldo / m.kebutuhan) * 100).toFixed(0);
+                  return (
+                    <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: m.status === "Kritis" ? COLORS.redLight : m.status === "Perhatian" ? COLORS.yellowLight : "transparent" }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = "0.85"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, color: m.status === "Kritis" ? COLORS.red : COLORS.gray800 }}>{m.mitra}</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>Rp {m.saldo} M</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace" }}>Rp {m.kebutuhan} M</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontWeight: 700, color: parseInt(cov) > 120 ? COLORS.green : parseInt(cov) > 80 ? COLORS.orange : COLORS.red }}>{cov}%</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <Badge color={m.status === "Aman" ? "green" : m.status === "Perhatian" ? "yellow" : "red"}>
+                          {m.status === "Aman" ? "■ AMAN" : m.status === "Perhatian" ? "▲ PERHATIAN" : "● KRITIS"}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })}</tbody>
+              </table>
+            </div>
+            <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Data saldo diperbarui real-time dari masing-masing mitra bayar • Terakhir: 06 Jul 2026, 14:30 WIB</div>
+          </div>
+
+          {/* PANEL 2 & PANEL 4 side by side */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+            {/* PANEL 2 — Proyeksi Kebutuhan Dana */}
+            <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+              <SectionTitle>Panel 2 — Proyeksi Kebutuhan Dana</SectionTitle>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { label: "Kebutuhan Dapem Bulan Ini", value: `Rp ${kebutuhanDapem} M`, color: COLORS.gray800 },
+                  { label: "Kebutuhan THR/Ke-13 (jika bulan ini)", value: kebutuhanTHR > 0 ? `Rp ${kebutuhanTHR} M` : "—", color: COLORS.gray400 },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", background: COLORS.gray50, borderRadius: 8 }}>
+                    <span style={{ fontSize: 13, color: COLORS.gray600 }}>{item.label}</span>
+                    <span style={{ fontWeight: 600, fontFamily: "monospace", color: item.color }}>{item.value}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop: `1px solid ${COLORS.gray200}`, paddingTop: 8, marginTop: 4 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", background: "#E3F2FD", borderRadius: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.blueDark }}>Total Kebutuhan</span>
+                    <span style={{ fontWeight: 800, fontFamily: "monospace", color: COLORS.blueDark }}>Rp {totalKebutuhan} M</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", background: COLORS.gray50, borderRadius: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, color: COLORS.gray600 }}>Total Saldo Tersedia</span>
+                    <span style={{ fontWeight: 600, fontFamily: "monospace" }}>Rp {totalSaldo} M</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 14px", background: surplus >= 0 ? COLORS.greenLight : COLORS.redLight, borderRadius: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: surplus >= 0 ? COLORS.green : COLORS.red }}>Surplus / Defisit</span>
+                    <span style={{ fontSize: 18, fontWeight: 800, fontFamily: "monospace", color: surplus >= 0 ? COLORS.green : COLORS.red }}>{surplus >= 0 ? "+" : ""}Rp {surplus} M</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* PANEL 4 — Alert Aktif */}
+            <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+              <SectionTitle>Panel 4 — Alert Aktif</SectionTitle>
+              {alertMitra.length === 0 ? (
+                <div style={{ padding: 24, textAlign: "center", color: COLORS.green }}>
+                  <CheckCircle2 size={32} style={{ marginBottom: 8 }} />
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Semua mitra dalam status AMAN</div>
+                  <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 4 }}>Tidak ada alert aktif saat ini</div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {alertMitra.map((m, i) => (
+                    <div key={i} style={{ padding: "14px 16px", borderRadius: 8, border: `1px solid ${m.status === "Kritis" ? "#FFCDD2" : "#FFE0B2"}`, background: m.status === "Kritis" ? COLORS.redLight : COLORS.orangeLight, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: m.status === "Kritis" ? COLORS.red : COLORS.orange }}>{m.mitra}</div>
+                        <div style={{ fontSize: 12, color: COLORS.gray600, marginTop: 2 }}>Saldo: Rp {m.saldo} M • Kebutuhan: Rp {m.kebutuhan} M</div>
+                      </div>
+                      <Badge color={m.status === "Kritis" ? "red" : "yellow"}>
+                        {m.status === "Kritis" ? "● KRITIS" : "▲ PERHATIAN"}
+                      </Badge>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>Notifikasi email + SMS dikirim ke Kadiv Keuangan ketika saldo mitra mendekati batas aman</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* PANEL 3 — Trend Saldo 3 Bulan Terakhir */}
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+            <SectionTitle>Panel 3 — Trend Saldo 3 Bulan Terakhir</SectionTitle>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {mitraData.map((m, i) => {
+                const maxVal = Math.max(m.saldoMei, m.saldoJun, m.saldoJul, 1);
+                const isDown = m.saldoJul < m.saldoMei;
+                return (
+                  <div key={i} style={{ padding: "12px 16px", background: COLORS.gray50, borderRadius: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.gray800 }}>{m.mitra}</span>
+                      <span style={{ fontSize: 12, color: isDown ? COLORS.red : COLORS.green, fontWeight: 600 }}>
+                        {isDown ? "↓" : "↑"} {Math.abs(m.saldoJul - m.saldoMei)} M ({((m.saldoJul - m.saldoMei) / m.saldoMei * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-end", height: 48 }}>
+                      {[
+                        { label: "Mei", val: m.saldoMei },
+                        { label: "Jun", val: m.saldoJun },
+                        { label: "Jul", val: m.saldoJul },
+                      ].map((b, bi) => (
+                        <div key={bi} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                          <span style={{ fontSize: 10, fontWeight: 600, color: COLORS.gray700 }}>Rp {b.val} M</span>
+                          <div style={{ width: "100%", height: `${(b.val / maxVal) * 36}px`, background: bi === 2 ? (isDown ? COLORS.red : COLORS.green) : COLORS.blue, borderRadius: 3, minHeight: 4, opacity: bi === 2 ? 1 : 0.4 }} />
+                          <span style={{ fontSize: 9, color: COLORS.gray400 }}>{b.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
       {activeTab === "upload" && (
@@ -814,7 +1064,7 @@ const DashboardDana = () => {
       )}
       {activeTab === "rekap" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm">Excel</Btn><Btn variant="outline" size="sm">PDF</Btn></div>}>Rekap Pembayaran Mitra ke Peserta</SectionTitle>
+          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Harian", subtitle: "Data pembayaran mitra ke peserta", type: "table", fileName: "Rekap_Harian_Pembayaran.xlsx", content: { columns: ["No. Ref", "Nama", "Jenis", "Mitra", "Nominal", "Status"], rows: filteredRekap.slice(0,5).map(r => [r.noRef, r.nama, r.jenis, r.mitra, r.nominal, r.status]), totalRows: filteredRekap.length } })}>Excel</Btn><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Harian", subtitle: "Format PDF", type: "table", fileName: "Rekap_Harian_Pembayaran.pdf", content: { columns: ["No. Ref", "Nama", "Jenis", "Mitra", "Nominal", "Status"], rows: filteredRekap.slice(0,5).map(r => [r.noRef, r.nama, r.jenis, r.mitra, r.nominal, r.status]), totalRows: filteredRekap.length } })}>PDF</Btn></div>}>Rekap Pembayaran Mitra ke Peserta</SectionTitle>
           <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
             <Select label="Mitra Bayar" value={selectedMitra} onChange={setSelectedMitra} options={["Semua", "Bank Mandiri", "BRI", "BNI"]} minW={140} />
             <Select label="Jenis Pembayaran" value={filterJenis} onChange={setFilterJenis} options={["Semua", "Pensiun Bulanan", "Pensiun Janda/Duda", "Klaim JKK", "Klaim JKm", "THT"]} minW={160} />
@@ -855,12 +1105,12 @@ const DashboardDana = () => {
 const Perpajakan = () => {
   const [filterSatker, setFilterSatker] = useState("Semua");
   const allData = [
-    { nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", satker: "TNI", bruto: 8500000, p17: 125000, ter: 127500 },
-    { nrp: "198805678", nama: "Purn. Lettu Budi K.", satker: "TNI", bruto: 6200000, p17: 62000, ter: 62000 },
-    { nrp: "199012345", nama: "Purn. AKP Citra D.", satker: "POLRI", bruto: 12800000, p17: 450000, ter: 460800 },
-    { nrp: "199205678", nama: "Purn. Penata Sri W.", satker: "ASN Kemenhan", bruto: 7400000, p17: 95000, ter: 96200 },
-    { nrp: "198604321", nama: "Purn. Bripka Anwar I.", satker: "POLRI", bruto: 9200000, p17: 215000, ter: 220800 },
-    { nrp: "197506789", nama: "Purn. Pembina Agus S.", satker: "ASN Kemenhan", bruto: 5800000, p17: 48000, ter: 48000 },
+    { nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", satker: "TNI", unor: "Kodam Jaya", bruto: 8500000, p17: 125000, ter: 127500 },
+    { nrp: "198805678", nama: "Purn. Lettu Budi K.", satker: "TNI", unor: "Mabes TNI", bruto: 6200000, p17: 62000, ter: 62000 },
+    { nrp: "199012345", nama: "Purn. AKP Citra D.", satker: "POLRI", unor: "Polda Metro Jaya", bruto: 12800000, p17: 450000, ter: 460800 },
+    { nrp: "199205678", nama: "Purn. Penata Sri W.", satker: "ASN Kemenhan", unor: "Ditjen Strahan", bruto: 7400000, p17: 95000, ter: 96200 },
+    { nrp: "198604321", nama: "Purn. Bripka Anwar I.", satker: "POLRI", unor: "Polda Jabar", bruto: 9200000, p17: 215000, ter: 220800 },
+    { nrp: "197506789", nama: "Purn. Pembina Agus S.", satker: "PPPK", unor: "Setjen Kemhan", bruto: 5800000, p17: 48000, ter: 48000 },
   ];
   const filtered = filterSatker === "Semua" ? allData : allData.filter(d => d.satker === filterSatker);
   const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
@@ -874,12 +1124,12 @@ const Perpajakan = () => {
       <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
         <SectionTitle>Perbandingan TER vs Pasal 17</SectionTitle>
         <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
-          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan"]} minW={140} />
+          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
         </div>
         <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allData.length}</div>
         {filtered.length === 0 ? <NoData /> : (
-          <Table columns={["NRP", "Nama", "Satker", "Penghasilan Bruto", "PPh Pasal 17", "PPh 21 TER", "Selisih"]}
-            data={filtered.map(d => [d.nrp, d.nama, <Badge color={d.satker === "TNI" ? "green" : d.satker === "POLRI" ? "blue" : "orange"}>{d.satker}</Badge>, fmt(d.bruto), fmt(d.p17), fmt(d.ter), <span style={{ color: d.ter - d.p17 === 0 ? COLORS.green : COLORS.red }}>{fmt(Math.abs(d.ter - d.p17))}</span>])} />
+          <Table columns={["NRP", "Nama", "Satker", "Unor", "Penghasilan Bruto", "PPh Pasal 17", "PPh 21 TER", "Selisih"]}
+            data={filtered.map(d => [d.nrp, d.nama, <Badge color={d.satker === "TNI" ? "green" : d.satker === "POLRI" ? "blue" : d.satker === "PPPK" ? "yellow" : "orange"}>{d.satker}</Badge>, <span style={{ fontSize: 12, color: COLORS.gray600 }}>{d.unor || "—"}</span>, fmt(d.bruto), fmt(d.p17), fmt(d.ter), <span style={{ color: d.ter - d.p17 === 0 ? COLORS.green : COLORS.red }}>{fmt(Math.abs(d.ter - d.p17))}</span>])} />
         )}
       </div>
     </div>
@@ -887,107 +1137,575 @@ const Perpajakan = () => {
 };
 
 const KreditPiutang = () => {
-  const [filterBank, setFilterBank] = useState("Semua");
-  const [filterStatusDenda, setFilterStatusDenda] = useState("Semua");
-  const allDenda = [
-    { bank: "BRI", tagihan: "Rp 3.200.000.000", tglDoc: "01 Jun 2026", jt: "15 Jun 2026", tglTerima: "14 Jun 2026", terlambat: 0, denda: "Rp 0", status: "Tepat Waktu" },
-    { bank: "Mandiri", tagihan: "Rp 4.500.000.000", tglDoc: "01 Jun 2026", jt: "15 Jun 2026", tglTerima: "22 Jun 2026", terlambat: 7, denda: "Rp 5.876.712", status: "Terlambat" },
-    { bank: "BNI", tagihan: "Rp 2.800.000.000", tglDoc: "01 Jun 2026", jt: "15 Jun 2026", tglTerima: "—", terlambat: 21, denda: "Rp 11.104.110", status: "Belum Bayar" },
+  const [filterSatker, setFilterSatker] = useState("Semua");
+  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [searchUDW, setSearchUDW] = useState("");
+  const [detailKasus, setDetailKasus] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [mappingSatker, setMappingSatker] = useState("Pilih Satker...");
+
+  const allKasus = [
+    { no: 1, ref: "UDW/2026/01/001", tgl: "15 Jan 2026", nama: "Kolonel Inf. Agus Setiawan", nrp: "11020014250", satker: "TNI", unor: "Kodam Jaya", jumlah: 15420000, status: "Diproses", tglBayar: "15 Jan 2026", tglSurat: "18 Jan 2026", dikembalikan: 5140000, catatan: "Pengembalian dicicil 2 tahap, tahap pertama diterima via transfer Satker Kodam Jaya." },
+    { no: 2, ref: "UDW/2026/01/042", tgl: "12 Jan 2026", nama: "Ny. Ratna Sari (Warakawuri)", nrp: "PNS-00125492", satker: "POLRI", unor: "Polda Metro Jaya", jumlah: 12800000, status: "Selesai", tglBayar: "12 Jan 2026", tglSurat: "14 Jan 2026", dikembalikan: 12800000, catatan: "Pengembalian penuh via transfer langsung." },
+    { no: 3, ref: "UDW/2026/01/089", tgl: "10 Jan 2026", nama: "Sertu Bima Prakoso", nrp: "21120485901", satker: "TNI", unor: "Lanud Halim", jumlah: 18500000, status: "Diproses", tglBayar: "10 Jan 2026", tglSurat: "12 Jan 2026", dikembalikan: 8500000, catatan: "Cicilan pertama dari 3 tahap." },
+    { no: 4, ref: "UDW/2026/01/112", tgl: "08 Jan 2026", nama: "Laksamana Muda Yudi K.", nrp: "74080124110", satker: "TNI", unor: "Mabes AL", jumlah: 22340000, status: "Ditolak", tglBayar: "08 Jan 2026", tglSurat: "10 Jan 2026", dikembalikan: 0, catatan: "Ditolak — peserta mengajukan keberatan, dalam proses mediasi." },
+    { no: 5, ref: "UDW/2026/01/156", tgl: "05 Jan 2026", nama: "Mayor (P) Hendra Gunawan", nrp: "5109820012", satker: "TNI", unor: "Koarmada I", jumlah: 14200000, status: "Selesai", tglBayar: "05 Jan 2026", tglSurat: "07 Jan 2026", dikembalikan: 14200000, catatan: "Pengembalian penuh via potongan pensiun bulan Februari." },
+    { no: 6, ref: "UDW/2026/01/201", tgl: "02 Jan 2026", nama: "Brigjen Pol. Sutrisno", nrp: "6201089201", satker: "POLRI", unor: "Mabes Polri", jumlah: 25000000, status: "Selesai", tglBayar: "02 Jan 2026", tglSurat: "05 Jan 2026", dikembalikan: 25000000, catatan: "Pengembalian penuh via transfer." },
   ];
-  const filtered = allDenda.filter(d => {
-    if (filterBank !== "Semua" && d.bank !== filterBank) return false;
-    if (filterStatusDenda !== "Semua" && d.status !== filterStatusDenda) return false;
+
+  const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
+  const filtered = allKasus.filter(k => {
+    if (filterSatker !== "Semua" && k.satker !== filterSatker) return false;
+    if (filterStatus !== "Semua" && k.status !== filterStatus) return false;
+    if (searchUDW && !k.nama.toLowerCase().includes(searchUDW.toLowerCase()) && !k.ref.toLowerCase().includes(searchUDW.toLowerCase()) && !k.nrp.includes(searchUDW)) return false;
     return true;
   });
+  const totalSaldo = allKasus.reduce((a, k) => a + k.jumlah, 0);
+  const totalDikembalikan = allKasus.reduce((a, k) => a + k.dikembalikan, 0);
+  const satkerList = [...new Set(allKasus.map(k => k.satker))];
+  const statusColor = s => s === "Selesai" ? "green" : s === "Diproses" ? "orange" : "red";
+
   return (
     <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Detail Modal */}
+      {detailKasus && (() => {
+        const k = detailKasus;
+        const sisa = k.jumlah - k.dikembalikan;
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }} onClick={() => setDetailKasus(null)}>
+            <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 540, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+              <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>Detail kasus {k.ref}</div>
+                <button onClick={() => setDetailKasus(null)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
+              </div>
+              <div style={{ padding: "16px 24px", background: COLORS.gray50, display: "flex", alignItems: "center", gap: 14, borderBottom: `1px solid ${COLORS.gray200}` }}>
+                <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#E3F2FD", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Users size={22} color={COLORS.blue} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>{k.nama}</div>
+                  <div style={{ fontSize: 12, color: COLORS.gray500 }}>{k.satker} · {k.unor} · NRP {k.nrp}</div>
+                  <div style={{ marginTop: 4 }}><Badge color={statusColor(k.status)}>{k.status}</Badge></div>
+                </div>
+              </div>
+              <div style={{ padding: "20px 24px" }}>
+                {[
+                  ["No.", k.no],
+                  ["NRP/Nopens", k.nrp],
+                  ["Nama", k.nama],
+                  ["Tanggal bayar UDW", k.tglBayar],
+                  ["Nilai UDW terlanjur dibayar", <span style={{ fontWeight: 700 }}>{fmt(k.jumlah)}</span>],
+                  ["Tanggal surat tagihan", k.tglSurat],
+                  ["Status pengembalian", <Badge color={statusColor(k.status)}>{k.status}</Badge>],
+                  ["Tanggal dikembalikan", k.status === "Selesai" ? k.tglSurat : "—"],
+                  ["Nilai yang dikembalikan", fmt(k.dikembalikan)],
+                  ["Sisa belum dikembalikan", <span style={{ color: sisa > 0 ? COLORS.red : COLORS.green, fontWeight: 700 }}>{fmt(sisa)}</span>],
+                  ["Catatan", <span style={{ fontSize: 12, color: COLORS.gray600 }}>{k.catatan}</span>],
+                ].map(([label, val], i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "9px 0", borderBottom: `1px solid ${COLORS.gray100}`, fontSize: 13 }}>
+                    <span style={{ color: COLORS.gray500, minWidth: 180, flexShrink: 0 }}>{label}</span>
+                    <span style={{ textAlign: "right", color: COLORS.gray900 }}>{val}</span>
+                  </div>
+                ))}
+                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
+                  <Btn variant="outline" size="sm" onClick={() => { setDetailKasus(null); setPreview({ title: "Preview Surat Tagihan UDW", subtitle: k.ref + " — " + k.nama, type: "surat", fileName: "Surat_Tagihan_" + k.ref.replace(/\//g, "_") + ".pdf", content: { noSurat: k.ref, tujuan: k.nama + " — " + k.satker, periode: "Penagihan UDW Punah", cutoff: k.tglBayar, tanggal: k.tglSurat, items: [{ jenis: "UDW Terlanjur Dibayar", peserta: "1", nominal: fmt(k.jumlah) }, { jenis: "Sudah Dikembalikan", peserta: "—", nominal: fmt(k.dikembalikan) }, { jenis: "Sisa Tagihan", peserta: "—", nominal: fmt(k.jumlah - k.dikembalikan) }] } }); }}>Unduh surat tagihan</Btn>
+                  <Btn variant="danger" size="sm" onClick={() => setDetailKasus(null)}>Tutup</Btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Stat Cards */}
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard icon={<CreditCard size={IC} />} label="Imbal Jasa Flagging" value="Rp 12,8 M" sub="Bulan ini, 6 Bank" color={COLORS.blue} />
-        <StatCard icon={<Landmark size={IC} />} label="Piutang PUM KPR" value="Rp 245 M" sub="1.230 peserta aktif" color={COLORS.orange} />
-        <StatCard icon={<AlertTriangle size={IC} />} label="UDW Punah Terdeteksi" value="18 Kasus" sub="Rp 890 jt belum kembali" color={COLORS.red} />
+        <StatCard icon={<Users size={IC} />} label="Jumlah Peserta Terdaftar" value="12.482" sub="Peserta UDW aktif" color={COLORS.blue} />
+        <StatCard icon={<Wallet size={IC} />} label="Total Saldo UDW" value="Rp 4.4B" sub="Akumulasi seluruh peserta" color={COLORS.blue} />
+        <StatCard icon={<BarChart3 size={IC} />} label="Rata-rata Per Peserta" value="Rp 1.2M" sub="Saldo rata-rata UDW" color={COLORS.blue} />
+        <StatCard icon={<Banknote size={IC} />} label="Total Tabungan Peserta" value="842.1M" sub="Tabungan terkumpul" color={COLORS.blue} />
       </div>
+
+      {/* Filters */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: "14px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20, display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+        <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={150} />
+        <Select label="Status" value={filterStatus} onChange={setFilterStatus} options={["Semua", "Diproses", "Selesai", "Ditolak"]} minW={130} />
+        <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari</label><SearchInput value={searchUDW} onChange={setSearchUDW} placeholder="Cari ref / nama / NRP..." minW={200} /></div>
+      </div>
+
+      {/* Table */}
       <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-        <SectionTitle>Monitoring Imbal Jasa & Denda Keterlambatan</SectionTitle>
-        <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
-          <Select label="Bank Mitra" value={filterBank} onChange={setFilterBank} options={["Semua", "BRI", "Mandiri", "BNI"]} minW={130} />
-          <Select label="Status" value={filterStatusDenda} onChange={setFilterStatusDenda} options={["Semua", "Tepat Waktu", "Terlambat", "Belum Bayar"]} minW={140} />
-        </div>
+        <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Data UDW Punah", subtitle: "Monitoring penarikan per kasus", type: "table", fileName: "Monitoring_UDW_Punah.pdf", content: { columns: ["Ref", "Nama", "NRP", "Satker", "Jumlah", "Status"], rows: filtered.slice(0,5).map(k => [k.ref, k.nama, k.nrp, k.satker, fmt(k.jumlah), k.status]), totalRows: filtered.length } })}>Ekspor PDF</Btn>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Data UDW Punah", subtitle: "Format Excel", type: "table", fileName: "Monitoring_UDW_Punah.xlsx", content: { columns: ["Ref", "Nama", "NRP", "Satker", "Jumlah", "Status"], rows: filtered.slice(0,5).map(k => [k.ref, k.nama, k.nrp, k.satker, fmt(k.jumlah), k.status]), totalRows: filtered.length } })}>Ekspor Excel</Btn>
+        </div>}>Monitoring Penarikan UDW Punah per Kasus</SectionTitle>
+        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 10 }}>Menampilkan {filtered.length} dari {allKasus.length} data pengajuan</div>
         {filtered.length === 0 ? <NoData /> : (
-          <Table columns={["Bank Mitra", "Tagihan Netto", "Tgl Dokumen", "Jatuh Tempo", "Tgl Terima Dana", "Hari Terlambat", "Denda", "Status"]}
-            data={filtered.map(d => [d.bank, d.tagihan, d.tglDoc, d.jt, d.tglTerima, d.terlambat > 0 ? <span style={{ color: COLORS.red, fontWeight: 700 }}>{d.terlambat}</span> : "0", d.terlambat > 0 ? <span style={{ color: COLORS.red }}>{d.denda}</span> : d.denda, <Badge color={d.status === "Tepat Waktu" ? "green" : "red"}>{d.status}</Badge>])} />
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["No", "Ref / Tgl Pengajuan", "Nama Peserta", "NRP/NIP", "Satker", "Unor", "Jumlah (Rp)", "Status", "Aksi"].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: i === 5 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>{filtered.map((k, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <td style={{ padding: "10px 14px", color: COLORS.gray500 }}>{k.no}</td>
+                  <td style={{ padding: "10px 14px" }}>
+                    <div style={{ fontWeight: 600, color: COLORS.blue }}>{k.ref}</div>
+                    <div style={{ fontSize: 11, color: COLORS.gray400 }}>{k.tgl}</div>
+                  </td>
+                  <td style={{ padding: "10px 14px", fontWeight: 500, color: COLORS.gray800 }}>{k.nama}</td>
+                  <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 12 }}>{k.nrp}</td>
+                  <td style={{ padding: "10px 14px" }}><Badge color={k.satker === "TNI" ? "green" : k.satker === "POLRI" ? "blue" : k.satker === "PPPK" ? "yellow" : "orange"}>{k.satker}</Badge></td>
+                  <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray600 }}>{k.unor || "—"}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(k.jumlah)}</td>
+                  <td style={{ padding: "10px 14px" }}><Badge color={statusColor(k.status)}>{k.status}</Badge></td>
+                  <td style={{ padding: "10px 14px" }}><Btn size="sm" variant="outline" onClick={() => setDetailKasus(k)}>Detail</Btn></td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
         )}
-        <div style={{ marginTop: 12, fontSize: 12, color: COLORS.gray500 }}>Formula denda: (Tagihan Netto × BI Rate × Hari Terlambat) / 365 — BI Rate: 5,75%</div>
+      </div>
+
+      {/* Konfirmasi Penarikan Kolektif / Mapping Rekening Koran */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+        <SectionTitle action={<div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+          <Select value={mappingSatker} onChange={setMappingSatker} options={["Pilih Satker...", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={160} />
+          <Btn>Proses Mapping</Btn>
+        </div>}>Konfirmasi Penarikan Kolektif / Mapping Rekening Koran</SectionTitle>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.gray500, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Data Rekening Koran (Kredit)</div>
+            <div style={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead><tr style={{ background: COLORS.gray100 }}>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>Tanggal Deskripsi</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>Nominal</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td style={{ padding: "8px 12px", borderBottom: `1px solid ${COLORS.gray100}` }}>28/01/2026</td><td style={{ padding: "8px 12px", borderBottom: `1px solid ${COLORS.gray100}` }}>
+                    <div style={{ fontSize: 11, color: COLORS.gray500 }}>KREDIT UDW KOALISI SATKER A</div>
+                    <div style={{ fontWeight: 700, fontFamily: "monospace" }}>45.000.000</div>
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.gray500, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Data Sistem (Total Tagihan)</div>
+            <div style={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead><tr style={{ background: COLORS.gray100 }}>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>Satker</th>
+                  <th style={{ padding: "8px 12px", textAlign: "center", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>Jml Kasus</th>
+                  <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>Total Tagihan</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td style={{ padding: "8px 12px" }}>Kodam Jaya</td><td style={{ padding: "8px 12px", textAlign: "center" }}>3 Kasus</td><td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, fontFamily: "monospace", color: COLORS.orange }}>46.500.000</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
+          <AlertTriangle size={16} color="#F57F17" />
+          <span style={{ color: "#F57F17" }}>Selisih ditemukan: <strong>-Rp 1.500.000</strong>. Mohon periksa kembali data mutasi rekening koran dan data pengajuan kolektif.</span>
+        </div>
       </div>
     </div>
   );
 };
 
-const DashboardDIPA = () => (
-  <div>
-    <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
-      <StatCard icon={<BarChart3 size={IC} />} label="Pagu DIPA Total" value="Rp 5.410 M" sub="TA 2026" color={COLORS.blue} />
-      <StatCard icon={<Wallet size={IC} />} label="Realisasi SP2D" value="Rp 3.883 M" sub="71,8% terserap" color={COLORS.green} />
-      <StatCard icon={<TrendingDown size={IC} />} label="Sisa Pagu" value="Rp 1.527 M" sub="28,2% tersisa" color={COLORS.orange} />
-    </div>
-    <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-      <SectionTitle>Breakdown per Jenis Dapem</SectionTitle>
-      {[{ label: "Dapem Induk", pagu: 4200, realisasi: 3150, color: COLORS.blue }, { label: "Dapem Susulan", pagu: 890, realisasi: 445, color: COLORS.green }, { label: "Non-Dapem (Harian)", pagu: 320, realisasi: 288, color: COLORS.orange }].map((d, i) => (
-        <div key={i} style={{ padding: 16, background: COLORS.gray50, borderRadius: 8, marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontWeight: 700 }}>{d.label}</span>
-            <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
-              <span>Pagu: <strong>Rp {d.pagu} M</strong></span><span>Realisasi: <strong>Rp {d.realisasi} M</strong></span>
-              <span style={{ color: d.realisasi / d.pagu > 0.85 ? COLORS.red : COLORS.green }}>Sisa: <strong>Rp {d.pagu - d.realisasi} M</strong></span>
-            </div>
-          </div>
-          <ProgressBar value={d.realisasi} max={d.pagu} color={d.color} />
-          {d.realisasi / d.pagu > 0.85 && <div style={{ marginTop: 8, fontSize: 12, color: COLORS.red }}>⚠ Sisa pagu di bawah threshold 15%</div>}
-        </div>
-      ))}
-    </div>
-  </div>
-);
+const DashboardDIPA = () => {
+  const [filterJenis, setFilterJenis] = useState("Semua");
+  const [threshold, setThreshold] = useState(15);
+  const [preview, setPreview] = useState(null);
 
-const RekonBPJS = () => {
-  const [filterBulan, setFilterBulan] = useState("Semua");
-  const [filterDapem, setFilterDapem] = useState("Semua");
-  const allSetoran = [
-    { bulan: "April 2026", dapem: "Dapem Induk", peserta: "98.200", setoran: "Rp 41.230.000.000", ntpn: "1234567890ABCDEF", tgl: "10 Apr 2026", status: "Tervalidasi" },
-    { bulan: "April 2026", dapem: "Dapem Susulan", peserta: "15.300", setoran: "Rp 3.420.000.000", ntpn: "ABCDEF1234567890", tgl: "12 Apr 2026", status: "Tervalidasi" },
-    { bulan: "Mei 2026", dapem: "Dapem Induk", peserta: "98.450", setoran: "Rp 41.580.000.000", ntpn: "5678901234ABCDEF", tgl: "09 Mei 2026", status: "Tervalidasi" },
-    { bulan: "Juni 2026", dapem: "Non-Dapem", peserta: "14.500", setoran: "Rp 2.870.000.000", ntpn: "CDEF567890123456", tgl: "11 Jun 2026", status: "Pending" },
+  const paguAwal = 5410;
+  const revisiPagu = 320;
+  const paguBerjalan = paguAwal + revisiPagu;
+  const realisasi = 3883;
+  const sisaPagu = paguBerjalan - realisasi;
+  const pctUsed = ((realisasi / paguBerjalan) * 100).toFixed(1);
+  const pctSisa = ((sisaPagu / paguBerjalan) * 100).toFixed(1);
+  const isAlert = parseFloat(pctSisa) <= threshold;
+
+  const breakdownData = [
+    { jenis: "Dapem Induk", paguAwal: 4200, revisi: 200, realisasi: 3150 },
+    { jenis: "Dapem Susulan", paguAwal: 890, revisi: 80, realisasi: 445 },
+    { jenis: "Non-Dapem (Harian)", paguAwal: 320, revisi: 40, realisasi: 288 },
   ];
-  const filtered = allSetoran.filter(s => {
-    if (filterBulan !== "Semua" && s.bulan !== filterBulan) return false;
-    if (filterDapem !== "Semua" && s.dapem !== filterDapem) return false;
-    return true;
-  });
+  const filteredBreakdown = filterJenis === "Semua" ? breakdownData : breakdownData.filter(b => b.jenis === filterJenis);
+
+  const sp2dLog = [
+    { no: "SP2D/2026/07/0234", tgl: "06 Jul 2026 14:30", jenis: "Dapem Induk", nominal: "Rp 42.500.000.000", penerima: "Bank Mandiri", sisa: "Rp 1.847.000.000.000" },
+    { no: "SP2D/2026/07/0233", tgl: "05 Jul 2026 11:15", jenis: "Dapem Susulan", nominal: "Rp 8.200.000.000", penerima: "BRI", sisa: "Rp 1.889.500.000.000" },
+    { no: "SP2D/2026/07/0232", tgl: "04 Jul 2026 09:45", jenis: "Non-Dapem", nominal: "Rp 3.100.000.000", penerima: "BNI", sisa: "Rp 1.897.700.000.000" },
+    { no: "SP2D/2026/07/0231", tgl: "03 Jul 2026 16:20", jenis: "Dapem Induk", nominal: "Rp 38.900.000.000", penerima: "Bank Mandiri", sisa: "Rp 1.900.800.000.000" },
+    { no: "SP2D/2026/06/0228", tgl: "28 Jun 2026 10:00", jenis: "Dapem Induk", nominal: "Rp 45.200.000.000", penerima: "BTN", sisa: "Rp 1.939.700.000.000" },
+  ];
+
+  const revisiLog = [
+    { no: "REV/2026/03/001", tgl: "15 Mar 2026", jenis: "Dapem Induk", sebelum: "Rp 4.200 M", sesudah: "Rp 4.400 M", selisih: "+Rp 200 M", alasan: "Revisi APBN TA 2026 — tambahan alokasi pensiun baru" },
+    { no: "REV/2026/05/002", tgl: "20 Mei 2026", jenis: "Dapem Susulan", sebelum: "Rp 890 M", sesudah: "Rp 970 M", selisih: "+Rp 80 M", alasan: "Penyesuaian data pensiunan susulan triwulan II" },
+    { no: "REV/2026/06/003", tgl: "10 Jun 2026", jenis: "Non-Dapem", sebelum: "Rp 320 M", sesudah: "Rp 360 M", selisih: "+Rp 40 M", alasan: "Tambahan anggaran pembayaran non-dapem harian" },
+  ];
+
   return (
     <div>
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard icon={<Cross size={IC} />} label="Potongan BPJS Bulan Ini" value="Rp 48,2 M" sub="128.450 peserta" color={COLORS.blue} />
-        <StatCard icon={<BarChart3 size={IC} />} label="Setoran Triwulan II" value="Rp 144,6 M" sub="Apr–Jun 2026" color={COLORS.green} />
-        <StatCard icon={<AlertTriangle size={IC} />} label="Selisih Teridentifikasi" value="Rp 2,3 M" color={COLORS.orange} />
-      </div>
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-        <SectionTitle>Rekap Setoran Iuran Jamkes — Triwulan II 2026</SectionTitle>
-        <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
-          <Select label="Bulan" value={filterBulan} onChange={setFilterBulan} options={["Semua", "April 2026", "Mei 2026", "Juni 2026"]} minW={130} />
-          <Select label="Jenis Dapem" value={filterDapem} onChange={setFilterDapem} options={["Semua", "Dapem Induk", "Dapem Susulan", "Non-Dapem"]} minW={140} />
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Alert Banner */}
+      {isAlert && (
+        <div style={{ background: COLORS.redLight, border: `1px solid #FFCDD2`, borderRadius: 10, padding: "14px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+          <AlertTriangle size={20} color={COLORS.red} />
+          <div>
+            <div style={{ fontWeight: 700, color: COLORS.red, fontSize: 14 }}>Sisa Pagu di Bawah Threshold ({threshold}%)</div>
+            <div style={{ fontSize: 12, color: COLORS.gray700 }}>Sisa pagu saat ini <strong>Rp {sisaPagu} M ({pctSisa}%)</strong> dari pagu berjalan Rp {paguBerjalan} M. Notifikasi telah dikirim ke Kadiv Keuangan.</div>
+          </div>
         </div>
-        {filtered.length === 0 ? <NoData /> : (
-          <Table columns={["Bulan", "Jenis Dapem", "Jumlah Peserta", "Jumlah Setoran", "NTPN", "Tanggal Setor", "Status"]}
-            data={filtered.map(s => [s.bulan, s.dapem, s.peserta, s.setoran, <span style={{ fontFamily: "monospace", fontSize: 11 }}>{s.ntpn}</span>, s.tgl, <Badge color={s.status === "Tervalidasi" ? "green" : "yellow"}>{s.status}</Badge>])} />
-        )}
+      )}
+
+      {/* Stat Cards - 5 cards */}
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard icon={<BarChart3 size={IC} />} label="Pagu DIPA Awal" value={`Rp ${paguAwal} M`} sub="TA 2026 (DIPA Induk)" color={COLORS.blue} />
+        <StatCard icon={<TrendingUp size={IC} />} label="Revisi Pagu" value={`+Rp ${revisiPagu} M`} sub={`${revisiLog.length} kali revisi`} color="#7B1FA2" />
+        <StatCard icon={<Banknote size={IC} />} label="Pagu Berjalan" value={`Rp ${paguBerjalan} M`} sub="Pagu Awal + Revisi" color={COLORS.blueDark} />
+        <StatCard icon={<Wallet size={IC} />} label="Realisasi SP2D" value={`Rp ${realisasi} M`} sub={`${pctUsed}% terserap`} color={COLORS.green} />
+        <StatCard icon={<TrendingDown size={IC} />} label="Sisa Pagu" value={`Rp ${sisaPagu} M`} sub={`${pctSisa}% tersisa`} color={isAlert ? COLORS.red : COLORS.orange} />
       </div>
+
+      {/* Main Progress Bar */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+        <SectionTitle>Realisasi Pagu DIPA — TA 2026</SectionTitle>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+            <span style={{ color: COLORS.gray500 }}>Realisasi: <strong style={{ color: COLORS.gray900 }}>Rp {realisasi} M</strong> dari <strong>Rp {paguBerjalan} M</strong></span>
+            <span style={{ fontWeight: 700, color: parseFloat(pctUsed) > 85 ? COLORS.red : COLORS.blue }}>{pctUsed}%</span>
+          </div>
+          <div style={{ height: 20, background: COLORS.gray200, borderRadius: 10, overflow: "hidden", position: "relative" }}>
+            <div style={{ height: "100%", width: `${pctUsed}%`, background: `linear-gradient(90deg, ${COLORS.blue} 0%, ${parseFloat(pctUsed) > 85 ? COLORS.red : COLORS.green} 100%)`, borderRadius: 10, transition: "width 0.6s" }} />
+            {/* Threshold marker */}
+            <div style={{ position: "absolute", top: 0, bottom: 0, left: `${100 - threshold}%`, width: 2, background: COLORS.red, opacity: 0.7 }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 4 }}>
+            <span style={{ color: COLORS.gray400 }}>Rp 0</span>
+            <span style={{ color: COLORS.red, position: "relative", left: `${50 - threshold}%` }}>Threshold {threshold}%</span>
+            <span style={{ color: COLORS.gray400 }}>Rp {paguBerjalan} M</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Breakdown per Jenis + Threshold Config */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 20 }}>
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle>Breakdown per Jenis Dapem</SectionTitle>
+          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+            <Select value={filterJenis} onChange={setFilterJenis} options={["Semua", "Dapem Induk", "Dapem Susulan", "Non-Dapem (Harian)"]} minW={170} />
+          </div>
+          {filteredBreakdown.map((d, i) => {
+            const pagu = d.paguAwal + d.revisi;
+            const sisa = pagu - d.realisasi;
+            const pct = ((d.realisasi / pagu) * 100).toFixed(1);
+            const isOver = (sisa / pagu) * 100 <= threshold;
+            return (
+              <div key={i} style={{ padding: 16, background: isOver ? COLORS.redLight : COLORS.gray50, borderRadius: 8, marginBottom: 10, border: isOver ? `1px solid #FFCDD2` : `1px solid ${COLORS.gray200}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 8 }}>
+                  <span style={{ fontWeight: 700, color: COLORS.gray800 }}>{d.jenis} {isOver && <AlertTriangle size={14} color={COLORS.red} style={{ verticalAlign: "middle" }} />}</span>
+                  <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
+                    <span style={{ color: COLORS.gray500 }}>Pagu Awal: <strong>Rp {d.paguAwal} M</strong></span>
+                    {d.revisi > 0 && <span style={{ color: "#7B1FA2" }}>Revisi: <strong>+Rp {d.revisi} M</strong></span>}
+                    <span style={{ color: COLORS.blue }}>Berjalan: <strong>Rp {pagu} M</strong></span>
+                    <span style={{ color: COLORS.green }}>Realisasi: <strong>Rp {d.realisasi} M</strong> ({pct}%)</span>
+                    <span style={{ color: isOver ? COLORS.red : COLORS.green, fontWeight: 700 }}>Sisa: Rp {sisa} M</span>
+                  </div>
+                </div>
+                <ProgressBar value={d.realisasi} max={pagu} color={isOver ? COLORS.red : COLORS.blue} />
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle>Konfigurasi Alert</SectionTitle>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Threshold Peringatan (%)</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input type="number" value={threshold} onChange={e => setThreshold(Number(e.target.value))} style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: 80, fontSize: 14 }} />
+              <span style={{ fontSize: 13, color: COLORS.gray500 }}>% dari pagu berjalan</span>
+            </div>
+            <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 4 }}>Alert muncul jika sisa pagu ≤ {threshold}%</div>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Notifikasi Dikirim Ke</label>
+            <input defaultValue="kadiv.keuangan@asabri.co.id" style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: "100%", fontSize: 13, boxSizing: "border-box" }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>CC Notifikasi</label>
+            <input defaultValue="staf.anggaran@asabri.co.id" style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: "100%", fontSize: 13, boxSizing: "border-box" }} />
+          </div>
+          <Btn size="sm">Simpan Konfigurasi</Btn>
+
+          <div style={{ marginTop: 20, padding: 14, background: COLORS.gray50, borderRadius: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, marginBottom: 8 }}>Status Saat Ini</div>
+            <div style={{ fontSize: 13, color: isAlert ? COLORS.red : COLORS.green, fontWeight: 600 }}>{isAlert ? "⚠ ALERT — Sisa pagu di bawah threshold" : "✓ AMAN — Sisa pagu di atas threshold"}</div>
+            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>Sisa: {pctSisa}% | Threshold: {threshold}%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Riwayat SP2D Terbaru */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+        <SectionTitle action={<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <span style={{ fontSize: 11, color: COLORS.green, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><CircleDot size={10} /> Real-time</span>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Riwayat SP2D", subtitle: "Data pencairan SP2D TA 2026", type: "table", fileName: "Riwayat_SP2D_2026.xlsx", content: { columns: ["No. SP2D", "Tanggal", "Jenis", "Nominal", "Penerima"], rows: sp2dLog.map(s => [s.no, s.tgl, s.jenis, s.nominal, s.penerima]), totalRows: sp2dLog.length } })}>Ekspor</Btn>
+        </div>}>Riwayat Pencairan SP2D Terbaru</SectionTitle>
+        <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead><tr style={{ background: COLORS.gray100 }}>
+              {["No. SP2D", "Tanggal & Waktu", "Jenis Dapem", "Nominal Pencairan", "Mitra Bayar", "Sisa Pagu Setelah"].map((c, i) => (
+                <th key={i} style={{ padding: "10px 14px", textAlign: i >= 3 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+              ))}
+            </tr></thead>
+            <tbody>{sp2dLog.map((s, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue, fontWeight: 500 }}>{s.no}</td>
+                <td style={{ padding: "10px 14px", fontSize: 12 }}>{s.tgl}</td>
+                <td style={{ padding: "10px 14px" }}><Badge color={s.jenis === "Dapem Induk" ? "blue" : s.jenis === "Dapem Susulan" ? "green" : "orange"}>{s.jenis}</Badge></td>
+                <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{s.nominal}</td>
+                <td style={{ padding: "10px 14px" }}>{s.penerima}</td>
+                <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontSize: 12, color: COLORS.gray500 }}>{s.sisa}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+        <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Data diperbarui otomatis setiap kali SP2D baru diterbitkan • Terakhir: 06 Jul 2026, 14:30 WIB</div>
+      </div>
+
+      {/* Riwayat Revisi Pagu */}
       <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-        <SectionTitle>Kalkulator Kompensasi Lebih/Kurang BPJS</SectionTitle>
-        <Table columns={["Kelompok Pensiun", "Potongan Seharusnya", "Setoran Aktual", "Selisih", "Keterangan"]} data={[
-          ["PNS Kemhan", "Rp 18.500.000.000", "Rp 18.720.000.000", <span style={{ color: COLORS.red }}>+Rp 220.000.000</span>, <Badge color="orange">Restitusi</Badge>],
-          ["TNI", "Rp 22.300.000.000", "Rp 22.300.000.000", <span style={{ color: COLORS.green }}>Rp 0</span>, <Badge color="green">Match</Badge>],
-          ["Polri", "Rp 7.800.000.000", "Rp 7.560.000.000", <span style={{ color: COLORS.orange }}>-Rp 240.000.000</span>, <Badge color="red">Kurang Setor</Badge>],
-        ]} />
+        <SectionTitle>Riwayat Revisi Pagu DIPA</SectionTitle>
+        <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead><tr style={{ background: COLORS.gray100 }}>
+              {["No. Revisi", "Tanggal", "Jenis Dapem", "Pagu Sebelum", "Pagu Sesudah", "Selisih", "Alasan Revisi"].map((c, i) => (
+                <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+              ))}
+            </tr></thead>
+            <tbody>{revisiLog.map((r, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: "#7B1FA2", fontWeight: 500 }}>{r.no}</td>
+                <td style={{ padding: "10px 14px", fontSize: 12 }}>{r.tgl}</td>
+                <td style={{ padding: "10px 14px" }}><Badge color="blue">{r.jenis}</Badge></td>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace" }}>{r.sebelum}</td>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontWeight: 600 }}>{r.sesudah}</td>
+                <td style={{ padding: "10px 14px", fontFamily: "monospace", color: COLORS.green, fontWeight: 700 }}>{r.selisih}</td>
+                <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray600, maxWidth: 280 }}>{r.alasan}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+        <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Revisi pagu diperbarui berdasarkan DIPA Revisi dari Kemenkeu • Data otomatis memperbarui pagu berjalan</div>
       </div>
+    </div>
+  );
+};
+
+const RekonBPJS = () => {
+  const [filterBulan, setFilterBulan] = useState("Juni 2026");
+  const [filterKelompok, setFilterKelompok] = useState("Semua");
+  const [activeTab, setActiveTab] = useState("rekap");
+  const [searchPeserta, setSearchPeserta] = useState("");
+  const [preview, setPreview] = useState(null);
+
+  const fmt = n => `Rp ${Math.abs(n).toLocaleString("id-ID")}`;
+
+  const rekapData = [
+    { kelompok: "TNI", targetRekap3: 22300000000, realisasi: 22300000000 },
+    { kelompok: "POLRI", targetRekap3: 7800000000, realisasi: 7560000000 },
+    { kelompok: "ASN Kemhan", targetRekap3: 18500000000, realisasi: 18720000000 },
+    { kelompok: "PPPK", targetRekap3: 1200000000, realisasi: 1200000000 },
+  ];
+  const filteredRekap = filterKelompok === "Semua" ? rekapData : rekapData.filter(r => r.kelompok === filterKelompok);
+  const totalTarget = filteredRekap.reduce((a, r) => a + r.targetRekap3, 0);
+  const totalRealisasi = filteredRekap.reduce((a, r) => a + r.realisasi, 0);
+  const totalKompensasi = totalRealisasi - totalTarget;
+
+  const detailPeserta = [
+    { nrp: "198701234", nama: "Serka Ahmad Fauzi", kelompok: "TNI", unor: "Kodam Jaya", target: 185000, realisasi: 185000, kompensasi: 0, alasan: "—" },
+    { nrp: "199205678", nama: "Briptu Rina Marlina", kelompok: "POLRI", unor: "Polda Metro Jaya", target: 162000, realisasi: 158000, kompensasi: -4000, alasan: "Potongan kurang — data tanggungan belum update" },
+    { nrp: "198604321", nama: "Penata Tk.I Siti Nurhaliza", kelompok: "ASN Kemhan", unor: "Ditjen Renhan", target: 210000, realisasi: 225000, kompensasi: 15000, alasan: "Lebih potong — kenaikan gaji belum tersinkron di Rekap III" },
+    { nrp: "197803456", nama: "Letkol Bambang Suharto", kelompok: "TNI", unor: "Kodam IM", target: 320000, realisasi: 320000, kompensasi: 0, alasan: "—" },
+    { nrp: "198512345", nama: "AKP Dedi Kurniawan", kelompok: "POLRI", unor: "Polda Jabar", target: 245000, realisasi: 230000, kompensasi: -15000, alasan: "Kurang potong — perubahan kelas rawat" },
+    { nrp: "202101234", nama: "Sari Indah Permata", kelompok: "PPPK", unor: "Ditjen Renhan", target: 148000, realisasi: 148000, kompensasi: 0, alasan: "—" },
+    { nrp: "198211111", nama: "Pembina Utama Dr. Ratna", kelompok: "ASN Kemhan", unor: "Itjen Kemhan", target: 380000, realisasi: 395000, kompensasi: 15000, alasan: "Lebih potong — tunjangan keluarga belum disesuaikan" },
+    { nrp: "198802345", nama: "Bripka Anwar Ibrahim", kelompok: "POLRI", unor: "Polda Jateng", target: 195000, realisasi: 190000, kompensasi: -5000, alasan: "Kurang potong — tanggungan anak bertambah" },
+  ];
+
+  const filteredPeserta = detailPeserta.filter(p => {
+    if (filterKelompok !== "Semua" && p.kelompok !== filterKelompok) return false;
+    if (searchPeserta && !p.nama.toLowerCase().includes(searchPeserta.toLowerCase()) && !p.nrp.includes(searchPeserta)) return false;
+    return true;
+  });
+  const pesertaKompensasi = filteredPeserta.filter(p => p.kompensasi !== 0);
+
+  const setoranLog = [
+    { bulan: "April 2026", dapem: "Dapem Induk", peserta: "98.200", setoran: 41230000000, ntpn: "1234567890ABCDEF", tgl: "10 Apr 2026", status: "Tervalidasi" },
+    { bulan: "April 2026", dapem: "Dapem Susulan", peserta: "15.300", setoran: 3420000000, ntpn: "ABCDEF1234567890", tgl: "12 Apr 2026", status: "Tervalidasi" },
+    { bulan: "Mei 2026", dapem: "Dapem Induk", peserta: "98.450", setoran: 41580000000, ntpn: "5678901234ABCDEF", tgl: "09 Mei 2026", status: "Tervalidasi" },
+    { bulan: "Juni 2026", dapem: "Dapem Induk", peserta: "98.600", setoran: 41890000000, ntpn: "ABCD901234567890", tgl: "10 Jun 2026", status: "Tervalidasi" },
+    { bulan: "Juni 2026", dapem: "Non-Dapem", peserta: "14.500", setoran: 2870000000, ntpn: "CDEF567890123456", tgl: "11 Jun 2026", status: "Pending" },
+  ];
+
+  const filteredSetoran = filterBulan === "Semua" ? setoranLog : setoranLog.filter(s => s.bulan === filterBulan);
+
+  return (
+    <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Info distribusi */}
+      <div style={{ background: "#E3F2FD", borderRadius: 8, padding: "10px 16px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
+        <span style={{ color: COLORS.gray700 }}>Dokumen rekonsiliasi ini didistribusikan ke <strong>BPJS Kesehatan</strong> dan <strong>DJPb (Direktorat Jenderal Perbendaharaan)</strong></span>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Laporan Rekonsiliasi BPJS", subtitle: "Periode " + filterBulan + " — Format Excel", type: "table", fileName: "Rekonsiliasi_BPJS_" + filterBulan.replace(" ", "_") + ".xlsx", content: { columns: ["Kelompok", "Target Rekap III", "Realisasi", "Kompensasi"], rows: filteredRekap.map(r => [r.kelompok, fmt(r.targetRekap3), fmt(r.realisasi), (r.realisasi - r.targetRekap3 >= 0 ? "+" : "-") + " " + fmt(r.realisasi - r.targetRekap3)]), totalRows: filteredRekap.length + 1 } })}>Ekspor Excel</Btn>
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Laporan Rekonsiliasi BPJS", subtitle: "Periode " + filterBulan + " — Format PDF", type: "table", fileName: "Rekonsiliasi_BPJS_" + filterBulan.replace(" ", "_") + ".pdf", content: { columns: ["Kelompok", "Target Rekap III", "Realisasi", "Kompensasi"], rows: filteredRekap.map(r => [r.kelompok, fmt(r.targetRekap3), fmt(r.realisasi), (r.realisasi - r.targetRekap3 >= 0 ? "+" : "-") + " " + fmt(r.realisasi - r.targetRekap3)]), totalRows: filteredRekap.length + 1 } })}>Ekspor PDF</Btn>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard icon={<Cross size={IC} />} label="Target Rekap III BPJS" value={`Rp ${(totalTarget / 1e9).toFixed(1)} M`} sub={"Potongan seharusnya · " + filterBulan} color={COLORS.blue} />
+        <StatCard icon={<Banknote size={IC} />} label="Realisasi Setoran" value={`Rp ${(totalRealisasi / 1e9).toFixed(1)} M`} sub="Disetor ke Kas Negara" color={COLORS.green} />
+        <StatCard icon={<AlertTriangle size={IC} />} label="Kompensasi (+/-)" value={(totalKompensasi >= 0 ? "+" : "-") + " " + fmt(totalKompensasi)} sub={totalKompensasi > 0 ? "Lebih setor — perlu restitusi" : totalKompensasi < 0 ? "Kurang setor — perlu tagih" : "Matched"} color={totalKompensasi === 0 ? COLORS.green : COLORS.orange} />
+        <StatCard icon={<Users size={IC} />} label="Peserta Kompensasi" value={detailPeserta.filter(p => p.kompensasi !== 0).length.toString()} sub="Peserta dengan selisih" color={COLORS.red} />
+      </div>
+
+      {/* Filters */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: "14px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20, display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+        <Select label="Periode Bulan" value={filterBulan} onChange={setFilterBulan} options={["Semua", "April 2026", "Mei 2026", "Juni 2026"]} minW={140} />
+        <Select label="Kelompok" value={filterKelompok} onChange={setFilterKelompok} options={["Semua", "TNI", "POLRI", "ASN Kemhan", "PPPK"]} minW={140} />
+      </div>
+
+      {/* Tab Navigation */}
+      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
+        {[
+          { id: "rekap", label: "Bagian A — Rekap Per Kelompok" },
+          { id: "detail", label: `Bagian B — Detail Per Peserta (${pesertaKompensasi.length} kompensasi)` },
+          { id: "setoran", label: "Riwayat Setoran" },
+        ].map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ padding: "10px 20px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: "transparent", color: activeTab === t.id ? COLORS.blue : COLORS.gray500, borderBottom: activeTab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent", marginBottom: -2 }}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* BAGIAN A — Rekap Per Kelompok Peserta */}
+      {activeTab === "rekap" && (
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle>Rekap Per Kelompok Peserta — {filterBulan}</SectionTitle>
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["Kelompok", "Target Rekap III", "Realisasi", "Kompensasi (+/-)"].map((c, i) => (
+                  <th key={i} style={{ padding: "12px 16px", textAlign: i >= 1 ? "right" : "left", fontWeight: 700, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}` }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {filteredRekap.map((r, i) => {
+                  const komp = r.realisasi - r.targetRekap3;
+                  return (
+                    <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, color: COLORS.gray800 }}>{r.kelompok}</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace" }}>{fmt(r.targetRekap3)}</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace" }}>{fmt(r.realisasi)}</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: komp === 0 ? COLORS.green : komp > 0 ? COLORS.red : COLORS.orange }}>
+                        {komp === 0 ? "Rp 0" : (komp > 0 ? "+ " : "- ") + fmt(komp)}
+                        {komp !== 0 && <span style={{ marginLeft: 8 }}><Badge color={komp > 0 ? "red" : "orange"}>{komp > 0 ? "Lebih Setor" : "Kurang Setor"}</Badge></span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {/* Total Row */}
+                <tr style={{ background: COLORS.blueDark }}>
+                  <td style={{ padding: "12px 16px", fontWeight: 800, color: COLORS.white }}>TOTAL</td>
+                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.white }}>{fmt(totalTarget)}</td>
+                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.white }}>{fmt(totalRealisasi)}</td>
+                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.accent }}>
+                    {totalKompensasi === 0 ? "Rp 0" : (totalKompensasi > 0 ? "+ " : "- ") + fmt(totalKompensasi)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {totalKompensasi !== 0 && (
+            <div style={{ marginTop: 12, background: totalKompensasi > 0 ? COLORS.redLight : COLORS.orangeLight, borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
+              <AlertTriangle size={16} color={totalKompensasi > 0 ? COLORS.red : COLORS.orange} />
+              <span style={{ color: totalKompensasi > 0 ? COLORS.red : COLORS.orange }}>
+                {totalKompensasi > 0
+                  ? `Terdapat kelebihan setor sebesar ${fmt(totalKompensasi)}. Perlu dilakukan restitusi ke Kas Negara atau kompensasi di periode berikutnya.`
+                  : `Terdapat kekurangan setor sebesar ${fmt(totalKompensasi)}. Perlu dilakukan penagihan tambahan ke Kemenkeu.`
+                }
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* BAGIAN B — Detail Per Peserta (Lampiran) */}
+      {activeTab === "detail" && (
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle action={<Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Lampiran Detail Peserta", subtitle: "Nominatif peserta dengan kompensasi", type: "table", fileName: "Lampiran_Kompensasi_BPJS.xlsx", content: { columns: ["NRP", "Nama", "Kelompok", "Target", "Realisasi", "Kompensasi"], rows: pesertaKompensasi.map(p => [p.nrp, p.nama, p.kelompok, fmt(p.target), fmt(p.realisasi), (p.kompensasi >= 0 ? "+" : "-") + " " + fmt(p.kompensasi)]), totalRows: pesertaKompensasi.length } })}>Ekspor Lampiran</Btn>}>
+            Detail Per Peserta — Nominatif Kompensasi Lebih/Kurang
+          </SectionTitle>
+          <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#F57F17", display: "flex", gap: 8 }}>
+            <AlertTriangle size={14} />
+            <span>Lampiran ini berisi daftar peserta yang memiliki kompensasi lebih/kurang beserta alasannya. Didistribusikan ke BPJS Kesehatan dan DJPb sebagai dokumen rekonsiliasi.</span>
+          </div>
+          <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
+            <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari Peserta</label><SearchInput value={searchPeserta} onChange={setSearchPeserta} placeholder="NRP / Nama peserta..." /></div>
+            <Btn variant={searchPeserta || filterKelompok !== "Semua" ? "outline" : "ghost"} size="sm" onClick={() => { setSearchPeserta(""); setFilterKelompok("Semua"); }}>Reset Filter</Btn>
+          </div>
+          <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filteredPeserta.length} peserta ({pesertaKompensasi.length} dengan kompensasi)</div>
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["NRP/NIP", "Nama Peserta", "Kelompok", "Unor", "Target Rekap III", "Realisasi Potong", "Kompensasi (+/-)", "Alasan"].map((c, i) => (
+                  <th key={i} style={{ padding: "8px 12px", textAlign: i >= 4 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>{filteredPeserta.map((p, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: p.kompensasi !== 0 ? (p.kompensasi > 0 ? COLORS.redLight : COLORS.yellowLight) : "transparent" }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                  <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: 11 }}>{p.nrp}</td>
+                  <td style={{ padding: "8px 12px", fontWeight: 500, color: COLORS.gray800 }}>{p.nama}</td>
+                  <td style={{ padding: "8px 12px" }}><Badge color={p.kelompok === "TNI" ? "green" : p.kelompok === "POLRI" ? "blue" : p.kelompok === "PPPK" ? "yellow" : "orange"}>{p.kelompok}</Badge></td>
+                  <td style={{ padding: "8px 12px", fontSize: 11, color: COLORS.gray600 }}>{p.unor}</td>
+                  <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace" }}>{fmt(p.target)}</td>
+                  <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace" }}>{fmt(p.realisasi)}</td>
+                  <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: p.kompensasi === 0 ? COLORS.green : p.kompensasi > 0 ? COLORS.red : COLORS.orange }}>
+                    {p.kompensasi === 0 ? "—" : (p.kompensasi > 0 ? "+" : "-") + " " + fmt(p.kompensasi)}
+                  </td>
+                  <td style={{ padding: "8px 12px", fontSize: 11, color: COLORS.gray600, maxWidth: 220 }}>{p.alasan}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Riwayat Setoran ke Kas Negara */}
+      {activeTab === "setoran" && (
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle>Riwayat Setoran Iuran BPJS Kesehatan ke Kas Negara</SectionTitle>
+          {filteredSetoran.length === 0 ? <NoData /> : (
+            <Table columns={["Bulan", "Jenis Dapem", "Jumlah Peserta", "Jumlah Setoran", "NTPN", "Tanggal Setor", "Status"]}
+              data={filteredSetoran.map(s => [s.bulan, s.dapem, s.peserta, fmt(s.setoran), <span style={{ fontFamily: "monospace", fontSize: 11 }}>{s.ntpn}</span>, s.tgl, <Badge color={s.status === "Tervalidasi" ? "green" : "yellow"}>{s.status}</Badge>])} />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -1011,7 +1729,7 @@ const ReportGenerator = () => {
         <SectionTitle>Generator Laporan Standar — 32+ Format</SectionTitle>
         <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
           <Select label="Periode" value={filterPeriode} onChange={setFilterPeriode} options={["Juli 2026", "Juni 2026", "Mei 2026", "Triwulan II 2026", "Semester I 2026"]} minW={140} />
-          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan"]} minW={140} />
+          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
           <Select label="Kategori" value={filterKategori} onChange={setFilterKategori} options={["Semua", ...allReports.map(g => g.cat)]} minW={170} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: filtered.length === 1 ? "1fr" : "1fr 1fr 1fr", gap: 12 }}>
@@ -1050,6 +1768,7 @@ const TagihanImbalJasa = () => {
   const [filterMitra, setFilterMitra] = useState("Semua");
   const [searchTagihan, setSearchTagihan] = useState("");
   const [detailTagihan, setDetailTagihan] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const allTagihan = [
     { no: "IJ-2606-001", mitra: "BRI", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "15 Jun 2026", ppn: 128000000, netto: 1152000000, totalTagihan: 1280000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
@@ -1074,6 +1793,7 @@ const TagihanImbalJasa = () => {
 
   return (
     <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
       {/* Detail Modal */}
       {detailTagihan && (() => {
         const t = detailTagihan;
@@ -1149,7 +1869,7 @@ const TagihanImbalJasa = () => {
                   <span style={{ fontSize: 22, fontWeight: 800, color: COLORS.gray900, fontFamily: "monospace" }}>{fmt(t.totalTagihan + t.denda)}</span>
                 </div>
                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-                  <Btn variant="outline" size="sm">Unduh Tagihan</Btn>
+                  <Btn variant="outline" size="sm" onClick={() => { setDetailTagihan(null); setPreview({ title: "Preview Unduh Tagihan " + t.no, subtitle: t.mitra + " - " + t.jenis + " - " + t.periode, type: "table", fileName: "Tagihan_" + t.no + ".pdf", content: { columns: ["Item", "Nilai"], rows: [["Nilai Netto", fmt(t.netto)], ["PPN", fmt(t.ppn)], ["Total Tagihan", fmt(t.totalTagihan)], ["Denda", fmt(t.denda)], ["Grand Total", fmt(t.totalTagihan + t.denda)]], totalRows: 5 } }); }}>Unduh Tagihan</Btn>
                   <Btn variant="danger" size="sm" onClick={() => setDetailTagihan(null)}>Tutup</Btn>
                 </div>
               </div>
@@ -1163,7 +1883,7 @@ const TagihanImbalJasa = () => {
           <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 4 }}>Daftar lengkap tagihan imbal jasa per mitra bayar, termasuk keterlambatan dan denda yang dikenakan</div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <Btn variant="outline">Ekspor Excel</Btn>
+          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Tagihan Imbal Jasa", subtitle: "Data seluruh tagihan imbal jasa", type: "table", fileName: "Tagihan_Imbal_Jasa.xlsx", content: { columns: ["No.", "Mitra", "Jenis", "Periode", "Total Tagihan", "Status"], rows: allTagihan.slice(0,5).map(t => [t.no, t.mitra, t.jenis, t.periode, fmt(t.totalTagihan), t.status]), totalRows: allTagihan.length } })}>Ekspor Excel</Btn>
           <Btn>Terbitkan & Kirim ke Mitra</Btn>
         </div>
       </div>
@@ -1184,30 +1904,25 @@ const TagihanImbalJasa = () => {
         <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allTagihan.length} tagihan</div>
         {filtered.length === 0 ? <NoData /> : (
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead><tr style={{ background: COLORS.gray100 }}>
-                {["No. Tagihan", "Mitra Bayar", "Jenis Imbal Jasa", "Periode", "Tgl. Terbit", "Jatuh Tempo", "Tgl. Dibayar", "PPN", "Nilai Netto", "Total Tagihan", "Hari Terlambat", "Denda", "Total + Denda", "Status", ""].map((c, i) => (
-                  <th key={i} style={{ padding: "8px 10px", textAlign: i >= 7 && i <= 12 ? "right" : "left", fontWeight: 600, color: COLORS.gray500, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap", fontSize: 11 }}>{c}</th>
+                {["No. Tagihan", "Mitra Bayar", "Jenis Imbal Jasa", "Periode", "Tgl. Terbit", "Jatuh Tempo", "Tgl. Dibayar", "Status", ""].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
                 ))}
               </tr></thead>
               <tbody>{filtered.map((t, i) => (
                 <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: t.status === "Belum Dibayar" ? COLORS.redLight : t.status === "Terlambat" ? COLORS.yellowLight : "transparent" }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.85"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-                  <td style={{ padding: "8px 10px", fontFamily: "monospace", color: COLORS.blue, fontWeight: 500 }}>{t.no}</td>
-                  <td style={{ padding: "8px 10px", fontWeight: 600 }}>{t.mitra}</td>
-                  <td style={{ padding: "8px 10px" }}>{t.jenis}</td>
-                  <td style={{ padding: "8px 10px" }}>{t.periode}</td>
-                  <td style={{ padding: "8px 10px" }}>{t.tglTerbit}</td>
-                  <td style={{ padding: "8px 10px" }}>{t.jatuhTempo}</td>
-                  <td style={{ padding: "8px 10px" }}>{t.tglBayar || "—"}</td>
-                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace" }}>{fmt(t.ppn)}</td>
-                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace" }}>{fmt(t.netto)}</td>
-                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(t.totalTagihan)}</td>
-                  <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: 700, color: t.hariTerlambat > 0 ? COLORS.red : COLORS.gray400 }}>{t.hariTerlambat > 0 ? t.hariTerlambat : "—"}</td>
-                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", color: t.denda > 0 ? COLORS.red : COLORS.gray400 }}>{t.denda > 0 ? fmt(t.denda) : "—"}</td>
-                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>{fmt(t.totalTagihan + t.denda)}</td>
-                  <td style={{ padding: "8px 10px" }}><Badge color={t.status === "Dibayar" ? "green" : t.status === "Terlambat" ? "orange" : "red"}>{t.status}</Badge></td>
-                  <td style={{ padding: "8px 10px" }}><Btn size="sm" variant="ghost" onClick={() => setDetailTagihan(t)}>Detail</Btn></td>
+                  onMouseEnter={e => e.currentTarget.style.background = t.status === "Belum Dibayar" ? COLORS.redLight : t.status === "Terlambat" ? COLORS.yellowLight : COLORS.gray50}
+                  onMouseLeave={e => e.currentTarget.style.background = t.status === "Belum Dibayar" ? COLORS.redLight : t.status === "Terlambat" ? COLORS.yellowLight : "transparent"}>
+                  <td style={{ padding: "10px 14px", fontFamily: "monospace", color: COLORS.blue, fontWeight: 500 }}>{t.no}</td>
+                  <td style={{ padding: "10px 14px", fontWeight: 600 }}>{t.mitra}</td>
+                  <td style={{ padding: "10px 14px" }}>{t.jenis}</td>
+                  <td style={{ padding: "10px 14px" }}>{t.periode}</td>
+                  <td style={{ padding: "10px 14px" }}>{t.tglTerbit}</td>
+                  <td style={{ padding: "10px 14px" }}>{t.jatuhTempo}</td>
+                  <td style={{ padding: "10px 14px" }}>{t.tglBayar || <span style={{ color: COLORS.gray400 }}>—</span>}</td>
+                  <td style={{ padding: "10px 14px" }}><Badge color={t.status === "Dibayar" ? "green" : t.status === "Terlambat" ? "orange" : "red"}>{t.status}</Badge></td>
+                  <td style={{ padding: "10px 14px" }}><Btn size="sm" variant="outline" onClick={() => setDetailTagihan(t)}>Detail</Btn></td>
                 </tr>
               ))}</tbody>
             </table>
@@ -1219,76 +1934,205 @@ const TagihanImbalJasa = () => {
 };
 
 // ============ MAIN APP ============
+const ICON_MAP = {
+  chart: BarChart3, calc: Calculator, sync: RefreshCw, file: FileText,
+  bank: Building2, clip: ClipboardList, card: CreditCard, receipt: Receipt,
+  trend: TrendingDown, cross: Cross, pen: PenLine, dollar: DollarSign,
+  shield: Shield, wallet: Wallet,
+};
+
 const MENU = [
-  { group: "OPERASIONAL UTAMA", items: [{ id: "dashboard", icon: "chart", label: "Dashboard Keuangan" }] },
-  { group: "MODUL 1 — PENAGIHAN IURAN", items: [{ id: "kalkulator", icon: "calc", label: "Kalkulator Iuran" }, { id: "rekonsiliasi", icon: "sync", label: "Rekonsiliasi SKP-PFK" }, { id: "tagihan", icon: "file", label: "Penagihan ke Kemenkeu" }] },
-  { group: "MODUL 2 — KLAIM & MANFAAT", items: [{ id: "dana", icon: "bank", label: "Dana & Rekening Koran" }, { id: "klaim", icon: "clip", label: "Monitoring Klaim JKK" }] },
-  { group: "MODUL 3 — KREDIT & PIUTANG", items: [{ id: "kredit", icon: "card", label: "Kredit & Piutang" }, { id: "imbaljasa", icon: "receipt", label: "Tagihan Imbal Jasa" }] },
-  { group: "MODUL 4 — PERPAJAKAN", items: [{ id: "pajak", icon: "receipt", label: "PPh 21 & Bukti Potong" }] },
-  { group: "MODUL 5 — DIPA & PENSIUN", items: [{ id: "dipa", icon: "trend", label: "Dashboard DIPA" }] },
-  { group: "MODUL 6 — REKON BPJS", items: [{ id: "bpjs", icon: "cross", label: "Rekonsiliasi BPJS" }] },
-  { group: "MODUL 7 — PELAPORAN", items: [{ id: "laporan", icon: "pen", label: "Generator Laporan" }] },
+  { section: "KEUANGAN", items: [
+    { id: "dashboard", icon: "chart", label: "Dashboard" },
+    { icon: "dollar", label: "Pengelolaan Iuran", children: [
+      { id: "kalkulator", label: "Kalkulator Iuran" },
+      { id: "rekonsiliasi", label: "Rekonsiliasi SKP-PFK" },
+      { id: "tagihan", label: "Penagihan ke Kemenkeu", disabled: true },
+    ]},
+    { icon: "bank", label: "Pembayaran Manfaat", children: [
+      { id: "dana", label: "Monitoring Dana" },
+      { id: "klaim", label: "Monitoring Klaim JKK" },
+    ]},
+    { icon: "shield", label: "Penagihan & UDW", children: [
+      { id: "kredit", label: "Monitoring UDW Punah" },
+      { id: "imbaljasa", label: "Tagihan Imbal Jasa" },
+    ]},
+    { id: "dipa", icon: "trend", label: "Monitoring Pagu DIPA" },
+    { id: "bpjs", icon: "cross", label: "Rekonsiliasi BPJS" },
+  ]},
+  { section: "PERPAJAKAN", items: [
+    { icon: "receipt", label: "Pengelolaan Pajak", children: [
+      { id: "pajak", label: "PPh 21 & Bukti Potong" },
+    ]},
+  ]},
+  { section: "PELAPORAN", items: [
+    { id: "laporan", icon: "pen", label: "Generator Laporan" },
+  ]},
 ];
 
 const PAGES = {
   dashboard: { title: "Dashboard Keuangan", component: DashboardKeuangan },
-  kalkulator: { title: "US-1.1 — Kalkulator Iuran Per Peserta", component: KalkulatorIuran },
-  rekonsiliasi: { title: "US-1.2 — Rekonsiliasi THT/Dapen vs SKP-PFK", component: RekonsIuran },
-  tagihan: { title: "US-1.3 — Penagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
-  dana: { title: "US-2.2 & 2.7 — Dashboard Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
-  klaim: { title: "US-2.3 — Monitoring Klaim JKK Perawatan", component: MonitoringKlaim },
-  kredit: { title: "US-3.x — Kredit, Piutang & UDW Punah", component: KreditPiutang },
+  kalkulator: { title: "Kalkulator Iuran Per Peserta", component: KalkulatorIuran },
+  rekonsiliasi: { title: "Rekonsiliasi THT/Dapen vs SKP-PFK", component: RekonsIuran },
+  tagihan: { title: "Penagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
+  dana: { title: "Dashboard Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
+  klaim: { title: "Monitoring Klaim JKK Perawatan", component: MonitoringKlaim },
+  kredit: { title: "Monitoring & Penarikan UDW Punah", component: KreditPiutang },
   imbaljasa: { title: "Tagihan Imbal Jasa Mitra Bayar", component: TagihanImbalJasa },
-  pajak: { title: "US-4.x — Perpajakan PPh 21", component: Perpajakan },
-  dipa: { title: "US-5.x — Dashboard DIPA & Pembayaran Pensiun", component: DashboardDIPA },
-  bpjs: { title: "US-6.x — Rekonsiliasi BPJS Kesehatan", component: RekonBPJS },
-  laporan: { title: "US-7.x — Pelaporan & Integrasi Sistem", component: ReportGenerator },
+  pajak: { title: "Perpajakan PPh 21", component: Perpajakan },
+  dipa: { title: "Monitoring Sisa Pagu DIPA TA 2026", component: DashboardDIPA },
+  bpjs: { title: "Rekonsiliasi Iuran BPJS Kesehatan", component: RekonBPJS },
+  laporan: { title: "Pelaporan & Integrasi Sistem", component: ReportGenerator },
 };
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [expandedMenus, setExpandedMenus] = useState(["Pengelolaan Iuran"]);
   const page = PAGES[activePage];
   const PageComp = page.component;
 
+  const toggleMenu = (label) => {
+    setExpandedMenus(prev => prev.includes(label) ? prev.filter(m => m !== label) : [...prev, label]);
+  };
+
+  // Auto-expand parent when child is active
+  const isChildActive = (children) => children?.some(c => c.id === activePage);
+
+  const renderIcon = (iconKey, size = 16, color) => {
+    const IconComp = ICON_MAP[iconKey];
+    return IconComp ? <IconComp size={size} color={color} /> : null;
+  };
+
   return (
     <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", height: "100vh", display: "flex", flexDirection: "column", background: COLORS.gray100, color: COLORS.gray900 }}>
+      {/* Header */}
       <div style={{ background: `linear-gradient(135deg, ${COLORS.navy} 0%, ${COLORS.blueDark} 100%)`, padding: "0 20px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: COLORS.white, fontSize: 20, cursor: "pointer", padding: 4 }}>☰</button>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: COLORS.white, fontSize: 20, cursor: "pointer", padding: 4 }}>
+            <Menu size={20} />
+          </button>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ width: 32, height: 32, borderRadius: 6, background: COLORS.accent, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: COLORS.navy }}>A</div>
-            <div><div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14, letterSpacing: 0.5 }}>YANDU <span style={{ color: COLORS.accent }}>NEXTGEN</span> ASABRI</div><div style={{ color: COLORS.gray400, fontSize: 10, letterSpacing: 1 }}>DIVISI KEUANGAN</div></div>
+            <div>
+              <div style={{ color: COLORS.white, fontWeight: 700, fontSize: 14, letterSpacing: 0.5 }}>YANDU <span style={{ color: COLORS.accent }}>NEXTGEN</span> ASABRI</div>
+              <div style={{ color: COLORS.gray400, fontSize: 10, letterSpacing: 1 }}>DIVISI KEUANGAN</div>
+            </div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 6, padding: "6px 14px", display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 12, color: COLORS.gray400 }}>Cari Peserta / NRP / NIP...</span></div>
+          <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 6, padding: "6px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+            <Search size={14} color={COLORS.gray400} />
+            <span style={{ fontSize: 12, color: COLORS.gray400 }}>Cari Peserta / NRP / NIP...</span>
+          </div>
           <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 6, padding: "6px 12px", fontSize: 12, color: COLORS.gray300 }}>ROLE: <strong style={{ color: COLORS.white }}>Super Administrator</strong></div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}><Bell size={18} color={COLORS.gray300} /><div style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.blue, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.white, fontSize: 12, fontWeight: 700 }}>WA</div></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Bell size={18} color={COLORS.gray300} />
+            <div style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.blue, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.white, fontSize: 12, fontWeight: 700 }}>WA</div>
+          </div>
         </div>
       </div>
+
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        {/* Sidebar */}
         {sidebarOpen && (
-          <div style={{ width: 250, background: COLORS.white, borderRight: `1px solid ${COLORS.gray200}`, overflowY: "auto", flexShrink: 0, padding: "8px 0" }}>
-            {MENU.map((g, gi) => (
-              <div key={gi} style={{ marginBottom: 4 }}>
-                <div style={{ padding: "10px 16px 4px", fontSize: 10, fontWeight: 700, color: COLORS.gray500, letterSpacing: 0.8, textTransform: "uppercase" }}>{g.group}</div>
-                {g.items.map(item => (
-                  <button key={item.id} onClick={() => setActivePage(item.id)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "8px 16px", border: "none", cursor: "pointer", fontSize: 13, textAlign: "left", background: activePage === item.id ? "#E3F2FD" : "transparent", color: activePage === item.id ? COLORS.blue : COLORS.gray700, fontWeight: activePage === item.id ? 600 : 400, borderRight: activePage === item.id ? `3px solid ${COLORS.blue}` : "3px solid transparent" }}>
-                    <span style={{ display: "flex" }}>{{"chart": <BarChart3 size={16} />, "calc": <Calculator size={16} />, "sync": <RefreshCw size={16} />, "file": <FileText size={16} />, "bank": <Building2 size={16} />, "clip": <ClipboardList size={16} />, "card": <CreditCard size={16} />, "receipt": <Receipt size={16} />, "trend": <TrendingDown size={16} />, "cross": <Cross size={16} />, "pen": <PenLine size={16} />}[item.icon] || item.icon}</span><span>{item.label}</span>
-                  </button>
-                ))}
+          <div style={{ width: 256, background: COLORS.white, borderRight: `1px solid ${COLORS.gray200}`, overflowY: "auto", flexShrink: 0 }}>
+            {MENU.map((section, si) => (
+              <div key={si} style={{ paddingTop: si === 0 ? 12 : 4, paddingBottom: 4 }}>
+                {/* Section Header */}
+                <div style={{ padding: "8px 20px 6px", fontSize: 10, fontWeight: 800, color: COLORS.gray400, letterSpacing: 1.2, textTransform: "uppercase" }}>
+                  {section.section}
+                </div>
+
+                {section.items.map((item, ii) => {
+                  // Standalone item (no children)
+                  if (!item.children) {
+                    const isActive = activePage === item.id;
+                    return (
+                      <button key={ii} onClick={() => setActivePage(item.id)} style={{
+                        display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 20px",
+                        border: "none", cursor: "pointer", fontSize: 13, textAlign: "left", transition: "all 0.15s",
+                        background: isActive ? "#E3F2FD" : "transparent",
+                        color: isActive ? COLORS.blue : COLORS.gray700,
+                        fontWeight: isActive ? 600 : 400,
+                        borderLeft: isActive ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+                      }}>
+                        <span style={{ display: "flex", opacity: isActive ? 1 : 0.6 }}>{renderIcon(item.icon, 16, isActive ? COLORS.blue : COLORS.gray500)}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  }
+
+                  // Parent with children (collapsible)
+                  const isExpanded = expandedMenus.includes(item.label) || isChildActive(item.children);
+                  const hasActiveChild = isChildActive(item.children);
+
+                  return (
+                    <div key={ii}>
+                      {/* Parent button */}
+                      <button onClick={() => toggleMenu(item.label)} style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%",
+                        padding: "9px 20px", border: "none", cursor: "pointer", fontSize: 13, textAlign: "left",
+                        background: "transparent", transition: "all 0.15s",
+                        color: hasActiveChild ? COLORS.blue : COLORS.gray700,
+                        fontWeight: hasActiveChild ? 600 : 500,
+                        borderLeft: "3px solid transparent",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ display: "flex", opacity: hasActiveChild ? 1 : 0.6 }}>{renderIcon(item.icon, 16, hasActiveChild ? COLORS.blue : COLORS.gray500)}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <ChevronDown size={14} color={COLORS.gray400} style={{ transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.2s" }} />
+                      </button>
+
+                      {/* Children */}
+                      {isExpanded && (
+                        <div style={{ overflow: "hidden" }}>
+                          {item.children.map((child, ci) => {
+                            const isActive = activePage === child.id;
+                            const isDisabled = child.disabled;
+                            return (
+                              <button key={ci} onClick={() => !isDisabled && setActivePage(child.id)} style={{
+                                display: "flex", alignItems: "center", gap: 8, width: "100%",
+                                padding: "7px 20px 7px 48px", border: "none",
+                                cursor: isDisabled ? "not-allowed" : "pointer",
+                                fontSize: 12.5, textAlign: "left", transition: "all 0.15s",
+                                background: isActive ? "#E3F2FD" : "transparent",
+                                color: isDisabled ? COLORS.gray400 : isActive ? COLORS.blue : COLORS.gray600,
+                                fontWeight: isActive ? 600 : 400,
+                                opacity: isDisabled ? 0.5 : 1,
+                                borderLeft: isActive ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+                              }}>
+                                <span style={{ width: 4, height: 4, borderRadius: "50%", background: isDisabled ? COLORS.gray300 : isActive ? COLORS.blue : COLORS.gray400, flexShrink: 0 }} />
+                                <span>{child.label}</span>
+                                {isDisabled && <span style={{ fontSize: 9, background: COLORS.gray200, color: COLORS.gray500, padding: "1px 6px", borderRadius: 3, marginLeft: "auto", fontWeight: 600 }}>SOON</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Section divider */}
+                {si < MENU.length - 1 && <div style={{ margin: "8px 20px", borderBottom: `1px solid ${COLORS.gray200}` }} />}
               </div>
             ))}
           </div>
         )}
+
+        {/* Content */}
         <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div>
-              <div style={{ fontSize: 11, color: COLORS.gray500, marginBottom: 2 }}>Beranda › Keuangan › {page.title.split("—")[0].trim()}</div>
+              <div style={{ fontSize: 11, color: COLORS.gray500, marginBottom: 2 }}>Beranda › Keuangan › {page.title}</div>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.gray900, margin: 0 }}>{page.title}</h2>
             </div>
-            <div style={{ background: COLORS.blueDark, color: COLORS.white, padding: "6px 14px", borderRadius: 6, fontSize: 12 }}>📅 Minggu, 06 Juli 2026</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Calendar size={14} color={COLORS.white} />
+              <span style={{ background: COLORS.blueDark, color: COLORS.white, padding: "6px 14px", borderRadius: 6, fontSize: 12 }}>Minggu, 06 Juli 2026</span>
+            </div>
           </div>
           <PageComp />
         </div>
