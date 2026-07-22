@@ -398,7 +398,7 @@ const KalkulatorIuran = () => {
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         {["rekap", "peserta", "tidak_lengkap"].map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{ padding: "8px 18px", borderRadius: 6, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", background: tab === t ? COLORS.blue : COLORS.gray200, color: tab === t ? COLORS.white : COLORS.gray700 }}>
+          <button key={t} disabled={t === "tidak_lengkap" || t === "peserta"} onClick={() => setTab(t)} style={{ padding: "8px 18px", borderRadius: 6, border: "none", fontSize: 13, fontWeight: 600, cursor: (t === "tidak_lengkap" || t === "peserta") ? "not-allowed" : "pointer", opacity: (t === "tidak_lengkap" || t === "peserta") ? 0.5 : 1, background: tab === t ? COLORS.blue : COLORS.gray200, color: tab === t ? COLORS.white : COLORS.gray700 }}>
             {t === "rekap" ? "Rekap per Satker & Golongan" : t === "peserta" ? "List per Nama Peserta" : "Data Tidak Lengkap (23)"}
           </button>
         ))}
@@ -1104,32 +1104,222 @@ const DashboardDana = () => {
 // ===== REMAINING PAGES (Perpajakan, KreditPiutang, DashboardDIPA, RekonBPJS, ReportGenerator) =====
 const Perpajakan = () => {
   const [filterSatker, setFilterSatker] = useState("Semua");
+  const [expandedSatker, setExpandedSatker] = useState(null);
+  const [uploadStep, setUploadStep] = useState(0); // 0=belum upload, 1=terunggah & tercocokkan, 2=terdistribusi
+  const [preview, setPreview] = useState(null);
+
   const allData = [
-    { nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", satker: "TNI", unor: "Kodam Jaya", bruto: 8500000, p17: 125000, ter: 127500 },
-    { nrp: "198805678", nama: "Purn. Lettu Budi K.", satker: "TNI", unor: "Mabes TNI", bruto: 6200000, p17: 62000, ter: 62000 },
-    { nrp: "199012345", nama: "Purn. AKP Citra D.", satker: "POLRI", unor: "Polda Metro Jaya", bruto: 12800000, p17: 450000, ter: 460800 },
-    { nrp: "199205678", nama: "Purn. Penata Sri W.", satker: "ASN Kemenhan", unor: "Ditjen Strahan", bruto: 7400000, p17: 95000, ter: 96200 },
-    { nrp: "198604321", nama: "Purn. Bripka Anwar I.", satker: "POLRI", unor: "Polda Jabar", bruto: 9200000, p17: 215000, ter: 220800 },
-    { nrp: "197506789", nama: "Purn. Pembina Agus S.", satker: "PPPK", unor: "Setjen Kemhan", bruto: 5800000, p17: 48000, ter: 48000 },
+    { nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", satker: "TNI", unor: "Kodam Jaya", bruto: 8500000, p17: 125000, ter: 127500, npwp: "09.123.456.7-011.000", email: "a.rifai@mail.com", matched: true },
+    { nrp: "198805678", nama: "Purn. Lettu Budi K.", satker: "TNI", unor: "Mabes TNI", bruto: 6200000, p17: 62000, ter: 62000, npwp: "—", email: "budi.k@mail.com", matched: false },
+    { nrp: "199012345", nama: "Purn. AKP Citra D.", satker: "POLRI", unor: "Polda Metro Jaya", bruto: 12800000, p17: 450000, ter: 460800, npwp: "08.234.567.8-021.000", email: "citra.d@mail.com", matched: true },
+    { nrp: "199205678", nama: "Purn. Penata Sri W.", satker: "ASN Kemenhan", unor: "Ditjen Strahan", bruto: 7400000, p17: 95000, ter: 96200, npwp: "07.345.678.9-031.000", email: "sri.w@mail.com", matched: true },
+    { nrp: "198604321", nama: "Purn. Bripka Anwar I.", satker: "POLRI", unor: "Polda Jabar", bruto: 9200000, p17: 215000, ter: 220800, npwp: "06.456.789.0-041.000", email: "anwar.i@mail.com", matched: true },
+    { nrp: "197506789", nama: "Purn. Pembina Agus S.", satker: "PPPK", unor: "Setjen Kemhan", bruto: 5800000, p17: 48000, ter: 48000, npwp: "05.567.890.1-051.000", email: "agus.s@mail.com", matched: true },
   ];
-  const filtered = filterSatker === "Semua" ? allData : allData.filter(d => d.satker === filterSatker);
   const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
+  const satkerColor = s => s === "TNI" ? "green" : s === "POLRI" ? "blue" : s === "PPPK" ? "yellow" : "orange";
+
+  // ===== Agregasi TER vs Pasal 17 PER SATKER =====
+  const satkerList = ["TNI", "POLRI", "ASN Kemenhan", "PPPK"];
+  const satkerAgg = satkerList.map(sk => {
+    const rows = allData.filter(d => d.satker === sk);
+    return {
+      satker: sk,
+      count: rows.length,
+      bruto: rows.reduce((a, d) => a + d.bruto, 0),
+      p17: rows.reduce((a, d) => a + d.p17, 0),
+      ter: rows.reduce((a, d) => a + d.ter, 0),
+      rows,
+    };
+  }).filter(s => s.count > 0);
+  const aggFiltered = filterSatker === "Semua" ? satkerAgg : satkerAgg.filter(s => s.satker === filterSatker);
+  const totalRow = aggFiltered.reduce((a, s) => ({ count: a.count + s.count, bruto: a.bruto + s.bruto, p17: a.p17 + s.p17, ter: a.ter + s.ter }), { count: 0, bruto: 0, p17: 0, ter: 0 });
+
+  // ===== Distribusi Bukti Potong (dari Coretax) =====
+  const totalBukpot = allData.length;
+  const cocok = allData.filter(d => d.matched);
+  const tidakCocok = allData.filter(d => !d.matched);
+  const bukpotStatus = d => {
+    if (!d.matched) return { label: "NIK/NPWP tidak cocok", color: "red" };
+    if (uploadStep < 2) return { label: "Siap Kirim", color: "yellow" };
+    // simulasi: peserta pertama sudah membuka portal / mengunduh
+    return d.nrp === "198701234" ? { label: "Terunduh", color: "green" } : { label: "Terkirim", color: "blue" };
+  };
+
   return (
     <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
         <StatCard icon={<Calculator size={IC} />} label="PPh 21 Terhitung" value="128.450 WP" sub="Periode Juli 2026 (TER)" color={COLORS.blue} />
         <StatCard icon={<Receipt size={IC} />} label="Bukti Potong A2" value="128.320" sub="130 tertunda" color={COLORS.green} />
         <StatCard icon={<AlertTriangle size={IC} />} label="NIK/NPWP Bermasalah" value="347 Peserta" color={COLORS.red} />
       </div>
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-        <SectionTitle>Perbandingan TER vs Pasal 17</SectionTitle>
+
+      {/* ===== PERBANDINGAN TER vs PASAL 17 — PER SATKER ===== */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+        <SectionTitle action={
+          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Perbandingan TER vs Pasal 17", subtitle: "Rekap per Satker", type: "table", fileName: "Perbandingan_TER_vs_Pasal17_per_Satker.xlsx", content: { columns: ["Satker", "Jumlah WP", "Bruto", "PPh Pasal 17", "PPh 21 TER", "Selisih"], rows: aggFiltered.map(s => [s.satker, s.count, fmt(s.bruto), fmt(s.p17), fmt(s.ter), fmt(s.ter - s.p17)]), totalRows: aggFiltered.length } })}>Ekspor Rekap</Btn>
+        }>Perbandingan TER vs Pasal 17 per Satker</SectionTitle>
         <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
-          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
+          <Select label="Satker" value={filterSatker} onChange={v => { setFilterSatker(v); setExpandedSatker(null); }} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
         </div>
-        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allData.length}</div>
-        {filtered.length === 0 ? <NoData /> : (
-          <Table columns={["NRP", "Nama", "Satker", "Unor", "Penghasilan Bruto", "PPh Pasal 17", "PPh 21 TER", "Selisih"]}
-            data={filtered.map(d => [d.nrp, d.nama, <Badge color={d.satker === "TNI" ? "green" : d.satker === "POLRI" ? "blue" : d.satker === "PPPK" ? "yellow" : "orange"}>{d.satker}</Badge>, <span style={{ fontSize: 12, color: COLORS.gray600 }}>{d.unor || "—"}</span>, fmt(d.bruto), fmt(d.p17), fmt(d.ter), <span style={{ color: d.ter - d.p17 === 0 ? COLORS.green : COLORS.red }}>{fmt(Math.abs(d.ter - d.p17))}</span>])} />
+        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 10 }}>Klik baris satker untuk melihat rincian per peserta. Selisih = PPh 21 TER − PPh Pasal 17.</div>
+        {aggFiltered.length === 0 ? <NoData /> : (
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["Satker", "Jumlah WP", "Penghasilan Bruto", "PPh Pasal 17", "PPh 21 TER", "Selisih", ""].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: i >= 1 && i <= 5 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {aggFiltered.flatMap((s) => {
+                  const selisih = s.ter - s.p17;
+                  const open = expandedSatker === s.satker;
+                  const rows = [
+                    <tr key={s.satker} onClick={() => setExpandedSatker(open ? null : s.satker)} style={{ borderBottom: `1px solid ${COLORS.gray200}`, cursor: "pointer", background: open ? COLORS.gray50 : "transparent" }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = open ? COLORS.gray50 : "transparent"}>
+                      <td style={{ padding: "10px 14px" }}><div style={{ display: "flex", alignItems: "center", gap: 8 }}>{open ? <ChevronDown size={14} color={COLORS.gray500} /> : <ChevronRight size={14} color={COLORS.gray500} />}<Badge color={satkerColor(s.satker)}>{s.satker}</Badge></div></td>
+                      <td style={{ padding: "10px 14px", textAlign: "right" }}>{s.count} WP</td>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmt(s.bruto)}</td>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmt(s.p17)}</td>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(s.ter)}</td>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", color: selisih === 0 ? COLORS.gray500 : selisih > 0 ? COLORS.red : COLORS.green, fontWeight: 600 }}>{selisih > 0 ? "+" : ""}{fmt(selisih)}</td>
+                      <td style={{ padding: "10px 14px", textAlign: "right" }}>{selisih === 0 ? <Badge color="gray">Setara</Badge> : selisih > 0 ? <Badge color="red">TER lebih tinggi</Badge> : <Badge color="green">TER lebih rendah</Badge>}</td>
+                    </tr>
+                  ];
+                  if (open) s.rows.forEach((d, j) => {
+                    const sel = d.ter - d.p17;
+                    rows.push(
+                      <tr key={s.satker + "-" + j} style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.gray50, fontSize: 12 }}>
+                        <td style={{ padding: "8px 14px 8px 40px", color: COLORS.gray800 }}><div style={{ fontWeight: 600 }}>{d.nama}</div><div style={{ fontSize: 11, color: COLORS.gray400 }}>NRP {d.nrp} · {d.unor}</div></td>
+                        <td style={{ padding: "8px 14px", textAlign: "right", color: COLORS.gray400 }}>1 WP</td>
+                        <td style={{ padding: "8px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.gray600 }}>{fmt(d.bruto)}</td>
+                        <td style={{ padding: "8px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.gray600 }}>{fmt(d.p17)}</td>
+                        <td style={{ padding: "8px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.gray600 }}>{fmt(d.ter)}</td>
+                        <td style={{ padding: "8px 14px", textAlign: "right", fontFamily: "monospace", color: sel === 0 ? COLORS.gray400 : sel > 0 ? COLORS.red : COLORS.green }}>{sel > 0 ? "+" : ""}{fmt(sel)}</td>
+                        <td />
+                      </tr>
+                    );
+                  });
+                  return rows;
+                })}
+                <tr style={{ background: COLORS.gray100, fontWeight: 700 }}>
+                  <td style={{ padding: "10px 14px" }}>TOTAL {filterSatker !== "Semua" ? `— ${filterSatker}` : ""}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right" }}>{totalRow.count} WP</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmt(totalRow.bruto)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmt(totalRow.p17)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmt(totalRow.ter)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", color: totalRow.ter - totalRow.p17 > 0 ? COLORS.red : COLORS.green }}>{totalRow.ter - totalRow.p17 > 0 ? "+" : ""}{fmt(totalRow.ter - totalRow.p17)}</td>
+                  <td />
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ===== UPLOAD & DISTRIBUSI BUKTI POTONG (DARI CORETAX) ===== */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+        <SectionTitle action={uploadStep > 0 && <Btn variant="ghost" size="sm" onClick={() => setUploadStep(0)}><RefreshCw size={13} /> Ulangi Upload</Btn>}>Bukti Potong PPh 21 — Upload & Distribusi ke Peserta</SectionTitle>
+
+        {/* Stepper */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
+          {[{ n: 1, t: "Unggah dari Coretax" }, { n: 2, t: "Pencocokan NPWP/NIK" }, { n: 3, t: "Distribusi ke Peserta" }].map((st, i) => {
+            const done = uploadStep >= st.n;
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 20, background: done ? "#E3F2FD" : COLORS.gray100, color: done ? COLORS.blue : COLORS.gray500, fontSize: 12, fontWeight: 600 }}>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: done ? COLORS.blue : COLORS.gray300, color: COLORS.white, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>{done ? <CheckCircle2 size={13} /> : st.n}</span>
+                {st.t}
+              </div>
+            );
+          })}
+        </div>
+
+        {uploadStep === 0 && (
+          <>
+            <div style={{ border: `2px dashed ${COLORS.gray300}`, borderRadius: 10, padding: "36px 24px", textAlign: "center", background: COLORS.gray50 }}>
+              <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#E3F2FD", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}><FileUp size={24} color={COLORS.blue} /></div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.gray900 }}>Unggah berkas bukti potong dari Coretax</div>
+              <div style={{ fontSize: 13, color: COLORS.gray500, marginTop: 6, maxWidth: 560, margin: "6px auto 0" }}>Sumber bukti potong hanya dari Coretax DJP. Unggah paket massal (ZIP berisi PDF per peserta) beserta berkas manifes XML/CSV yang memuat NPWP/NIK setiap peserta untuk pencocokan otomatis.</div>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 18, flexWrap: "wrap" }}>
+                <Btn onClick={() => setUploadStep(1)}><Upload size={14} /> Pilih Berkas Coretax</Btn>
+                <Btn variant="outline" onClick={() => setUploadStep(1)}>Tarik dari Coretax (API)</Btn>
+              </div>
+              <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 14 }}>Format didukung: ZIP (PDF 1721-A2), XML/CSV manifes • Maks. 200 MB</div>
+            </div>
+            {/* <div style={{ marginTop: 16, background: COLORS.gray50, border: `1px solid ${COLORS.gray200}`, borderRadius: 8, padding: "14px 18px", fontSize: 13, color: COLORS.gray700 }}>
+              <div style={{ fontWeight: 700, color: COLORS.gray800, marginBottom: 8 }}>Alur ideal agar tiap bukti potong sampai ke peserta yang benar</div>
+              <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.9 }}>
+                <li><strong>Kunci pencocokan = NPWP/NIK.</strong> Sistem memetakan tiap PDF bukpot ke satu peserta lewat NPWP/NIK pada manifes — bukan nama, agar tidak tertukar.</li>
+                <li><strong>Peserta cocok → Portal Peserta + Email.</strong> Bukpot terbit di akun masing-masing peserta (unduh mandiri) dan notifikasi tautan aman dikirim ke email. Tiap peserta hanya melihat miliknya sendiri.</li>
+                <li><strong>Peserta tidak cocok → antrian perbaikan.</strong> NPWP/NIK bermasalah ditahan, tidak dikirim, sampai data dibetulkan agar tak salah kirim.</li>
+                <li><strong>Lacak status per peserta:</strong> Terkirim → Terunduh, sehingga bisa dibuktikan bukpot benar-benar diterima.</li>
+              </ol>
+            </div> */}
+          </>
+        )}
+
+        {uploadStep >= 1 && (
+          <>
+            {/* Ringkasan pencocokan */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+              <div style={{ flex: 1, minWidth: 160, background: COLORS.gray50, border: `1px solid ${COLORS.gray200}`, borderRadius: 8, padding: "12px 16px" }}>
+                <div style={{ fontSize: 12, color: COLORS.gray500 }}>Bukpot terbaca</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.gray900 }}>{totalBukpot}</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 160, background: COLORS.greenLight, border: `1px solid ${COLORS.green}22`, borderRadius: 8, padding: "12px 16px" }}>
+                <div style={{ fontSize: 12, color: COLORS.green }}>Cocok dengan peserta</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.green }}>{cocok.length}</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 160, background: COLORS.redLight, border: `1px solid ${COLORS.red}22`, borderRadius: 8, padding: "12px 16px" }}>
+                <div style={{ fontSize: 12, color: COLORS.red }}>NPWP/NIK tidak cocok</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.red }}>{tidakCocok.length}</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 10 }}>
+              <div style={{ fontSize: 13, color: COLORS.gray600 }}>
+                {uploadStep < 2
+                  ? <>Kanal distribusi: <strong>Portal Peserta + Email</strong>. Hanya bukpot yang cocok yang dapat dikirim.</>
+                  : <><CheckCircle2 size={14} color={COLORS.green} style={{ verticalAlign: "middle" }} /> <strong>{cocok.length} bukpot</strong> telah didistribusikan ke Portal Peserta & email masing-masing.</>}
+              </div>
+              {uploadStep < 2
+                ? <Btn onClick={() => setUploadStep(2)}><Mail size={14} /> Kirim ke {cocok.length} Peserta</Btn>
+                : <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Log Distribusi Bukti Potong", subtitle: "Portal Peserta + Email", type: "table", fileName: "Log_Distribusi_Bukpot_PPh21.xlsx", content: { columns: ["Nama", "NPWP", "Satker", "Kanal", "Status"], rows: cocok.map(d => [d.nama, d.npwp, d.satker, "Portal + Email", bukpotStatus(d).label]), totalRows: cocok.length } })}>Unduh Log Distribusi</Btn>}
+            </div>
+
+            {/* Tabel distribusi per peserta */}
+            <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead><tr style={{ background: COLORS.gray100 }}>
+                  {["Nama Peserta", "NPWP", "Satker", "Kanal", "Status Distribusi", "Aksi"].map((c, i) => (
+                    <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                  ))}
+                </tr></thead>
+                <tbody>
+                  {allData.map((d, i) => {
+                    const st = bukpotStatus(d);
+                    return (
+                      <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <td style={{ padding: "10px 14px" }}><div style={{ fontWeight: 600, color: COLORS.gray800 }}>{d.nama}</div><div style={{ fontSize: 11, color: COLORS.gray400 }}>NRP {d.nrp}</div></td>
+                        <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 12, color: d.matched ? COLORS.gray700 : COLORS.red }}>{d.npwp}</td>
+                        <td style={{ padding: "10px 14px" }}><Badge color={satkerColor(d.satker)}>{d.satker}</Badge></td>
+                        <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray600 }}>{d.matched ? "Portal + Email" : "—"}</td>
+                        <td style={{ padding: "10px 14px" }}><Badge color={st.color}>{st.label}</Badge></td>
+                        <td style={{ padding: "10px 14px" }}>
+                          {d.matched
+                            ? <Btn size="sm" variant="ghost" onClick={() => setPreview({ title: "Preview Bukti Potong 1721-A2", subtitle: `${d.nama} — ${d.satker}`, type: "table", fileName: `Bukpot_A2_${d.nrp}.pdf`, content: { columns: ["Uraian", "Nilai"], rows: [["NPWP", d.npwp], ["Penghasilan Bruto", fmt(d.bruto)], ["PPh 21 Dipotong (TER)", fmt(d.ter)], ["Masa Pajak", "Juli 2026"], ["Pemotong", "PT ASABRI (Persero)"]], totalRows: 5 } })}><Eye size={13} /> Lihat</Btn>
+                            : <Btn size="sm" variant="outline" onClick={() => setPreview({ title: "Perbaikan Data NPWP/NIK", subtitle: `${d.nama} — bukpot ditahan`, type: "table", fileName: "Antrian_Perbaikan.xlsx", content: { columns: ["Field", "Nilai"], rows: [["Nama", d.nama], ["NRP", d.nrp], ["NPWP", "Tidak ditemukan / tidak valid"], ["Tindakan", "Padankan NPWP dari Coretax lalu unggah ulang"]], totalRows: 4 } })}><PenLine size={13} /> Perbaiki</Btn>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ marginTop: 10, fontSize: 12, color: COLORS.gray500 }}>Peserta dengan NPWP/NIK tidak cocok ditahan otomatis dan tidak dikirim hingga datanya dibetulkan — mencegah bukti potong salah kirim.</div>
+          </>
         )}
       </div>
     </div>
@@ -1766,22 +1956,43 @@ const ReportGenerator = () => {
 // ===== TAGIHAN IMBAL JASA MITRA BAYAR =====
 const TagihanImbalJasa = () => {
   const [filterMitra, setFilterMitra] = useState("Semua");
+  const [filterProgram, setFilterProgram] = useState("Semua");
   const [searchTagihan, setSearchTagihan] = useState("");
   const [detailTagihan, setDetailTagihan] = useState(null);
   const [preview, setPreview] = useState(null);
 
   const allTagihan = [
-    { no: "IJ-2606-001", mitra: "BRI", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "15 Jun 2026", ppn: 128000000, netto: 1152000000, totalTagihan: 1280000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
-    { no: "IJ-2606-002", mitra: "BRI", jenis: "Autentikasi Digital", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "14 Jun 2026", ppn: 14000000, netto: 126000000, totalTagihan: 140000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
-    { no: "IJ-2606-003", mitra: "BNI", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "23 Jun 2026", ppn: 98000000, netto: 882000000, totalTagihan: 980000000, hariTerlambat: 6, denda: 5880000, status: "Terlambat" },
-    { no: "IJ-2606-004", mitra: "Mandiri", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "16 Jun 2026", ppn: 156000000, netto: 1404000000, totalTagihan: 1560000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
-    { no: "IJ-2606-005", mitra: "BTN", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: null, ppn: 22000000, netto: 198000000, totalTagihan: 220000000, hariTerlambat: 19, denda: 6820000, status: "Belum Dibayar" },
-    { no: "IJ-2606-006", mitra: "Mandiri", jenis: "Autentikasi Digital", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "20 Jun 2026", ppn: 8000000, netto: 72000000, totalTagihan: 80000000, hariTerlambat: 3, denda: 1720000, status: "Terlambat" },
+    { no: "IJ-2606-001", mitra: "BRI", program: "THT/Pensiun", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "15 Jun 2026", ppn: 128000000, netto: 1152000000, totalTagihan: 1280000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
+    { no: "IJ-2606-002", mitra: "BRI", program: "JKK", jenis: "Autentikasi Digital", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "14 Jun 2026", ppn: 14000000, netto: 126000000, totalTagihan: 140000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
+    { no: "IJ-2606-003", mitra: "BNI", program: "THT/Pensiun", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "23 Jun 2026", ppn: 98000000, netto: 882000000, totalTagihan: 980000000, hariTerlambat: 6, denda: 5880000, status: "Terlambat" },
+    { no: "IJ-2606-004", mitra: "Mandiri", program: "JKm", jenis: "Penyaluran Santunan", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "16 Jun 2026", ppn: 156000000, netto: 1404000000, totalTagihan: 1560000000, hariTerlambat: 0, denda: 0, status: "Dibayar" },
+    { no: "IJ-2606-005", mitra: "BTN", program: "THT/Pensiun", jenis: "Penyaluran Pensiun", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: null, ppn: 22000000, netto: 198000000, totalTagihan: 220000000, hariTerlambat: 19, denda: 6820000, status: "Belum Dibayar" },
+    { no: "IJ-2606-006", mitra: "Mandiri", program: "JKK", jenis: "Autentikasi Digital", periode: "Jun 2026", tglTerbit: "02 Jun 2026", jatuhTempo: "17 Jun 2026", tglBayar: "20 Jun 2026", ppn: 8000000, netto: 72000000, totalTagihan: 80000000, hariTerlambat: 3, denda: 1720000, status: "Terlambat" },
   ];
 
   const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
+  const programColor = p => p === "THT/Pensiun" ? "blue" : p === "JKK" ? "orange" : "green";
+  const tagihDenda = (t) => setPreview({
+    title: "Surat Tagihan Denda Keterlambatan",
+    subtitle: `${t.mitra} — ${t.no} • ${t.hariTerlambat} hari terlambat`,
+    type: "surat",
+    fileName: `Tagihan_Denda_${t.no}.pdf`,
+    content: {
+      noSurat: `${t.no.replace(/^IJ/, "DENDA")}`,
+      tujuan: `Mitra Bayar — ${t.mitra}`,
+      periode: `${t.jenis} (${t.program}) — ${t.periode}`,
+      cutoff: t.jatuhTempo,
+      tanggal: "07 Jul 2026",
+      items: [
+        { jenis: "Nilai Netto Tagihan", peserta: "—", nominal: fmt(t.netto) },
+        { jenis: `Hari keterlambatan (jatuh tempo ${t.jatuhTempo})`, peserta: `${t.hariTerlambat} hari`, nominal: "—" },
+        { jenis: "Denda (Netto × 5,75% × hari ÷ 365)", peserta: "—", nominal: fmt(t.denda) },
+      ],
+    },
+  });
   const filtered = allTagihan.filter(t => {
     if (filterMitra !== "Semua" && t.mitra !== filterMitra) return false;
+    if (filterProgram !== "Semua" && t.program !== filterProgram) return false;
     if (searchTagihan && !t.no.toLowerCase().includes(searchTagihan.toLowerCase()) && !t.mitra.toLowerCase().includes(searchTagihan.toLowerCase())) return false;
     return true;
   });
@@ -1819,6 +2030,7 @@ const TagihanImbalJasa = () => {
                   <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Informasi Tagihan</div>
                   {[
                     ["Mitra bayar", t.mitra],
+                    ["Program", t.program],
                     ["Jenis imbal jasa", t.jenis],
                     ["Periode", t.periode],
                     ["Tanggal terbit", t.tglTerbit],
@@ -1883,7 +2095,7 @@ const TagihanImbalJasa = () => {
           <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 4 }}>Daftar lengkap tagihan imbal jasa per mitra bayar, termasuk keterlambatan dan denda yang dikenakan</div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Tagihan Imbal Jasa", subtitle: "Data seluruh tagihan imbal jasa", type: "table", fileName: "Tagihan_Imbal_Jasa.xlsx", content: { columns: ["No.", "Mitra", "Jenis", "Periode", "Total Tagihan", "Status"], rows: allTagihan.slice(0,5).map(t => [t.no, t.mitra, t.jenis, t.periode, fmt(t.totalTagihan), t.status]), totalRows: allTagihan.length } })}>Ekspor Excel</Btn>
+          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Tagihan Imbal Jasa", subtitle: "Data seluruh tagihan imbal jasa", type: "table", fileName: "Tagihan_Imbal_Jasa.xlsx", content: { columns: ["No.", "Mitra", "Program", "Jenis", "Periode", "Total Tagihan", "Status"], rows: allTagihan.slice(0,5).map(t => [t.no, t.mitra, t.program, t.jenis, t.periode, fmt(t.totalTagihan), t.status]), totalRows: allTagihan.length } })}>Ekspor Excel</Btn>
           <Btn>Terbitkan & Kirim ke Mitra</Btn>
         </div>
       </div>
@@ -1899,6 +2111,7 @@ const TagihanImbalJasa = () => {
         <SectionTitle action={<span style={{ fontSize: 12, color: COLORS.gray500 }}>Termasuk hari terlambat & denda otomatis</span>}>Daftar Tagihan Imbal Jasa</SectionTitle>
         <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
           <Select label="Mitra Bayar" value={filterMitra} onChange={setFilterMitra} options={["Semua", "BRI", "BNI", "Mandiri", "BTN"]} minW={140} />
+          <Select label="Program" value={filterProgram} onChange={setFilterProgram} options={["Semua", "THT/Pensiun", "JKK", "JKm"]} minW={140} />
           <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari</label><SearchInput value={searchTagihan} onChange={setSearchTagihan} placeholder="Cari no. tagihan atau mitra bayar..." minW={240} /></div>
         </div>
         <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allTagihan.length} tagihan</div>
@@ -1906,7 +2119,7 @@ const TagihanImbalJasa = () => {
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead><tr style={{ background: COLORS.gray100 }}>
-                {["No. Tagihan", "Mitra Bayar", "Jenis Imbal Jasa", "Periode", "Tgl. Terbit", "Jatuh Tempo", "Tgl. Dibayar", "Status", ""].map((c, i) => (
+                {["No. Tagihan", "Mitra Bayar", "Program", "Jenis Imbal Jasa", "Periode", "Tgl. Terbit", "Jatuh Tempo", "Tgl. Dibayar", "Status", ""].map((c, i) => (
                   <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
                 ))}
               </tr></thead>
@@ -1916,18 +2129,200 @@ const TagihanImbalJasa = () => {
                   onMouseLeave={e => e.currentTarget.style.background = t.status === "Belum Dibayar" ? COLORS.redLight : t.status === "Terlambat" ? COLORS.yellowLight : "transparent"}>
                   <td style={{ padding: "10px 14px", fontFamily: "monospace", color: COLORS.blue, fontWeight: 500 }}>{t.no}</td>
                   <td style={{ padding: "10px 14px", fontWeight: 600 }}>{t.mitra}</td>
+                  <td style={{ padding: "10px 14px" }}><Badge color={programColor(t.program)}>{t.program}</Badge></td>
                   <td style={{ padding: "10px 14px" }}>{t.jenis}</td>
                   <td style={{ padding: "10px 14px" }}>{t.periode}</td>
                   <td style={{ padding: "10px 14px" }}>{t.tglTerbit}</td>
                   <td style={{ padding: "10px 14px" }}>{t.jatuhTempo}</td>
                   <td style={{ padding: "10px 14px" }}>{t.tglBayar || <span style={{ color: COLORS.gray400 }}>—</span>}</td>
                   <td style={{ padding: "10px 14px" }}><Badge color={t.status === "Dibayar" ? "green" : t.status === "Terlambat" ? "orange" : "red"}>{t.status}</Badge></td>
-                  <td style={{ padding: "10px 14px" }}><Btn size="sm" variant="outline" onClick={() => setDetailTagihan(t)}>Detail</Btn></td>
+                  <td style={{ padding: "10px 14px" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <Btn size="sm" variant="outline" onClick={() => setDetailTagihan(t)}>Detail</Btn>
+                      {t.hariTerlambat > 0 && <Btn size="sm" variant="danger" onClick={() => tagihDenda(t)}><Bell size={13} /> Tagih Denda</Btn>}
+                    </div>
+                  </td>
                 </tr>
               ))}</tbody>
             </table>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+// ===== DAFTAR DAPEM & PEMBAYARAN PENSIUN (per MAK, terhubung Pagu DIPA) =====
+const PembayaranPensiun = () => {
+  const [tab, setTab] = useState("dapem"); // dapem | nondapem
+  const [filterSatker, setFilterSatker] = useState("Semua");
+  const [selected, setSelected] = useState({});
+  const [preview, setPreview] = useState(null);
+  const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
+  const satkerColor = s => s === "TNI" ? "green" : s === "POLRI" ? "blue" : s === "PPPK" ? "yellow" : "orange";
+
+  // ==== DAPEM (PENSIUN) — data peserta per MAK ====
+  const dapemRows = [
+    { id: "D1", nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", satker: "TNI", unor: "Kodam Jaya", jenis: "Dapem Induk", mak: "511111", makNama: "Belanja Pensiun Pokok", nominal: 4850000 },
+    { id: "D2", nrp: "198805678", nama: "Purn. Lettu Budi K.", satker: "TNI", unor: "Mabes TNI", jenis: "Dapem Induk", mak: "511111", makNama: "Belanja Pensiun Pokok", nominal: 3200000 },
+    { id: "D3", nrp: "199012345", nama: "Purn. AKP Citra D.", satker: "POLRI", unor: "Polda Metro Jaya", jenis: "Dapem Induk", mak: "511111", makNama: "Belanja Pensiun Pokok", nominal: 5100000 },
+    { id: "D4", nrp: "198604321", nama: "Ny. Ratna S. (Warakawuri)", satker: "POLRI", unor: "Polda Jabar", jenis: "Dapem Induk", mak: "511119", makNama: "Belanja Tunjangan Keluarga", nominal: 1250000 },
+    { id: "D5", nrp: "199205678", nama: "Purn. Penata Sri W.", satker: "ASN Kemenhan", unor: "Ditjen Strahan", jenis: "Dapem Induk", mak: "511121", makNama: "Belanja Tunjangan Beras", nominal: 720000 },
+    { id: "D6", nrp: "197506789", nama: "Purn. Serma Agus S.", satker: "TNI", unor: "Kodam V/Brawijaya", jenis: "Dapem Susulan", mak: "511112", makNama: "Belanja Pensiun Susulan", nominal: 6400000 },
+    { id: "D7", nrp: "196904111", nama: "Purn. Kompol Hadi P.", satker: "POLRI", unor: "Polda Jateng", jenis: "Dapem Susulan", mak: "511112", makNama: "Belanja Pensiun Susulan", nominal: 3900000 },
+  ];
+
+  // ==== NON-DAPEM (KLAIM) — data klaim per MAK ====
+  const klaimRows = [
+    { id: "K1", nrp: "KLM/2026/07/018", nama: "Purn. Kapten Dedi M.", satker: "TNI", unor: "Kodam Jaya", jenis: "Nilai Tunai THT", mak: "594211", makNama: "Belanja Klaim THT", nominal: 42500000, status: "Terverifikasi" },
+    { id: "K2", nrp: "KLM/2026/07/021", nama: "Ny. Sulastri (Ahli Waris)", satker: "POLRI", unor: "Polda Metro Jaya", jenis: "Santunan JKm", mak: "594213", makNama: "Belanja Klaim JKm", nominal: 85000000, status: "Terverifikasi" },
+    { id: "K3", nrp: "KLM/2026/07/025", nama: "Serda Bima Prakoso", satker: "TNI", unor: "Lanud Halim", jenis: "Santunan JKK", mak: "594212", makNama: "Belanja Klaim JKK", nominal: 18500000, status: "Menunggu Verifikasi" },
+    { id: "K4", nrp: "KLM/2026/07/029", nama: "Purn. AKBP Rudi H.", satker: "POLRI", unor: "Polda Jabar", jenis: "Nilai Tunai THT", mak: "594211", makNama: "Belanja Klaim THT", nominal: 56000000, status: "Terverifikasi" },
+    { id: "K5", nrp: "KLM/2026/07/033", nama: "Purn. Pembina Yanti K.", satker: "ASN Kemenhan", unor: "Setjen Kemhan", jenis: "Biaya Pemakaman", mak: "594214", makNama: "Belanja Klaim Pemakaman", nominal: 12000000, status: "Terverifikasi" },
+  ];
+
+  const isDapem = tab === "dapem";
+  const curAll = isDapem ? dapemRows : klaimRows;
+  const curRows = filterSatker === "Semua" ? curAll : curAll.filter(r => r.satker === filterSatker);
+  const billable = r => isDapem || r.status === "Terverifikasi"; // klaim harus terverifikasi
+
+  // Kelompokkan per MAK
+  const groups = [];
+  curRows.forEach(r => {
+    let g = groups.find(x => x.mak === r.mak);
+    if (!g) { g = { mak: r.mak, makNama: r.makNama, rows: [], total: 0 }; groups.push(g); }
+    g.rows.push(r); g.total += r.nominal;
+  });
+
+  // Seleksi
+  const toggleRow = id => setSelected(s => ({ ...s, [id]: !s[id] }));
+  const selectedRows = curRows.filter(r => selected[r.id] && billable(r));
+  const selTotal = selectedRows.reduce((a, r) => a + r.nominal, 0);
+  const allBillable = curRows.filter(billable);
+  const allSelected = allBillable.length > 0 && allBillable.every(r => selected[r.id]);
+  const toggleAll = () => {
+    setSelected(s => { const n = { ...s }; allBillable.forEach(r => { n[r.id] = !allSelected; }); return n; });
+  };
+  const switchTab = t => { setTab(t); setSelected({}); setFilterSatker("Semua"); };
+
+  // Ringkasan Pagu DIPA (sumber: Monitoring Pagu DIPA — dalam juta)
+  const paguRef = isDapem
+    ? { label: "Dapem Induk + Susulan", pagu: 5370, realisasi: 3595 }
+    : { label: "Non-Dapem (Klaim/Harian)", pagu: 360, realisasi: 288 };
+  const sisaPaguM = paguRef.pagu - paguRef.realisasi;
+
+  const totalDapem = dapemRows.reduce((a, r) => a + r.nominal, 0);
+  const totalKlaim = klaimRows.reduce((a, r) => a + r.nominal, 0);
+
+  const buatTagihan = () => {
+    if (!selectedRows.length) return;
+    const byMak = {};
+    selectedRows.forEach(r => { (byMak[r.mak] = byMak[r.mak] || { makNama: r.makNama, mak: r.mak, count: 0, sum: 0 }); byMak[r.mak].count++; byMak[r.mak].sum += r.nominal; });
+    const items = Object.values(byMak).map(g => ({ jenis: `${g.makNama} (MAK ${g.mak})`, peserta: g.count.toString(), nominal: fmt(g.sum) }));
+    setPreview({
+      title: isDapem ? "Buat Tagihan Pembayaran — DAPEM Pensiun" : "Buat Tagihan Pembayaran — Non-Dapem (Klaim)",
+      subtitle: `${selectedRows.length} item • Total ${fmt(selTotal)} • diterbitkan Divisi Keuangan`,
+      type: "surat",
+      fileName: `Tagihan_${isDapem ? "DAPEM_Pensiun" : "NonDapem_Klaim"}_Juli_2026.pdf`,
+      content: { noSurat: `SPP/${isDapem ? "DAPEM" : "NONDAPEM"}/VII/2026`, tujuan: "Kuasa Pengguna Anggaran — DJPb Kementerian Keuangan", periode: "Juli 2026", cutoff: "06 Jul 2026", tanggal: "07 Jul 2026", items },
+    });
+  };
+
+  return (
+    <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Ringkasan */}
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard icon={<Wallet size={IC} />} label="Total DAPEM (Pensiun)" value={`Rp ${(totalDapem / 1e6).toFixed(1)} Jt`} sub={`${dapemRows.length} peserta • Juli 2026`} color={COLORS.blue} />
+        <StatCard icon={<Cross size={IC} />} label="Total Non-Dapem (Klaim)" value={`Rp ${(totalKlaim / 1e6).toFixed(1)} Jt`} sub={`${klaimRows.length} klaim diajukan`} color={COLORS.orange} />
+        <StatCard icon={<TrendingDown size={IC} />} label={`Sisa Pagu — ${paguRef.label}`} value={`Rp ${sisaPaguM} M`} sub="Sumber: Monitoring Pagu DIPA" color={COLORS.green} />
+        <StatCard icon={<FileText size={IC} />} label="Dipilih untuk Tagihan" value={selectedRows.length ? `Rp ${(selTotal / 1e6).toFixed(1)} Jt` : "—"} sub={`${selectedRows.length} item dipilih`} color={selectedRows.length ? COLORS.blueDark : COLORS.gray400} />
+      </div>
+
+      {/* Referensi pagu DIPA */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: "14px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
+          <span style={{ color: COLORS.gray600 }}><TrendingDown size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />Realisasi Pagu DIPA — <strong>{paguRef.label}</strong> (terhubung ke Monitoring Pagu DIPA)</span>
+          <span style={{ color: COLORS.gray500 }}>Realisasi Rp {paguRef.realisasi} M / Pagu Rp {paguRef.pagu} M</span>
+        </div>
+        <ProgressBar value={paguRef.realisasi} max={paguRef.pagu} color={sisaPaguM / paguRef.pagu <= 0.15 ? COLORS.red : COLORS.blue} />
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {[{ k: "dapem", t: "Dapem (Pensiun)" }, { k: "nondapem", t: "Non-Dapem (Klaim)" }].map(x => (
+          <button key={x.k} onClick={() => switchTab(x.k)} style={{ padding: "8px 18px", borderRadius: 6, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", background: tab === x.k ? COLORS.blue : COLORS.gray200, color: tab === x.k ? COLORS.white : COLORS.gray700 }}>{x.t}</button>
+        ))}
+      </div>
+
+      {/* Daftar DAPEM per MAK */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+        <SectionTitle action={
+          <Btn size="sm" onClick={buatTagihan} variant={selectedRows.length ? "primary" : "ghost"}>
+            <FilePlus size={14} /> Buat Tagihan{selectedRows.length ? ` (${selectedRows.length} • ${fmt(selTotal)})` : ""}
+          </Btn>
+        }>{isDapem ? "Daftar DAPEM Pensiun per MAK" : "Daftar Non-Dapem (Klaim) per MAK"}</SectionTitle>
+
+        <div style={{ display: "flex", gap: 10, marginBottom: 14, alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap" }}>
+          <Select label="Satker" value={filterSatker} onChange={v => setFilterSatker(v)} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={150} />
+          <div style={{ fontSize: 12, color: COLORS.gray500 }}>
+            {isDapem ? "Pilih baris peserta lalu Buat Tagihan (SPP) untuk diteruskan Divisi Keuangan ke DJPb." : "Hanya klaim berstatus Terverifikasi yang dapat ditagihkan."}
+          </div>
+        </div>
+
+        {groups.length === 0 ? <NoData /> : (
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                <th style={{ padding: "10px 14px", textAlign: "center", borderBottom: `1px solid ${COLORS.gray300}`, width: 36 }}>
+                  <input type="checkbox" checked={allSelected} onChange={toggleAll} style={{ cursor: "pointer" }} />
+                </th>
+                {[isDapem ? "NRP" : "No. Klaim", "Nama Peserta", "Satker", isDapem ? "Jenis Dapem" : "Jenis Klaim", isDapem ? "" : "Status", "Nominal"].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: c === "Nominal" ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {groups.flatMap(g => {
+                  const rows = [
+                    <tr key={"h-" + g.mak} style={{ background: COLORS.gray50 }}>
+                      <td colSpan={7} style={{ padding: "8px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray800 }}><Hash size={12} style={{ verticalAlign: "middle" }} /> MAK {g.mak} — {g.makNama} <span style={{ color: COLORS.gray400, fontWeight: 400 }}>({g.rows.length} {isDapem ? "peserta" : "klaim"})</span></span>
+                          <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray700, fontFamily: "monospace" }}>{fmt(g.total)}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ];
+                  g.rows.forEach(r => {
+                    const canBill = billable(r);
+                    rows.push(
+                      <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: selected[r.id] ? "#E3F2FD55" : "transparent" }} onMouseEnter={e => { if (!selected[r.id]) e.currentTarget.style.background = COLORS.gray50; }} onMouseLeave={e => { if (!selected[r.id]) e.currentTarget.style.background = "transparent"; }}>
+                        <td style={{ padding: "9px 14px", textAlign: "center" }}>
+                          <input type="checkbox" disabled={!canBill} checked={!!selected[r.id]} onChange={() => toggleRow(r.id)} style={{ cursor: canBill ? "pointer" : "not-allowed" }} />
+                        </td>
+                        <td style={{ padding: "9px 14px", fontFamily: "monospace", fontSize: 12, color: COLORS.gray700 }}>{r.nrp}</td>
+                        <td style={{ padding: "9px 14px" }}><div style={{ fontWeight: 600, color: COLORS.gray800 }}>{r.nama}</div><div style={{ fontSize: 11, color: COLORS.gray400 }}>{r.unor}</div></td>
+                        <td style={{ padding: "9px 14px" }}><Badge color={satkerColor(r.satker)}>{r.satker}</Badge></td>
+                        <td style={{ padding: "9px 14px", fontSize: 12, color: COLORS.gray600 }}>{r.jenis}</td>
+                        {!isDapem && <td style={{ padding: "9px 14px" }}><Badge color={r.status === "Terverifikasi" ? "green" : "orange"}>{r.status}</Badge></td>}
+                        {isDapem && <td />}
+                        <td style={{ padding: "9px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(r.nominal)}</td>
+                      </tr>
+                    );
+                  });
+                  return rows;
+                })}
+                <tr style={{ background: COLORS.gray100, fontWeight: 700 }}>
+                  <td />
+                  <td colSpan={isDapem ? 4 : 4} style={{ padding: "10px 14px" }}>TOTAL {isDapem ? "DAPEM" : "NON-DAPEM"} {filterSatker !== "Semua" ? `— ${filterSatker}` : ""}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmt(curRows.reduce((a, r) => a + r.nominal, 0))}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div style={{ marginTop: 10, fontSize: 12, color: COLORS.gray500 }}>Menampilkan {curRows.length} {isDapem ? "peserta pensiun" : "klaim"} dalam {groups.length} MAK. Tagihan yang dibuat akan mengurangi sisa pagu DIPA pada jenis terkait.</div>
       </div>
     </div>
   );
@@ -1950,6 +2345,7 @@ const MENU = [
       { id: "tagihan", label: "Penagihan ke Kemenkeu", disabled: true },
     ]},
     { icon: "bank", label: "Pembayaran Manfaat", children: [
+      { id: "bayarpensiun", label: "Daftar DAPEM & Tagihan" },
       { id: "dana", label: "Monitoring Dana" },
       { id: "klaim", label: "Monitoring Klaim JKK" },
     ]},
@@ -1975,6 +2371,7 @@ const PAGES = {
   kalkulator: { title: "Kalkulator Iuran Per Peserta", component: KalkulatorIuran },
   rekonsiliasi: { title: "Rekonsiliasi THT/Dapen vs SKP-PFK", component: RekonsIuran },
   tagihan: { title: "Penagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
+  bayarpensiun: { title: "Daftar DAPEM per MAK & Pembuatan Tagihan", component: PembayaranPensiun },
   dana: { title: "Dashboard Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
   klaim: { title: "Monitoring Klaim JKK Perawatan", component: MonitoringKlaim },
   kredit: { title: "Monitoring & Penarikan UDW Punah", component: KreditPiutang },
