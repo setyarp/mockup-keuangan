@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { LayoutDashboard, Activity, Calculator, RefreshCw, FileText, Building2, ClipboardList, CreditCard, Receipt, TrendingDown, Cross, PenLine, Search, Download, Upload, Calendar, CheckCircle2, AlertTriangle, Banknote, Eye, PenTool, Mail, Bell, Menu, ChevronRight, ChevronDown, CircleDot, Shield, Lock, BarChart3, Users, Clock, XCircle, FileUp, Filter, Printer, ExternalLink, ArrowRight, FolderOpen, CircleCheck, CircleAlert, CircleDashed, FileCheck, FileClock, FileX, Landmark, TrendingUp, Wallet, DollarSign, Percent, Hash, UserCheck, FilePlus, ArrowUpDown, MoreHorizontal } from "lucide-react";
 
+const LINE_COLORS = ["#1565C0", "#2E7D32", "#EF6C00", "#7B1FA2", "#C62828", "#00838F"];
+
 const IC = 18; // default icon size
 
 const COLORS = {
@@ -823,17 +825,6 @@ const MonitoringKlaim = () => {
             data={filtered.map(k => [k.spp, k.rekap, k.peserta, <Badge color={k.satker === "TNI" ? "green" : k.satker === "POLRI" ? "blue" : k.satker === "PPPK" ? "yellow" : "orange"}>{k.satker || "—"}</Badge>, <span style={{ fontSize: 12, color: COLORS.gray600 }}>{k.unor || "—"}</span>, k.jenisKlaim, k.nominal, k.mitra, <Badge color={statusBadge(k.status)}>{k.status}</Badge>, k.riwayat])} />
         )}
       </div>
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-        <SectionTitle>Alur Status Klaim</SectionTitle>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, padding: "10px 0" }}>
-          {["Pengajuan", "Verifikasi", "Disetujui / Ditolak", "Dibayar"].map((s, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ padding: "10px 20px", borderRadius: 8, background: i === 0 ? COLORS.gray200 : i === 1 ? COLORS.orangeLight : i === 2 ? "#E3F2FD" : COLORS.greenLight, fontWeight: 600, fontSize: 13, color: COLORS.gray800, textAlign: "center" }}>{s}</div>
-              {i < 3 && <div style={{ width: 40, height: 2, background: COLORS.gray300 }} />}
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
@@ -1010,38 +1001,88 @@ const DashboardDana = () => {
             </div>
           </div>
 
-          {/* PANEL 3 — Trend Saldo 3 Bulan Terakhir */}
+          {/* PANEL 3 — Trend Saldo 3 Bulan Terakhir (Line Chart) */}
           <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-            <SectionTitle>Panel 3 — Trend Saldo 3 Bulan Terakhir</SectionTitle>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <SectionTitle action={
+              <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                {mitraData.map((m, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: COLORS.gray600 }}>
+                    <span style={{ width: 14, height: 3, background: LINE_COLORS[i % LINE_COLORS.length], borderRadius: 2, display: "inline-block" }} />
+                    {m.mitra}
+                  </div>
+                ))}
+              </div>
+            }>Panel 3 — Trend Saldo 3 Bulan Terakhir</SectionTitle>
+
+            {(() => {
+              const months = ["Mei 2026", "Jun 2026", "Jul 2026"];
+              const series = mitraData.map(m => [m.saldoMei, m.saldoJun, m.saldoJul]);
+              const allVals = series.flat();
+              const rawMax = Math.max(...allVals);
+              const niceMax = Math.ceil(rawMax / 200) * 200 || 200;
+              const W = 900, H = 300, ML = 66, MR = 20, MT = 16, MB = 40;
+              const plotW = W - ML - MR, plotH = H - MT - MB;
+              const xAt = i => ML + (plotW / (months.length - 1)) * i;
+              const yAt = v => MT + plotH - (v / niceMax) * plotH;
+              const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(niceMax * f));
+
+              return (
+                <div style={{ width: "100%", overflowX: "auto" }}>
+                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", minWidth: 560, height: "auto", display: "block" }}>
+                    {/* Horizontal gridlines + Y axis labels */}
+                    {yTicks.map((t, i) => (
+                      <g key={i}>
+                        <line x1={ML} y1={yAt(t)} x2={W - MR} y2={yAt(t)} stroke={COLORS.gray200} strokeWidth="1" strokeDasharray={t === 0 ? "0" : "4 4"} />
+                        <text x={ML - 10} y={yAt(t) + 4} textAnchor="end" fontSize="11" fill={COLORS.gray500} fontFamily="Inter, sans-serif">Rp {t} M</text>
+                      </g>
+                    ))}
+
+                    {/* X axis labels */}
+                    {months.map((mo, i) => (
+                      <text key={i} x={xAt(i)} y={H - MB + 22} textAnchor="middle" fontSize="12" fill={COLORS.gray600} fontWeight="600" fontFamily="Inter, sans-serif">{mo}</text>
+                    ))}
+
+                    {/* Lines + points */}
+                    {series.map((vals, si) => {
+                      const color = LINE_COLORS[si % LINE_COLORS.length];
+                      const pts = vals.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
+                      return (
+                        <g key={si}>
+                          <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+                          {vals.map((v, i) => (
+                            <g key={i}>
+                              <circle cx={xAt(i)} cy={yAt(v)} r="4.5" fill={COLORS.white} stroke={color} strokeWidth="2.5" />
+                              {i === vals.length - 1 && (
+                                <text x={xAt(i) + 10} y={yAt(v) + 4} fontSize="11" fontWeight="700" fill={color} fontFamily="Inter, sans-serif">Rp {v} M</text>
+                              )}
+                            </g>
+                          ))}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              );
+            })()}
+
+            {/* Ringkasan perubahan per mitra */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginTop: 16 }}>
               {mitraData.map((m, i) => {
-                const maxVal = Math.max(m.saldoMei, m.saldoJun, m.saldoJul, 1);
-                const isDown = m.saldoJul < m.saldoMei;
+                const delta = m.saldoJul - m.saldoMei;
+                const pct = (delta / m.saldoMei * 100).toFixed(1);
+                const down = delta < 0;
                 return (
-                  <div key={i} style={{ padding: "12px 16px", background: COLORS.gray50, borderRadius: 8 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                      <span style={{ fontWeight: 700, fontSize: 13, color: COLORS.gray800 }}>{m.mitra}</span>
-                      <span style={{ fontSize: 12, color: isDown ? COLORS.red : COLORS.green, fontWeight: 600 }}>
-                        {isDown ? "↓" : "↑"} {Math.abs(m.saldoJul - m.saldoMei)} M ({((m.saldoJul - m.saldoMei) / m.saldoMei * 100).toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, alignItems: "flex-end", height: 48 }}>
-                      {[
-                        { label: "Mei", val: m.saldoMei },
-                        { label: "Jun", val: m.saldoJun },
-                        { label: "Jul", val: m.saldoJul },
-                      ].map((b, bi) => (
-                        <div key={bi} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                          <span style={{ fontSize: 10, fontWeight: 600, color: COLORS.gray700 }}>Rp {b.val} M</span>
-                          <div style={{ width: "100%", height: `${(b.val / maxVal) * 36}px`, background: bi === 2 ? (isDown ? COLORS.red : COLORS.green) : COLORS.blue, borderRadius: 3, minHeight: 4, opacity: bi === 2 ? 1 : 0.4 }} />
-                          <span style={{ fontSize: 9, color: COLORS.gray400 }}>{b.label}</span>
-                        </div>
-                      ))}
+                  <div key={i} style={{ padding: "10px 12px", background: COLORS.gray50, borderRadius: 8, borderLeft: `3px solid ${LINE_COLORS[i % LINE_COLORS.length]}` }}>
+                    <div style={{ fontSize: 11, color: COLORS.gray600, marginBottom: 3 }}>{m.mitra}</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, fontFamily: "monospace", color: COLORS.gray900 }}>Rp {m.saldoJul} M</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: down ? COLORS.red : COLORS.green }}>{down ? "↓" : "↑"} {pct}%</span>
                     </div>
                   </div>
                 );
               })}
             </div>
+            <div style={{ marginTop: 10, fontSize: 11, color: COLORS.gray500 }}>Perbandingan saldo akhir bulan per mitra bayar • Sumber: rekening koran CMS masing-masing mitra</div>
           </div>
         </div>
       )}
@@ -1512,196 +1553,359 @@ const KreditPiutang = () => {
 };
 
 const DashboardDIPA = () => {
-  const [filterJenis, setFilterJenis] = useState("Semua");
+  const [tab, setTab] = useState("realisasi");
+  const [openJenis, setOpenJenis] = useState(null);
   const [threshold, setThreshold] = useState(15);
   const [preview, setPreview] = useState(null);
 
-  const paguAwal = 5410;
-  const revisiPagu = 320;
-  const paguBerjalan = paguAwal + revisiPagu;
-  const realisasi = 3883;
-  const sisaPagu = paguBerjalan - realisasi;
-  const pctUsed = ((realisasi / paguBerjalan) * 100).toFixed(1);
-  const pctSisa = ((sisaPagu / paguBerjalan) * 100).toFixed(1);
-  const isAlert = parseFloat(pctSisa) <= threshold;
+  const fmtM = n => `Rp ${n.toLocaleString("id-ID")} M`;
+  const fmtRp = n => `Rp ${n.toLocaleString("id-ID")}`;
 
-  const breakdownData = [
-    { jenis: "Dapem Induk", paguAwal: 4200, revisi: 200, realisasi: 3150 },
-    { jenis: "Dapem Susulan", paguAwal: 890, revisi: 80, realisasi: 445 },
-    { jenis: "Non-Dapem (Harian)", paguAwal: 320, revisi: 40, realisasi: 288 },
+  // Rincian MAK per jenis dapem (nilai dalam rupiah penuh)
+  const jenisDapem = [
+    { key: "induk", nama: "Dapem Induk", icon: "wallet", warna: COLORS.blue, mak: [
+      { kode: "511111", uraian: "Belanja Pensiun Pokok", pagu: 3_120_000_000_000, real: 2_340_000_000_000 },
+      { kode: "511119", uraian: "Belanja Tunjangan Keluarga Pensiun", pagu: 680_000_000_000, real: 512_000_000_000 },
+      { kode: "511121", uraian: "Belanja Tunjangan Beras Pensiun", pagu: 400_000_000_000, real: 298_000_000_000 },
+    ]},
+    { key: "susulan", nama: "Dapem Susulan", icon: "clock", warna: COLORS.green, mak: [
+      { kode: "511112", uraian: "Belanja Pensiun Susulan Pokok", pagu: 640_000_000_000, real: 318_000_000_000 },
+      { kode: "511120", uraian: "Belanja Tunjangan Keluarga Susulan", pagu: 210_000_000_000, real: 92_000_000_000 },
+      { kode: "511122", uraian: "Belanja Tunjangan Beras Susulan", pagu: 120_000_000_000, real: 35_000_000_000 },
+    ]},
+    { key: "rapel", nama: "Dapem Rapel", icon: "trendup", warna: COLORS.orange, mak: [
+      { kode: "511113", uraian: "Belanja Rapel Kenaikan Pensiun Pokok", pagu: 280_000_000_000, real: 196_000_000_000 },
+      { kode: "511123", uraian: "Belanja Rapel Tunjangan", pagu: 90_000_000_000, real: 61_000_000_000 },
+    ]},
+    { key: "thr", nama: "THR Pensiun", icon: "gift", warna: "#7B1FA2", mak: [
+      { kode: "511131", uraian: "Belanja THR Pensiun Pokok", pagu: 320_000_000_000, real: 318_500_000_000 },
+      { kode: "511132", uraian: "Belanja THR Tunjangan Keluarga", pagu: 68_000_000_000, real: 67_200_000_000 },
+    ]},
+    { key: "ke13", nama: "Dapem ke-13", icon: "calendar", warna: "#00838F", mak: [
+      { kode: "511141", uraian: "Belanja Pensiun ke-13 Pokok", pagu: 310_000_000_000, real: 0 },
+      { kode: "511142", uraian: "Belanja Pensiun ke-13 Tunjangan", pagu: 66_000_000_000, real: 0 },
+    ]},
+    { key: "jkk", nama: "JKK Perawatan", icon: "shield", warna: COLORS.red, mak: [
+      { kode: "594211", uraian: "Belanja Santunan JKK Perawatan", pagu: 180_000_000_000, real: 121_000_000_000 },
+      { kode: "594212", uraian: "Belanja Santunan JKK Cacat", pagu: 95_000_000_000, real: 58_000_000_000 },
+    ]},
+    { key: "taspen", nama: "Taspen Life", icon: "bank", warna: "#5D4037", mak: [
+      { kode: "594213", uraian: "Belanja Premi Taspen Life (TDS/TPB)", pagu: 48_000_000_000, real: 31_500_000_000 },
+      { kode: "594214", uraian: "Belanja Premi Proteksi Beasiswa", pagu: 22_000_000_000, real: 12_800_000_000 },
+    ]},
   ];
-  const filteredBreakdown = filterJenis === "Semua" ? breakdownData : breakdownData.filter(b => b.jenis === filterJenis);
+
+  const jenisTotal = j => {
+    const pagu = j.mak.reduce((a, m) => a + m.pagu, 0);
+    const real = j.mak.reduce((a, m) => a + m.real, 0);
+    return { pagu, real, sisa: pagu - real, pct: pagu ? (real / pagu) * 100 : 0 };
+  };
+  const grand = jenisDapem.reduce((a, j) => { const t = jenisTotal(j); return { pagu: a.pagu + t.pagu, real: a.real + t.real }; }, { pagu: 0, real: 0 });
+  const grandSisa = grand.pagu - grand.real;
+  const pctUsed = ((grand.real / grand.pagu) * 100).toFixed(1);
+  const pctSisa = ((grandSisa / grand.pagu) * 100).toFixed(1);
+  const isAlert = parseFloat(pctSisa) <= threshold;
+  const paguAwal = grand.pagu - 320_000_000_000;
+  const revisiPagu = 320_000_000_000;
+
+  const jenisIcon = (k, size = 18) => ({ wallet: <Wallet size={size} />, clock: <Clock size={size} />, trendup: <TrendingUp size={size} />, gift: <Banknote size={size} />, calendar: <Calendar size={size} />, shield: <Shield size={size} />, bank: <Building2 size={size} /> }[k] || <FileText size={size} />);
 
   const sp2dLog = [
-    { no: "SP2D/2026/07/0234", tgl: "06 Jul 2026 14:30", jenis: "Dapem Induk", nominal: "Rp 42.500.000.000", penerima: "Bank Mandiri", sisa: "Rp 1.847.000.000.000" },
-    { no: "SP2D/2026/07/0233", tgl: "05 Jul 2026 11:15", jenis: "Dapem Susulan", nominal: "Rp 8.200.000.000", penerima: "BRI", sisa: "Rp 1.889.500.000.000" },
-    { no: "SP2D/2026/07/0232", tgl: "04 Jul 2026 09:45", jenis: "Non-Dapem", nominal: "Rp 3.100.000.000", penerima: "BNI", sisa: "Rp 1.897.700.000.000" },
-    { no: "SP2D/2026/07/0231", tgl: "03 Jul 2026 16:20", jenis: "Dapem Induk", nominal: "Rp 38.900.000.000", penerima: "Bank Mandiri", sisa: "Rp 1.900.800.000.000" },
-    { no: "SP2D/2026/06/0228", tgl: "28 Jun 2026 10:00", jenis: "Dapem Induk", nominal: "Rp 45.200.000.000", penerima: "BTN", sisa: "Rp 1.939.700.000.000" },
+    { no: "SP2D/2026/07/0234", tgl: "06 Jul 2026 14:30", jenis: "Dapem Induk", nominal: 42_500_000_000, penerima: "Bank Mandiri", sisa: 1_847_000_000_000 },
+    { no: "SP2D/2026/07/0233", tgl: "05 Jul 2026 11:15", jenis: "Dapem Susulan", nominal: 8_200_000_000, penerima: "BRI", sisa: 1_889_500_000_000 },
+    { no: "SP2D/2026/07/0232", tgl: "04 Jul 2026 09:45", jenis: "JKK Perawatan", nominal: 3_100_000_000, penerima: "BNI", sisa: 1_897_700_000_000 },
+    { no: "SP2D/2026/07/0231", tgl: "03 Jul 2026 16:20", jenis: "Dapem Rapel", nominal: 12_400_000_000, penerima: "Bank Mandiri", sisa: 1_900_800_000_000 },
+    { no: "SP2D/2026/07/0230", tgl: "02 Jul 2026 13:10", jenis: "Taspen Life", nominal: 2_050_000_000, penerima: "Taspen Life", sisa: 1_913_200_000_000 },
+    { no: "SP2D/2026/06/0228", tgl: "28 Jun 2026 10:00", jenis: "THR Pensiun", nominal: 385_700_000_000, penerima: "BTN", sisa: 1_939_700_000_000 },
   ];
 
   const revisiLog = [
-    { no: "REV/2026/03/001", tgl: "15 Mar 2026", jenis: "Dapem Induk", sebelum: "Rp 4.200 M", sesudah: "Rp 4.400 M", selisih: "+Rp 200 M", alasan: "Revisi APBN TA 2026 — tambahan alokasi pensiun baru" },
-    { no: "REV/2026/05/002", tgl: "20 Mei 2026", jenis: "Dapem Susulan", sebelum: "Rp 890 M", sesudah: "Rp 970 M", selisih: "+Rp 80 M", alasan: "Penyesuaian data pensiunan susulan triwulan II" },
-    { no: "REV/2026/06/003", tgl: "10 Jun 2026", jenis: "Non-Dapem", sebelum: "Rp 320 M", sesudah: "Rp 360 M", selisih: "+Rp 40 M", alasan: "Tambahan anggaran pembayaran non-dapem harian" },
+    { no: "REV/2026/03/001", tgl: "15 Mar 2026", jenis: "Dapem Induk", sebelum: 4_000_000_000_000, sesudah: 4_200_000_000_000, alasan: "Revisi APBN TA 2026 — tambahan alokasi pensiun baru" },
+    { no: "REV/2026/05/002", tgl: "20 Mei 2026", jenis: "Dapem Susulan", sebelum: 890_000_000_000, sesudah: 970_000_000_000, alasan: "Penyesuaian data pensiunan susulan triwulan II" },
+    { no: "REV/2026/06/003", tgl: "10 Jun 2026", jenis: "Dapem ke-13", sebelum: 336_000_000_000, sesudah: 376_000_000_000, alasan: "Penyesuaian alokasi Dapem ke-13 sesuai PP terbaru" },
   ];
 
   return (
     <div>
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
 
-      {/* Alert Banner */}
       {isAlert && (
         <div style={{ background: COLORS.redLight, border: `1px solid #FFCDD2`, borderRadius: 10, padding: "14px 20px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
           <AlertTriangle size={20} color={COLORS.red} />
           <div>
             <div style={{ fontWeight: 700, color: COLORS.red, fontSize: 14 }}>Sisa Pagu di Bawah Threshold ({threshold}%)</div>
-            <div style={{ fontSize: 12, color: COLORS.gray700 }}>Sisa pagu saat ini <strong>Rp {sisaPagu} M ({pctSisa}%)</strong> dari pagu berjalan Rp {paguBerjalan} M. Notifikasi telah dikirim ke Kadiv Keuangan.</div>
+            <div style={{ fontSize: 12, color: COLORS.gray700 }}>Sisa pagu saat ini <strong>{fmtRp(grandSisa)} ({pctSisa}%)</strong> dari pagu berjalan {fmtRp(grand.pagu)}. Notifikasi telah dikirim ke Kadiv Keuangan.</div>
           </div>
         </div>
       )}
 
-      {/* Stat Cards - 5 cards */}
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard icon={<BarChart3 size={IC} />} label="Pagu DIPA Awal" value={`Rp ${paguAwal} M`} sub="TA 2026 (DIPA Induk)" color={COLORS.blue} />
-        <StatCard icon={<TrendingUp size={IC} />} label="Revisi Pagu" value={`+Rp ${revisiPagu} M`} sub={`${revisiLog.length} kali revisi`} color="#7B1FA2" />
-        <StatCard icon={<Banknote size={IC} />} label="Pagu Berjalan" value={`Rp ${paguBerjalan} M`} sub="Pagu Awal + Revisi" color={COLORS.blueDark} />
-        <StatCard icon={<Wallet size={IC} />} label="Realisasi SP2D" value={`Rp ${realisasi} M`} sub={`${pctUsed}% terserap`} color={COLORS.green} />
-        <StatCard icon={<TrendingDown size={IC} />} label="Sisa Pagu" value={`Rp ${sisaPagu} M`} sub={`${pctSisa}% tersisa`} color={isAlert ? COLORS.red : COLORS.orange} />
+        <StatCard icon={<BarChart3 size={IC} />} label="Pagu DIPA Awal" value={fmtRp(paguAwal)} sub="TA 2026 (DIPA Induk)" color={COLORS.blue} />
+        <StatCard icon={<TrendingUp size={IC} />} label="Revisi Pagu" value={"+" + fmtRp(revisiPagu)} sub={`${revisiLog.length} kali revisi`} color="#7B1FA2" />
+        <StatCard icon={<Banknote size={IC} />} label="Pagu Berjalan" value={fmtRp(grand.pagu)} sub="Pagu Awal + Revisi" color={COLORS.blueDark} />
+        <StatCard icon={<Wallet size={IC} />} label="Realisasi SP2D" value={fmtRp(grand.real)} sub={`${pctUsed}% terserap`} color={COLORS.green} />
+        <StatCard icon={<TrendingDown size={IC} />} label="Sisa Pagu" value={fmtRp(grandSisa)} sub={`${pctSisa}% tersisa`} color={isAlert ? COLORS.red : COLORS.orange} />
       </div>
 
-      {/* Main Progress Bar */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-        <SectionTitle>Realisasi Pagu DIPA — TA 2026</SectionTitle>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
-            <span style={{ color: COLORS.gray500 }}>Realisasi: <strong style={{ color: COLORS.gray900 }}>Rp {realisasi} M</strong> dari <strong>Rp {paguBerjalan} M</strong></span>
-            <span style={{ fontWeight: 700, color: parseFloat(pctUsed) > 85 ? COLORS.red : COLORS.blue }}>{pctUsed}%</span>
-          </div>
-          <div style={{ height: 20, background: COLORS.gray200, borderRadius: 10, overflow: "hidden", position: "relative" }}>
-            <div style={{ height: "100%", width: `${pctUsed}%`, background: `linear-gradient(90deg, ${COLORS.blue} 0%, ${parseFloat(pctUsed) > 85 ? COLORS.red : COLORS.green} 100%)`, borderRadius: 10, transition: "width 0.6s" }} />
-            {/* Threshold marker */}
-            <div style={{ position: "absolute", top: 0, bottom: 0, left: `${100 - threshold}%`, width: 2, background: COLORS.red, opacity: 0.7 }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 4 }}>
-            <span style={{ color: COLORS.gray400 }}>Rp 0</span>
-            <span style={{ color: COLORS.red, position: "relative", left: `${50 - threshold}%` }}>Threshold {threshold}%</span>
-            <span style={{ color: COLORS.gray400 }}>Rp {paguBerjalan} M</span>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
+        {[
+          { id: "realisasi", l: "Realisasi per Jenis Dapem" },
+          { id: "sp2d", l: "Riwayat Pencairan SP2D", c: sp2dLog.length },
+          { id: "revisi", l: "Riwayat Revisi Pagu", c: revisiLog.length },
+          { id: "konfigurasi", l: "Konfigurasi Alert" },
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "10px 20px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: "transparent", display: "flex", alignItems: "center", gap: 6, color: tab === t.id ? COLORS.blue : COLORS.gray500, borderBottom: tab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent", marginBottom: -2 }}>
+            {t.l}
+            {t.c ? <span style={{ background: tab === t.id ? "#E3F2FD" : COLORS.gray200, color: tab === t.id ? COLORS.blue : COLORS.gray700, padding: "1px 8px", borderRadius: 10, fontSize: 11, fontWeight: 700 }}>{t.c}</span> : null}
+          </button>
+        ))}
       </div>
 
-      {/* Breakdown per Jenis + Threshold Config */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 20 }}>
-        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle>Breakdown per Jenis Dapem</SectionTitle>
-          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-            <Select value={filterJenis} onChange={setFilterJenis} options={["Semua", "Dapem Induk", "Dapem Susulan", "Non-Dapem (Harian)"]} minW={170} />
+      {/* TAB: Realisasi per Jenis Dapem */}
+      {tab === "realisasi" && (
+        <div>
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+            <SectionTitle>Realisasi Pagu DIPA — TA 2026</SectionTitle>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+              <span style={{ color: COLORS.gray500 }}>Realisasi <strong style={{ color: COLORS.gray900 }}>{fmtRp(grand.real)}</strong> dari <strong>{fmtRp(grand.pagu)}</strong></span>
+              <span style={{ fontWeight: 700, color: parseFloat(pctUsed) > 85 ? COLORS.red : COLORS.blue }}>{pctUsed}%</span>
+            </div>
+            <div style={{ height: 20, background: COLORS.gray200, borderRadius: 10, overflow: "hidden", position: "relative" }}>
+              <div style={{ height: "100%", width: `${pctUsed}%`, background: `linear-gradient(90deg, ${COLORS.blue} 0%, ${parseFloat(pctUsed) > 85 ? COLORS.red : COLORS.green} 100%)`, borderRadius: 10, transition: "width 0.6s" }} />
+              <div style={{ position: "absolute", top: 0, bottom: 0, left: `${100 - threshold}%`, width: 2, background: COLORS.red, opacity: 0.7 }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginTop: 4, color: COLORS.gray400 }}>
+              <span>Rp 0</span><span style={{ color: COLORS.red }}>Threshold {threshold}%</span><span>{fmtRp(grand.pagu)}</span>
+            </div>
           </div>
-          {filteredBreakdown.map((d, i) => {
-            const pagu = d.paguAwal + d.revisi;
-            const sisa = pagu - d.realisasi;
-            const pct = ((d.realisasi / pagu) * 100).toFixed(1);
-            const isOver = (sisa / pagu) * 100 <= threshold;
+
+          <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 10 }}>Klik kartu untuk melihat rincian MAK (Mata Anggaran Kegiatan)</div>
+
+          <div style={{ maxHeight: 460, overflowY: "auto", paddingRight: 4, display: "flex", flexDirection: "column", gap: 10 }}>
+            {jenisDapem.map((j, i) => {
+              const t = jenisTotal(j);
+              const warn = t.pagu > 0 && (t.sisa / t.pagu) * 100 <= threshold;
+              return (
+                <div key={i} onClick={() => setOpenJenis(j.key)}
+                  style={{ background: COLORS.white, borderRadius: 10, padding: "14px 18px", cursor: "pointer", transition: "all .18s", border: `1px solid ${COLORS.gray200}` }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = j.warna; e.currentTarget.style.boxShadow = `0 2px 10px ${j.warna}1F`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = COLORS.gray200; e.currentTarget.style.boxShadow = "none"; }}>
+
+                  {/* Baris judul */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 9, background: j.warna + "18", color: j.warna, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{jenisIcon(j.icon, 18)}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray800 }}>{j.nama}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400 }}>{j.mak.length} MAK</div>
+                    </div>
+                    {warn && <Badge color="red">Di bawah threshold</Badge>}
+                    <ChevronRight size={16} color={COLORS.gray400} style={{ flexShrink: 0 }} />
+                  </div>
+
+                  {/* Angka ringkas — wrap otomatis bila sempit */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 22px", marginBottom: 10 }}>
+                    {[
+                      { l: "Pagu", v: fmtRp(t.pagu), c: COLORS.gray800 },
+                      { l: "Realisasi", v: fmtRp(t.real), c: COLORS.green },
+                      { l: "Sisa", v: fmtRp(t.sisa), c: warn ? COLORS.red : COLORS.gray800 },
+                    ].map((x, k) => (
+                      <div key={k} style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                        <span style={{ fontSize: 10, color: COLORS.gray500, textTransform: "uppercase", letterSpacing: 0.4 }}>{x.l}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "monospace", color: x.c }}>{x.v}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 4 }}>
+                    <span style={{ color: COLORS.gray500 }}>Terserap</span>
+                    <span style={{ fontWeight: 700, color: warn ? COLORS.red : j.warna }}>{t.pct.toFixed(1)}%</span>
+                  </div>
+                  <ProgressBar value={t.real} max={t.pagu || 1} color={warn ? COLORS.red : j.warna} />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Modal rincian MAK */}
+          {openJenis && (() => {
+            const j = jenisDapem.find(x => x.key === openJenis);
+            const t = jenisTotal(j);
             return (
-              <div key={i} style={{ padding: 16, background: isOver ? COLORS.redLight : COLORS.gray50, borderRadius: 8, marginBottom: 10, border: isOver ? `1px solid #FFCDD2` : `1px solid ${COLORS.gray200}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 8 }}>
-                  <span style={{ fontWeight: 700, color: COLORS.gray800 }}>{d.jenis} {isOver && <AlertTriangle size={14} color={COLORS.red} style={{ verticalAlign: "middle" }} />}</span>
-                  <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
-                    <span style={{ color: COLORS.gray500 }}>Pagu Awal: <strong>Rp {d.paguAwal} M</strong></span>
-                    {d.revisi > 0 && <span style={{ color: "#7B1FA2" }}>Revisi: <strong>+Rp {d.revisi} M</strong></span>}
-                    <span style={{ color: COLORS.blue }}>Berjalan: <strong>Rp {pagu} M</strong></span>
-                    <span style={{ color: COLORS.green }}>Realisasi: <strong>Rp {d.realisasi} M</strong> ({pct}%)</span>
-                    <span style={{ color: isOver ? COLORS.red : COLORS.green, fontWeight: 700 }}>Sisa: Rp {sisa} M</span>
+              <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 20 }} onClick={() => setOpenJenis(null)}>
+                <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: "100%", maxWidth: 780, maxHeight: "88vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+                  <div style={{ padding: "18px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: 9, background: j.warna + "18", color: j.warna, display: "flex", alignItems: "center", justifyContent: "center" }}>{jenisIcon(j.icon, 19)}</div>
+                      <div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>Rincian MAK — {j.nama}</div>
+                        <div style={{ fontSize: 12, color: COLORS.gray500 }}>{j.mak.length} mata anggaran • TA 2026</div>
+                      </div>
+                    </div>
+                    <button onClick={() => setOpenJenis(null)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
+                  </div>
+
+                  <div style={{ padding: "18px 24px", overflowY: "auto", flex: 1 }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
+                      {[
+                        { l: "Pagu DIPA", v: fmtRp(t.pagu), c: COLORS.blue, bg: "#E3F2FD" },
+                        { l: "Realisasi", v: fmtRp(t.real), c: COLORS.green, bg: COLORS.greenLight },
+                        { l: "Sisa Pagu", v: fmtRp(t.sisa), c: t.sisa / t.pagu * 100 <= threshold ? COLORS.red : COLORS.orange, bg: t.sisa / t.pagu * 100 <= threshold ? COLORS.redLight : COLORS.orangeLight },
+                      ].map((x, k) => (
+                        <div key={k} style={{ flex: "1 1 180px", padding: "12px 14px", background: x.bg, borderRadius: 8 }}>
+                          <div style={{ fontSize: 11, color: COLORS.gray600 }}>{x.l}</div>
+                          <div style={{ fontSize: 16, fontWeight: 800, fontFamily: "monospace", color: x.c }}>{x.v}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                        <thead><tr style={{ background: COLORS.gray100 }}>
+                          {["MAK", "Uraian", "Pagu DIPA (Rp)", "Realisasi (Rp)", "Sisa (Rp)"].map((c, k) => (
+                            <th key={k} style={{ padding: "11px 14px", textAlign: k >= 2 ? "right" : "left", fontWeight: 700, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                          ))}
+                        </tr></thead>
+                        <tbody>
+                          {(() => {
+                            const warn = t.pagu > 0 && (t.sisa / t.pagu) * 100 <= threshold;
+                            return (
+                              <tr style={{ background: warn ? COLORS.redLight : "transparent" }}>
+                                <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 600, color: j.warna }}>{j.mak.map(m => m.kode).join(", ")}</td>
+                                <td style={{ padding: "12px 14px", fontWeight: 600, color: COLORS.gray800 }}>{j.nama}</td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>{fmtRp(t.pagu)}</td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.green }}>{fmtRp(t.real)}</td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: warn ? COLORS.red : COLORS.gray900 }}>{fmtRp(t.sisa)}</td>
+                              </tr>
+                            );
+                          })()}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style={{ marginTop: 10, fontSize: 11, color: COLORS.gray500 }}>Nilai merupakan akumulasi seluruh MAK pada jenis ini • Latar merah = sisa pagu di bawah threshold {threshold}%</div>
+                  </div>
+
+                  <div style={{ padding: "14px 24px", borderTop: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "flex-end", gap: 10, flexShrink: 0 }}>
+                    <Btn variant="outline" size="sm" onClick={() => setPreview({ title: `Preview Rincian MAK — ${j.nama}`, subtitle: "Pagu, realisasi, dan sisa per mata anggaran", type: "table", fileName: `Rincian_MAK_${j.nama.replace(/ /g, "_")}.xlsx`, content: { columns: ["MAK", "Uraian", "Pagu DIPA", "Realisasi", "Sisa"], rows: [[j.mak.map(m => m.kode).join(", "), j.nama, fmtRp(t.pagu), fmtRp(t.real), fmtRp(t.sisa)]], totalRows: 1 } })}>Ekspor Excel</Btn>
+                    <Btn size="sm" onClick={() => setOpenJenis(null)}>Tutup</Btn>
                   </div>
                 </div>
-                <ProgressBar value={d.realisasi} max={pagu} color={isOver ? COLORS.red : COLORS.blue} />
               </div>
             );
-          })}
+          })()}
         </div>
+      )}
 
+      {/* TAB: Riwayat SP2D */}
+      {tab === "sp2d" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle>Konfigurasi Alert</SectionTitle>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Threshold Peringatan (%)</label>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input type="number" value={threshold} onChange={e => setThreshold(Number(e.target.value))} style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: 80, fontSize: 14 }} />
-              <span style={{ fontSize: 13, color: COLORS.gray500 }}>% dari pagu berjalan</span>
+          <SectionTitle action={<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{ fontSize: 11, color: COLORS.green, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><CircleDot size={10} /> Real-time</span>
+            <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Riwayat SP2D", subtitle: "Data pencairan SP2D TA 2026", type: "table", fileName: "Riwayat_SP2D_2026.xlsx", content: { columns: ["No. SP2D", "Tanggal", "Jenis", "Nominal", "Penerima"], rows: sp2dLog.map(s => [s.no, s.tgl, s.jenis, fmtRp(s.nominal), s.penerima]), totalRows: sp2dLog.length } })}>Ekspor</Btn>
+          </div>}>Riwayat Pencairan SP2D</SectionTitle>
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["No. SP2D", "Tanggal & Waktu", "Jenis Dapem", "Nominal Pencairan", "Mitra Bayar", "Sisa Pagu Setelah"].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: i >= 3 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>{sp2dLog.map((s, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue, fontWeight: 500 }}>{s.no}</td>
+                  <td style={{ padding: "10px 14px", fontSize: 12 }}>{s.tgl}</td>
+                  <td style={{ padding: "10px 14px" }}><Badge color={s.jenis.includes("Induk") ? "blue" : s.jenis.includes("Susulan") ? "green" : s.jenis.includes("JKK") ? "red" : "orange"}>{s.jenis}</Badge></td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmtRp(s.nominal)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right" }}>{s.penerima}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontSize: 12, color: COLORS.gray500 }}>{fmtRp(s.sisa)}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Data diperbarui otomatis setiap kali SP2D baru diterbitkan • Terakhir: 06 Jul 2026, 14:30 WIB</div>
+        </div>
+      )}
+
+      {/* TAB: Riwayat Revisi Pagu */}
+      {tab === "revisi" && (
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle action={<Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Riwayat Revisi Pagu", subtitle: "Perubahan pagu DIPA TA 2026", type: "table", fileName: "Riwayat_Revisi_Pagu_2026.xlsx", content: { columns: ["No. Revisi", "Tanggal", "Jenis", "Sebelum", "Sesudah", "Selisih"], rows: revisiLog.map(r => [r.no, r.tgl, r.jenis, fmtRp(r.sebelum), fmtRp(r.sesudah), "+" + fmtRp(r.sesudah - r.sebelum)]), totalRows: revisiLog.length } })}>Ekspor</Btn>}>Riwayat Revisi Pagu DIPA</SectionTitle>
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["No. Revisi", "Tanggal", "Jenis Dapem", "Pagu Sebelum", "Pagu Sesudah", "Selisih", "Alasan Revisi"].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: i >= 3 && i <= 5 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>{revisiLog.map((r, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: "#7B1FA2", fontWeight: 500 }}>{r.no}</td>
+                  <td style={{ padding: "10px 14px", fontSize: 12 }}>{r.tgl}</td>
+                  <td style={{ padding: "10px 14px" }}><Badge color="blue">{r.jenis}</Badge></td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace" }}>{fmtRp(r.sebelum)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmtRp(r.sesudah)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.green, fontWeight: 700 }}>+{fmtRp(r.sesudah - r.sebelum)}</td>
+                  <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray600, maxWidth: 280 }}>{r.alasan}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Revisi pagu diperbarui berdasarkan DIPA Revisi dari Kemenkeu • Data otomatis memperbarui pagu berjalan</div>
+        </div>
+      )}
+
+      {/* TAB: Konfigurasi Alert */}
+      {tab === "konfigurasi" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+            <SectionTitle>Parameter Ambang Batas</SectionTitle>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Threshold Peringatan (%)</label>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input type="number" value={threshold} onChange={e => setThreshold(Number(e.target.value))} style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: 90, fontSize: 14, fontWeight: 700 }} />
+                <span style={{ fontSize: 13, color: COLORS.gray500 }}>% dari pagu berjalan</span>
+              </div>
+              <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 4 }}>Alert muncul jika sisa pagu ≤ {threshold}%</div>
             </div>
-            <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 4 }}>Alert muncul jika sisa pagu ≤ {threshold}%</div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Notifikasi Dikirim Ke</label>
+              <input defaultValue="kadiv.keuangan@asabri.co.id" style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: "100%", fontSize: 13, boxSizing: "border-box" }} />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>CC Notifikasi</label>
+              <input defaultValue="staf.anggaran@asabri.co.id" style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: "100%", fontSize: 13, boxSizing: "border-box" }} />
+            </div>
+            <Btn size="sm">Simpan Konfigurasi</Btn>
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Notifikasi Dikirim Ke</label>
-            <input defaultValue="kadiv.keuangan@asabri.co.id" style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: "100%", fontSize: 13, boxSizing: "border-box" }} />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>CC Notifikasi</label>
-            <input defaultValue="staf.anggaran@asabri.co.id" style={{ padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: "100%", fontSize: 13, boxSizing: "border-box" }} />
-          </div>
-          <Btn size="sm">Simpan Konfigurasi</Btn>
 
-          <div style={{ marginTop: 20, padding: 14, background: COLORS.gray50, borderRadius: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, marginBottom: 8 }}>Status Saat Ini</div>
-            <div style={{ fontSize: 13, color: isAlert ? COLORS.red : COLORS.green, fontWeight: 600 }}>{isAlert ? "⚠ ALERT — Sisa pagu di bawah threshold" : "✓ AMAN — Sisa pagu di atas threshold"}</div>
-            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>Sisa: {pctSisa}% | Threshold: {threshold}%</div>
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+            <SectionTitle>Status Pemantauan</SectionTitle>
+            <div style={{ padding: 16, background: isAlert ? COLORS.redLight : COLORS.greenLight, borderRadius: 8, marginBottom: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: isAlert ? COLORS.red : COLORS.green, display: "flex", alignItems: "center", gap: 8 }}>
+                {isAlert ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
+                {isAlert ? "ALERT — Sisa pagu di bawah threshold" : "AMAN — Sisa pagu di atas threshold"}
+              </div>
+              <div style={{ fontSize: 12, color: COLORS.gray600, marginTop: 6 }}>Sisa saat ini: <strong>{pctSisa}%</strong> • Threshold: <strong>{threshold}%</strong></div>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, marginBottom: 8 }}>Jenis Dapem di Bawah Threshold</div>
+            {(() => {
+              const warnList = jenisDapem.filter(j => { const t = jenisTotal(j); return t.pagu > 0 && (t.sisa / t.pagu) * 100 <= threshold; });
+              return warnList.length === 0 ? (
+                <div style={{ padding: 14, background: COLORS.gray50, borderRadius: 8, fontSize: 12, color: COLORS.gray500 }}>Tidak ada jenis dapem yang melewati ambang batas.</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {warnList.map((j, i) => { const t = jenisTotal(j); return (
+                    <div key={i} style={{ padding: "10px 14px", background: COLORS.redLight, borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.red }}>{j.nama}</span>
+                      <span style={{ fontSize: 12, fontFamily: "monospace", color: COLORS.gray700 }}>Sisa {fmtRp(t.sisa)} ({((t.sisa / t.pagu) * 100).toFixed(1)}%)</span>
+                    </div>
+                  ); })}
+                </div>
+              );
+            })()}
           </div>
         </div>
-      </div>
-
-      {/* Riwayat SP2D Terbaru */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-        <SectionTitle action={<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: COLORS.green, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><CircleDot size={10} /> Real-time</span>
-          <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Riwayat SP2D", subtitle: "Data pencairan SP2D TA 2026", type: "table", fileName: "Riwayat_SP2D_2026.xlsx", content: { columns: ["No. SP2D", "Tanggal", "Jenis", "Nominal", "Penerima"], rows: sp2dLog.map(s => [s.no, s.tgl, s.jenis, s.nominal, s.penerima]), totalRows: sp2dLog.length } })}>Ekspor</Btn>
-        </div>}>Riwayat Pencairan SP2D Terbaru</SectionTitle>
-        <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead><tr style={{ background: COLORS.gray100 }}>
-              {["No. SP2D", "Tanggal & Waktu", "Jenis Dapem", "Nominal Pencairan", "Mitra Bayar", "Sisa Pagu Setelah"].map((c, i) => (
-                <th key={i} style={{ padding: "10px 14px", textAlign: i >= 3 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
-              ))}
-            </tr></thead>
-            <tbody>{sp2dLog.map((s, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue, fontWeight: 500 }}>{s.no}</td>
-                <td style={{ padding: "10px 14px", fontSize: 12 }}>{s.tgl}</td>
-                <td style={{ padding: "10px 14px" }}><Badge color={s.jenis === "Dapem Induk" ? "blue" : s.jenis === "Dapem Susulan" ? "green" : "orange"}>{s.jenis}</Badge></td>
-                <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{s.nominal}</td>
-                <td style={{ padding: "10px 14px" }}>{s.penerima}</td>
-                <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontSize: 12, color: COLORS.gray500 }}>{s.sisa}</td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
-        <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Data diperbarui otomatis setiap kali SP2D baru diterbitkan • Terakhir: 06 Jul 2026, 14:30 WIB</div>
-      </div>
-
-      {/* Riwayat Revisi Pagu */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-        <SectionTitle>Riwayat Revisi Pagu DIPA</SectionTitle>
-        <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead><tr style={{ background: COLORS.gray100 }}>
-              {["No. Revisi", "Tanggal", "Jenis Dapem", "Pagu Sebelum", "Pagu Sesudah", "Selisih", "Alasan Revisi"].map((c, i) => (
-                <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
-              ))}
-            </tr></thead>
-            <tbody>{revisiLog.map((r, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11, color: "#7B1FA2", fontWeight: 500 }}>{r.no}</td>
-                <td style={{ padding: "10px 14px", fontSize: 12 }}>{r.tgl}</td>
-                <td style={{ padding: "10px 14px" }}><Badge color="blue">{r.jenis}</Badge></td>
-                <td style={{ padding: "10px 14px", fontFamily: "monospace" }}>{r.sebelum}</td>
-                <td style={{ padding: "10px 14px", fontFamily: "monospace", fontWeight: 600 }}>{r.sesudah}</td>
-                <td style={{ padding: "10px 14px", fontFamily: "monospace", color: COLORS.green, fontWeight: 700 }}>{r.selisih}</td>
-                <td style={{ padding: "10px 14px", fontSize: 12, color: COLORS.gray600, maxWidth: 280 }}>{r.alasan}</td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
-        <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Revisi pagu diperbarui berdasarkan DIPA Revisi dari Kemenkeu • Data otomatis memperbarui pagu berjalan</div>
-      </div>
+      )}
     </div>
   );
 };
@@ -2329,6 +2533,616 @@ const PembayaranPensiun = () => {
 };
 
 // ============ MAIN APP ============
+
+// ===== MONITORING POLIS TASPEN LIFE (TL-F01..F07) =====
+const TaspenPolis = () => {
+  const [tab, setTab] = useState("dashboard");
+  const [filterProgram, setFilterProgram] = useState("Semua");
+  const [filterCabang, setFilterCabang] = useState("Semua");
+  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [search, setSearch] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [baState, setBaState] = useState("idle");
+  const [dragOver, setDragOver] = useState(false);
+  const [selectedSP, setSelectedSP] = useState({});
+
+  const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
+  const progColor = p => p === "TDS (THT)" ? "blue" : p === "Proteksi Beasiswa JKK" ? "orange" : "green";
+  const progShort = p => p === "TDS (THT)" ? "TDS" : p === "Proteksi Beasiswa JKK" ? "JKK" : "JKm";
+
+  // Data polis per individu (FR-TL-02, format Tabel 5 BRS)
+  const polis = [
+    { id: "P1", nik: "3201010101850001", ktpa: "KTPA-0012845", noPolis: "TL-TDS-2026-00145", noSP: "SP/TL/2026/07/001", cabang: "KC Jakarta", program: "TDS (THT)", tglAju: "05 Jun 2026", tglLahir: "01 Jan 1985", nama: "Serka Ahmad Fauzi", premi: 450000, status: "Sudah Dibayar", nikValid: true },
+    { id: "P2", nik: "3175020202920002", ktpa: "KTPA-0012846", noPolis: "TL-TDS-2026-00146", noSP: "SP/TL/2026/07/001", cabang: "KC Jakarta", program: "TDS (THT)", tglAju: "05 Jun 2026", tglLahir: "02 Feb 1992", nama: "Briptu Rina Marlina", premi: 380000, status: "Sudah Dibayar", nikValid: true },
+    { id: "P3", nik: "3674030303780003", ktpa: "KTPA-0012847", noPolis: "TL-JKK-2026-00089", noSP: "SP/TL/2026/07/002", cabang: "KC Bandung", program: "Proteksi Beasiswa JKK", tglAju: "08 Jun 2026", tglLahir: "03 Mar 1978", nama: "Letkol Bambang Suharto", premi: 620000, status: "Dalam Proses", nikValid: true },
+    { id: "P4", nik: "35780404048600", ktpa: "KTPA-0012848", noPolis: "TL-JKK-2026-00090", noSP: "—", cabang: "KC Surabaya", program: "Proteksi Beasiswa JKK", tglAju: "10 Jun 2026", tglLahir: "04 Apr 1986", nama: "Penata Tk.I Siti Nurhaliza", premi: 540000, status: "Belum Dibayar", nikValid: false },
+    { id: "P5", nik: "3273050505850005", ktpa: "KTPA-0012849", noPolis: "TL-JKM-2026-00034", noSP: "SP/TL/2026/07/003", cabang: "KC Bandung", program: "Proteksi Beasiswa JKm", tglAju: "12 Jun 2026", tglLahir: "05 Mei 1985", nama: "AKP Dedi Kurniawan", premi: 310000, status: "Sudah Dibayar", nikValid: true },
+    { id: "P6", nik: "", ktpa: "KTPA-0012850", noPolis: "TL-TDS-2026-00147", noSP: "—", cabang: "KC Medan", program: "TDS (THT)", tglAju: "14 Jun 2026", tglLahir: "06 Jun 1990", nama: "Peltu Hendra Wijaya", premi: 420000, status: "Belum Dibayar", nikValid: false },
+    { id: "P7", nik: "3171070707820007", ktpa: "KTPA-0012851", noPolis: "TL-JKM-2026-00035", noSP: "SP/TL/2026/07/003", cabang: "KC Jakarta", program: "Proteksi Beasiswa JKm", tglAju: "15 Jun 2026", tglLahir: "07 Jul 1982", nama: "Pembina Utama Dr. Ratna", premi: 290000, status: "Sudah Dibayar", nikValid: true },
+    { id: "P8", nik: "3578090909880009", ktpa: "KTPA-0012852", noPolis: "TL-TDS-2026-00148", noSP: "—", cabang: "KC Surabaya", program: "TDS (THT)", tglAju: "18 Jun 2026", tglLahir: "09 Sep 1988", nama: "Bripka Anwar Ibrahim", premi: 465000, status: "Belum Dibayar", nikValid: true },
+  ];
+
+  const cabangList = [...new Set(polis.map(p => p.cabang))];
+  const rows = polis.filter(p => {
+    if (filterProgram !== "Semua" && p.program !== filterProgram) return false;
+    if (filterCabang !== "Semua" && p.cabang !== filterCabang) return false;
+    if (filterStatus !== "Semua" && p.status !== filterStatus) return false;
+    if (search) { const q = search.toLowerCase(); if (!p.nama.toLowerCase().includes(q) && !p.nik.includes(search) && !p.ktpa.toLowerCase().includes(q) && !p.noPolis.toLowerCase().includes(q)) return false; }
+    return true;
+  });
+
+  const programs = ["TDS (THT)", "Proteksi Beasiswa JKK", "Proteksi Beasiswa JKm"];
+  const stat = pr => { const g = polis.filter(p => p.program === pr); return { n: g.length, premi: g.reduce((a, p) => a + p.premi, 0), lunas: g.filter(p => p.status === "Sudah Dibayar").length }; };
+  const invalidNik = polis.filter(p => !p.nikValid);
+  const totalPremi = polis.reduce((a, p) => a + p.premi, 0);
+
+  // SP Premi (TL-F05, F06, F07)
+  const spRows = [
+    { id: "S1", noSP: "SP/TL/2026/07/001", periode: "Juni 2026", program: "TDS (THT)", jml: 2, nominal: 830000, tglTerbit: "16 Jul 2026", jatuhTempo: "20 Jul 2026", status: "Disetujui", approver: "Kadiv Keuangan", bank: "Bank Mandiri", rek: "1234567890" },
+    { id: "S2", noSP: "SP/TL/2026/07/002", periode: "Juni 2026", program: "Proteksi Beasiswa JKK", jml: 1, nominal: 620000, tglTerbit: "16 Jul 2026", jatuhTempo: "20 Jul 2026", status: "Menunggu Approval", approver: "Kabag Anggaran", bank: "Bank Mandiri", rek: "1234567890" },
+    { id: "S3", noSP: "SP/TL/2026/07/003", periode: "Juni 2026", program: "Proteksi Beasiswa JKm", jml: 2, nominal: 600000, tglTerbit: "16 Jul 2026", jatuhTempo: "20 Jul 2026", status: "Disetujui", approver: "Kadiv Keuangan", bank: "Bank Mandiri", rek: "1234567890" },
+    { id: "S4", noSP: "—", periode: "Juli 2026", program: "TDS (THT)", jml: 2, nominal: 885000, tglTerbit: "—", jatuhTempo: "20 Agu 2026", status: "Draft", approver: "—", bank: "Bank Mandiri", rek: "1234567890" },
+  ];
+  const spStatusColor = s => s === "Disetujui" ? "green" : s === "Menunggu Approval" ? "orange" : "gray";
+  const belumBayar = polis.filter(p => p.status === "Belum Dibayar");
+  const totalBelum = belumBayar.reduce((a, p) => a + p.premi, 0);
+  const toggleSP = id => setSelectedSP(s => ({ ...s, [id]: !s[id] }));
+  const selSP = belumBayar.filter(p => selectedSP[p.id]);
+  const selSPTotal = selSP.reduce((a, p) => a + p.premi, 0);
+
+  return (
+    <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Alert NIK tidak valid */}
+      {invalidNik.length > 0 && (
+        <div style={{ background: COLORS.orangeLight, border: `1px solid #FFE0B2`, borderRadius: 10, padding: "12px 18px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+          <AlertTriangle size={18} color={COLORS.orange} />
+          <div style={{ fontSize: 13 }}>
+            <strong style={{ color: COLORS.orange }}>{invalidNik.length} polis dengan NIK tidak valid</strong>
+            <span style={{ color: COLORS.gray700 }}> — ditandai sebagai pengecualian, tidak menghambat pembayaran premi periode berjalan (BR-TL-07).</span>
+          </div>
+        </div>
+      )}
+
+      {/* Stat cards */}
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard icon={<Shield size={IC} />} label="Total Polis Aktif" value={polis.length.toString()} sub="3 program Taspen Life" color={COLORS.blue} />
+        <StatCard icon={<Banknote size={IC} />} label="Total Premi Periode" value={fmt(totalPremi)} sub="Juni 2026" color={COLORS.green} />
+        <StatCard icon={<Clock size={IC} />} label="Belum Dibayar" value={belumBayar.length.toString()} sub={fmt(totalBelum)} color={COLORS.orange} />
+        <StatCard icon={<AlertTriangle size={IC} />} label="NIK Tidak Valid" value={invalidNik.length.toString()} sub="Perlu tindak lanjut" color={COLORS.red} />
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
+        {[{ id: "dashboard", l: "Dashboard Program" }, { id: "peserta", l: "Daftar Peserta" }, { id: "sp", l: "SP Premi", c: spRows.filter(s => s.status !== "Disetujui").length }, { id: "ba", l: "Berita Acara" }].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "10px 20px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: "transparent", display: "flex", alignItems: "center", gap: 6, color: tab === t.id ? COLORS.blue : COLORS.gray500, borderBottom: tab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent", marginBottom: -2 }}>
+            {t.l}
+            {t.c ? <span style={{ background: tab === t.id ? "#E3F2FD" : COLORS.gray200, color: tab === t.id ? COLORS.blue : COLORS.gray700, padding: "1px 8px", borderRadius: 10, fontSize: 11, fontWeight: 700 }}>{t.c}</span> : null}
+          </button>
+        ))}
+      </div>
+
+      {/* TAB: Dashboard per Program */}
+      {tab === "dashboard" && (
+        <div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+            {programs.map((pr, i) => {
+              const s = stat(pr);
+              const pct = s.n ? Math.round((s.lunas / s.n) * 100) : 0;
+              return (
+                <div key={i} style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                    <Badge color={progColor(pr)}>{progShort(pr)}</Badge>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray800 }}>{pr}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                    <div><div style={{ fontSize: 11, color: COLORS.gray500 }}>Peserta</div><div style={{ fontSize: 24, fontWeight: 800, color: COLORS.gray900 }}>{s.n}</div></div>
+                    <div style={{ textAlign: "right" }}><div style={{ fontSize: 11, color: COLORS.gray500 }}>Premi</div><div style={{ fontSize: 18, fontWeight: 700, fontFamily: "monospace", color: COLORS.blueDark }}>{fmt(s.premi)}</div></div>
+                  </div>
+                  <div style={{ fontSize: 11, color: COLORS.gray500, marginBottom: 4, display: "flex", justifyContent: "space-between" }}><span>Status pembayaran</span><span style={{ fontWeight: 700, color: pct === 100 ? COLORS.green : COLORS.orange }}>{s.lunas}/{s.n} lunas</span></div>
+                  <ProgressBar value={s.lunas} max={s.n} color={pct === 100 ? COLORS.green : COLORS.orange} />
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+            <SectionTitle action={<span style={{ fontSize: 11, color: COLORS.green, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><CircleDot size={10} /> Sinkron harian dari Aplikasi Polis</span>}>Rekap Status Pembayaran Premi</SectionTitle>
+            <Table columns={["Program", "Jumlah Peserta", "Total Premi", "Sudah Dibayar", "Dalam Proses", "Belum Dibayar"]}
+              data={programs.map(pr => { const g = polis.filter(p => p.program === pr); return [
+                <Badge color={progColor(pr)}>{pr}</Badge>, g.length, fmt(g.reduce((a, p) => a + p.premi, 0)),
+                <span style={{ color: COLORS.green, fontWeight: 700 }}>{g.filter(p => p.status === "Sudah Dibayar").length}</span>,
+                <span style={{ color: COLORS.orange, fontWeight: 700 }}>{g.filter(p => p.status === "Dalam Proses").length}</span>,
+                <span style={{ color: COLORS.red, fontWeight: 700 }}>{g.filter(p => p.status === "Belum Dibayar").length}</span>,
+              ]; })} />
+            <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Terakhir sinkron: 22 Jul 2026, 06:00 WIB • Sumber: Aplikasi Polis Taspen Life (web service)</div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: Daftar Peserta (Tabel 5 BRS) */}
+      {tab === "peserta" && (
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}>
+            <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Daftar Peserta Taspen Life", subtitle: "Format Tabel 5 BRS", type: "table", fileName: "Tabel5_Daftar_Polis_TaspenLife.xlsx", content: { columns: ["Cabang", "KTPA", "No. Polis", "Nama", "Program", "Premi"], rows: rows.slice(0, 5).map(p => [p.cabang, p.ktpa, p.noPolis, p.nama, progShort(p.program), fmt(p.premi)]), totalRows: rows.length } })}>Ekspor Excel</Btn>
+            <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Daftar Peserta Taspen Life", subtitle: "Format PDF", type: "table", fileName: "Tabel5_Daftar_Polis_TaspenLife.pdf", content: { columns: ["Cabang", "KTPA", "No. Polis", "Nama", "Program", "Premi"], rows: rows.slice(0, 5).map(p => [p.cabang, p.ktpa, p.noPolis, p.nama, progShort(p.program), fmt(p.premi)]), totalRows: rows.length } })}>Ekspor PDF</Btn>
+          </div>}>Daftar Peserta per Program — Tabel 5 BRS</SectionTitle>
+
+          <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
+            <Select label="Program" value={filterProgram} onChange={setFilterProgram} options={["Semua", ...programs]} minW={190} />
+            <Select label="Cabang" value={filterCabang} onChange={setFilterCabang} options={["Semua", ...cabangList]} minW={140} />
+            <Select label="Status Polis" value={filterStatus} onChange={setFilterStatus} options={["Semua", "Belum Dibayar", "Dalam Proses", "Sudah Dibayar"]} minW={150} />
+            <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari</label><SearchInput value={search} onChange={setSearch} placeholder="NIK / KTPA / No. Polis / Nama..." minW={230} /></div>
+          </div>
+          <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {rows.length} dari {polis.length} polis</div>
+
+          {rows.length === 0 ? <NoData /> : (
+            <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead><tr style={{ background: COLORS.gray100 }}>
+                  {["Cabang", "No. KTPA", "No. Polis", "Tgl Ajuan", "No. SP", "Tgl Lahir", "Nama Pemegang Polis", "Program", "NIK", "Premi", "Status"].map((c, i) => (
+                    <th key={i} style={{ padding: "8px 10px", textAlign: i === 9 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap", fontSize: 11 }}>{c}</th>
+                  ))}
+                </tr></thead>
+                <tbody>{rows.map((p, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: !p.nikValid ? COLORS.orangeLight : "transparent" }}
+                    onMouseEnter={e => { if (p.nikValid) e.currentTarget.style.background = COLORS.gray50; }} onMouseLeave={e => { if (p.nikValid) e.currentTarget.style.background = "transparent"; }}>
+                    <td style={{ padding: "8px 10px" }}>{p.cabang}</td>
+                    <td style={{ padding: "8px 10px", fontFamily: "monospace", fontSize: 11 }}>{p.ktpa}</td>
+                    <td style={{ padding: "8px 10px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue, fontWeight: 500 }}>{p.noPolis}</td>
+                    <td style={{ padding: "8px 10px" }}>{p.tglAju}</td>
+                    <td style={{ padding: "8px 10px", fontFamily: "monospace", fontSize: 11, color: p.noSP === "—" ? COLORS.gray400 : COLORS.gray700 }}>{p.noSP}</td>
+                    <td style={{ padding: "8px 10px" }}>{p.tglLahir}</td>
+                    <td style={{ padding: "8px 10px", fontWeight: 600, color: COLORS.gray800 }}>{p.nama}</td>
+                    <td style={{ padding: "8px 10px" }}><Badge color={progColor(p.program)}>{progShort(p.program)}</Badge></td>
+                    <td style={{ padding: "8px 10px", fontFamily: "monospace", fontSize: 11 }}>
+                      {p.nikValid ? p.nik : <span style={{ color: COLORS.red, fontWeight: 600 }}>{p.nik || "(kosong)"} <AlertTriangle size={11} style={{ verticalAlign: "middle" }} /></span>}
+                    </td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(p.premi)}</td>
+                    <td style={{ padding: "8px 10px" }}><Badge color={p.status === "Sudah Dibayar" ? "green" : p.status === "Dalam Proses" ? "orange" : "gray"}>{p.status}</Badge></td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+          {invalidNik.length > 0 && (
+            <div style={{ marginTop: 12, background: COLORS.orangeLight, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: COLORS.orange, display: "flex", gap: 8 }}>
+              <AlertTriangle size={14} />
+              <span>Baris berlatar oranye = NIK tidak valid (bukan 16 digit atau kosong). Data tetap dihitung dalam premi periode berjalan, namun perlu dilengkapi.</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB: SP Premi */}
+      {tab === "sp" && (
+        <div>
+          <div style={{ background: "#E3F2FD", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 12, color: COLORS.gray700, display: "flex", gap: 8, alignItems: "center" }}>
+            <Calendar size={14} color={COLORS.blue} />
+            <span>Pembayaran premi ke Taspen Life dilakukan <strong>setelah tanggal 15 bulan berikutnya</strong> dari periode premi (BR-TL-01). Hari ini <strong>22 Jul 2026</strong> — SP untuk periode Juni 2026 sudah dapat diterbitkan.</span>
+          </div>
+
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+            <SectionTitle action={
+              <Btn onClick={() => { if (!selSP.length) return; const byProg = {}; selSP.forEach(p => { (byProg[p.program] = byProg[p.program] || { count: 0, sum: 0 }); byProg[p.program].count++; byProg[p.program].sum += p.premi; });
+                setPreview({ title: "Preview Surat Perintah Pembayaran Premi", subtitle: `${selSP.length} polis • Total ${fmt(selSPTotal)} • Format Tabel 6 BRS`, type: "surat", fileName: "SP_Premi_TaspenLife_Juli2026.pdf", content: { noSurat: "SP/TL/2026/07/XXX", tujuan: "PT Asuransi Jiwa Taspen (Taspen Life)\\nBank Mandiri — Rek. 1234567890", periode: "Juni 2026", cutoff: "30 Jun 2026", tanggal: "22 Jul 2026", items: Object.entries(byProg).map(([pr, g]) => ({ jenis: pr, peserta: g.count.toString(), nominal: fmt(g.sum) })) } }); }}>
+                <FileText size={14} /> Terbitkan SP Premi ({selSP.length})
+              </Btn>
+            }>Polis Belum Dibayar — Siap Diterbitkan SP</SectionTitle>
+
+            {belumBayar.length === 0 ? <NoData text="Semua premi periode ini sudah dibayar." /> : (
+              <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead><tr style={{ background: COLORS.gray100 }}>
+                    {["", "No. Polis", "Nama Pemegang Polis", "Cabang", "Program", "Premi"].map((c, i) => (
+                      <th key={i} style={{ padding: "10px 12px", textAlign: i === 5 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>{belumBayar.map((p, i) => (
+                    <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: selectedSP[p.id] ? "#E3F2FD" : "transparent" }}>
+                      <td style={{ padding: "10px 12px", textAlign: "center" }}><input type="checkbox" checked={!!selectedSP[p.id]} onChange={() => toggleSP(p.id)} style={{ cursor: "pointer", width: 16, height: 16 }} /></td>
+                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue }}>{p.noPolis}</td>
+                      <td style={{ padding: "10px 12px", fontWeight: 600 }}>{p.nama}</td>
+                      <td style={{ padding: "10px 12px" }}>{p.cabang}</td>
+                      <td style={{ padding: "10px 12px" }}><Badge color={progColor(p.program)}>{progShort(p.program)}</Badge></td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(p.premi)}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            )}
+            {selSP.length > 0 && (
+              <div style={{ marginTop: 12, padding: "12px 16px", background: "#E3F2FD", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 13, color: COLORS.blueDark }}><strong>{selSP.length}</strong> polis dipilih — Total premi: <strong>{fmt(selSPTotal)}</strong></span>
+                <span style={{ fontSize: 11, color: COLORS.gray600 }}>Rekening tujuan: Bank Mandiri — 1234567890 a.n. PT Asuransi Jiwa Taspen</span>
+              </div>
+            )}
+          </div>
+
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+            <SectionTitle>Riwayat SP Premi & Status Approval</SectionTitle>
+            <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead><tr style={{ background: COLORS.gray100 }}>
+                  {["No. SP", "Periode", "Program", "Jml Polis", "Nominal", "Tgl Terbit", "Jatuh Tempo", "Status", "Approver"].map((c, i) => (
+                    <th key={i} style={{ padding: "10px 12px", textAlign: i === 3 || i === 4 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                  ))}
+                </tr></thead>
+                <tbody>{spRows.map((s, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: s.noSP === "—" ? COLORS.gray400 : COLORS.blue, fontWeight: 500 }}>{s.noSP}</td>
+                    <td style={{ padding: "10px 12px" }}>{s.periode}</td>
+                    <td style={{ padding: "10px 12px" }}><Badge color={progColor(s.program)}>{progShort(s.program)}</Badge></td>
+                    <td style={{ padding: "10px 12px", textAlign: "right" }}>{s.jml}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(s.nominal)}</td>
+                    <td style={{ padding: "10px 12px", fontSize: 12 }}>{s.tglTerbit}</td>
+                    <td style={{ padding: "10px 12px", fontSize: 12 }}>{s.jatuhTempo}</td>
+                    <td style={{ padding: "10px 12px" }}><Badge color={spStatusColor(s.status)}>{s.status}</Badge></td>
+                    <td style={{ padding: "10px 12px", fontSize: 12, color: COLORS.gray600 }}>{s.approver}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: Berita Acara */}
+      {tab === "ba" && (
+        <div>
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 24, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+            <SectionTitle>Unggah Berita Acara dari Divisi Kepesertaan</SectionTitle>
+            <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#F57F17", display: "flex", gap: 8 }}>
+              <AlertTriangle size={14} />
+              <span>Pembayaran premi hanya dapat diproses apabila Berita Acara telah diterima dan direkonsiliasi bersama Divisi Layanan (BR-TL-02).</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 18 }}>
+              <Select label="Periode Berita Acara" value="Juni 2026" onChange={() => {}} options={["Juni 2026", "Mei 2026", "April 2026"]} />
+              <Select label="Program" value="Semua Program" onChange={() => {}} options={["Semua Program", ...programs]} />
+              <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Tanggal Berita Acara</label><input type="date" defaultValue="2026-07-01" style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, boxSizing: "border-box" }} /></div>
+            </div>
+            <div onDragOver={e => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)}
+              onDrop={e => { e.preventDefault(); setDragOver(false); setBaState("uploading"); setTimeout(() => setBaState("done"), 1400); }}
+              onClick={() => { setBaState("uploading"); setTimeout(() => setBaState("done"), 1400); }}
+              style={{ border: `2px dashed ${dragOver ? COLORS.blue : COLORS.gray300}`, borderRadius: 12, padding: "40px 24px", textAlign: "center", background: dragOver ? "#E3F2FD" : COLORS.gray50, cursor: "pointer" }}>
+              {baState === "idle" && (<>
+                <div style={{ marginBottom: 10, opacity: 0.4 }}><Upload size={40} /></div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.gray800, marginBottom: 4 }}>Drag &amp; drop Berita Acara di sini</div>
+                <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 14 }}>atau klik untuk memilih file dari komputer</div>
+                <div style={{ display: "inline-flex", padding: "8px 20px", background: COLORS.blue, color: COLORS.white, borderRadius: 6, fontSize: 13, fontWeight: 600 }}>Pilih File</div>
+                <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 10 }}>Format: PDF, XLSX — Maks. 20 MB</div>
+              </>)}
+              {baState === "uploading" && (<>
+                <div style={{ marginBottom: 10, color: COLORS.blue }}><Clock size={40} /></div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.blue }}>Mengunggah &amp; mencocokkan dengan data polis...</div>
+              </>)}
+              {baState === "done" && (<>
+                <div style={{ marginBottom: 10, color: COLORS.green }}><CheckCircle2 size={40} /></div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.green, marginBottom: 4 }}>Berita Acara berhasil diunggah</div>
+                <div style={{ fontSize: 12, color: COLORS.gray700, marginBottom: 12 }}>8 polis dicocokkan • 6 sesuai • 2 selisih ditemukan</div>
+                <Btn size="sm" variant="ghost" onClick={e => { e.stopPropagation(); setBaState("idle"); }}>Unggah Ulang</Btn>
+              </>)}
+            </div>
+          </div>
+
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+            <SectionTitle>Riwayat Berita Acara &amp; Status Rekonsiliasi</SectionTitle>
+            <Table columns={["No. Berita Acara", "Periode", "Tgl Terima", "Jml Polis (BA)", "Jml Polis (Sistem)", "Selisih", "Status", "Diunggah Oleh"]} data={[
+              ["BA/KEP/2026/06/012", "Juni 2026", "01 Jul 2026", "8", "8", <span style={{ color: COLORS.orange, fontWeight: 700 }}>2 selisih</span>, <Badge color="orange">Perlu Rekonsiliasi</Badge>, "Staf Keuangan A"],
+              ["BA/KEP/2026/05/011", "Mei 2026", "02 Jun 2026", "7", "7", <span style={{ color: COLORS.green }}>0</span>, <Badge color="green">Tervalidasi</Badge>, "Staf Keuangan A"],
+              ["BA/KEP/2026/04/010", "April 2026", "03 Mei 2026", "7", "7", <span style={{ color: COLORS.green }}>0</span>, <Badge color="green">Tervalidasi</Badge>, "Staf Keuangan B"],
+            ]} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ===== TAGIHAN IMBAL JASA TASPEN LIFE (TL-F08..F11) =====
+const TaspenImbalJasa = () => {
+  const [filterProgram, setFilterProgram] = useState("Semua");
+  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [searchTagihan, setSearchTagihan] = useState("");
+  const [detailTagihan, setDetailTagihan] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [showTarif, setShowTarif] = useState(false);
+  const [tarifTDS, setTarifTDS] = useState(2.5);
+  const [tarifJKK, setTarifJKK] = useState(3);
+  const [tarifJKm, setTarifJKm] = useState(3);
+  const [pphRate, setPphRate] = useState(2);
+  const [ppnRate, setPpnRate] = useState(11);
+
+  const fmt = n => `Rp ${Math.round(n).toLocaleString("id-ID")}`;
+  const progColor = p => p === "TDS (THT)" ? "blue" : p === "Proteksi Beasiswa JKK" ? "orange" : "green";
+  const progShort = p => p === "TDS (THT)" ? "TDS" : p === "Proteksi Beasiswa JKK" ? "JKK" : "JKm";
+
+  const allTagihan = [
+    { no: "TIJ-2606-001", program: "TDS (THT)", noSP: "SP/TL/2026/06/001", periode: "Mei 2026", jmlPolis: 2, premi: 830000, tarif: 2.5, tglTerbit: "18 Jun 2026", jatuhTempo: "18 Jul 2026", tglBayar: "10 Jul 2026", hariTerlambat: 0, status: "Dibayar" },
+    { no: "TIJ-2606-002", program: "Proteksi Beasiswa JKK", noSP: "SP/TL/2026/06/002", periode: "Mei 2026", jmlPolis: 1, premi: 620000, tarif: 3, tglTerbit: "18 Jun 2026", jatuhTempo: "18 Jul 2026", tglBayar: null, hariTerlambat: 4, status: "Belum Dibayar" },
+    { no: "TIJ-2606-003", program: "Proteksi Beasiswa JKm", noSP: "SP/TL/2026/06/003", periode: "Mei 2026", jmlPolis: 2, premi: 600000, tarif: 3, tglTerbit: "18 Jun 2026", jatuhTempo: "18 Jul 2026", tglBayar: "15 Jul 2026", hariTerlambat: 0, status: "Dibayar" },
+    { no: "TIJ-2605-001", program: "TDS (THT)", noSP: "SP/TL/2026/05/001", periode: "April 2026", jmlPolis: 2, premi: 792000, tarif: 2.5, tglTerbit: "18 Mei 2026", jatuhTempo: "18 Jun 2026", tglBayar: "25 Jun 2026", hariTerlambat: 7, status: "Terlambat" },
+    { no: "TIJ-2605-002", program: "Proteksi Beasiswa JKK", noSP: "SP/TL/2026/05/002", periode: "April 2026", jmlPolis: 1, premi: 600000, tarif: 3, tglTerbit: "18 Mei 2026", jatuhTempo: "18 Jun 2026", tglBayar: "05 Jun 2026", hariTerlambat: 0, status: "Dibayar" },
+    { no: "TIJ-2607-001", program: "TDS (THT)", noSP: "SP/TL/2026/07/001", periode: "Juni 2026", jmlPolis: 2, premi: 830000, tarif: 2.5, tglTerbit: "20 Jul 2026", jatuhTempo: "20 Agu 2026", tglBayar: null, hariTerlambat: 0, status: "Menunggu Pembayaran" },
+  ];
+
+  const calc = t => {
+    const bruto = t.premi * t.tarif / 100;
+    const ppn = bruto * ppnRate / 100;
+    const pph = bruto * pphRate / 100;
+    const neto = bruto + ppn - pph;
+    const denda = t.hariTerlambat > 0 ? neto * 0.0575 * t.hariTerlambat / 365 : 0;
+    return { bruto, ppn, pph, neto, denda };
+  };
+
+  const statusColor = s => s === "Dibayar" ? "green" : s === "Terlambat" ? "orange" : s === "Belum Dibayar" ? "red" : "gray";
+
+  const tagihDenda = (t) => { const c = calc(t); setPreview({
+    title: "Surat Tagihan Denda Keterlambatan",
+    subtitle: `Taspen Life — ${t.no} • ${t.hariTerlambat} hari terlambat`,
+    type: "surat",
+    fileName: `Tagihan_Denda_${t.no}.pdf`,
+    content: {
+      noSurat: t.no.replace(/^TIJ/, "DENDA"),
+      tujuan: "PT Asuransi Jiwa Taspen (Taspen Life)",
+      periode: `${t.program} — ${t.periode}`,
+      cutoff: t.jatuhTempo,
+      tanggal: "22 Jul 2026",
+      items: [
+        { jenis: "Nilai Neto Tagihan", peserta: "—", nominal: fmt(c.neto) },
+        { jenis: `Hari keterlambatan (jatuh tempo ${t.jatuhTempo})`, peserta: `${t.hariTerlambat} hari`, nominal: "—" },
+        { jenis: "Denda (Neto × 5,75% × hari ÷ 365)", peserta: "—", nominal: fmt(c.denda) },
+      ],
+    },
+  }); };
+
+  const filtered = allTagihan.filter(t => {
+    if (filterProgram !== "Semua" && t.program !== filterProgram) return false;
+    if (filterStatus !== "Semua" && t.status !== filterStatus) return false;
+    if (searchTagihan && !t.no.toLowerCase().includes(searchTagihan.toLowerCase()) && !t.noSP.toLowerCase().includes(searchTagihan.toLowerCase())) return false;
+    return true;
+  });
+
+  const totalNeto = allTagihan.reduce((a, t) => a + calc(t).neto, 0);
+  const totalDenda = allTagihan.reduce((a, t) => a + calc(t).denda, 0);
+  const terlambatCount = allTagihan.filter(t => t.hariTerlambat > 0).length;
+  const lunasCount = allTagihan.filter(t => t.status === "Dibayar").length;
+
+  const riwayatTarif = [
+    { tgl: "01 Jan 2026", prog: "TDS (THT)", lama: "2,0%", baru: "2,5%", oleh: "Kadiv Keuangan", ket: "Penyesuaian kontrak kerjasama 2026" },
+    { tgl: "01 Jan 2026", prog: "Proteksi Beasiswa JKK", lama: "2,5%", baru: "3,0%", oleh: "Kadiv Keuangan", ket: "Penyesuaian kontrak kerjasama 2026" },
+    { tgl: "01 Jan 2026", prog: "Proteksi Beasiswa JKm", lama: "2,5%", baru: "3,0%", oleh: "Kadiv Keuangan", ket: "Mengikuti tarif JKK" },
+  ];
+
+  return (
+    <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Modal Parameter Tarif */}
+      {showTarif && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }} onClick={() => setShowTarif(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 640, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+            <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>Parameter Tarif Imbal Jasa</div>
+                <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>Perubahan berlaku prospektif sesuai periode yang ditetapkan (BR-TL-08)</div>
+              </div>
+              <button onClick={() => setShowTarif(false)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
+            </div>
+            <div style={{ padding: "20px 24px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Tarif per Program</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+                {[{ l: "TDS (THT)", v: tarifTDS, set: setTarifTDS, c: "blue" }, { l: "Proteksi Beasiswa JKK", v: tarifJKK, set: setTarifJKK, c: "orange" }, { l: "Proteksi Beasiswa JKm", v: tarifJKm, set: setTarifJKm, c: "green" }].map((x, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: COLORS.gray50, borderRadius: 8 }}>
+                    <Badge color={x.c}>{x.l}</Badge>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <input type="number" step="0.1" value={x.v} onChange={e => x.set(Number(e.target.value))} style={{ padding: "6px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: 80, fontSize: 14, textAlign: "right", fontWeight: 700 }} />
+                      <span style={{ fontSize: 13, color: COLORS.gray500 }}>% dari premi</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Parameter Perpajakan</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+                {[{ l: "PPh atas Imbal Jasa", v: pphRate, set: setPphRate, note: "Dipotong dari bruto" }, { l: "PPN atas Imbal Jasa", v: ppnRate, set: setPpnRate, note: "Ditambahkan ke bruto" }].map((x, i) => (
+                  <div key={i} style={{ padding: "12px 14px", background: COLORS.gray50, borderRadius: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray800, marginBottom: 6 }}>{x.l}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <input type="number" step="0.5" value={x.v} onChange={e => x.set(Number(e.target.value))} style={{ padding: "6px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, width: 70, fontSize: 14, textAlign: "right", fontWeight: 700 }} />
+                      <span style={{ fontSize: 13, color: COLORS.gray500 }}>%</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 4 }}>{x.note}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding: 14, background: "#E3F2FD", borderRadius: 8, marginBottom: 20 }}>
+                <div style={{ fontSize: 11, color: COLORS.gray600, marginBottom: 4 }}>Simulasi — premi Rp 1.000.000 (tarif TDS {tarifTDS}%)</div>
+                <div style={{ fontSize: 12, fontFamily: "monospace", color: COLORS.blueDark, lineHeight: 1.7 }}>
+                  Bruto: {fmt(1000000 * tarifTDS / 100)} • PPN {ppnRate}%: +{fmt(1000000 * tarifTDS / 100 * ppnRate / 100)} • PPh {pphRate}%: −{fmt(1000000 * tarifTDS / 100 * pphRate / 100)}<br />
+                  <strong>Neto: {fmt(1000000 * tarifTDS / 100 * (1 + ppnRate / 100 - pphRate / 100))}</strong>
+                </div>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Riwayat Perubahan Tarif</div>
+              <div style={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, overflow: "hidden", marginBottom: 16 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead><tr style={{ background: COLORS.gray100 }}>{["Berlaku", "Program", "Lama", "Baru", "Diubah Oleh"].map((c, i) => <th key={i} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>{c}</th>)}</tr></thead>
+                  <tbody>{riwayatTarif.map((r, i) => (
+                    <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                      <td style={{ padding: "8px 10px" }}>{r.tgl}</td>
+                      <td style={{ padding: "8px 10px" }}><Badge color={progColor(r.prog)}>{progShort(r.prog)}</Badge></td>
+                      <td style={{ padding: "8px 10px", color: COLORS.gray500 }}>{r.lama}</td>
+                      <td style={{ padding: "8px 10px", fontWeight: 700 }}>{r.baru}</td>
+                      <td style={{ padding: "8px 10px", fontSize: 11, color: COLORS.gray600 }}>{r.oleh}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <Btn variant="ghost" size="sm" onClick={() => setShowTarif(false)}>Batal</Btn>
+                <Btn size="sm" onClick={() => setShowTarif(false)}>Simpan Parameter</Btn>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Tagihan */}
+      {detailTagihan && (() => {
+        const t = detailTagihan; const c = calc(t);
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }} onClick={() => setDetailTagihan(null)}>
+            <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+              <div style={{ padding: "24px 28px 16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.gray900 }}>Detail tagihan {t.no}</div>
+                    <div style={{ fontSize: 13, color: COLORS.gray500, marginTop: 2 }}>Taspen Life - {t.program} - {t.periode}</div>
+                  </div>
+                  <button onClick={() => setDetailTagihan(null)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <Badge color={statusColor(t.status)}>{t.hariTerlambat === 0 && t.status === "Dibayar" ? "Dibayar tepat waktu" : t.status}</Badge>
+                </div>
+              </div>
+              <div style={{ padding: "0 28px 24px" }}>
+                <div style={{ borderTop: `1px solid ${COLORS.gray200}`, paddingTop: 20, marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Informasi Tagihan</div>
+                  {[
+                    ["Penerbit", "PT ASABRI (Persero)"],
+                    ["Ditagihkan kepada", "PT Asuransi Jiwa Taspen"],
+                    ["Program", t.program],
+                    ["No. SP Premi", t.noSP],
+                    ["Jumlah polis", `${t.jmlPolis} polis`],
+                    ["Periode", t.periode],
+                    ["Tanggal terbit", t.tglTerbit],
+                    ["Jatuh tempo", t.jatuhTempo],
+                    ["Tanggal dibayar", t.tglBayar || "—"],
+                  ].map(([label, val], i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${COLORS.gray100}`, fontSize: 13 }}>
+                      <span style={{ color: COLORS.gray500 }}>{label}</span>
+                      <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{val}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Rincian Nilai Tagihan</div>
+                  {[
+                    ["Total premi", fmt(t.premi)],
+                    [`Tarif imbal jasa (${t.tarif}%)`, fmt(c.bruto)],
+                    [`PPN ${ppnRate}%`, "+ " + fmt(c.ppn)],
+                    [`PPh ${pphRate}%`, "− " + fmt(c.pph)],
+                  ].map(([label, val], i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${COLORS.gray100}`, fontSize: 13 }}>
+                      <span style={{ color: COLORS.gray500 }}>{label}</span><span style={{ fontWeight: 500, color: COLORS.gray800 }}>{val}</span>
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13 }}>
+                    <span style={{ fontWeight: 700, color: COLORS.gray900 }}>Nilai neto tagihan</span>
+                    <span style={{ fontWeight: 700, color: COLORS.gray900 }}>{fmt(c.neto)}</span>
+                  </div>
+                </div>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Denda Keterlambatan</div>
+                  {c.denda === 0 ? (
+                    <div style={{ background: COLORS.greenLight, borderRadius: 8, padding: "12px 14px", fontSize: 13, color: COLORS.green, display: "flex", gap: 8, alignItems: "center" }}>
+                      <CheckCircle2 size={16} />
+                      <span>Tidak ada denda — pembayaran sesuai atau belum melewati jatuh tempo</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${COLORS.gray100}`, fontSize: 13 }}>
+                        <span style={{ color: COLORS.gray500 }}>Hari terlambat</span><span style={{ fontWeight: 600, color: COLORS.red }}>{t.hariTerlambat} hari</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13 }}>
+                        <span style={{ color: COLORS.gray500 }}>Denda (Neto × 5,75% × hari / 365)</span><span style={{ fontWeight: 700, color: COLORS.red }}>{fmt(c.denda)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderTop: `1px solid ${COLORS.gray200}` }}>
+                  <span style={{ fontSize: 14, color: COLORS.gray700 }}>Total tagihan + denda</span>
+                  <span style={{ fontSize: 22, fontWeight: 800, color: COLORS.gray900, fontFamily: "monospace" }}>{fmt(c.neto + c.denda)}</span>
+                </div>
+                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
+                  <Btn variant="outline" size="sm" onClick={() => { setDetailTagihan(null); setPreview({ title: "Preview Unduh Tagihan " + t.no, subtitle: `Taspen Life - ${t.program} - ${t.periode}`, type: "table", fileName: "Tagihan_" + t.no + ".pdf", content: { columns: ["Item", "Nilai"], rows: [["Total Premi", fmt(t.premi)], [`Imbal Jasa ${t.tarif}%`, fmt(c.bruto)], [`PPN ${ppnRate}%`, "+" + fmt(c.ppn)], [`PPh ${pphRate}%`, "−" + fmt(c.pph)], ["Nilai Neto", fmt(c.neto)], ["Denda", fmt(c.denda)], ["Grand Total", fmt(c.neto + c.denda)]], totalRows: 7 } }); }}>Unduh Tagihan</Btn>
+                  <Btn variant="danger" size="sm" onClick={() => setDetailTagihan(null)}>Tutup</Btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 4 }}>Daftar tagihan imbal jasa kepada Taspen Life atas jasa pemasaran dan administrasi polis, termasuk keterlambatan dan denda</div>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Btn variant="ghost" onClick={() => setShowTarif(true)}><Percent size={14} /> Parameter Tarif</Btn>
+          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Tagihan Imbal Jasa Taspen Life", subtitle: "Format Tabel 7 BRS", type: "table", fileName: "Tagihan_ImbalJasa_TaspenLife.xlsx", content: { columns: ["No.", "Program", "Periode", "Premi", "Tarif", "Neto", "Status"], rows: allTagihan.slice(0, 5).map(t => [t.no, progShort(t.program), t.periode, fmt(t.premi), t.tarif + "%", fmt(calc(t).neto), t.status]), totalRows: allTagihan.length } })}>Ekspor Excel</Btn>
+          <Btn onClick={() => setPreview({ title: "Preview Surat Tagihan Imbal Jasa", subtitle: "Format Tabel 7 BRS + kuitansi tanda terima", type: "surat", fileName: "Surat_Tagihan_ImbalJasa_TaspenLife.pdf", content: { noSurat: "TIJ/2026/07/XXX", tujuan: "PT Asuransi Jiwa Taspen (Taspen Life)", periode: "Juni 2026", cutoff: "18 Jul 2026", tanggal: "22 Jul 2026", items: allTagihan.filter(t => t.periode === "Juni 2026").map(t => { const c = calc(t); return { jenis: `${t.program} — imbal jasa ${t.tarif}%`, peserta: t.jmlPolis.toString(), nominal: fmt(c.neto) }; }) } })}>Terbitkan & Kirim ke Taspen Life</Btn>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard icon={<Banknote size={IC} />} label="Total nilai neto tagihan" value={fmt(totalNeto)} sub={`${allTagihan.length} tagihan diterbitkan`} color={COLORS.blue} />
+        <StatCard icon={<CheckCircle2 size={IC} />} label="Tagihan sudah lunas" value={`${lunasCount} tagihan`} sub={`Dari ${allTagihan.length} tagihan`} color={COLORS.green} />
+        <StatCard icon={<Clock size={IC} />} label="Tagihan terlambat" value={`${terlambatCount} tagihan`} sub="Melewati jatuh tempo" color={COLORS.orange} />
+        <StatCard icon={<AlertTriangle size={IC} />} label="Total denda keterlambatan" value={fmt(totalDenda)} sub="Akumulasi periode ini" color={COLORS.red} />
+      </div>
+
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+        <SectionTitle action={<span style={{ fontSize: 12, color: COLORS.gray500 }}>Tarif aktif: TDS {tarifTDS}% • JKK {tarifJKK}% • JKm {tarifJKm}%</span>}>Daftar Tagihan Imbal Jasa Taspen Life</SectionTitle>
+        <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#F57F17", display: "flex", gap: 8 }}>
+          <AlertTriangle size={14} />
+          <span>Surat tagihan imbal jasa hanya diterbitkan setelah pembayaran premi kepada Taspen Life selesai dilakukan (BR-TL-05).</span>
+        </div>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end" }}>
+          <Select label="Program" value={filterProgram} onChange={setFilterProgram} options={["Semua", "TDS (THT)", "Proteksi Beasiswa JKK", "Proteksi Beasiswa JKm"]} minW={190} />
+          <Select label="Status" value={filterStatus} onChange={setFilterStatus} options={["Semua", "Dibayar", "Terlambat", "Belum Dibayar", "Menunggu Pembayaran"]} minW={170} />
+          <div><label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari</label><SearchInput value={searchTagihan} onChange={setSearchTagihan} placeholder="Cari no. tagihan atau no. SP..." minW={240} /></div>
+        </div>
+        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allTagihan.length} tagihan</div>
+        {filtered.length === 0 ? <NoData /> : (
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr style={{ background: COLORS.gray100 }}>
+                {["No. Tagihan", "Program", "No. SP Premi", "Periode", "Tgl. Terbit", "Jatuh Tempo", "Tgl. Dibayar", "Status", ""].map((c, i) => (
+                  <th key={i} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                ))}
+              </tr></thead>
+              <tbody>{filtered.map((t, i) => {
+                const bg = t.status === "Belum Dibayar" ? COLORS.redLight : t.status === "Terlambat" ? COLORS.yellowLight : "transparent";
+                return (
+                  <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: bg }}
+                    onMouseEnter={e => e.currentTarget.style.background = bg === "transparent" ? COLORS.gray50 : bg}
+                    onMouseLeave={e => e.currentTarget.style.background = bg}>
+                    <td style={{ padding: "10px 14px", fontFamily: "monospace", color: COLORS.blue, fontWeight: 500 }}>{t.no}</td>
+                    <td style={{ padding: "10px 14px" }}><Badge color={progColor(t.program)}>{progShort(t.program)}</Badge></td>
+                    <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11 }}>{t.noSP}</td>
+                    <td style={{ padding: "10px 14px" }}>{t.periode}</td>
+                    <td style={{ padding: "10px 14px" }}>{t.tglTerbit}</td>
+                    <td style={{ padding: "10px 14px", color: t.hariTerlambat > 0 ? COLORS.red : COLORS.gray800, fontWeight: t.hariTerlambat > 0 ? 700 : 400 }}>{t.jatuhTempo}</td>
+                    <td style={{ padding: "10px 14px" }}>{t.tglBayar || <span style={{ color: COLORS.gray400 }}>—</span>}</td>
+                    <td style={{ padding: "10px 14px" }}><Badge color={statusColor(t.status)}>{t.status}</Badge></td>
+                    <td style={{ padding: "10px 14px" }}>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <Btn size="sm" variant="outline" onClick={() => setDetailTagihan(t)}>Detail</Btn>
+                        {t.hariTerlambat > 0 && <Btn size="sm" variant="danger" onClick={() => tagihDenda(t)}><Bell size={13} /> Tagih Denda</Btn>}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const ICON_MAP = {
   chart: BarChart3, calc: Calculator, sync: RefreshCw, file: FileText,
   bank: Building2, clip: ClipboardList, card: CreditCard, receipt: Receipt,
@@ -2337,55 +3151,75 @@ const ICON_MAP = {
 };
 
 const MENU = [
-  { section: "KEUANGAN", items: [
-    { id: "dashboard", icon: "chart", label: "Dashboard" },
-    { icon: "dollar", label: "Pengelolaan Iuran", children: [
-      { id: "kalkulator", label: "Kalkulator Iuran" },
-      { id: "rekonsiliasi", label: "Rekonsiliasi SKP-PFK" },
-      { id: "tagihan", label: "Penagihan ke Kemenkeu", disabled: true },
-    ]},
-    { icon: "bank", label: "Pembayaran Manfaat", children: [
-      { id: "bayarpensiun", label: "Daftar DAPEM & Tagihan" },
-      { id: "dana", label: "Monitoring Dana" },
-      { id: "klaim", label: "Monitoring Klaim JKK" },
-    ]},
-    { icon: "shield", label: "Penagihan & UDW", children: [
-      { id: "kredit", label: "Monitoring UDW Punah" },
-      { id: "imbaljasa", label: "Tagihan Imbal Jasa" },
-    ]},
-    { id: "dipa", icon: "trend", label: "Monitoring Pagu DIPA" },
-    { id: "bpjs", icon: "cross", label: "Rekonsiliasi BPJS" },
+  { section: "IKHTISAR", items: [
+    { id: "dashboard", icon: "chart", label: "Ikhtisar Keuangan" },
   ]},
-  { section: "PERPAJAKAN", items: [
-    { icon: "receipt", label: "Pengelolaan Pajak", children: [
+  { section: "PENERIMAAN IURAN", items: [
+    { icon: "dollar", label: "Administrasi Iuran Peserta", children: [
+      { id: "kalkulator", label: "Perhitungan Iuran Peserta" },
+      { id: "rekonsiliasi", label: "Rekonsiliasi SKP-PFK Kemenkeu" },
+      { id: "tagihan", label: "Penerbitan Tagihan Kemenkeu", disabled: true },
+    ]},
+  ]},
+  { section: "PEMBAYARAN MANFAAT", items: [
+    { icon: "bank", label: "Realisasi Pembayaran Manfaat", children: [
+      { id: "bayarpensiun", label: "Daftar DAPEM & Penerbitan SPP" },
+      { id: "klaim", label: "Penyelesaian Klaim JKK" },
+    ]},
+    { icon: "trend", label: "Pengendalian Anggaran", children: [
+      { id: "dipa", label: "Realisasi & Sisa Pagu DIPA" },
+      { id: "dana", label: "Ketersediaan Dana Mitra Bayar" },
+    ]},
+  ]},
+  { section: "PENAGIHAN & PIUTANG", items: [
+    { icon: "shield", label: "Penagihan Kelebihan Bayar", children: [
+      { id: "kredit", label: "Penarikan UDW Punah" },
+    ]},
+    { icon: "card", label: "Penagihan Imbal Jasa", children: [
+      { id: "imbaljasa", label: "Imbal Jasa Mitra Bayar" },
+      { id: "tlimbaljasa", label: "Imbal Jasa Taspen Life" },
+    ]},
+  ]},
+  { section: "KEMITRAAN ASURANSI", items: [
+    { icon: "wallet", label: "Administrasi Taspen Life", children: [
+      { id: "tlpolis", label: "Portofolio Polis & Premi" },
+    ]},
+  ]},
+  { section: "PERPAJAKAN & REKONSILIASI", items: [
+    { icon: "receipt", label: "Administrasi Perpajakan", children: [
       { id: "pajak", label: "PPh 21 & Bukti Potong" },
+    ]},
+    { icon: "cross", label: "Rekonsiliasi Jaminan Kesehatan", children: [
+      { id: "bpjs", label: "Iuran BPJS Kesehatan" },
     ]},
   ]},
   { section: "PELAPORAN", items: [
-    { id: "laporan", icon: "pen", label: "Generator Laporan" },
+    { id: "laporan", icon: "pen", label: "Laporan & Ekspor Data" },
   ]},
 ];
 
 const PAGES = {
-  dashboard: { title: "Dashboard Keuangan", component: DashboardKeuangan },
-  kalkulator: { title: "Kalkulator Iuran Per Peserta", component: KalkulatorIuran },
-  rekonsiliasi: { title: "Rekonsiliasi THT/Dapen vs SKP-PFK", component: RekonsIuran },
-  tagihan: { title: "Penagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
-  bayarpensiun: { title: "Daftar DAPEM per MAK & Pembuatan Tagihan", component: PembayaranPensiun },
-  dana: { title: "Dashboard Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
-  klaim: { title: "Monitoring Klaim JKK Perawatan", component: MonitoringKlaim },
-  kredit: { title: "Monitoring & Penarikan UDW Punah", component: KreditPiutang },
+  dashboard: { title: "Ikhtisar Keuangan", component: DashboardKeuangan },
+  kalkulator: { title: "Perhitungan Iuran Peserta", component: KalkulatorIuran },
+  rekonsiliasi: { title: "Rekonsiliasi SKP-PFK Kemenkeu", component: RekonsIuran },
+  tagihan: { title: "Penerbitan Tagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
+  bayarpensiun: { title: "Daftar DAPEM per MAK & Penerbitan SPP", component: PembayaranPensiun },
+  dana: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
+  klaim: { title: "Penyelesaian Klaim JKK Perawatan", component: MonitoringKlaim },
+  kredit: { title: "Penarikan Kelebihan Bayar UDW Punah", component: KreditPiutang },
   imbaljasa: { title: "Tagihan Imbal Jasa Mitra Bayar", component: TagihanImbalJasa },
-  pajak: { title: "Perpajakan PPh 21", component: Perpajakan },
-  dipa: { title: "Monitoring Sisa Pagu DIPA TA 2026", component: DashboardDIPA },
+  tlpolis: { title: "Portofolio Polis & Premi Taspen Life", component: TaspenPolis },
+  tlimbaljasa: { title: "Tagihan Imbal Jasa Taspen Life", component: TaspenImbalJasa },
+  pajak: { title: "Administrasi PPh 21 & Bukti Potong", component: Perpajakan },
+  dipa: { title: "Realisasi & Sisa Pagu DIPA TA 2026", component: DashboardDIPA },
   bpjs: { title: "Rekonsiliasi Iuran BPJS Kesehatan", component: RekonBPJS },
-  laporan: { title: "Pelaporan & Integrasi Sistem", component: ReportGenerator },
+  laporan: { title: "Laporan & Ekspor Data", component: ReportGenerator },
 };
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [expandedMenus, setExpandedMenus] = useState(["Pengelolaan Iuran"]);
+  const [expandedMenus, setExpandedMenus] = useState(["Administrasi Iuran Peserta"]);
   const page = PAGES[activePage];
   const PageComp = page.component;
 
