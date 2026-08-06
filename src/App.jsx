@@ -19,17 +19,21 @@ const Badge = ({ children, color = "blue" }) => {
   return <span style={{ background: c.bg, color: c.text, padding: "2px 10px", borderRadius: 4, fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>{children}</span>;
 };
 
-const StatCard = ({ icon, label, value, sub, color = COLORS.blue, link }) => (
-  <div style={{ background: COLORS.white, borderRadius: 10, padding: "20px 24px", flex: 1, minWidth: 200, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid ${COLORS.gray200}` }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-      <div style={{ width: 40, height: 40, borderRadius: 10, background: color + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{icon}</div>
-      <span style={{ fontSize: 12, color: COLORS.gray500, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>{label}</span>
+const StatCard = ({ icon, label, value, sub, color = COLORS.blue, link }) => {
+  const strVal = String(value || "");
+  const fontSize = strVal.length > 20 ? 14 : strVal.length > 16 ? 16 : strVal.length > 12 ? 19 : strVal.length > 9 ? 22 : 26;
+  return (
+    <div style={{ background: COLORS.white, borderRadius: 10, padding: "18px 20px", flex: 1, minWidth: 180, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <div style={{ width: 38, height: 38, borderRadius: 10, background: color + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{icon}</div>
+        <span style={{ fontSize: 11, color: COLORS.gray500, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+      </div>
+      <div style={{ fontSize: fontSize, fontWeight: 700, color: COLORS.gray900, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={strVal}>{value}</div>
+      {sub && <div style={{ fontSize: 12, color: COLORS.gray500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub}</div>}
+      {link && <div style={{ fontSize: 12, color: COLORS.blue, marginTop: 8, cursor: "pointer", fontWeight: 500 }}>{link} ↗</div>}
     </div>
-    <div style={{ fontSize: 28, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>{value}</div>
-    {sub && <div style={{ fontSize: 13, color: COLORS.gray500 }}>{sub}</div>}
-    {link && <div style={{ fontSize: 13, color: COLORS.blue, marginTop: 8, cursor: "pointer", fontWeight: 500 }}>{link} ↗</div>}
-  </div>
-);
+  );
+};
 
 const Table = ({ columns, data }) => (
   <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
@@ -109,7 +113,7 @@ const PreviewModal = ({ preview, onClose }) => {
                     <tbody>
                       {(content?.items || [
                         { jenis: "THT (3,25%)", peserta: "14.328", nominal: "Rp 35.760.000.000" },
-                        { jenis: "Dapen (4,75%)", peserta: "14.328", nominal: "Rp 52.250.000.000" },
+                        { jenis: "Pensiun (4,75%)", peserta: "14.328", nominal: "Rp 52.250.000.000" },
                         { jenis: "JKK (0,24%)", peserta: "14.328", nominal: "Rp 2.630.000.000" },
                         { jenis: "JKm (0,20%)", peserta: "14.328", nominal: "Rp 2.210.000.000" },
                       ]).map((r, i) => (
@@ -164,7 +168,7 @@ const PreviewModal = ({ preview, onClose }) => {
 const DashboardKeuangan = () => (
   <div>
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
-      <StatCard icon={<DollarSign size={IC} />} label="Total Tagihan Bulan Ini" value="Rp 847,2 M" sub="THT + Dapen + JKK + JKm" color={COLORS.blue} link="Lihat Rincian" />
+      <StatCard icon={<DollarSign size={IC} />} label="Total Tagihan Bulan Ini" value="Rp 847,2 M" sub="THT + Pensiun + JKK + JKm" color={COLORS.blue} link="Lihat Rincian" />
       <StatCard icon={<BarChart3 size={IC} />} label="Realisasi Penerimaan" value="Rp 812,5 M" sub="95.9% dari tagihan" color={COLORS.green} link="Rekonsiliasi" />
       <StatCard icon={<FileText size={IC} />} label="Klaim Pending" value="156 Berkas" sub="Rp 23,1 M pending pembayaran" color={COLORS.red} link="Proses Klaim" />
     </div>
@@ -208,7 +212,7 @@ const DashboardKeuangan = () => (
           <tbody>
             {[
               { no: "001/ASABRI/TGH-THT/VII/2026", jenis: "THT", acuan: "SKP-PFK", nominal: "Rp 35.760.000.000", cutoff: "25 Jun 2026", status: "Dokumen di-TTD", color: "green" },
-              { no: "002/ASABRI/TGH-DAP/VII/2026", jenis: "Dapen", acuan: "SKP-PFK", nominal: "Rp 52.250.000.000", cutoff: "25 Jun 2026", status: "Dokumen di-TTD", color: "green" },
+              { no: "002/ASABRI/TGH-DAP/VII/2026", jenis: "Pensiun", acuan: "SKP-PFK", nominal: "Rp 52.250.000.000", cutoff: "25 Jun 2026", status: "Dokumen di-TTD", color: "green" },
               { no: "003/ASABRI/TGH-JKK/VII/2026", jenis: "JKK", acuan: "Data Klaim", nominal: "Rp 2.630.000.000", cutoff: "25 Jun 2026", status: "Siap Download", color: "blue" },
               { no: "004/ASABRI/TGH-JKM/VII/2026", jenis: "JKm", acuan: "Data Klaim", nominal: "Rp 2.210.000.000", cutoff: "25 Jun 2026", status: "Draft Tersedia", color: "yellow" },
             ].map((t, i) => (
@@ -226,7 +230,7 @@ const DashboardKeuangan = () => (
         </table>
       </div>
       <div style={{ marginTop: 10, fontSize: 12, color: COLORS.gray500, display: "flex", justifyContent: "space-between" }}>
-        <span>THT & Dapen acuan: SKP-PFK Kemenkeu • JKK & JKm acuan: Data Klaim & Kalkulasi Sistem</span>
+        <span>THT & Pensiun acuan: SKP-PFK Kemenkeu • JKK & JKm acuan: Data Klaim & Kalkulasi Sistem</span>
         <span style={{ color: COLORS.gray400 }}>Proses pengiriman ke Kemenkeu dilakukan secara manual</span>
       </div>
     </div>
@@ -245,33 +249,33 @@ const KalkulatorIuran = () => {
   const [filterSatkerPeserta, setFilterSatkerPeserta] = useState("Semua");
 
   const allSatkerData = [
-    { kode: "TNI", nama: "TNI", peserta: 5480, gp: 438.4, tht: 14.25, dapen: 20.82, jkk: 1.05, jkm: 0.88,
+    { kode: "TNI", nama: "TNI", peserta: 5480, gp: 438.4, tht: 14.25, Pensiun: 20.82, jkk: 1.05, jkm: 0.88,
       gol: [
-        { gol: "Golongan I (Tamtama)", peserta: 1820, gp: 109.2, tht: 3.55, dapen: 5.19, jkk: 0.26, jkm: 0.22 },
-        { gol: "Golongan II (Bintara)", peserta: 2140, gp: 171.2, tht: 5.56, dapen: 8.13, jkk: 0.41, jkm: 0.34 },
-        { gol: "Golongan III (Perwira Pertama)", peserta: 1050, gp: 105.0, tht: 3.41, dapen: 4.99, jkk: 0.25, jkm: 0.21 },
-        { gol: "Golongan IV (Perwira Menengah/Tinggi)", peserta: 470, gp: 53.0, tht: 1.72, dapen: 2.52, jkk: 0.13, jkm: 0.11 },
+        { gol: "Golongan I (Tamtama)", peserta: 1820, gp: 109.2, tht: 3.55, Pensiun: 5.19, jkk: 0.26, jkm: 0.22 },
+        { gol: "Golongan II (Bintara)", peserta: 2140, gp: 171.2, tht: 5.56, Pensiun: 8.13, jkk: 0.41, jkm: 0.34 },
+        { gol: "Golongan III (Perwira Pertama)", peserta: 1050, gp: 105.0, tht: 3.41, Pensiun: 4.99, jkk: 0.25, jkm: 0.21 },
+        { gol: "Golongan IV (Perwira Menengah/Tinggi)", peserta: 470, gp: 53.0, tht: 1.72, Pensiun: 2.52, jkk: 0.13, jkm: 0.11 },
       ]},
-    { kode: "POLRI", nama: "POLRI", peserta: 4230, gp: 338.4, tht: 11.00, dapen: 16.07, jkk: 0.81, jkm: 0.68,
+    { kode: "POLRI", nama: "POLRI", peserta: 4230, gp: 338.4, tht: 11.00, Pensiun: 16.07, jkk: 0.81, jkm: 0.68,
       gol: [
-        { gol: "Golongan I (Tamtama)", peserta: 1350, gp: 81.0, tht: 2.63, dapen: 3.85, jkk: 0.19, jkm: 0.16 },
-        { gol: "Golongan II (Bintara)", peserta: 1680, gp: 134.4, tht: 4.37, dapen: 6.38, jkk: 0.32, jkm: 0.27 },
-        { gol: "Golongan III (Perwira Pertama)", peserta: 820, gp: 82.0, tht: 2.67, dapen: 3.90, jkk: 0.20, jkm: 0.16 },
-        { gol: "Golongan IV (Perwira Menengah/Tinggi)", peserta: 380, gp: 41.0, tht: 1.33, dapen: 1.95, jkk: 0.10, jkm: 0.08 },
+        { gol: "Golongan I (Tamtama)", peserta: 1350, gp: 81.0, tht: 2.63, Pensiun: 3.85, jkk: 0.19, jkm: 0.16 },
+        { gol: "Golongan II (Bintara)", peserta: 1680, gp: 134.4, tht: 4.37, Pensiun: 6.38, jkk: 0.32, jkm: 0.27 },
+        { gol: "Golongan III (Perwira Pertama)", peserta: 820, gp: 82.0, tht: 2.67, Pensiun: 3.90, jkk: 0.20, jkm: 0.16 },
+        { gol: "Golongan IV (Perwira Menengah/Tinggi)", peserta: 380, gp: 41.0, tht: 1.33, Pensiun: 1.95, jkk: 0.10, jkm: 0.08 },
       ]},
-    { kode: "ASN", nama: "ASN Kemenhan", peserta: 4618, gp: 323.3, tht: 10.51, dapen: 15.36, jkk: 0.77, jkm: 0.65,
+    { kode: "ASN", nama: "ASN Kemenhan", peserta: 4618, gp: 323.3, tht: 10.51, Pensiun: 15.36, jkk: 0.77, jkm: 0.65,
       gol: [
-        { gol: "Golongan I", peserta: 920, gp: 46.0, tht: 1.50, dapen: 2.19, jkk: 0.11, jkm: 0.09 },
-        { gol: "Golongan II", peserta: 1580, gp: 110.6, tht: 3.59, dapen: 5.25, jkk: 0.26, jkm: 0.22 },
-        { gol: "Golongan III", peserta: 1450, gp: 116.0, tht: 3.77, dapen: 5.51, jkk: 0.28, jkm: 0.23 },
-        { gol: "Golongan IV", peserta: 668, gp: 50.7, tht: 1.65, dapen: 2.41, jkk: 0.12, jkm: 0.10 },
+        { gol: "Golongan I", peserta: 920, gp: 46.0, tht: 1.50, Pensiun: 2.19, jkk: 0.11, jkm: 0.09 },
+        { gol: "Golongan II", peserta: 1580, gp: 110.6, tht: 3.59, Pensiun: 5.25, jkk: 0.26, jkm: 0.22 },
+        { gol: "Golongan III", peserta: 1450, gp: 116.0, tht: 3.77, Pensiun: 5.51, jkk: 0.28, jkm: 0.23 },
+        { gol: "Golongan IV", peserta: 668, gp: 50.7, tht: 1.65, Pensiun: 2.41, jkk: 0.12, jkm: 0.10 },
       ]},
-    { kode: "PPPK", nama: "PPPK", peserta: 2150, gp: 150.5, tht: 4.89, dapen: 7.15, jkk: 0.36, jkm: 0.30,
+    { kode: "PPPK", nama: "PPPK", peserta: 2150, gp: 150.5, tht: 4.89, Pensiun: 7.15, jkk: 0.36, jkm: 0.30,
       gol: [
-        { gol: "Golongan IX", peserta: 420, gp: 21.0, tht: 0.68, dapen: 1.00, jkk: 0.05, jkm: 0.04 },
-        { gol: "Golongan X", peserta: 680, gp: 47.6, tht: 1.55, dapen: 2.26, jkk: 0.11, jkm: 0.10 },
-        { gol: "Golongan XI", peserta: 620, gp: 49.6, tht: 1.61, dapen: 2.36, jkk: 0.12, jkm: 0.10 },
-        { gol: "Golongan XII", peserta: 430, gp: 32.3, tht: 1.05, dapen: 1.53, jkk: 0.08, jkm: 0.06 },
+        { gol: "Golongan IX", peserta: 420, gp: 21.0, tht: 0.68, Pensiun: 1.00, jkk: 0.05, jkm: 0.04 },
+        { gol: "Golongan X", peserta: 680, gp: 47.6, tht: 1.55, Pensiun: 2.26, jkk: 0.11, jkm: 0.10 },
+        { gol: "Golongan XI", peserta: 620, gp: 49.6, tht: 1.61, Pensiun: 2.36, jkk: 0.12, jkm: 0.10 },
+        { gol: "Golongan XII", peserta: 430, gp: 32.3, tht: 1.05, Pensiun: 1.53, jkk: 0.08, jkm: 0.06 },
       ]},
   ];
 
@@ -308,7 +312,7 @@ const KalkulatorIuran = () => {
   const showCol = (jenis) => filterJenis === "Semua" || filterJenis === jenis;
 
   const totalTHT = satkerData.reduce((a, s) => a + s.tht, 0);
-  const totalDapen = satkerData.reduce((a, s) => a + s.dapen, 0);
+  const totalPensiun = satkerData.reduce((a, s) => a + s.Pensiun, 0);
   const totalJKK = satkerData.reduce((a, s) => a + s.jkk, 0);
   const totalJKM = satkerData.reduce((a, s) => a + s.jkm, 0);
   const totalPeserta = satkerData.reduce((a, s) => a + s.peserta, 0);
@@ -323,9 +327,9 @@ const KalkulatorIuran = () => {
       {detailPeserta && (() => {
         const p = detailPeserta;
         const dasar = p.gp + p.ti + p.ta;
-        const tht = Math.round(dasar * 0.0325); const dapen = Math.round(dasar * 0.0475);
+        const tht = Math.round(dasar * 0.0325); const Pensiun = Math.round(dasar * 0.0475);
         const jkk = Math.round(dasar * 0.0024); const jkm = Math.round(dasar * 0.002);
-        const total = tht + dapen + jkk + jkm;
+        const total = tht + Pensiun + jkk + jkm;
         return (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }} onClick={() => setDetailPeserta(null)}>
             <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
@@ -354,7 +358,7 @@ const KalkulatorIuran = () => {
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                   {[
                     { label: "Iuran THT", rate: "3,25%", value: tht, color: COLORS.blue },
-                    { label: "Iuran Dapen", rate: "4,75%", value: dapen, color: COLORS.green },
+                    { label: "Iuran Pensiun", rate: "4,75%", value: Pensiun, color: COLORS.green },
                     { label: "Iuran JKK", rate: "0,24%", value: jkk, color: COLORS.orange },
                     { label: "Iuran JKm", rate: "0,20%", value: jkm, color: "#7B1FA2" },
                   ].map((item, i) => (
@@ -380,7 +384,7 @@ const KalkulatorIuran = () => {
 
       <div style={{ display: "flex", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
         {showCol("THT") && <StatCard icon={<BarChart3 size={IC} />} label="Total Iuran THT" value={`Rp ${totalTHT.toFixed(2)} M`} sub="3,25% × (GP+T.Istri+T.Anak)" color={COLORS.blue} />}
-        {showCol("Dapen") && <StatCard icon={<BarChart3 size={IC} />} label="Total Iuran Dapen" value={`Rp ${totalDapen.toFixed(2)} M`} sub="4,75% × (GP+T.Istri+T.Anak)" color={COLORS.green} />}
+        {showCol("Pensiun") && <StatCard icon={<BarChart3 size={IC} />} label="Total Iuran Pensiun" value={`Rp ${totalPensiun.toFixed(2)} M`} sub="4,75% × (GP+T.Istri+T.Anak)" color={COLORS.green} />}
         {showCol("JKK") && <StatCard icon={<Shield size={IC} />} label="Total Iuran JKK" value={`Rp ${totalJKK.toFixed(2)} M`} sub="0,24% × (GP+T.Istri+T.Anak)" color={COLORS.orange} />}
         {showCol("JKm") && <StatCard icon={<Lock size={IC} />} label="Total Iuran JKm" value={`Rp ${totalJKM.toFixed(2)} M`} sub="0,20% × (GP+T.Istri+T.Anak)" color="#7B1FA2" />}
       </div>
@@ -388,11 +392,11 @@ const KalkulatorIuran = () => {
       <div style={{ background: COLORS.white, borderRadius: 10, padding: "14px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20, display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
         <Select label="Periode" value={filterPeriode} onChange={setFilterPeriode} options={["Juli 2026", "Juni 2026", "Mei 2026", "April 2026", "Maret 2026", "Februari 2026", "Januari 2026"]} minW={130} />
         <Select label="Satker" value={filterSatker} onChange={v => { setFilterSatker(v); setSelectedSatker(null); }} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
-        <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["Semua", "THT", "Dapen", "JKK", "JKm"]} minW={120} />
+        <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["Semua", "THT", "Pensiun", "JKK", "JKm"]} minW={120} />
         <Select label="Tanggal Cut-off" value="30 Jun 2026" onChange={() => {}} options={["30 Jun 2026", "31 Mei 2026", "30 Apr 2026"]} minW={130} />
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Data Iuran", subtitle: `Periode ${filterPeriode} • ${filterSatker === "Semua" ? "Seluruh Satker" : filterSatker}`, type: "table", fileName: `Rekap_Iuran_${filterPeriode.replace(" ", "_")}.xlsx`, content: { columns: ["Satker", "Peserta", "THT", "Dapen", "JKK", "JKm", "Total"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), `Rp ${s.tht} M`, `Rp ${s.dapen} M`, `Rp ${s.jkk} M`, `Rp ${s.jkm} M`, `Rp ${(s.tht+s.dapen+s.jkk+s.jkm).toFixed(2)} M`]), totalRows: satkerData.length } })}>Ekspor Data</Btn>
-          <Btn onClick={() => setPreview({ title: "Preview Surat Tagihan Iuran", subtitle: `Periode ${filterPeriode} — Surat Tagihan ke Kemenkeu`, type: "surat", fileName: `Surat_Tagihan_Iuran_${filterPeriode.replace(" ", "_")}.pdf`, content: { noSurat: `001/ASABRI/TGH/${filterPeriode.replace(" ", "/")}`, periode: filterPeriode, cutoff: "25 Jun 2026", tanggal: "01 Jul 2026", items: [ { jenis: "THT (3,25%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalTHT.toFixed(2)} M` }, { jenis: "Dapen (4,75%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalDapen.toFixed(2)} M` }, { jenis: "JKK (0,24%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKK.toFixed(2)} M` }, { jenis: "JKm (0,20%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKM.toFixed(2)} M` } ] } })}>
+          <Btn variant="outline" onClick={() => setPreview({ title: "Preview Ekspor Data Iuran", subtitle: `Periode ${filterPeriode} • ${filterSatker === "Semua" ? "Seluruh Satker" : filterSatker}`, type: "table", fileName: `Rekap_Iuran_${filterPeriode.replace(" ", "_")}.xlsx`, content: { columns: ["Satker", "Peserta", "THT", "Pensiun", "JKK", "JKm", "Total"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), `Rp ${s.tht} M`, `Rp ${s.Pensiun} M`, `Rp ${s.jkk} M`, `Rp ${s.jkm} M`, `Rp ${(s.tht+s.Pensiun+s.jkk+s.jkm).toFixed(2)} M`]), totalRows: satkerData.length } })}>Ekspor Data</Btn>
+          <Btn onClick={() => setPreview({ title: "Preview Surat Tagihan Iuran", subtitle: `Periode ${filterPeriode} — Surat Tagihan ke Kemenkeu`, type: "surat", fileName: `Surat_Tagihan_Iuran_${filterPeriode.replace(" ", "_")}.pdf`, content: { noSurat: `001/ASABRI/TGH/${filterPeriode.replace(" ", "/")}`, periode: filterPeriode, cutoff: "25 Jun 2026", tanggal: "01 Jul 2026", items: [ { jenis: "THT (3,25%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalTHT.toFixed(2)} M` }, { jenis: "Pensiun (4,75%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalPensiun.toFixed(2)} M` }, { jenis: "JKK (0,24%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKK.toFixed(2)} M` }, { jenis: "JKm (0,20%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKM.toFixed(2)} M` } ] } })}>
             <FileText size={14} /> Buat Tagihan
           </Btn>
         </div>
@@ -408,7 +412,7 @@ const KalkulatorIuran = () => {
 
       {tab === "rekap" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Iuran", subtitle: "Format Excel (.xlsx)", type: "table", fileName: "Rekap_Iuran_Satker.xlsx", content: { columns: ["Satker", "Peserta", "THT", "Dapen", "JKK", "JKm"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), "Rp "+s.tht+" M", "Rp "+s.dapen+" M", "Rp "+s.jkk+" M", "Rp "+s.jkm+" M"]), totalRows: satkerData.length } })}>Ekspor Excel</Btn><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Iuran", subtitle: "Format PDF", type: "table", fileName: "Rekap_Iuran_Satker.pdf", content: { columns: ["Satker", "Peserta", "THT", "Dapen", "JKK", "JKm"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), "Rp "+s.tht+" M", "Rp "+s.dapen+" M", "Rp "+s.jkk+" M", "Rp "+s.jkm+" M"]), totalRows: satkerData.length } })}>Ekspor PDF</Btn></div>}>Rekap Iuran per Satker & Golongan {filterSatker !== "Semua" && `— ${filterSatker}`} {filterJenis !== "Semua" && `(${filterJenis})`}</SectionTitle>
+          <SectionTitle action={<div style={{ display: "flex", gap: 8 }}><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Iuran", subtitle: "Format Excel (.xlsx)", type: "table", fileName: "Rekap_Iuran_Satker.xlsx", content: { columns: ["Satker", "Peserta", "THT", "Pensiun", "JKK", "JKm"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), "Rp "+s.tht+" M", "Rp "+s.Pensiun+" M", "Rp "+s.jkk+" M", "Rp "+s.jkm+" M"]), totalRows: satkerData.length } })}>Ekspor Excel</Btn><Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap Iuran", subtitle: "Format PDF", type: "table", fileName: "Rekap_Iuran_Satker.pdf", content: { columns: ["Satker", "Peserta", "THT", "Pensiun", "JKK", "JKm"], rows: satkerData.map(s => [s.nama, s.peserta.toLocaleString(), "Rp "+s.tht+" M", "Rp "+s.Pensiun+" M", "Rp "+s.jkk+" M", "Rp "+s.jkm+" M"]), totalRows: satkerData.length } })}>Ekspor PDF</Btn></div>}>Rekap Iuran per Satker & Golongan {filterSatker !== "Semua" && `— ${filterSatker}`} {filterJenis !== "Semua" && `(${filterJenis})`}</SectionTitle>
           {satkerData.length === 0 ? <NoData /> : satkerData.map((s, si) => (
             <div key={si} style={{ marginBottom: si < satkerData.length - 1 ? 20 : 0 }}>
               <div onClick={() => setSelectedSatker(selectedSatker === s.kode ? null : s.kode)} style={{ cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: COLORS.blueDark, borderRadius: selectedSatker === s.kode ? "8px 8px 0 0" : 8, color: COLORS.white }}>
@@ -418,7 +422,7 @@ const KalkulatorIuran = () => {
                 </div>
                 <div style={{ display: "flex", gap: 20, alignItems: "center", fontSize: 13 }}>
                   {showCol("THT") && <div style={{ textAlign: "right" }}><div style={{ opacity: 0.7, fontSize: 10 }}>THT</div><div style={{ fontWeight: 700 }}>Rp {s.tht} M</div></div>}
-                  {showCol("Dapen") && <div style={{ textAlign: "right" }}><div style={{ opacity: 0.7, fontSize: 10 }}>Dapen</div><div style={{ fontWeight: 700 }}>Rp {s.dapen} M</div></div>}
+                  {showCol("Pensiun") && <div style={{ textAlign: "right" }}><div style={{ opacity: 0.7, fontSize: 10 }}>Pensiun</div><div style={{ fontWeight: 700 }}>Rp {s.Pensiun} M</div></div>}
                   {showCol("JKK") && <div style={{ textAlign: "right" }}><div style={{ opacity: 0.7, fontSize: 10 }}>JKK</div><div style={{ fontWeight: 700 }}>Rp {s.jkk} M</div></div>}
                   {showCol("JKm") && <div style={{ textAlign: "right" }}><div style={{ opacity: 0.7, fontSize: 10 }}>JKm</div><div style={{ fontWeight: 700 }}>Rp {s.jkm} M</div></div>}
                   <span style={{ fontSize: 16 }}>{selectedSatker === s.kode ? "▼" : "▶"}</span>
@@ -427,12 +431,12 @@ const KalkulatorIuran = () => {
               {selectedSatker === s.kode && (
                 <div style={{ border: `1px solid ${COLORS.gray200}`, borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
                   <Table
-                    columns={["Golongan", "Jml Peserta", "Total GP+Tunj", ...(showCol("THT") ? ["Iuran THT (3,25%)"] : []), ...(showCol("Dapen") ? ["Iuran Dapen (4,75%)"] : []), ...(showCol("JKK") ? ["Iuran JKK (0,24%)"] : []), ...(showCol("JKm") ? ["Iuran JKm (0,20%)"] : []), "Total"]}
+                    columns={["Golongan", "Jml Peserta", "Total GP+Tunj", ...(showCol("THT") ? ["Iuran THT (3,25%)"] : []), ...(showCol("Pensiun") ? ["Iuran Pensiun (4,75%)"] : []), ...(showCol("JKK") ? ["Iuran JKK (0,24%)"] : []), ...(showCol("JKm") ? ["Iuran JKm (0,20%)"] : []), "Total"]}
                     data={s.gol.map(g => [
                       <span style={{ fontWeight: 600 }}>{g.gol}</span>, g.peserta.toLocaleString(), `Rp ${g.gp} M`,
-                      ...(showCol("THT") ? [`Rp ${g.tht} M`] : []), ...(showCol("Dapen") ? [`Rp ${g.dapen} M`] : []),
+                      ...(showCol("THT") ? [`Rp ${g.tht} M`] : []), ...(showCol("Pensiun") ? [`Rp ${g.Pensiun} M`] : []),
                       ...(showCol("JKK") ? [`Rp ${g.jkk} M`] : []), ...(showCol("JKm") ? [`Rp ${g.jkm} M`] : []),
-                      <span style={{ fontWeight: 700 }}>Rp {((showCol("THT") ? g.tht : 0) + (showCol("Dapen") ? g.dapen : 0) + (showCol("JKK") ? g.jkk : 0) + (showCol("JKm") ? g.jkm : 0)).toFixed(2)} M</span>,
+                      <span style={{ fontWeight: 700 }}>Rp {((showCol("THT") ? g.tht : 0) + (showCol("Pensiun") ? g.Pensiun : 0) + (showCol("JKK") ? g.jkk : 0) + (showCol("JKm") ? g.jkm : 0)).toFixed(2)} M</span>,
                     ])}
                   />
                 </div>
@@ -441,7 +445,7 @@ const KalkulatorIuran = () => {
           ))}
           <div style={{ marginTop: 16, padding: "14px 16px", background: "#E3F2FD", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontWeight: 700, fontSize: 15, color: COLORS.blueDark }}>Grand Total {filterSatker !== "Semua" ? filterSatker : "Seluruh Satker"} {filterJenis !== "Semua" ? `(${filterJenis})` : ""}</span>
-            <span style={{ fontWeight: 800, fontSize: 20, color: COLORS.blueDark }}>Rp {((showCol("THT") ? totalTHT : 0) + (showCol("Dapen") ? totalDapen : 0) + (showCol("JKK") ? totalJKK : 0) + (showCol("JKm") ? totalJKM : 0)).toFixed(2)} M</span>
+            <span style={{ fontWeight: 800, fontSize: 20, color: COLORS.blueDark }}>Rp {((showCol("THT") ? totalTHT : 0) + (showCol("Pensiun") ? totalPensiun : 0) + (showCol("JKK") ? totalJKK : 0) + (showCol("JKm") ? totalJKM : 0)).toFixed(2)} M</span>
           </div>
         </div>
       )}
@@ -508,7 +512,7 @@ const RekonsIuran = () => {
       { satker: "ASN Kemenhan", sistem: 2914200000, skp: 2914200000 },
       { satker: "PPPK", sistem: 489000000, skp: 489000000 },
     ],
-    Dapen: [
+    Pensiun: [
       { satker: "TNI", sistem: 8890000000, skp: 8890000000 },
       { satker: "POLRI", sistem: 7180000000, skp: 7250000000 },
       { satker: "ASN Kemenhan", sistem: 4260000000, skp: 4260000000 },
@@ -528,11 +532,11 @@ const RekonsIuran = () => {
         <SectionTitle>Rekonsiliasi Iuran vs SKP-PFK Kemenkeu</SectionTitle>
         <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#F57F17", display: "flex", gap: 8, marginBottom: 16 }}>
           <AlertTriangle size={14} />
-          <span>Rekonsiliasi hanya berlaku untuk iuran <strong>THT</strong> dan <strong>Dapen</strong> karena acuan tagihannya berdasarkan SKP-PFK dari Kemenkeu. Iuran JKK dan JKm menggunakan acuan terpisah (Data Klaim & Kalkulasi Sistem).</span>
+          <span>Rekonsiliasi hanya berlaku untuk iuran <strong>THT</strong> dan <strong>Pensiun</strong> karena acuan tagihannya berdasarkan SKP-PFK dari Kemenkeu. Iuran JKK dan JKm menggunakan acuan terpisah (Data Klaim & Kalkulasi Sistem).</span>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
           <Select label="Periode" value={filterPeriode} onChange={setFilterPeriode} options={["Juli 2026", "Juni 2026", "Mei 2026", "April 2026"]} minW={130} />
-          <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["THT", "Dapen"]} minW={120} />
+          <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["THT", "Pensiun"]} minW={120} />
           <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={140} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
@@ -591,11 +595,11 @@ const GeneratorTagihan = () => {
 
   const allTagihan = [
     { id: "TGH-001", noSurat: "001/ASABRI/TGH-THT/VII/2026", jenis: "THT", acuan: "SKP-PFK", periode: "Juli 2026", cutoff: "25 Jun 2026", nominal: "Rp 35.760.000.000", peserta: "14.328", currentStep: 3, tglDraft: "26 Jun 2026", tglDownload: "27 Jun 2026", tglTTD: "28 Jun 2026", fileTTD: "Surat_Tagihan_THT_Juli2026_signed.pdf", icon: "banknote" },
-    { id: "TGH-002", noSurat: "002/ASABRI/TGH-DAP/VII/2026", jenis: "Dapen", acuan: "SKP-PFK", periode: "Juli 2026", cutoff: "25 Jun 2026", nominal: "Rp 52.250.000.000", peserta: "14.328", currentStep: 3, tglDraft: "26 Jun 2026", tglDownload: "27 Jun 2026", tglTTD: "28 Jun 2026", fileTTD: "Surat_Tagihan_Dapen_Juli2026_signed.pdf", icon: "barchart" },
+    { id: "TGH-002", noSurat: "002/ASABRI/TGH-DAP/VII/2026", jenis: "Pensiun", acuan: "SKP-PFK", periode: "Juli 2026", cutoff: "25 Jun 2026", nominal: "Rp 52.250.000.000", peserta: "14.328", currentStep: 3, tglDraft: "26 Jun 2026", tglDownload: "27 Jun 2026", tglTTD: "28 Jun 2026", fileTTD: "Surat_Tagihan_Pensiun_Juli2026_signed.pdf", icon: "barchart" },
     { id: "TGH-003", noSurat: "003/ASABRI/TGH-JKK/VII/2026", jenis: "JKK", acuan: "Data Klaim", periode: "Juli 2026", cutoff: "25 Jun 2026", nominal: "Rp 2.630.000.000", peserta: "14.328", currentStep: 2, tglDraft: "26 Jun 2026", tglDownload: "27 Jun 2026", tglTTD: null, fileTTD: null, icon: "shield" },
     { id: "TGH-004", noSurat: "004/ASABRI/TGH-JKM/VII/2026", jenis: "JKm", acuan: "Data Klaim", periode: "Juli 2026", cutoff: "25 Jun 2026", nominal: "Rp 2.210.000.000", peserta: "14.328", currentStep: 1, tglDraft: "26 Jun 2026", tglDownload: null, tglTTD: null, fileTTD: null, icon: "lock" },
     { id: "TGH-005", noSurat: "005/ASABRI/TGH-THT/VI/2026", jenis: "THT", acuan: "SKP-PFK", periode: "Juni 2026", cutoff: "25 Mei 2026", nominal: "Rp 35.420.000.000", peserta: "14.290", currentStep: 3, tglDraft: "26 Mei 2026", tglDownload: "26 Mei 2026", tglTTD: "27 Mei 2026", fileTTD: "Surat_Tagihan_THT_Juni2026_signed.pdf", icon: "banknote" },
-    { id: "TGH-006", noSurat: "006/ASABRI/TGH-DAP/VI/2026", jenis: "Dapen", acuan: "SKP-PFK", periode: "Juni 2026", cutoff: "25 Mei 2026", nominal: "Rp 51.800.000.000", peserta: "14.290", currentStep: 3, tglDraft: "26 Mei 2026", tglDownload: "26 Mei 2026", tglTTD: "27 Mei 2026", fileTTD: "Surat_Tagihan_Dapen_Juni2026_signed.pdf", icon: "barchart" },
+    { id: "TGH-006", noSurat: "006/ASABRI/TGH-DAP/VI/2026", jenis: "Pensiun", acuan: "SKP-PFK", periode: "Juni 2026", cutoff: "25 Mei 2026", nominal: "Rp 51.800.000.000", peserta: "14.290", currentStep: 3, tglDraft: "26 Mei 2026", tglDownload: "26 Mei 2026", tglTTD: "27 Mei 2026", fileTTD: "Surat_Tagihan_Pensiun_Juni2026_signed.pdf", icon: "barchart" },
   ];
 
   const statusLabel = (step) => {
@@ -635,7 +639,7 @@ const GeneratorTagihan = () => {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
         <div style={{ background: "#E3F2FD", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 20 }}>📋</span>
-          <div><div style={{ fontSize: 13, fontWeight: 700, color: COLORS.blueDark }}>THT & Dapen</div><div style={{ fontSize: 12, color: COLORS.gray700 }}>Acuan tagihan: <strong>SKP-PFK Kemenkeu</strong></div></div>
+          <div><div style={{ fontSize: 13, fontWeight: 700, color: COLORS.blueDark }}>THT & Pensiun</div><div style={{ fontSize: 12, color: COLORS.gray700 }}>Acuan tagihan: <strong>SKP-PFK Kemenkeu</strong></div></div>
         </div>
         <div style={{ background: COLORS.orangeLight, borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 20 }}>📋</span>
@@ -651,7 +655,7 @@ const GeneratorTagihan = () => {
       </div>
 
       <div style={{ background: COLORS.white, borderRadius: 10, padding: "14px 20px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20, display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
-        <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["Semua", "THT", "Dapen", "JKK", "JKm"]} minW={120} />
+        <Select label="Jenis Iuran" value={filterJenis} onChange={setFilterJenis} options={["Semua", "THT", "Pensiun", "JKK", "JKm"]} minW={120} />
         <Select label="Status" value={filterStatus} onChange={setFilterStatus} options={["Semua", "Sudah TTD", "Menunggu TTD", "Belum Download"]} minW={160} />
       </div>
 
@@ -821,8 +825,8 @@ const MonitoringKlaim = () => {
         </div>
         <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>Menampilkan {filtered.length} dari {allKlaim.length} klaim</div>
         {filtered.length === 0 ? <NoData /> : (
-          <Table columns={["No. SPP", "No. Rekap", "Peserta", "Satker", "Unor", "Jenis Klaim", "Nominal", "Mitra Bayar", "Status", "Riwayat"]}
-            data={filtered.map(k => [k.spp, k.rekap, k.peserta, <Badge color={k.satker === "TNI" ? "green" : k.satker === "POLRI" ? "blue" : k.satker === "PPPK" ? "yellow" : "orange"}>{k.satker || "—"}</Badge>, <span style={{ fontSize: 12, color: COLORS.gray600 }}>{k.unor || "—"}</span>, k.jenisKlaim, k.nominal, k.mitra, <Badge color={statusBadge(k.status)}>{k.status}</Badge>, k.riwayat])} />
+          <Table columns={["No. SPP", "No. Rekap", "Peserta", "Satker", "Unor", "Jenis Klaim", "Nominal", "Mitra Bayar", "Status"]}
+            data={filtered.map(k => [k.spp, k.rekap, k.peserta, <Badge color={k.satker === "TNI" ? "green" : k.satker === "POLRI" ? "blue" : k.satker === "PPPK" ? "yellow" : "orange"}>{k.satker || "—"}</Badge>, <span style={{ fontSize: 12, color: COLORS.gray600 }}>{k.unor || "—"}</span>, k.jenisKlaim, k.nominal, k.mitra, <Badge color={statusBadge(k.status)}>{k.status}</Badge>])} />
         )}
       </div>
     </div>
@@ -910,7 +914,7 @@ const DashboardDana = () => {
           {/* PANEL 1 — Saldo Per Mitra Bayar (Real-time) */}
           <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
             <SectionTitle action={<span style={{ fontSize: 11, color: COLORS.green, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}><CircleDot size={10} /> Real-time</span>}>
-              Panel 1 — Saldo Per Mitra Bayar
+              Saldo Per Mitra Bayar
             </SectionTitle>
             <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -945,7 +949,7 @@ const DashboardDana = () => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* PANEL 2 — Proyeksi Kebutuhan Dana */}
             <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-              <SectionTitle>Panel 2 — Proyeksi Kebutuhan Dana</SectionTitle>
+              <SectionTitle>Proyeksi Kebutuhan Dana</SectionTitle>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
                   { label: "Kebutuhan Dapem Bulan Ini", value: `Rp ${kebutuhanDapem} M`, color: COLORS.gray800 },
@@ -975,7 +979,7 @@ const DashboardDana = () => {
 
             {/* PANEL 4 — Alert Aktif */}
             <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-              <SectionTitle>Panel 4 — Alert Aktif</SectionTitle>
+              <SectionTitle>Alert Aktif</SectionTitle>
               {alertMitra.length === 0 ? (
                 <div style={{ padding: 24, textAlign: "center", color: COLORS.green }}>
                   <CheckCircle2 size={32} style={{ marginBottom: 8 }} />
@@ -1012,7 +1016,7 @@ const DashboardDana = () => {
                   </div>
                 ))}
               </div>
-            }>Panel 3 — Trend Saldo 3 Bulan Terakhir</SectionTitle>
+            }>Trend Saldo 3 Bulan Terakhir</SectionTitle>
 
             {(() => {
               const months = ["Mei 2026", "Jun 2026", "Jul 2026"];
@@ -1367,6 +1371,352 @@ const Perpajakan = () => {
   );
 };
 
+// ===== REKAP UKP (UANG KENA PAJAK) PESERTA PENSIUN =====
+const RekapUKP = () => {
+  const [filterPeriode, setFilterPeriode] = useState("Juli 2026");
+  const [filterJenisUKP, setFilterJenisUKP] = useState("Semua");
+  const [filterSatker, setFilterSatker] = useState("Semua");
+  const [filterPTKP, setFilterPTKP] = useState("Semua");
+  const [searchPeserta, setSearchPeserta] = useState("");
+  const [detailPeserta, setDetailPeserta] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const allUKPData = [
+    {
+      no: 1,
+      nik: "3171012304650001",
+      nrp: "198701234",
+      nama: "Purn. Kol. Ahmad Rifai",
+      kodeJiwa: "1102",
+      jabatan: "Perwira Menengah / Kolonel (TNI AD)",
+      satker: "TNI",
+      unor: "Kodam Jaya",
+      jenisUKP: "Dapem Induk",
+      blnDiterima: 12,
+      blnDikembalikan: 0,
+      ptkp: "K/2",
+      ukpNetoBulanIni: 8500000,
+      ukpKumulatif: 59500000,
+      history: [
+        { bln: "Jan 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+        { bln: "Feb 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+        { bln: "Mar 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+        { bln: "Apr 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+        { bln: "Mei 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+        { bln: "Jun 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+        { bln: "Jul 2026", bruto: 8500000, pot: 0, neto: 8500000 },
+      ]
+    },
+    {
+      no: 2,
+      nik: "3273021508700002",
+      nrp: "199205678",
+      nama: "Purn. Lettu Budi Kartono",
+      kodeJiwa: "1101",
+      jabatan: "Perwira Pertama / Lettu (TNI AD)",
+      satker: "TNI",
+      unor: "Mabes TNI",
+      jenisUKP: "Dapem Susulan",
+      blnDiterima: 6,
+      blnDikembalikan: 0,
+      ptkp: "K/1",
+      ukpNetoBulanIni: 6200000,
+      ukpKumulatif: 37200000,
+      history: [
+        { bln: "Feb 2026", bruto: 6200000, pot: 0, neto: 6200000 },
+        { bln: "Mar 2026", bruto: 6200000, pot: 0, neto: 6200000 },
+        { bln: "Apr 2026", bruto: 6200000, pot: 0, neto: 6200000 },
+        { bln: "Mei 2026", bruto: 6200000, pot: 0, neto: 6200000 },
+        { bln: "Jun 2026", bruto: 6200000, pot: 0, neto: 6200000 },
+        { bln: "Jul 2026", bruto: 6200000, pot: 0, neto: 6200000 },
+      ]
+    },
+    {
+      no: 3,
+      nik: "3175031109820004",
+      nrp: "199012345",
+      nama: "Purn. AKP Citra Dewi",
+      kodeJiwa: "0101",
+      jabatan: "Perwira Pertama / AKP (POLRI)",
+      satker: "POLRI",
+      unor: "Polda Metro Jaya",
+      jenisUKP: "Dapem Induk",
+      blnDiterima: 12,
+      blnDikembalikan: 0,
+      ptkp: "K/1",
+      ukpNetoBulanIni: 12800000,
+      ukpKumulatif: 89600000,
+      history: [
+        { bln: "Jan 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+        { bln: "Feb 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+        { bln: "Mar 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+        { bln: "Apr 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+        { bln: "Mei 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+        { bln: "Jun 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+        { bln: "Jul 2026", bruto: 12800000, pot: 0, neto: 12800000 },
+      ]
+    },
+    {
+      no: 4,
+      nik: "3204052203750003",
+      nrp: "197506789",
+      nama: "Purn. Pengatur Agus Salim",
+      kodeJiwa: "0100",
+      jabatan: "Pengatur Muda / Gol. II (ASN Kemhan)",
+      satker: "ASN Kemenhan",
+      unor: "Setjen Kemhan",
+      jenisUKP: "UDW Punah (Dikembalikan)",
+      blnDiterima: 10,
+      blnDikembalikan: 2,
+      ptkp: "TK/0",
+      ukpNetoBulanIni: 3100000,
+      ukpKumulatif: 24800000,
+      history: [
+        { bln: "Jan 2026", bruto: 3100000, pot: 0, neto: 3100000 },
+        { bln: "Feb 2026", bruto: 3100000, pot: 0, neto: 3100000 },
+        { bln: "Mar 2026", bruto: 3100000, pot: 0, neto: 3100000 },
+        { bln: "Apr 2026", bruto: 3100000, pot: 0, neto: 3100000 },
+        { bln: "Mei 2026", bruto: 3100000, pot: 0, neto: 3100000 },
+        { bln: "Jun 2026", bruto: 3100000, pot: 6200000, neto: -3100000 },
+        { bln: "Jul 2026", bruto: 3100000, pot: 0, neto: 3100000 },
+      ]
+    },
+    {
+      no: 5,
+      nik: "3578011210860005",
+      nrp: "198604321",
+      nama: "Purn. Bripka Anwar Ibrahim",
+      kodeJiwa: "1102",
+      jabatan: "Bintara / Bripka (POLRI)",
+      satker: "POLRI",
+      unor: "Polda Jabar",
+      jenisUKP: "Dapem Rapel",
+      blnDiterima: 12,
+      blnDikembalikan: 0,
+      ptkp: "K/2",
+      ukpNetoBulanIni: 9200000,
+      ukpKumulatif: 64400000,
+      history: [
+        { bln: "Jan 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+        { bln: "Feb 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+        { bln: "Mar 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+        { bln: "Apr 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+        { bln: "Mei 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+        { bln: "Jun 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+        { bln: "Jul 2026", bruto: 9200000, pot: 0, neto: 9200000 },
+      ]
+    },
+    {
+      no: 6,
+      nik: "3174092511940006",
+      nrp: "199401234",
+      nama: "Danu Prasetyo",
+      kodeJiwa: "1000",
+      jabatan: "Pegawai PPPK / Gol. X (Kemhan)",
+      satker: "PPPK",
+      unor: "Ditjen Strahan",
+      jenisUKP: "Dapem Induk",
+      blnDiterima: 7,
+      blnDikembalikan: 0,
+      ptkp: "TK/0",
+      ukpNetoBulanIni: 4800000,
+      ukpKumulatif: 33600000,
+      history: [
+        { bln: "Jan 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+        { bln: "Feb 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+        { bln: "Mar 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+        { bln: "Apr 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+        { bln: "Mei 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+        { bln: "Jun 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+        { bln: "Jul 2026", bruto: 4800000, pot: 0, neto: 4800000 },
+      ]
+    },
+    {
+      no: 7,
+      nik: "3374020807760007",
+      nrp: "197604567",
+      nama: "Purn. Mayor Inf. Surya Darma",
+      kodeJiwa: "1101",
+      jabatan: "Perwira Menengah / Mayor (TNI AU)",
+      satker: "TNI",
+      unor: "Lanud Halim",
+      jenisUKP: "THR / Dapem ke-13",
+      blnDiterima: 12,
+      blnDikembalikan: 0,
+      ptkp: "K/1",
+      ukpNetoBulanIni: 14500000,
+      ukpKumulatif: 101500000,
+      history: [
+        { bln: "Jan 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+        { bln: "Feb 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+        { bln: "Mar 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+        { bln: "Apr 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+        { bln: "Mei 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+        { bln: "Jun 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+        { bln: "Jul 2026", bruto: 14500000, pot: 0, neto: 14500000 },
+      ]
+    }
+  ];
+
+  const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
+
+  const filtered = allUKPData.filter(d => {
+    if (filterJenisUKP !== "Semua" && d.jenisUKP !== filterJenisUKP) return false;
+    if (filterSatker !== "Semua" && d.satker !== filterSatker) return false;
+    if (filterPTKP !== "Semua" && d.ptkp !== filterPTKP) return false;
+    if (searchPeserta && !d.nama.toLowerCase().includes(searchPeserta.toLowerCase()) && !d.nrp.includes(searchPeserta) && !d.nik.includes(searchPeserta)) return false;
+    return true;
+  });
+
+  const totalPeserta = filtered.length;
+  const totalUkpBulanIni = filtered.reduce((a, b) => a + b.ukpNetoBulanIni, 0);
+  const totalUkpKumulatif = filtered.reduce((a, b) => a + b.ukpKumulatif, 0);
+  const totalDikembalikan = filtered.reduce((a, b) => a + (b.blnDikembalikan > 0 ? b.blnDikembalikan * (b.ukpNetoBulanIni) : 0), 0);
+
+  return (
+    <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Detail Modal */}
+      {detailPeserta && (() => {
+        const d = detailPeserta;
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }} onClick={() => setDetailPeserta(null)}>
+            <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 620, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+              <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.gray900 }}>{d.nama}</div>
+                  <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>NIK: <span style={{ fontFamily: "monospace" }}>{d.nik}</span> • NRP/Nopens: <span style={{ fontFamily: "monospace" }}>{d.nrp}</span></div>
+                </div>
+                <button onClick={() => setDetailPeserta(null)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
+              </div>
+
+              <div style={{ padding: 24 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20, background: COLORS.gray50, padding: 14, borderRadius: 8 }}>
+                  <div><span style={{ fontSize: 11, color: COLORS.gray500 }}>Satker / Unor</span><div style={{ fontSize: 13, fontWeight: 600 }}>{d.satker} ({d.unor})</div></div>
+                  <div><span style={{ fontSize: 11, color: COLORS.gray500 }}>Kode Jiwa / PTKP</span><div style={{ fontSize: 13, fontWeight: 600 }}>{d.kodeJiwa} / <Badge color="blue">{d.ptkp}</Badge></div></div>
+                  <div><span style={{ fontSize: 11, color: COLORS.gray500 }}>Pangkat / Jabatan</span><div style={{ fontSize: 13, fontWeight: 600 }}>{d.jabatan}</div></div>
+                  <div><span style={{ fontSize: 11, color: COLORS.gray500 }}>Jenis UKP</span><div style={{ fontSize: 13, fontWeight: 600 }}>{d.jenisUKP}</div></div>
+                </div>
+
+                <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray800, marginBottom: 10 }}>Ringkasan Penerimaan UKP</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+                  <div style={{ padding: 12, background: "#E3F2FD", borderRadius: 8, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: COLORS.blue }}>Bln. Diterima</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.blueDark }}>{d.blnDiterima} Bulan</div>
+                  </div>
+                  <div style={{ padding: 12, background: d.blnDikembalikan > 0 ? COLORS.redLight : COLORS.gray100, borderRadius: 8, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: d.blnDikembalikan > 0 ? COLORS.red : COLORS.gray600 }}>Bln. Dikembalikan</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: d.blnDikembalikan > 0 ? COLORS.red : COLORS.gray800 }}>{d.blnDikembalikan} Bulan</div>
+                  </div>
+                  <div style={{ padding: 12, background: COLORS.greenLight, borderRadius: 8, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, color: COLORS.green }}>Kumulatif Tahun Ini</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "monospace", color: COLORS.green }}>{fmt(d.ukpKumulatif)}</div>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray800, marginBottom: 10 }}>Riwayat Bulanan (Jan - Jul 2026)</div>
+                <div style={{ border: `1px solid ${COLORS.gray200}`, borderRadius: 8, overflow: "hidden" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                    <thead><tr style={{ background: COLORS.gray100 }}><th style={{ padding: 8, textAlign: "left" }}>Bulan</th><th style={{ padding: 8, textAlign: "right" }}>Penghasilan Bruto</th><th style={{ padding: 8, textAlign: "right" }}>Pengembalian</th><th style={{ padding: 8, textAlign: "right" }}>UKP Neto</th></tr></thead>
+                    <tbody>
+                      {d.history.map((h, i) => (
+                        <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }}>
+                          <td style={{ padding: 8, fontWeight: 600 }}>{h.bln}</td>
+                          <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace" }}>{fmt(h.bruto)}</td>
+                          <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", color: h.pot > 0 ? COLORS.red : COLORS.gray400 }}>{h.pot > 0 ? `-${fmt(h.pot)}` : "—"}</td>
+                          <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: h.neto < 0 ? COLORS.red : COLORS.gray900 }}>{fmt(h.neto)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                  <Btn variant="outline" size="sm" onClick={() => { setDetailPeserta(null); setPreview({ title: `Preview Cetak Rincian UKP — ${d.nama}`, subtitle: `NRP: ${d.nrp} • NIK: ${d.nik}`, type: "surat", fileName: `Rincian_UKP_${d.nrp}.pdf`, content: { noSurat: `UKP/2026/${d.nrp}`, tujuan: `${d.nama} (${d.jabatan})`, periode: filterPeriode, cutoff: "31 Jul 2026", tanggal: "06 Agu 2026", items: [{ jenis: "Penerimaan UKP Neto Bulan Ini", peserta: `${d.blnDiterima} bln`, nominal: fmt(d.ukpNetoBulanIni) }, { jenis: "UKP Kumulatif Tahun Ini", peserta: "Jan-Jul", nominal: fmt(d.ukpKumulatif) }] } }); }}>Cetak Rincian UKP</Btn>
+                  <Btn size="sm" onClick={() => setDetailPeserta(null)}>Tutup</Btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Header Stat Cards */}
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+        <StatCard icon={<Users size={IC} />} label="Total Peserta UKP" value={`${totalPeserta} Peserta`} sub={`Periode ${filterPeriode}`} color={COLORS.blue} />
+        <StatCard icon={<DollarSign size={IC} />} label="UKP Neto Bulan Ini" value={fmt(totalUkpBulanIni)} sub="Rekapitulasi bulanan" color={COLORS.green} />
+        <StatCard icon={<TrendingUp size={IC} />} label="UKP Kumulatif Tahun Ini" value={fmt(totalUkpKumulatif)} sub="Akumulasi TA 2026" color={COLORS.blueDark} />
+        <StatCard icon={<RefreshCw size={IC} />} label="UKP Dikembalikan" value={fmt(totalDikembalikan)} sub="Kelebihan bayar / UDW" color={COLORS.orange} />
+      </div>
+
+      {/* Filter & Control Box */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
+        <SectionTitle action={
+          <div style={{ display: "flex", gap: 8 }}>
+            <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekap UKP Peserta Pensiun (Tabel 24)", subtitle: `Periode ${filterPeriode} • ${filterSatker}`, type: "table", fileName: `Tabel_24_Rekap_UKP_${filterPeriode.replace(" ", "_")}.xlsx`, content: { columns: ["No", "NIK", "NRP/Nopens", "Nama", "Kode Jiwa", "Jabatan", "Jenis UKP", "Diterima", "Dikembalikan", "PTKP", "UKP Neto", "UKP Kumulatif"], rows: filtered.map((d, i) => [i + 1, d.nik, d.nrp, d.nama, d.kodeJiwa, d.jabatan, d.jenisUKP, `${d.blnDiterima} bln`, `${d.blnDikembalikan} bln`, d.ptkp, fmt(d.ukpNetoBulanIni), fmt(d.ukpKumulatif)]), totalRows: filtered.length } })}>
+              <Download size={14} /> Ekspor Excel (.xlsx)
+            </Btn>
+            <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Laporan Resmi Tabel 24 - Rekap UKP Pensiun", subtitle: "Untuk Rekonsiliasi Kementerian Keuangan", type: "surat", fileName: `Laporan_Tabel24_UKP_${filterPeriode.replace(" ", "_")}.pdf`, content: { noSurat: "024/ASABRI/PAJAK-UKP/VII/2026", tujuan: "Direktur Jenderal Perbendaharaan / Direktorat Jenderal Pajak — Kemenkeu RI", periode: filterPeriode, cutoff: "31 Juli 2026", tanggal: "06 Agustus 2026", items: [{ jenis: "Total UKP Neto Bulan Ini", peserta: `${totalPeserta} peserta`, nominal: fmt(totalUkpBulanIni) }, { jenis: "Total UKP Kumulatif TA 2026", peserta: `${totalPeserta} peserta`, nominal: fmt(totalUkpKumulatif) }] } })}>
+              <FileText size={14} /> Ekspor PDF Laporan
+            </Btn>
+          </div>
+        }>Tabel 24 — Rekap UKP (Uang Kena Pajak) Peserta Pensiun Bulanan</SectionTitle>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
+          <Select label="Periode Laporan" value={filterPeriode} onChange={setFilterPeriode} options={["Juli 2026", "Juni 2026", "Mei 2026", "April 2026", "Maret 2026"]} minW={130} />
+          <Select label="Jenis UKP" value={filterJenisUKP} onChange={setFilterJenisUKP} options={["Semua", "Dapem Induk", "Dapem Susulan", "Dapem Rapel", "UDW Punah (Dikembalikan)", "THR / Dapem ke-13"]} minW={180} />
+          <Select label="Satker" value={filterSatker} onChange={setFilterSatker} options={["Semua", "TNI", "POLRI", "ASN Kemenhan", "PPPK"]} minW={130} />
+          <Select label="PTKP" value={filterPTKP} onChange={setFilterPTKP} options={["Semua", "TK/0", "K/0", "K/1", "K/2", "K/3"]} minW={110} />
+          <div>
+            <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Cari Peserta</label>
+            <SearchInput value={searchPeserta} onChange={setSearchPeserta} placeholder="Cari NIK / NRP / Nama / Jabatan..." minW={240} />
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 10 }}>Menampilkan {filtered.length} dari {allUKPData.length} data penerimaan UKP • Laporan resmi Divisi Keuangan (Bidang Pajak)</div>
+
+        {filtered.length === 0 ? <NoData text="Tidak ada data UKP yang sesuai filter." /> : (
+          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+              <thead>
+                <tr style={{ background: COLORS.gray100 }}>
+                  {["No.", "NIK", "NRP/Nopens", "Nama", "Kode Jiwa", "Jabatan / Pangkat", "Jenis UKP", "Bln. Diterima", "Bln. Dikembalikan", "PTKP", "Total UKP Neto Bulan Ini", "UKP Kumulatif Tahun Ini", "Aksi"].map((c, i) => (
+                    <th key={i} style={{ padding: "10px 12px", textAlign: i >= 10 && i <= 11 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((d, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    <td style={{ padding: "10px 12px", color: COLORS.gray500 }}>{i + 1}</td>
+                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11 }}>{d.nik}</td>
+                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue, fontWeight: 500 }}>{d.nrp}</td>
+                    <td style={{ padding: "10px 12px", fontWeight: 600, color: COLORS.gray800 }}>{d.nama}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "center" }}><span style={{ fontFamily: "monospace", background: COLORS.gray100, padding: "2px 6px", borderRadius: 4, fontSize: 11 }}>{d.kodeJiwa}</span></td>
+                    <td style={{ padding: "10px 12px", fontSize: 11.5, color: COLORS.gray600 }}>{d.jabatan}</td>
+                    <td style={{ padding: "10px 12px" }}><Badge color={d.jenisUKP.includes("Induk") ? "blue" : d.jenisUKP.includes("Susulan") ? "green" : d.jenisUKP.includes("Dikembalikan") ? "red" : "orange"}>{d.jenisUKP}</Badge></td>
+                    <td style={{ padding: "10px 12px", textAlign: "center" }}>{d.blnDiterima} bln</td>
+                    <td style={{ padding: "10px 12px", textAlign: "center", color: d.blnDikembalikan > 0 ? COLORS.red : COLORS.gray600, fontWeight: d.blnDikembalikan > 0 ? 700 : 400 }}>{d.blnDikembalikan > 0 ? `${d.blnDikembalikan} bln` : "0 bln"}</td>
+                    <td style={{ padding: "10px 12px" }}><Badge color="blue">{d.ptkp}</Badge></td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>{fmt(d.ukpNetoBulanIni)}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.blueDark }}>{fmt(d.ukpKumulatif)}</td>
+                    <td style={{ padding: "10px 12px" }}><Btn size="sm" variant="outline" onClick={() => setDetailPeserta(d)}>Detail</Btn></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div style={{ marginTop: 12, padding: "10px 14px", background: COLORS.gray50, borderRadius: 6, border: `1px solid ${COLORS.gray200}`, fontSize: 11.5, color: COLORS.gray700 }}>
+          <strong>Formula Kode Jiwa:</strong> <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>1000</span> = Single (Pria/Wanita) • <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>1100</span> = Menikah (Pria) • <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>1101</span> = Menikah (Anak 1) • <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>1102</span> = Menikah (Anak 2) • <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>0100</span> = Janda/Duda • <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>0101</span> = Janda/Duda (Anak 1)
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const KreditPiutang = () => {
   const [filterSatker, setFilterSatker] = useState("Semua");
   const [filterStatus, setFilterStatus] = useState("Semua");
@@ -1558,7 +1908,7 @@ const DashboardDIPA = () => {
   const [threshold, setThreshold] = useState(15);
   const [preview, setPreview] = useState(null);
 
-  const fmtM = n => `Rp ${n.toLocaleString("id-ID")} M`;
+  const fmtM = n => `Rp ${n >= 1_000_000_000 ? (n / 1_000_000_000).toLocaleString("id-ID") : n.toLocaleString("id-ID")} M`;
   const fmtRp = n => `Rp ${n.toLocaleString("id-ID")}`;
 
   // Rincian MAK per jenis dapem (nilai dalam rupiah penuh)
@@ -1640,11 +1990,11 @@ const DashboardDIPA = () => {
       )}
 
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard icon={<BarChart3 size={IC} />} label="Pagu DIPA Awal" value={fmtRp(paguAwal)} sub="TA 2026 (DIPA Induk)" color={COLORS.blue} />
-        <StatCard icon={<TrendingUp size={IC} />} label="Revisi Pagu" value={"+" + fmtRp(revisiPagu)} sub={`${revisiLog.length} kali revisi`} color="#7B1FA2" />
-        <StatCard icon={<Banknote size={IC} />} label="Pagu Berjalan" value={fmtRp(grand.pagu)} sub="Pagu Awal + Revisi" color={COLORS.blueDark} />
-        <StatCard icon={<Wallet size={IC} />} label="Realisasi SP2D" value={fmtRp(grand.real)} sub={`${pctUsed}% terserap`} color={COLORS.green} />
-        <StatCard icon={<TrendingDown size={IC} />} label="Sisa Pagu" value={fmtRp(grandSisa)} sub={`${pctSisa}% tersisa`} color={isAlert ? COLORS.red : COLORS.orange} />
+        <StatCard icon={<BarChart3 size={IC} />} label="Pagu DIPA Awal" value={fmtM(paguAwal)} sub="TA 2026 (DIPA Induk)" color={COLORS.blue} />
+        <StatCard icon={<TrendingUp size={IC} />} label="Revisi Pagu" value={"+" + fmtM(revisiPagu)} sub={`${revisiLog.length} kali revisi`} color="#7B1FA2" />
+        <StatCard icon={<Banknote size={IC} />} label="Pagu Berjalan" value={fmtM(grand.pagu)} sub="Pagu Awal + Revisi" color={COLORS.blueDark} />
+        <StatCard icon={<Wallet size={IC} />} label="Realisasi SP2D" value={fmtM(grand.real)} sub={`${pctUsed}% terserap`} color={COLORS.green} />
+        <StatCard icon={<TrendingDown size={IC} />} label="Sisa Pagu" value={fmtM(grandSisa)} sub={`${pctSisa}% tersisa`} color={isAlert ? COLORS.red : COLORS.orange} />
       </div>
 
       {/* Tabs */}
@@ -1653,11 +2003,19 @@ const DashboardDIPA = () => {
           { id: "realisasi", l: "Realisasi per Jenis Dapem" },
           { id: "sp2d", l: "Riwayat Pencairan SP2D", c: sp2dLog.length },
           { id: "revisi", l: "Riwayat Revisi Pagu", c: revisiLog.length },
-          { id: "konfigurasi", l: "Konfigurasi Alert" },
+          { id: "konfigurasi", l: "Konfigurasi Alert", disabled: true },
         ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "10px 20px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: "transparent", display: "flex", alignItems: "center", gap: 6, color: tab === t.id ? COLORS.blue : COLORS.gray500, borderBottom: tab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent", marginBottom: -2 }}>
+          <button key={t.id} disabled={t.disabled} onClick={() => !t.disabled && setTab(t.id)} style={{
+            padding: "10px 20px", border: "none", cursor: t.disabled ? "not-allowed" : "pointer",
+            fontSize: 13, fontWeight: 600, background: "transparent",
+            display: "flex", alignItems: "center", gap: 6,
+            color: t.disabled ? COLORS.gray400 : tab === t.id ? COLORS.blue : COLORS.gray500,
+            borderBottom: tab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+            marginBottom: -2, opacity: t.disabled ? 0.5 : 1
+          }}>
             {t.l}
             {t.c ? <span style={{ background: tab === t.id ? "#E3F2FD" : COLORS.gray200, color: tab === t.id ? COLORS.blue : COLORS.gray700, padding: "1px 8px", borderRadius: 10, fontSize: 11, fontWeight: 700 }}>{t.c}</span> : null}
+            {t.disabled && <span style={{ fontSize: 9, background: COLORS.gray200, color: COLORS.gray500, padding: "1px 6px", borderRadius: 3, fontWeight: 600 }}>SOON</span>}
           </button>
         ))}
       </div>
@@ -2109,7 +2467,7 @@ const ReportGenerator = () => {
   const [filterSatker, setFilterSatker] = useState("Semua");
   const [filterKategori, setFilterKategori] = useState("Semua");
   const allReports = [
-    { cat: "Penagihan Iuran", reports: ["Tabel 1 BRS II — Rekonsiliasi THT/Dapen", "Tabel 2 BRS II — Template Tagihan", "Rekap Tagihan per Satker"] },
+    { cat: "Penagihan Iuran", reports: ["Tabel 1 BRS II — Rekonsiliasi THT/Pensiun", "Tabel 2 BRS II — Template Tagihan", "Rekap Tagihan per Satker"] },
     { cat: "Klaim & Pembayaran", reports: ["Tabel 2 BRS I — Rekap Klaim JKK", "Tabel 4 BRS I — SPP Format Resmi", "Tabel 5 BRS I — Monitoring Taspen Life"] },
     { cat: "Perpajakan", reports: ["Bukti Potong 1721-A2 (Bulanan)", "Bukti Potong 1721-A3 (Tahunan)", "Tabel 25 BRS I — TER vs Pasal 17"] },
     { cat: "DIPA & SP2D", reports: ["Tabel 12 BRS I — Sisa Pagu DIPA", "Tabel 14–16 BRS I — Realisasi SP2D", "Tabel 17 BRS I — BOP Dapem"] },
@@ -2343,7 +2701,7 @@ const TagihanImbalJasa = () => {
                   <td style={{ padding: "10px 14px" }}>
                     <div style={{ display: "flex", gap: 6 }}>
                       <Btn size="sm" variant="outline" onClick={() => setDetailTagihan(t)}>Detail</Btn>
-                      {t.hariTerlambat > 0 && <Btn size="sm" variant="danger" onClick={() => tagihDenda(t)}><Bell size={13} /> Tagih Denda</Btn>}
+                      {t.status === "Belum Dibayar" && <Btn size="sm" variant="danger" onClick={() => tagihDenda(t)}><Bell size={13} /> Tagih Denda</Btn>}
                     </div>
                   </td>
                 </tr>
@@ -2545,6 +2903,9 @@ const TaspenPolis = () => {
   const [baState, setBaState] = useState("idle");
   const [dragOver, setDragOver] = useState(false);
   const [selectedSP, setSelectedSP] = useState({});
+  const [filterRekapBulan, setFilterRekapBulan] = useState("Semua");
+  const [filterRekapTahun, setFilterRekapTahun] = useState("2026");
+  const [filterRekapProgram, setFilterRekapProgram] = useState("Semua Program");
 
   const fmt = n => `Rp ${n.toLocaleString("id-ID")}`;
   const progColor = p => p === "TDS (THT)" ? "blue" : p === "Proteksi Beasiswa JKK" ? "orange" : "green";
@@ -2615,10 +2976,9 @@ const TaspenPolis = () => {
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
-        {[{ id: "dashboard", l: "Dashboard Program" }, { id: "peserta", l: "Daftar Peserta" }, { id: "sp", l: "SP Premi", c: spRows.filter(s => s.status !== "Disetujui").length }, { id: "ba", l: "Berita Acara" }].map(t => (
+        {[{ id: "dashboard", l: "Dashboard Program" }, { id: "peserta", l: "Daftar Peserta (Tabel 5)" }, { id: "rekap", l: "Rekapitulasi Polis" }, { id: "ba", l: "Berita Acara" }].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "10px 20px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: "transparent", display: "flex", alignItems: "center", gap: 6, color: tab === t.id ? COLORS.blue : COLORS.gray500, borderBottom: tab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent", marginBottom: -2 }}>
             {t.l}
-            {t.c ? <span style={{ background: tab === t.id ? "#E3F2FD" : COLORS.gray200, color: tab === t.id ? COLORS.blue : COLORS.gray700, padding: "1px 8px", borderRadius: 10, fontSize: 11, fontWeight: 700 }}>{t.c}</span> : null}
           </button>
         ))}
       </div>
@@ -2657,6 +3017,144 @@ const TaspenPolis = () => {
                 <span style={{ color: COLORS.red, fontWeight: 700 }}>{g.filter(p => p.status === "Belum Dibayar").length}</span>,
               ]; })} />
             <div style={{ marginTop: 8, fontSize: 11, color: COLORS.gray500 }}>Terakhir sinkron: 22 Jul 2026, 06:00 WIB • Sumber: Aplikasi Polis Taspen Life (web service)</div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: Rekapitulasi Polis (Tabel 8 BRS) */}
+      {tab === "rekap" && (
+        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+          <SectionTitle action={
+            <div style={{ display: "flex", gap: 8 }}>
+              <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Rekapitulasi Polis Taspen Life (Tabel 8 BRS)", subtitle: `Filter: ${filterRekapBulan} ${filterRekapTahun}`, type: "table", fileName: `Rekapitulasi_Polis_${filterRekapTahun}_${filterRekapBulan}.xlsx`, content: { columns: ["No", "Bulan Polis", "Program", "Jumlah Peserta", "Nominal Premi", "Total Fee Base (Imbal Jasa)"], rows: [
+                [1, "Januari 2026", "TDS (THT)", 1240, fmt(558000000), fmt(558000000 * 0.025)],
+                [2, "Februari 2026", "TDS (THT)", 1255, fmt(564750000), fmt(564750000 * 0.025)],
+                [3, "Maret 2026", "TDS (THT)", 1260, fmt(567000000), fmt(567000000 * 0.025)],
+                [4, "April 2026", "TDS (THT)", 1280, fmt(576000000), fmt(576000000 * 0.025)],
+                [5, "Mei 2026", "TDS (THT)", 1290, fmt(580500000), fmt(580500000 * 0.025)],
+                [6, "Juni 2026", "TDS (THT)", 1310, fmt(589500000), fmt(589500000 * 0.025)],
+                [7, "Juli 2026", "TDS (THT)", 1325, fmt(596250000), fmt(596250000 * 0.025)],
+              ], totalRows: 7 } })}>Ekspor Excel</Btn>
+            </div>
+          }>Rekapitulasi Polis — Tabel 8 BRS</SectionTitle>
+
+          <div style={{ display: "flex", gap: 10, marginBottom: 18, alignItems: "flex-end", flexWrap: "wrap" }}>
+            <Select label="Program Taspen Life" value={filterRekapProgram} onChange={setFilterRekapProgram} options={["Semua Program", "TDS (THT)", "Proteksi Beasiswa JKK", "Proteksi Beasiswa JKm"]} minW={220} />
+            <Select label="Tahun" value={filterRekapTahun} onChange={setFilterRekapTahun} options={["2026", "2025"]} minW={110} />
+            <Select label="Bulan" value={filterRekapBulan} onChange={setFilterRekapBulan} options={["Semua", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]} minW={150} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {[
+              { progKey: "TDS (THT)", title: "REKAPITULASI POLIS ASURANSI TASPEN DWIGUNA SEJAHTERA (PROGRAM THT — TARIF 2,5%)", color: "blue", rate: 0.025, data: [
+                { bln: "Januari", thn: "2026", peserta: 1240, premi: 558000000 },
+                { bln: "Februari", thn: "2026", peserta: 1255, premi: 564750000 },
+                { bln: "Maret", thn: "2026", peserta: 1260, premi: 567000000 },
+                { bln: "April", thn: "2026", peserta: 1280, premi: 576000000 },
+                { bln: "Mei", thn: "2026", peserta: 1290, premi: 580500000 },
+                { bln: "Juni", thn: "2026", peserta: 1310, premi: 589500000 },
+                { bln: "Juli", thn: "2026", peserta: 1325, premi: 596250000 },
+                { bln: "Januari", thn: "2025", peserta: 1100, premi: 495000000 },
+                { bln: "Februari", thn: "2025", peserta: 1120, premi: 504000000 },
+                { bln: "Maret", thn: "2025", peserta: 1135, premi: 510750000 },
+                { bln: "April", thn: "2025", peserta: 1150, premi: 517500000 },
+                { bln: "Mei", thn: "2025", peserta: 1170, premi: 526500000 },
+                { bln: "Juni", thn: "2025", peserta: 1190, premi: 535500000 },
+                { bln: "Juli", thn: "2025", peserta: 1200, premi: 540000000 },
+                { bln: "Agustus", thn: "2025", peserta: 1210, premi: 544500000 },
+                { bln: "September", thn: "2025", peserta: 1220, premi: 549000000 },
+                { bln: "Oktober", thn: "2025", peserta: 1225, premi: 551250000 },
+                { bln: "November", thn: "2025", peserta: 1230, premi: 553500000 },
+                { bln: "Desember", thn: "2025", peserta: 1235, premi: 555750000 },
+              ]},
+              { progKey: "Proteksi Beasiswa JKK", title: "REKAPITULASI POLIS ASURANSI TASPEN PROTEKSI BEASISWA (PROGRAM JKK — TARIF 3,0%)", color: "orange", rate: 0.03, data: [
+                { bln: "Januari", thn: "2026", peserta: 820, premi: 442800000 },
+                { bln: "Februari", thn: "2026", peserta: 835, premi: 450900000 },
+                { bln: "Maret", thn: "2026", peserta: 840, premi: 453600000 },
+                { bln: "April", thn: "2026", peserta: 850, premi: 459000000 },
+                { bln: "Mei", thn: "2026", peserta: 860, premi: 464400000 },
+                { bln: "Juni", thn: "2026", peserta: 875, premi: 472500000 },
+                { bln: "Juli", thn: "2026", peserta: 890, premi: 480600000 },
+                { bln: "Januari", thn: "2025", peserta: 710, premi: 383400000 },
+                { bln: "Februari", thn: "2025", peserta: 720, premi: 388800000 },
+                { bln: "Maret", thn: "2025", peserta: 730, premi: 394200000 },
+                { bln: "April", thn: "2025", peserta: 745, premi: 402300000 },
+                { bln: "Mei", thn: "2025", peserta: 760, premi: 410400000 },
+                { bln: "Juni", thn: "2025", peserta: 775, premi: 418500000 },
+                { bln: "Juli", thn: "2025", peserta: 785, premi: 423900000 },
+                { bln: "Agustus", thn: "2025", peserta: 795, premi: 429300000 },
+                { bln: "September", thn: "2025", peserta: 800, premi: 432000000 },
+                { bln: "Oktober", thn: "2025", peserta: 805, premi: 434700000 },
+                { bln: "November", thn: "2025", peserta: 810, premi: 437400000 },
+                { bln: "Desember", thn: "2025", peserta: 815, premi: 440100000 },
+              ]},
+              { progKey: "Proteksi Beasiswa JKm", title: "REKAPITULASI POLIS ASURANSI TASPEN PROTEKSI BEASISWA (PROGRAM JKM — TARIF 3,0%)", color: "green", rate: 0.03, data: [
+                { bln: "Januari", thn: "2026", peserta: 780, premi: 241800000 },
+                { bln: "Februari", thn: "2026", peserta: 790, premi: 244900000 },
+                { bln: "Maret", thn: "2026", peserta: 795, premi: 246450000 },
+                { bln: "April", thn: "2026", peserta: 805, premi: 249550000 },
+                { bln: "Mei", thn: "2026", peserta: 815, premi: 252650000 },
+                { bln: "Juni", thn: "2026", peserta: 825, premi: 255750000 },
+                { bln: "Juli", thn: "2026", peserta: 840, premi: 260400000 },
+                { bln: "Januari", thn: "2025", peserta: 690, premi: 213900000 },
+                { bln: "Februari", thn: "2025", peserta: 700, premi: 217000000 },
+                { bln: "Maret", thn: "2025", peserta: 710, premi: 220100000 },
+                { bln: "April", thn: "2025", peserta: 720, premi: 223200000 },
+                { bln: "Mei", thn: "2025", peserta: 735, premi: 227850000 },
+                { bln: "Juni", thn: "2025", peserta: 745, premi: 230950000 },
+                { bln: "Juli", thn: "2025", peserta: 755, premi: 234050000 },
+                { bln: "Agustus", thn: "2025", peserta: 760, premi: 235600000 },
+                { bln: "September", thn: "2025", peserta: 765, premi: 237150000 },
+                { bln: "Oktober", thn: "2025", peserta: 770, premi: 238700000 },
+                { bln: "November", thn: "2025", peserta: 772, premi: 239320000 },
+                { bln: "Desember", thn: "2025", peserta: 775, premi: 240250000 },
+              ]},
+            ].filter(sec => filterRekapProgram === "Semua Program" || sec.progKey === filterRekapProgram)
+             .map((sec, si) => {
+              const rows = sec.data.filter(r => {
+                if (filterRekapTahun !== "Semua" && r.thn !== filterRekapTahun) return false;
+                if (filterRekapBulan !== "Semua" && r.bln !== filterRekapBulan) return false;
+                return true;
+              });
+              const totPeserta = rows.reduce((a, r) => a + r.peserta, 0);
+              const totPremi = rows.reduce((a, r) => a + r.premi, 0);
+              const totFee = totPremi * sec.rate;
+              return (
+                <div key={si} style={{ border: `1px solid ${COLORS.gray200}`, borderRadius: 8, overflow: "hidden" }}>
+                  <div style={{ padding: "10px 14px", background: COLORS.gray100, borderBottom: `1px solid ${COLORS.gray300}`, fontSize: 12, fontWeight: 700, color: COLORS.gray800 }}>
+                    {sec.title}
+                  </div>
+                  {rows.length === 0 ? <NoData text="Tidak ada data rekapitulasi polis pada filter ini." /> : (
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+                      <thead>
+                        <tr style={{ background: COLORS.gray50 }}>
+                          {["No", "Bulan Polis", "Jumlah Peserta", "Nominal Premi (Rp)", "Total Fee Base / Imbal Jasa (Rp)"].map((c, k) => (
+                            <th key={k} style={{ padding: "8px 12px", textAlign: k >= 2 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `1px solid ${COLORS.gray300}` }}>{c}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((r, ri) => (
+                          <tr key={ri} style={{ borderBottom: `1px solid ${COLORS.gray200}` }}>
+                            <td style={{ padding: "8px 12px", color: COLORS.gray500 }}>{ri + 1}</td>
+                            <td style={{ padding: "8px 12px", fontWeight: 600 }}>{r.bln} {r.thn}</td>
+                            <td style={{ padding: "8px 12px", textAlign: "right" }}>{r.peserta.toLocaleString("id-ID")}</td>
+                            <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace" }}>{fmt(r.premi)}</td>
+                            <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.blueDark }}>{fmt(r.premi * sec.rate)}</td>
+                          </tr>
+                        ))}
+                        <tr style={{ background: COLORS.gray100, fontWeight: 700 }}>
+                          <td colSpan={2} style={{ padding: "9px 12px", color: COLORS.gray900 }}>Total {sec.title.split("(")[1]?.replace(")", "")}</td>
+                          <td style={{ padding: "9px 12px", textAlign: "right" }}>{totPeserta.toLocaleString("id-ID")}</td>
+                          <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace" }}>{fmt(totPremi)}</td>
+                          <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.green, fontSize: 13 }}>{fmt(totFee)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -2715,78 +3213,7 @@ const TaspenPolis = () => {
         </div>
       )}
 
-      {/* TAB: SP Premi */}
-      {tab === "sp" && (
-        <div>
-          <div style={{ background: "#E3F2FD", borderRadius: 8, padding: "10px 16px", marginBottom: 20, fontSize: 12, color: COLORS.gray700, display: "flex", gap: 8, alignItems: "center" }}>
-            <Calendar size={14} color={COLORS.blue} />
-            <span>Pembayaran premi ke Taspen Life dilakukan <strong>setelah tanggal 15 bulan berikutnya</strong> dari periode premi (BR-TL-01). Hari ini <strong>22 Jul 2026</strong> — SP untuk periode Juni 2026 sudah dapat diterbitkan.</span>
-          </div>
 
-          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-            <SectionTitle action={
-              <Btn onClick={() => { if (!selSP.length) return; const byProg = {}; selSP.forEach(p => { (byProg[p.program] = byProg[p.program] || { count: 0, sum: 0 }); byProg[p.program].count++; byProg[p.program].sum += p.premi; });
-                setPreview({ title: "Preview Surat Perintah Pembayaran Premi", subtitle: `${selSP.length} polis • Total ${fmt(selSPTotal)} • Format Tabel 6 BRS`, type: "surat", fileName: "SP_Premi_TaspenLife_Juli2026.pdf", content: { noSurat: "SP/TL/2026/07/XXX", tujuan: "PT Asuransi Jiwa Taspen (Taspen Life)\\nBank Mandiri — Rek. 1234567890", periode: "Juni 2026", cutoff: "30 Jun 2026", tanggal: "22 Jul 2026", items: Object.entries(byProg).map(([pr, g]) => ({ jenis: pr, peserta: g.count.toString(), nominal: fmt(g.sum) })) } }); }}>
-                <FileText size={14} /> Terbitkan SP Premi ({selSP.length})
-              </Btn>
-            }>Polis Belum Dibayar — Siap Diterbitkan SP</SectionTitle>
-
-            {belumBayar.length === 0 ? <NoData text="Semua premi periode ini sudah dibayar." /> : (
-              <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                  <thead><tr style={{ background: COLORS.gray100 }}>
-                    {["", "No. Polis", "Nama Pemegang Polis", "Cabang", "Program", "Premi"].map((c, i) => (
-                      <th key={i} style={{ padding: "10px 12px", textAlign: i === 5 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
-                    ))}
-                  </tr></thead>
-                  <tbody>{belumBayar.map((p, i) => (
-                    <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: selectedSP[p.id] ? "#E3F2FD" : "transparent" }}>
-                      <td style={{ padding: "10px 12px", textAlign: "center" }}><input type="checkbox" checked={!!selectedSP[p.id]} onChange={() => toggleSP(p.id)} style={{ cursor: "pointer", width: 16, height: 16 }} /></td>
-                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: COLORS.blue }}>{p.noPolis}</td>
-                      <td style={{ padding: "10px 12px", fontWeight: 600 }}>{p.nama}</td>
-                      <td style={{ padding: "10px 12px" }}>{p.cabang}</td>
-                      <td style={{ padding: "10px 12px" }}><Badge color={progColor(p.program)}>{progShort(p.program)}</Badge></td>
-                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(p.premi)}</td>
-                    </tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            )}
-            {selSP.length > 0 && (
-              <div style={{ marginTop: 12, padding: "12px 16px", background: "#E3F2FD", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 13, color: COLORS.blueDark }}><strong>{selSP.length}</strong> polis dipilih — Total premi: <strong>{fmt(selSPTotal)}</strong></span>
-                <span style={{ fontSize: 11, color: COLORS.gray600 }}>Rekening tujuan: Bank Mandiri — 1234567890 a.n. PT Asuransi Jiwa Taspen</span>
-              </div>
-            )}
-          </div>
-
-          <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
-            <SectionTitle>Riwayat SP Premi & Status Approval</SectionTitle>
-            <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead><tr style={{ background: COLORS.gray100 }}>
-                  {["No. SP", "Periode", "Program", "Jml Polis", "Nominal", "Tgl Terbit", "Jatuh Tempo", "Status", "Approver"].map((c, i) => (
-                    <th key={i} style={{ padding: "10px 12px", textAlign: i === 3 || i === 4 ? "right" : "left", fontWeight: 600, color: COLORS.gray700, borderBottom: `2px solid ${COLORS.gray300}`, whiteSpace: "nowrap" }}>{c}</th>
-                  ))}
-                </tr></thead>
-                <tbody>{spRows.map((s, i) => (
-                  <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }} onMouseEnter={e => e.currentTarget.style.background = COLORS.gray50} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11, color: s.noSP === "—" ? COLORS.gray400 : COLORS.blue, fontWeight: 500 }}>{s.noSP}</td>
-                    <td style={{ padding: "10px 12px" }}>{s.periode}</td>
-                    <td style={{ padding: "10px 12px" }}><Badge color={progColor(s.program)}>{progShort(s.program)}</Badge></td>
-                    <td style={{ padding: "10px 12px", textAlign: "right" }}>{s.jml}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{fmt(s.nominal)}</td>
-                    <td style={{ padding: "10px 12px", fontSize: 12 }}>{s.tglTerbit}</td>
-                    <td style={{ padding: "10px 12px", fontSize: 12 }}>{s.jatuhTempo}</td>
-                    <td style={{ padding: "10px 12px" }}><Badge color={spStatusColor(s.status)}>{s.status}</Badge></td>
-                    <td style={{ padding: "10px 12px", fontSize: 12, color: COLORS.gray600 }}>{s.approver}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* TAB: Berita Acara */}
       {tab === "ba" && (
@@ -3129,7 +3556,7 @@ const TaspenImbalJasa = () => {
                     <td style={{ padding: "10px 14px" }}>
                       <div style={{ display: "flex", gap: 6 }}>
                         <Btn size="sm" variant="outline" onClick={() => setDetailTagihan(t)}>Detail</Btn>
-                        {t.hariTerlambat > 0 && <Btn size="sm" variant="danger" onClick={() => tagihDenda(t)}><Bell size={13} /> Tagih Denda</Btn>}
+                        {t.status === "Belum Dibayar" && <Btn size="sm" variant="danger" onClick={() => tagihDenda(t)}><Bell size={13} /> Tagih Denda</Btn>}
                       </div>
                     </td>
                   </tr>
@@ -3139,6 +3566,401 @@ const TaspenImbalJasa = () => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+// ===== LIST SP (SURAT PERINTAH) PEMBAYARAN MANFAAT =====
+const ListSP = () => {
+  const [filterOpen, setFilterOpen] = useState(true);
+  const [dariTanggal, setDariTanggal] = useState("");
+  const [sampaiTanggal, setSampaiTanggal] = useState("");
+  const [mitraBayar, setMitraBayar] = useState("Semua");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [manfaat, setManfaat] = useState("-- Silahkan Pilih Manfaat --");
+  const [cabang, setCabang] = useState("-- Silahkan Pilih Cabang --");
+  const [status, setStatus] = useState("Semua");
+  const [unor, setUnor] = useState("-- Silahkan Pilih Unit Organisasi --");
+  const [statusPersonil, setStatusPersonil] = useState("-- Silahkan Pilih Status Personil --");
+  const [dariTanggalDPS, setDariTanggalDPS] = useState("");
+  const [sampaiTanggalDPS, setSampaiTanggalDPS] = useState("");
+  const [produk, setProduk] = useState("-- Silahkan Pilih Produk --");
+  const [preview, setPreview] = useState(null);
+
+  const fmt = n => typeof n === "number" ? `Rp ${n.toLocaleString("id-ID")}` : n;
+
+  const manfaatOptions = [
+    "-- Silahkan Pilih Manfaat --",
+    "999 - UKP",
+    "99999 - Reimboursment Perawatan",
+    "IDP - Iuran Dana Pensiun PP 67 (Pra PP No. 102)",
+    "JKK BEASISWA - Beasiswa (JKK)",
+    "JKK BIAYA ANGKUT - Biaya Angkut",
+    "JKK PERAWATAN - Perawatan",
+    "JKK SCDB - Santunan Cacat Dinas Biasa",
+    "JKK SCDK - Santunan Cacat Dinas Khusus",
+    "JKK SRKK GUGUR - Santunan Risiko Kematian Khusus Gugur",
+    "JKK SRKK TEWAS - Santunan Risiko Kematian Khusus Tewas",
+    "JKM BEASISWA - Bantuan Beasiswa (JKM)",
+    "JKM SRK BP - Santunan Resiko Kematian - Biaya Pemakaman",
+    "JKM SRK SKS BINTARA/TAMTAMA - Santunan Resiko Kematian - Santunan Kematian Sekaligus untuk bintara dan tamtama",
+    "JKM SRK SKS PA - Santunan Resiko Kematian - Santunan Kematian Sekaligus untuk perwira",
+    "JKM SRK UDW AKTIF - Santunan Resiko Kematian - Uang Duka wafat Aktif",
+    "NTIP - NTIP",
+    "PEMBATALAN_BUM - PEMBATALAN BUM",
+    "PINPOL - PELUNASAN POLIS",
+    "PINPOL - PINJAMAN POLIS",
+    "PP - Pensiun Pertama",
+    "PPA - Pensiun Pertama Anak",
+    "PPI - Pensiun Pertama Istri",
+    "PPOR - Pensiun Pertama Orang Tua",
+    "RKNT - RISIKO KEMATIAN & NILAI TUNAI ASURANSI",
+    "SA - Santunan Asuransi PP 67 (pra PP 102)",
+    "SBP - Santunan Biaya Pemakaman PP 67 (pra PP 102)",
+    "SNTA - Santunan Nilai Tunai Asuransi PP 67 (pra PP 102)",
+    "SRK - Santunan Risiko Kematian PP 67 (pra PP 102)",
+    "SRK/SNTA - Santunan Risiko Kematian PP 67 (pra PP 102)",
+    "SRKK - Santunan Risiko Kematian Khusus PP 67 (pra PP 102)",
+    "THT BPPP - Biaya Pemakaman Peserta Pensiunan",
+    "THT NTTA - Nilai Tunai Tabungan Asuransi",
+    "THT SBPA - Santunan Biaya Pemakaman Anak",
+    "THT SBPI/S - Santunan Biaya pemakaman Istri/Suami",
+    "THT TA - Tabungan Asuransi",
+    "UDW PENS - Uang Duka wafat Pensiun",
+    "UKP - UKP (Uang Kekurangan Pensiun)",
+    "UKP-PK - UKP (Uang Kekurangan Pensiun - Pembayaran Kembali)"
+  ];
+
+  const spMasterData = [
+    {
+      kpa: "KPA-001",
+      nrp: "198701234",
+      nama: "Purn. Kol. Ahmad Rifai",
+      produk: "JKK",
+      noSP: "SP/JKK/2026/07/001",
+      kodeBayar: "KB-99999-01",
+      tglSP: "2026-07-05",
+      unor: "Kodam Jaya",
+      cabangAsabri: "KC Jakarta",
+      mitraBayar: "PT Bank Rakyat Indonesia (BRI)",
+      cabangMitra: "KCP Matraman",
+      saranaBayar: "Overbooking CMS",
+      namaRekening: "Ahmad Rifai",
+      nomorRekening: "026101000123",
+      jumlahHak: 45000000,
+      potonganPajak: 0,
+      potongan: 0,
+      jumlahBayar: 45000000,
+      noDPS: "DPS-2026-0812",
+      tglBayar: "2026-07-10",
+      status: "Lunas",
+      manfaat: "99999 - Reimboursment Perawatan",
+      statusPersonil: "Pensiun"
+    },
+    {
+      kpa: "KPA-002",
+      nrp: "199205678",
+      nama: "Purn. Lettu Budi Kartono",
+      produk: "Taspen Life",
+      noSP: "SP/TL/2026/07/001",
+      kodeBayar: "KB-TL-02",
+      tglSP: "2026-07-16",
+      unor: "Mabes TNI",
+      cabangAsabri: "KC Jakarta",
+      mitraBayar: "PT Asuransi Jiwa Taspen",
+      cabangMitra: "Kantor Pusat TL",
+      saranaBayar: "Virtual Account",
+      namaRekening: "PT Asuransi Jiwa Taspen",
+      nomorRekening: "1234567890",
+      jumlahHak: 830000,
+      potonganPajak: 0,
+      potongan: 0,
+      jumlahBayar: 830000,
+      noDPS: "DPS-2026-0815",
+      tglBayar: "2026-07-20",
+      status: "Disetujui",
+      manfaat: "PINPOL - PELUNASAN POLIS",
+      statusPersonil: "Pensiun"
+    },
+    {
+      kpa: "KPA-003",
+      nrp: "199012345",
+      nama: "Purn. AKP Citra Dewi",
+      produk: "THT",
+      noSP: "SP/THT/2026/07/004",
+      kodeBayar: "KB-SBP-03",
+      tglSP: "2026-07-12",
+      unor: "Polda Metro Jaya",
+      cabangAsabri: "KC Jakarta",
+      mitraBayar: "PT Bank Mandiri (Persero)",
+      cabangMitra: "KC Thamrin",
+      saranaBayar: "CMS Mandiri",
+      namaRekening: "Citra Dewi",
+      nomorRekening: "137001234567",
+      jumlahHak: 15000000,
+      potonganPajak: 0,
+      potongan: 0,
+      jumlahBayar: 15000000,
+      noDPS: "DPS-2026-0818",
+      tglBayar: "2026-07-15",
+      status: "Lunas",
+      manfaat: "SBP - Santunan Biaya Pemakaman PP 67 (pra PP 102)",
+      statusPersonil: "Pensiun"
+    },
+    {
+      kpa: "KPA-004",
+      nrp: "197506789",
+      nama: "Purn. Pengatur Agus Salim",
+      produk: "UKP",
+      noSP: "SP/UKP/2026/07/009",
+      kodeBayar: "KB-UKP-04",
+      tglSP: "2026-07-18",
+      unor: "Setjen Kemhan",
+      cabangAsabri: "KC Bandung",
+      mitraBayar: "PT Bank Tabungan Negara (BTN)",
+      cabangMitra: "KC Bandung",
+      saranaBayar: "CMS BTN",
+      namaRekening: "Agus Salim",
+      nomorRekening: "001230156789",
+      jumlahHak: 6200000,
+      potonganPajak: 310000,
+      potongan: 0,
+      jumlahBayar: 5890000,
+      noDPS: "DPS-2026-0820",
+      tglBayar: "2026-07-22",
+      status: "Lunas",
+      manfaat: "999 - UKP",
+      statusPersonil: "Pensiun"
+    },
+    {
+      kpa: "KPA-005",
+      nrp: "198604321",
+      nama: "Purn. Bripka Anwar Ibrahim",
+      produk: "JKK",
+      noSP: "SP/JKK/2026/07/012",
+      kodeBayar: "KB-SCDK-05",
+      tglSP: "2026-07-20",
+      unor: "Polda Jabar",
+      cabangAsabri: "KC Bandung",
+      mitraBayar: "PT Bank Negara Indonesia (BNI)",
+      cabangMitra: "KC Juanda",
+      saranaBayar: "CMS BNI",
+      namaRekening: "Anwar Ibrahim",
+      nomorRekening: "0112233445",
+      jumlahHak: 85000000,
+      potonganPajak: 0,
+      potongan: 0,
+      jumlahBayar: 85000000,
+      noDPS: "—",
+      tglBayar: "—",
+      status: "Disetujui",
+      manfaat: "JKK SCDK - Santunan Cacat Dinas Khusus",
+      statusPersonil: "Pensiun"
+    },
+    {
+      kpa: "KPA-006",
+      nrp: "199401234",
+      nama: "Danu Prasetyo",
+      produk: "Dapen",
+      noSP: "SP/IDP/2026/07/015",
+      kodeBayar: "KB-IDP-06",
+      tglSP: "2026-07-22",
+      unor: "Ditjen Strahan",
+      cabangAsabri: "KC Jakarta",
+      mitraBayar: "PT Pos Indonesia",
+      cabangMitra: "KPU Jakarta Pusat",
+      saranaBayar: "Giropos",
+      namaRekening: "Danu Prasetyo",
+      nomorRekening: "900123456",
+      jumlahHak: 4800000,
+      potonganPajak: 120000,
+      potongan: 0,
+      jumlahBayar: 4680000,
+      noDPS: "—",
+      tglBayar: "—",
+      status: "Draft",
+      manfaat: "IDP - Iuran Dana Pensiun PP 67 (Pra PP No. 102)",
+      statusPersonil: "Aktif"
+    },
+    {
+      kpa: "KPA-007",
+      nrp: "197604567",
+      nama: "Purn. Mayor Inf. Surya Darma",
+      produk: "JKm",
+      noSP: "SP/JKM/2026/07/018",
+      kodeBayar: "KB-JKM-07",
+      tglSP: "2026-07-24",
+      unor: "Lanud Halim",
+      cabangAsabri: "KC Jakarta",
+      mitraBayar: "PT Bank Rakyat Indonesia (BRI)",
+      cabangMitra: "KC Jakarta Timur",
+      saranaBayar: "Overbooking CMS",
+      namaRekening: "Surya Darma",
+      nomorRekening: "026101987654",
+      jumlahHak: 42000000,
+      potonganPajak: 0,
+      potongan: 0,
+      jumlahBayar: 42000000,
+      noDPS: "DPS-2026-0830",
+      tglBayar: "2026-07-25",
+      status: "Lunas",
+      manfaat: "JKM SRK BP - Santunan Resiko Kematian - Biaya Pemakaman",
+      statusPersonil: "Wafat / Waris"
+    }
+  ];
+
+  const filtered = spMasterData.filter(d => {
+    if (mitraBayar !== "Semua" && !d.mitraBayar.toLowerCase().includes(mitraBayar.toLowerCase())) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!d.nama.toLowerCase().includes(q) && !d.nrp.includes(q) && !d.kpa.toLowerCase().includes(q)) return false;
+    }
+    if (manfaat !== "-- Silahkan Pilih Manfaat --" && d.manfaat !== manfaat) return false;
+    if (cabang !== "-- Silahkan Pilih Cabang --" && d.cabangAsabri !== cabang) return false;
+    if (status !== "Semua" && d.status !== status) return false;
+    if (unor !== "-- Silahkan Pilih Unit Organisasi --" && d.unor !== unor) return false;
+    if (statusPersonil !== "-- Silahkan Pilih Status Personil --" && d.statusPersonil !== statusPersonil) return false;
+    if (produk !== "-- Silahkan Pilih Produk --" && d.produk !== produk) return false;
+    if (dariTanggal && d.tglSP < dariTanggal) return false;
+    if (sampaiTanggal && d.tglSP > sampaiTanggal) return false;
+    return true;
+  });
+
+  const columnsList = [
+    "KPA", "NRP/NIP", "NAMA PESERTA", "Produk", "No Surat Perintah", "Kode Bayar", "Tanggal Surat Perintah",
+    "Unor", "Kantor Cabang Asabri", "Mitra Bayar", "Cabang Mitra Bayar", "Sarana Bayar", "Nama Rekening",
+    "Nomor Rekening", "Jumlah Hak", "Potongan Pajak", "Potongan", "Jumlah Bayar", "No DPS", "Tanggal Bayar", "Status"
+  ];
+
+  return (
+    <div>
+      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* Filter Panel collapsible */}
+      <div style={{ background: COLORS.white, borderRadius: 8, border: `1px solid ${COLORS.gray300}`, overflow: "hidden", marginBottom: 20 }}>
+        <div onClick={() => setFilterOpen(!filterOpen)} style={{ background: "#0D47A1", color: COLORS.white, padding: "10px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>{filterOpen ? "▼" : "►"} Filter</span>
+          <span style={{ fontSize: 11 }}>{filterOpen ? "Sembunyikan Panel Filter" : "Buka Panel Filter"}</span>
+        </div>
+
+        {filterOpen && (
+          <div style={{ padding: 18, background: "#FAFBFD" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, color: COLORS.gray700, fontWeight: 600, display: "block", marginBottom: 4 }}>Dari Tanggal</label>
+                <input type="date" value={dariTanggal} onChange={e => setDariTanggal(e.target.value)} style={{ width: "100%", padding: "7px 10px", borderRadius: 4, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5, boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: COLORS.gray700, fontWeight: 600, display: "block", marginBottom: 4 }}>Sampai Tanggal</label>
+                <input type="date" value={sampaiTanggal} onChange={e => setSampaiTanggal(e.target.value)} style={{ width: "100%", padding: "7px 10px", borderRadius: 4, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5, boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: COLORS.gray700, fontWeight: 600, display: "block", marginBottom: 4 }}>Mitra Bayar</label>
+                <input type="text" value={mitraBayar === "Semua" ? "" : mitraBayar} onChange={e => setMitraBayar(e.target.value || "Semua")} placeholder="Cari Mitra Bayar..." style={{ width: "100%", padding: "7px 10px", borderRadius: 4, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5, boxSizing: "border-box" }} />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, color: COLORS.gray700, fontWeight: 600, display: "block", marginBottom: 4 }}>Nama/KTPA/NRP</label>
+                <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Masukkan Nama, KTPA, atau NRP..." style={{ width: "100%", padding: "7px 10px", borderRadius: 4, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5, boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <Select label="Manfaat" value={manfaat} onChange={setManfaat} options={manfaatOptions} minW="100%" />
+              </div>
+              <div>
+                <Select label="Kantor Cabang Asabri" value={cabang} onChange={setCabang} options={["-- Silahkan Pilih Cabang --", "KC Jakarta", "KC Bandung", "KC Surabaya", "KC Medan", "KC Semarang", "KC Makassar"]} minW="100%" />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+              <div>
+                <Select label="Status" value={status} onChange={setStatus} options={["Semua", "Draft", "Disetujui", "Proses Bayar", "Lunas"]} minW="100%" />
+              </div>
+              <div>
+                <Select label="Unor" value={unor} onChange={setUnor} options={["-- Silahkan Pilih Unit Organisasi --", "Mabes TNI", "Kodam Jaya", "Polda Metro Jaya", "Setjen Kemhan", "Polda Jabar", "Ditjen Strahan", "Lanud Halim"]} minW="100%" />
+              </div>
+              <div>
+                <Select label="Status Personil" value={statusPersonil} onChange={setStatusPersonil} options={["-- Silahkan Pilih Status Personil --", "Aktif", "Pensiun", "Wafat / Waris", "Gugur / Tewas"]} minW="100%" />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 16 }}>
+              <div>
+                <label style={{ fontSize: 12, color: COLORS.gray700, fontWeight: 600, display: "block", marginBottom: 4 }}>Dari Tanggal DPS</label>
+                <input type="date" value={dariTanggalDPS} onChange={e => setDariTanggalDPS(e.target.value)} style={{ width: "100%", padding: "7px 10px", borderRadius: 4, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5, boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: COLORS.gray700, fontWeight: 600, display: "block", marginBottom: 4 }}>Sampai Tanggal DPS</label>
+                <input type="date" value={sampaiTanggalDPS} onChange={e => setSampaiTanggalDPS(e.target.value)} style={{ width: "100%", padding: "7px 10px", borderRadius: 4, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5, boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <Select label="Produk" value={produk} onChange={setProduk} options={["-- Silahkan Pilih Produk --", "THT", "JKK", "JKm", "Dapen", "Taspen Life", "UKP"]} minW="100%" />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button style={{ padding: "8px 24px", background: "#00A97F", color: COLORS.white, border: "none", borderRadius: 4, fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                🔍 Cari
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Summary Bar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ fontSize: 13, color: COLORS.gray800, fontWeight: 600 }}>
+          <span>Total Peserta : <strong>{filtered.length}</strong></span>
+          <span style={{ margin: "0 12px", color: COLORS.gray300 }}>|</span>
+          <span>Total SP : <strong>{filtered.length}</strong></span>
+        </div>
+        <Btn variant="primary" size="sm" onClick={() => setPreview({ title: "Preview Ekspor Daftar Surat Perintah (List SP)", subtitle: `Filter Manfaat: ${manfaat !== "-- Silahkan Pilih Manfaat --" ? manfaat : "Semua Manfaat"} • Total SP: ${filtered.length}`, type: "table", fileName: `List_SP_Manfaat_${new Date().toISOString().slice(0,10)}.xlsx`, content: { columns: columnsList, rows: filtered.map(d => [d.kpa, d.nrp, d.nama, d.produk, d.noSP, d.kodeBayar, d.tglSP, d.unor, d.cabangAsabri, d.mitraBayar, d.cabangMitra, d.saranaBayar, d.namaRekening, d.nomorRekening, fmt(d.jumlahHak), fmt(d.potonganPajak), fmt(d.potongan), fmt(d.jumlahBayar), d.noDPS, d.tglBayar, d.status]), totalRows: filtered.length } })}>
+          📥 Export Akun
+        </Btn>
+      </div>
+
+      {/* Table */}
+      {filtered.length === 0 ? <NoData text="Data Kosong — Tidak ada SP yang sesuai kriteria filter." /> : (
+        <div style={{ overflowX: "auto", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, background: COLORS.white }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5, whiteSpace: "nowrap" }}>
+            <thead>
+              <tr style={{ background: "#455A64", color: COLORS.white }}>
+                {columnsList.map((c, i) => (
+                  <th key={i} style={{ padding: "9px 10px", textAlign: i >= 14 && i <= 17 ? "right" : "left", fontWeight: 700, borderRight: `1px solid #546E7A` }}>{c}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((d, i) => (
+                <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}`, background: i % 2 === 1 ? "#F8F9FA" : "transparent" }} onMouseEnter={e => e.currentTarget.style.background = "#E3F2FD"} onMouseLeave={e => e.currentTarget.style.background = i % 2 === 1 ? "#F8F9FA" : "transparent"}>
+                  <td style={{ padding: "8px 10px", fontFamily: "monospace" }}>{d.kpa}</td>
+                  <td style={{ padding: "8px 10px", fontFamily: "monospace", color: COLORS.blue, fontWeight: 600 }}>{d.nrp}</td>
+                  <td style={{ padding: "8px 10px", fontWeight: 700, color: COLORS.gray900 }}>{d.nama}</td>
+                  <td style={{ padding: "8px 10px" }}><Badge color={d.produk === "JKK" ? "orange" : d.produk === "Taspen Life" ? "blue" : d.produk === "THT" ? "green" : "purple"}>{d.produk}</Badge></td>
+                  <td style={{ padding: "8px 10px", fontFamily: "monospace", color: COLORS.blueDark, fontWeight: 600 }}>{d.noSP}</td>
+                  <td style={{ padding: "8px 10px", fontFamily: "monospace", color: COLORS.gray700 }}>{d.kodeBayar}</td>
+                  <td style={{ padding: "8px 10px" }}>{d.tglSP}</td>
+                  <td style={{ padding: "8px 10px", color: COLORS.gray600 }}>{d.unor}</td>
+                  <td style={{ padding: "8px 10px" }}>{d.cabangAsabri}</td>
+                  <td style={{ padding: "8px 10px", fontWeight: 600 }}>{d.mitraBayar}</td>
+                  <td style={{ padding: "8px 10px", color: COLORS.gray600 }}>{d.cabangMitra}</td>
+                  <td style={{ padding: "8px 10px" }}>{d.saranaBayar}</td>
+                  <td style={{ padding: "8px 10px" }}>{d.namaRekening}</td>
+                  <td style={{ padding: "8px 10px", fontFamily: "monospace" }}>{d.nomorRekening}</td>
+                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace" }}>{fmt(d.jumlahHak)}</td>
+                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", color: COLORS.red }}>{fmt(d.potonganPajak)}</td>
+                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace" }}>{fmt(d.potongan)}</td>
+                  <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.green }}>{fmt(d.jumlahBayar)}</td>
+                  <td style={{ padding: "8px 10px", fontFamily: "monospace" }}>{d.noDPS}</td>
+                  <td style={{ padding: "8px 10px" }}>{d.tglBayar}</td>
+                  <td style={{ padding: "8px 10px" }}><Badge color={d.status === "Lunas" ? "green" : d.status === "Disetujui" ? "blue" : "gray"}>{d.status}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
@@ -3162,9 +3984,9 @@ const MENU = [
     ]},
   ]},
   { section: "PEMBAYARAN MANFAAT", items: [
-    { icon: "bank", label: "Realisasi Pembayaran Manfaat", children: [
+    { icon: "file", label: "Perintah & Realisasi Pembayaran", children: [
+      { id: "listsp", label: "List SP (Surat Perintah)" },
       { id: "bayarpensiun", label: "Daftar DAPEM & Penerbitan SPP" },
-      { id: "klaim", label: "Penyelesaian Klaim JKK" },
     ]},
     { icon: "trend", label: "Pengendalian Anggaran", children: [
       { id: "dipa", label: "Realisasi & Sisa Pagu DIPA" },
@@ -3188,6 +4010,7 @@ const MENU = [
   { section: "PERPAJAKAN & REKONSILIASI", items: [
     { icon: "receipt", label: "Administrasi Perpajakan", children: [
       { id: "pajak", label: "PPh 21 & Bukti Potong" },
+      { id: "ukp", label: "Rekap Data UKP Pensiun" },
     ]},
     { icon: "cross", label: "Rekonsiliasi Jaminan Kesehatan", children: [
       { id: "bpjs", label: "Iuran BPJS Kesehatan" },
@@ -3203,14 +4026,16 @@ const PAGES = {
   kalkulator: { title: "Perhitungan Iuran Peserta", component: KalkulatorIuran },
   rekonsiliasi: { title: "Rekonsiliasi SKP-PFK Kemenkeu", component: RekonsIuran },
   tagihan: { title: "Penerbitan Tagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
+  listsp: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
   bayarpensiun: { title: "Daftar DAPEM per MAK & Penerbitan SPP", component: PembayaranPensiun },
   dana: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
-  klaim: { title: "Penyelesaian Klaim JKK Perawatan", component: MonitoringKlaim },
+  klaim: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
   kredit: { title: "Penarikan Kelebihan Bayar UDW Punah", component: KreditPiutang },
   imbaljasa: { title: "Tagihan Imbal Jasa Mitra Bayar", component: TagihanImbalJasa },
   tlpolis: { title: "Portofolio Polis & Premi Taspen Life", component: TaspenPolis },
   tlimbaljasa: { title: "Tagihan Imbal Jasa Taspen Life", component: TaspenImbalJasa },
   pajak: { title: "Administrasi PPh 21 & Bukti Potong", component: Perpajakan },
+  ukp: { title: "Tabel 24 — Rekap UKP (Uang Kena Pajak) Peserta Pensiun Bulanan", component: RekapUKP },
   dipa: { title: "Realisasi & Sisa Pagu DIPA TA 2026", component: DashboardDIPA },
   bpjs: { title: "Rekonsiliasi Iuran BPJS Kesehatan", component: RekonBPJS },
   laporan: { title: "Laporan & Ekspor Data", component: ReportGenerator },
