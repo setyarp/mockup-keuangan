@@ -9,14 +9,56 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+      body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #FAFAFA; color: #0F172A; }
       #root { height: 100vh; }
+      
+      /* Scrollbar */
       ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: #f1f1f1; }
-      ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+      ::-webkit-scrollbar-track { background: #f1f5f9; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+      /* Global Micro-Interactions & Hover Polish */
+      button {
+        font-family: inherit;
+        transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+      }
+      button:hover {
+        filter: brightness(1.05);
+      }
+      button:active {
+        transform: scale(0.97) !important;
+      }
+
+      input, select, textarea {
+        font-family: inherit;
+        transition: all 0.15s ease;
+        outline: none;
+      }
+      input:hover, select:hover {
+        border-color: #94a3b8 !important;
+      }
+      input:focus, select:focus {
+        border-color: #1565C0 !important;
+        box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15) !important;
+      }
+
+      /* Hover states for table rows */
+      tbody tr {
+        transition: background-color 0.15s ease;
+      }
+
+      /* Hover animation for interactive cards */
+      .hover-lift {
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.09) !important;
+      }
     </style>
-    <script type="module" crossorigin src="/assets/index-CDwTAWvS.js"></script>
+    <script type="module" crossorigin src="/assets/index-DCFY5bn0.js"></script>
   </head>
   <body>
     <div id="root"></div>
