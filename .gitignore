@@ -44,3 +44,10 @@ ehthumbs.db
 .eslintcache
 *.tmp
 *.temp
+extracted_brd_tax.txt
+extracted_*.txt
+
+# Document / Reference Files
+*.pdf
+*.docx
+*.doc

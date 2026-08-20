@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Building2, Users, Download } from "lucide-react";
 import { COLORS } from "../constants/colors";
 import { SectionTitle, Select, Table, Badge, Btn, NoData, PreviewModal } from "../components/common";
 
@@ -42,6 +42,7 @@ export const RekonsIuran = () => {
   const rekonRows = (allRekonData[filterJenis] || []).filter(r => filterSatker === "Semua" || r.satker === filterSatker);
   const totalSistem = rekonRows.reduce((a, r) => a + r.sistem, 0);
   const totalSKP = rekonRows.reduce((a, r) => a + r.skp, 0);
+  const totalSelisihTab1 = Math.abs(totalSKP - totalSistem);
 
   // Data Tab 2: Rekon JKK/JKm vs Data Kepesertaan
   const rekonJKKData = [
@@ -61,47 +62,135 @@ export const RekonsIuran = () => {
   const totalRealJKKCombined = totalRealisasiJKK + totalRealisasiJKM;
   const totalPotensiKepesertaan = jkkFiltered.reduce((a, r) => a + r.potensiKepesertaan, 0);
 
+  const tabsConfig = [
+    {
+      id: "tht_pensiun",
+      icon: <Building2 size={16} />,
+      label: "THT & Pensiun vs SKP-PFK Kemenkeu",
+      badge: "⚠️ 1 Selisih",
+      badgeType: "warning"
+    },
+    {
+      id: "jkk_jkm",
+      icon: <Users size={16} />,
+      label: "JKK & JKm vs Data Kepesertaan",
+      badge: "8 Satker",
+      badgeType: "neutral"
+    }
+  ];
+
+  const handleExport = () => {
+    if (tab === "tht_pensiun") {
+      setPreview({
+        title: "Laporan Rekonsiliasi Iuran THT/Pensiun vs SKP-PFK",
+        subtitle: `Periode ${filterPeriode} • Jenis: ${filterJenis}`,
+        type: "table",
+        fileName: `Rekon_THT_Pensiun_SKP_${filterPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
+        content: {
+          columns: ["Satker", "Target Realisasi", "SKP-PFK Kemenkeu", "Selisih", "Status"],
+          rows: rekonRows.map(r => [r.satker, fmtB(r.sistem), fmtB(r.skp), fmtB(Math.abs(r.skp - r.sistem)), r.skp === r.sistem ? "Match" : "Selisih"]),
+          totalRows: rekonRows.length
+        }
+      });
+    } else {
+      setPreview({
+        title: "Laporan Rekonsiliasi Iuran JKK/JKm vs Data Kepesertaan",
+        subtitle: `Periode ${filterPeriode}`,
+        type: "table",
+        fileName: `Rekon_JKK_JKM_Kepesertaan_${filterPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
+        content: {
+          columns: ["Satker", "Peserta Aktif", "Realisasi JKK", "Realisasi JKm", "Potensi Kepesertaan", "Selisih", "Status"],
+          rows: jkkFiltered.map(r => [r.satker, r.pesertaAktif.toLocaleString(), fmtB(r.realisasiJKK), fmtB(r.realisasiJKM), fmtB(r.potensiKepesertaan), fmtB(Math.abs(r.potensiKepesertaan - (r.realisasiJKK + r.realisasiJKM))), r.status]),
+          totalRows: jkkFiltered.length
+        }
+      });
+    }
+  };
+
   return (
     <div>
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
 
-      {/* Tabs Menu */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
-        {[
-          { id: "tht_pensiun", label: "Perbandingan THT/Pensiun vs SKP-PFK Kemenkeu" },
-          { id: "jkk_jkm", label: "Perbandingan JKK/JKm vs Data Kepesertaan" }
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            style={{
-              padding: "12px 20px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13.5,
-              fontWeight: 700,
-              background: "transparent",
-              color: tab === t.id ? COLORS.blue : COLORS.gray600,
-              borderBottom: tab === t.id ? `3px solid ${COLORS.blue}` : "3px solid transparent",
-              marginBottom: -2,
-              display: "flex",
-              alignItems: "center",
-              gap: 8
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* ENTERPRISE TAB BAR WITH INTEGRATED CTA */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: `2px solid #CBD5E1`,
+          marginBottom: 20,
+          paddingBottom: 0,
+          gap: 16,
+          flexWrap: "wrap"
+        }}
+      >
+        {/* Tab Items List */}
+        <div style={{ display: "flex", gap: 6, marginBottom: -2 }}>
+          {tabsConfig.map(t => {
+            const isActive = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 18px",
+                  border: "none",
+                  borderRadius: "6px 6px 0 0",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: isActive ? 700 : 500,
+                  background: isActive ? "#FFFFFF" : "transparent",
+                  color: isActive ? "#0F172A" : "#475569",
+                  borderBottom: isActive ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+                  borderTop: isActive ? `1px solid #CBD5E1` : "1px solid transparent",
+                  borderLeft: isActive ? `1px solid #CBD5E1` : "1px solid transparent",
+                  borderRight: isActive ? `1px solid #CBD5E1` : "1px solid transparent",
+                  transition: "all 0.15s ease"
+                }}
+                onMouseEnter={e => {
+                  if (!isActive) e.currentTarget.style.background = "#F1F5F9";
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <span style={{ color: isActive ? COLORS.blue : "#64748B", display: "flex" }}>
+                  {t.icon}
+                </span>
+                <span>{t.label}</span>
+                <span
+                  style={{
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    padding: "1.5px 6px",
+                    borderRadius: 4,
+                    background: t.badgeType === "warning" ? "#FEE2E2" : isActive ? "#E2E8F0" : "#F1F5F9",
+                    color: t.badgeType === "warning" ? "#DC2626" : "#475569"
+                  }}
+                >
+                  {t.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* CTA Button Aligned Right */}
+        <div style={{ paddingBottom: 6 }}>
+          <Btn variant="primary" size="sm" onClick={handleExport}>
+            <Download size={14} />
+            <span>Ekspor Hasil Rekon</span>
+          </Btn>
+        </div>
       </div>
 
       {/* TAB 1: THT & PENSIUN VS SKP-PFK */}
       {tab === "tht_pensiun" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
           <SectionTitle>Rekonsiliasi Iuran THT/Pensiun vs SKP-PFK Kemenkeu</SectionTitle>
-          <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#F57F17", display: "flex", gap: 8, marginBottom: 16 }}>
-            <AlertTriangle size={14} />
-            <span>Rekonsiliasi tab ini khusus membandingkan penerimaan <strong>THT (3,25%)</strong> dan <strong>Pensiun (4,75%)</strong> terhadap acuan penerimaan SKP-PFK Kementerian Keuangan.</span>
-          </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
             <div>
@@ -137,7 +226,7 @@ export const RekonsIuran = () => {
             </div>
             <div style={{ background: totalSKP - totalSistem !== 0 ? COLORS.redLight : COLORS.greenLight, borderRadius: 8, padding: 16, textAlign: "center" }}>
               <div style={{ fontSize: 12, color: COLORS.gray700, marginBottom: 4 }}>Selisih</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: totalSKP - totalSistem !== 0 ? COLORS.red : COLORS.green }}>{fmtB(Math.abs(totalSKP - totalSistem))}</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: totalSKP - totalSistem !== 0 ? COLORS.red : COLORS.green }}>{fmtB(totalSelisihTab1)}</div>
               {totalSKP - totalSistem !== 0 && <div style={{ fontSize: 11, color: COLORS.red }}>{totalSKP > totalSistem ? "SKP-PFK > Target Realisasi" : "Target Realisasi > SKP-PFK"}</div>}
               {totalSKP - totalSistem === 0 && <div style={{ fontSize: 11, color: COLORS.green }}>✅ Matched</div>}
             </div>
@@ -169,10 +258,6 @@ export const RekonsIuran = () => {
       {tab === "jkk_jkm" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
           <SectionTitle>Rekonsiliasi Iuran JKK/JKm vs Data Kepesertaan</SectionTitle>
-          <div style={{ background: "#E8F5E9", borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#2E7D32", display: "flex", gap: 8, marginBottom: 16 }}>
-            <CheckCircle2 size={14} />
-            <span>Rekonsiliasi realisasi iuran per program <strong>JKK</strong> dan <strong>JKm</strong> dipadankan dengan <strong>Data Kepesertaan Aktif</strong> & kalkulasi potensi basis gaji peserta.</span>
-          </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
             <div>

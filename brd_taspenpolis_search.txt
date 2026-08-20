@@ -1,0 +1,462 @@
+--- Line 149 ---
+    Para pihak yang terlibat lainnya.
+    Ruang Lingkup
+    Ruang lingkup dokumen ini mencakup analisis kebutuhan bisnis untuk unit-unit kerja yang terlibat langsung dalam pengelolaan dan penggunaan YANDU NG, yang dipecah berdasaarkan proses bisnis sebagai berikut:
+    Divisi Kepesertaan — pendaftaran peserta baru, peremajaan data peserta, perhitungan iuran premi THT/JKK/JKm, pengelolaan KPR (PUM/BUM), pembentukan DAPEM, dan pengelolaan produk asuransi sosial.
+    Divisi Layanan — pelayanan pertama pensiun & e-SKPP, pelayanan klaim peserta aktif (JKK/JKm/THT), pelayanan klaim peserta pensiun, dan komunikasi pelanggan.
+>>> Divisi Keuangan — Penagihan iuran/premi dan anggaran belanja pensiun, monitoring ketersediaan dan penyediaan dana untuk pembayaran klaim, pembayaran manfaat tambahan, pembayaran pinjaman uang muka (PUM) serta pengembaliannya, pencatatan dan perlaporan keuangan, serta penagihan imbal jasa (taspen life, flagging kredit, dan pemanfaatan data autentikasi digital).
+    Divisi Aktuaria — penetapan tarif iuran/premi, cadangan teknis, estimasi DIPA, dan pelaporan aktuaria.
+    Divisi Akuntansi — pencatatan akuntansi penerimaan iuran/premi, pembayaran klaim, DAPEM/DIPA pensiun, dan pelaporan keuangan ke regulator (Kemenkeu, OJK, Danantara).
+    Satuan Pengawas Internal (SPI) — pelaporan untuk keperluan audit internal (PKAT, QAIP, multi-jenis audit), audit trail, dan rekonsiliasi lintas modul.
+    Kantor Cabang — fungsi operasional layanan langsung kepada peserta di tingkat cabang.
+    Untuk setiap fungsi utama, dokumen menyajikan: Kondisi Saat Ini (AS-IS) beserta pemodelan proses bisnis BPMN AS-IS, Permasalahan, Kondisi Ke Depan (TO-BE) beserta pemodelan proses bisnis BPMN TO-BE, dan Gap Analysis. Pemodelan BPMN pada dokumen ini disajikan dalam bentuk keterangan alur proses; diagram BPMN visual akan disusun pada tahap perancangan berikutnya. Hal-hal yang berada di luar ruang lingkup mengikuti batasan yang ditetapkan dalam kontrak dan dokumen BRD utama YANDU NG.
+    Referensi
+    Bagian berikut menjelaskan daftar referensi yang digunakan sebagai acuan dalam penyusunan dokumen BRD ini:
+    PER-22 tentang Organisasi dan Tata Kerja PT ASABRI — sumber uraian tugas/fungsi.
+    Resume Risalah Rapat Perwakilan Divisi Kepesertaan, Divisi Layanan, Divisi Aktuaria, Divisi Akuntansi, Divisi Keuangan, dan Divisi SAI pada bulan April 2026.
+    Dokumen BRS Divisi Kepesertaan, Divisi Layanan, Divisi Aktuaria, Divisi Akuntansi, Divisi Keuangan, dan Divisi SAI.
+    Kontrak Pembangunan YANDU Next Gen Pasal 2.
+    Pendekatan Analisis
+    Analisis kebutuhan bisnis disusun per unit kerja, dipecah per fungsi utama, dengan pendekatan:
+    Uraian tugas/fungsi diambil dari PER-22 (SOTK ASABRI).
+
+--- Line 187 ---
+    LYN
+    Divisi Layanan
+    Pelayanan pertama pensiun dan e-SKPP; Pelayanan klaim peserta aktif (THT/JKK/JKm); Pelayanan klaim peserta pensiun; Komunikasi pelanggan.
+    KEU
+    Divisi Keuangan
+>>> Penagihan iuran/premi dan anggaran belanja pensiun, monitoring ketersediaan dan penyediaan dana untuk pembayaran klaim, pembayaran manfaat tambahan, pembayaran pinjaman uang muka (PUM) serta pengembaliannya, pencatatan dan perlaporan keuangan, serta penagihan imbal jasa (taspen life, flagging kredit, dan pemanfaatan data autentikasi digital).
+    AKT
+    Divisi Aktuaria
+    Penetapan tarif iuran/premi, cadangan teknis, estimasi DIPA; Pelaporan aktuaria.
+    AKN
+    Divisi Akuntansi
+    Pencatatan akuntansi penerimaan iuran/premi; Pencatatan akuntansi pembayaran klaim; Pencatatan DAPEM dan DIPA; Pelaporan keuangan ke Kemenkeu, OJK, Danantara.
+    SPI
+    Satuan Pengawas Internal (SPI)
+    Pelaporan untuk keperluan SPI (PKAT, QAIP, multi-jenis audit); Audit trail dan rekonsiliasi lintas modul.
+    KC
+    Kantor Cabang
+    Pendaftaran peserta baru; Intake klaim; Layanan langsung peserta; Peremajaan data peserta tingkat cabang.
+    Hubungan Antar Unit Kerja
+    YANDU NG berperan sebagai sistem inti (core system) yang mengintegrasikan seluruh proses lintas unit kerja. Setiap divisi memberikan input ke YANDU NG dan menerima output dari YANDU NG sehingga data mengalir lintas unit tanpa pertukaran manual. Berikut keterkaitan input dan output utama tiap unit kerja dalam konteks YANDU NG:
+
+--- Line 290 ---
+    Kepesertaan
+    Konsolidasi data kepesertaan dan proses lanjutan di kantor pusat.
+    Analisis Divisi Keuangan
+    Gambaran Umum Divisi Keuangan
+    Kode unit: KEU
+>>> Unit kerja yang menangani penagihan iuran/premi dan anggaran belanja pensiun, monitoring ketersediaan dan penyediaan dana untuk pembayaran klaim, pembayaran manfaat tambahan, pembayaran pinjaman uang muka (PUM) serta pengembaliannya, pencatatan dan perlaporan keuangan, serta penagihan imbal jasa (taspen life, flagging kredit, dan pemanfaatan data autentikasi digital) serta penagihan denda keterlambatan penerimaan imbal jasa.
+    Fungsi utama: Penagihan iuran/premi ke Kemenkeu; Pembayaran klaim asuransi sosial; Pengelolaan DIPA dan pembayaran pensiun; Pencatatan dan Pengelolaan Pajak Pensiun.
+    Analisis Kondisi Saat Ini (AS-IS)
+    Penagihan Iuran/Premi THT/Pensiun
+    Penerimaan iuran/premi THT/Pensiun diterima dalam bentuk angka total dari Satker TNI/Polri berdasarkan SKP-PFK yang ditetapkan oleh Kemenkeu, tanpa disertakan daftar nama peserta. Kondisi ini menyebabkan kurangnya transparansi dan mempersulit rekonsiliasi per individu.
+    Pemodelan Proses Bisnis — BPMN AS-IS
+    Aktor
+    Staf Divisi Keuangan
+    Staf Divisi Kepesertaan
+    Kemenkeu
+    Trigger (start event): Penagihan iuran/premi THT/Pensiun periodik
+    Alur proses:
+    Kemenkeu mengirim SKP-PFK kepada PT ASABRI (Persero) melalui Aplikasi Treasury Big Data (TBD);
+    Divisi Keuangan membuat dan menyusun surat tagihan iuran PFK (THT/Pensiun) berdasarkan SKP-PFK;
+    Surat tagihan iuran/premi THT/Pensiun disampaikan kepada Kemenkeu baik hardcopy melalui kurir maupun softcopy melalui email dengan cc Divisi Kepesertaan;
+
+--- Line 344 ---
+    Permasalahan
+    Belum terintegrasinya aplikasi mandiri (seperti aplikasi gaji Satker) dengan aplikasi Yandu utama.
+    Perhitungan tunggakan iuran/premi atau hutang peserta belum otomatis dan masih bersifat asumsi.
+    Risiko ketidaksesuaian data antara jumlah personil aktif dengan iuran/premi yang disetorkan karena validasi NIK belum optimal.
+    Pembayaran Klaim Asuransi Sosial
+>>> Monitoring pembayaran manfaat program ASABRI dilakukan secara manual karena belum lengkap/menyeluruh integrasi antara Portal Pensiun, Aplikasi Perawatan, Polis Taspen Life, dan Aplikasi Flagging dengan YANDU. Data dan rekap pensiun per MAK masih disesuaikan manual.
+    Pemodelan Proses Bisnis — BPMN AS-IS
+    Aktor
+    Peserta
+    Kantor Cabang
+    Staf Divisi Keuangan
+    Staf Divisi Layanan
+    Mitra Bayar
+    Trigger (start event): Siklus pembayaran klaim/manfaat.
+    Alur ringkas:
+    Pembayaran manfaat program ASABRI diproses melalui beberapa aplikasi terpisah
+    Monitoring dilakukan manual karena aplikasi-aplikasi belum terintegrasi dengan YANDU
+    Data dan rekap pensiun per MAK disesuaikan manual.
+    Gambar 4.3 Proses Pembayaran Klaim Asuransi Sosial (AS-IS)
+    Permasalahan
+
+--- Line 412 ---
+    Berikut ini gambar BPMN TO-BE:
+    Gambar 4.7 Proses Penagihan Iuran Premi ke Kemenkeu (TO-BE)
+    Pembayaran Klaim Asuransi Sosial
+    Kondisi yang diharapkan / kebutuhan bisnis:
+    (KRITIS): pelaporan manfaat pensiun terotomasi dan tersedia dalam format yang sesuai kebutuhan DJPb Kemenkeu
+>>> (TINGGI): tagihan imbal jasa mitra bayar dan perhitungan denda keterlambatan pembayaran diterbitkan otomatis dengan perhitungan akurat berdasarkan data DAPEM dan PP untuk imbal jasa penggunaan data autentikasi digital, data flagging kredit untuk imbal jasa flagging kredit, dan Data pembayaran premi Taspen life.
+    (SEDANG): mapping rekening koran CMS mitra bayar ke format standar ASABRI tersedia dalam sistem. Outome dari mapping: Kebutuhan dana utk pembayaran klaim (dropping) harian. Penyusulan laporan secara otomatis berdasarkan realisasi CMS dan flagging transaksi
+    Pemodelan Proses Bisnis — BPMN TO-BE
+    Aktor
+    Peserta
+    Staf Divisi Kepesertaan
+    Staf Divisi Layanan
+    YANDU NG
+    Kantor Cabang
+    Staf Divisi Keuangan
+    Mitra Bayar
+    Staf Divisi Akuntansi
+    Trigger (start event): Siklus pembayaran klaim/manfaat.
+    Alur ringkas:
+    Aplikasi pendukung terintegrasi ke YANDU, pembayaran manfaat termonitor otomatis
+
+--- Line 519 ---
+    Unit Kerja : Divisi Keuangan
+    Prioritas : TINGGI
+    Latar Belakang:
+    Divisi Keuangan saat ini harus menyusun 26 format laporan standar secara manual dengan mengkompilasi data dari berbagai sumber yang belum terintegrasi. Proses penyusunan laporan yang seharusnya dapat dilakukan dalam hitungan menit oleh sistem membutuhkan waktu berjam-jam bahkan berhari-hari karena harus dilakukan secara manual, meningkatkan risiko kesalahan dan menghambat ketepatan waktu pelaporan.
+    Pernyataan Kebutuhan:
+>>> Sistem harus mengotomasi penyusunan seluruh 26 format laporan standar Divisi Keuangan sebagaimana didefinisikan dalam BRS Keuangan Tahap I dan Tahap II, termasuk laporan rekapitulasi klaim asuransi per mitra bayar, laporan pencairan SP2D dan realisasi belanja pensiun per MAK, laporan monitoring klaim JKK Perawatan dan Taspen Life, laporan potongan utang per UO/kode satker, laporan rekap iuran/premi THT/Pensiun per nama peserta, dan seluruh laporan lainnya. Setiap laporan harus dapat dihasilkan secara otomatis berdasarkan data yang tersedia dalam sistem dengan memilih parameter periode dan filter yang diinginkan, dan hasilnya dapat diunduh dalam format yang dibutuhkan (excel, PDF).
+    Manfaat yang Diharapkan:
+    Waktu penyusunan laporan berkurang dari berjam-jam menjadi hitungan menit, laporan yang dihasilkan selalu akurat karena langsung bersumber dari data transaksi dalam sistem, dan sumber daya manusia Divisi Keuangan dapat difokuskan pada analisis dan pengambilan keputusan berbasis data.
+    Monitoring Pengembalian Keterlanjuran Bayar Pensiun Karena Klaim UDW Punah 
+    Kode Kebutuhan : KEU 7
+    Nama Kebutuhan        : Sistem Monitoring dan Penagihan Otomatis Ketelanjuran Bayar UDW Punah
+    Unit Kerja : Divisi Keuangan / Divisi Pelayanan / Divisi Kepesertaan
+    Prioritas : TINGGI
+    Latar Belakang:
+    Dapem pensiun yang terlanjur dibayarkan kepada peserta yang tidak berhak karena meninggal dunia dan tidak ada ahli waris yang berhak menerima pembayaran pensiun (diketahui dari adanya klaim UDW Punah) merupakan kerugian yang harus ditagihkan kembali. Saat ini proses identifikasi dan penagihan UDW Punah dilakukan secara manual berdasarkan data dari Divisi Layanan dan Divisi Kepesertaan, sehingga tidak ada jaminan bahwa seluruh kasus UDW Punah teridentifikasi dan tertagih.
+    Pernyataan Kebutuhan:
+    Sistem harus dapat mendeteksi secara otomatis pembayaran UDW kepada peserta yang statusnya teridentifikasi sebagai UDW Punah berdasarkan data dari Divisi Layanan dan Divisi Kepesertaan, dan secara otomatis menerbitkan surat tagihan pengembalian kepada pihak yang bersangkutan. Sistem harus menyediakan monitoring status penagihan (sudah dikembalikan, belum dikembalikan, dalam proses penagihan) dan melakukan pemetaan (mapping) pengembalian dana berdasarkan rekening koran untuk mengkonfirmasi penerimaan kembali dana yang ditagihkan.
+    Manfaat yang Diharapkan:
+    Seluruh kasus UDW Punah teridentifikasi dan tertagih secara sistematis, mengurangi potensi kerugian keuangan PT ASABRI akibat UDW yang terlanjur dibayarkan dan tidak tertagih kembali.
+    Proses Bisnis:
+
+--- Line 541 ---
+    Kode Kebutuhan : KEU 8
+    Nama Kebutuhan       : Penerbitan Tagihan Imbal Jasa Secara Otomatis untuk Setiap Mitra Bayar per Periode
+    Unit Kerja : Divisi Keuangan
+    Prioritas : SEDANG
+    Latar Belakang:
+>>> PT ASABRI berhak atas imbal jasa dari Mitra Bayar atas berbagai layanan yang diberikan, termasuk pemanfaatan data autentikasi digital, flagging kredit, dan Taspen Life. Saat ini sebagian dari tagihan imbal jasa ini diterbitkan secara manual dan tidak selalu tepat waktu, sehingga berpotensi menunda penerimaan pendapatan dan mengurangi efisiensi operasional.
+    Pernyataan Kebutuhan:
+    Sistem harus secara otomatis menerbitkan tagihan imbal jasa untuk setiap Mitra Bayar pada setiap periode yang telah ditentukan, mencakup seluruh jenis imbal jasa yang menjadi hak PT ASABRI. Tagihan harus dihasilkan berdasarkan data transaksi aktual dalam sistem dan disajikan dalam format yang dapat langsung dikirimkan kepada Mitra Bayar sebagai dokumen tagihan resmi.
+    Manfaat yang Diharapkan:
+    Seluruh pendapatan imbal jasa dari Mitra Bayar tertagih secara konsisten dan tepat waktu, meningkatkan efisiensi pengelolaan piutang, dan memastikan tidak ada hak pendapatan ASABRI yang terlewatkan.
+    Mapping Rekening Koran CMS Mitra Bayar
+    Kode Kebutuhan : KEU 09
+    Nama Kebutuhan     : Standardisasi dan Mapping Rekening Koran CMS Mitra Bayar dalam Format Seragam
+    Unit Kerja : Divisi Keuangan
+    Prioritas : TINGGI
+    Latar Belakang:
+    Setiap Mitra Bayar memiliki format rekening koran CMS yang berbeda-beda, sehingga Divisi Keuangan harus melakukan penyesuaian format secara manual untuk setiap mitra sebelum data rekening koran dapat digunakan untuk keperluan pelaporan dan rekonsiliasi. Proses penyesuaian format manual ini membutuhkan waktu yang tidak sedikit dan rawan terjadi kesalahan.
+    Pernyataan Kebutuhan:
+    Sistem harus menyediakan mekanisme mapping rekening koran dari CMS seluruh Mitra Bayar ke dalam format standar yang seragam sesuai kebutuhan pelaporan Divisi Keuangan. Informasi transaksi dari seluruh rekening giro pembayaran harus dapat diakses dalam format tarikan rekening koran dari CMS mitra bayar yang seragam dan dapat dieksport dalam format excel mapping untuk keperluan pelaporan.
+    Manfaat yang Diharapkan:
+
+--- Line 651 ---
+    Dashboard harus dapat diakses oleh Divisi Keuangan dan memberikan alert apabila sisa pagu mendekati batas tertentu yang ditetapkan.
+    Uraian lebih lanjut dapat dilihat pada BRS Divisi Keuangan
+    Pengelolaan DIPA dan Pembayaran Pensiun
+    KEU 05 : Pelaporan Pembayaran Manfaat Terotomasi
+    KEU 05.1
+>>> Sistem harus mengotomasi penyusunan seluruh 26 format laporan standar Divisi Keuangan sebagaimana didefinisikan dalam BRS Keuangan Tahap I dan Tahap II, termasuk laporan rekapitulasi klaim asuransi per mitra bayar, laporan pencairan SP2D dan realisasi belanja pensiun per MAK, laporan monitoring klaim JKK Perawatan dan Taspen Life, laporan potongan utang per UO/kode satker, laporan rekap iuran/premi THT/Pensiun per nama peserta, dan seluruh laporan lainnya.
+    Uraian lebih lanjut dapat dilihat pada BRS Divisi Keuangan
+    Pelaporan Keuangan, Pengelolaan DIPA dan Pembayaran Pensiun, Pembayaran Klaim Asuransi Sosial, Penagihan Iuran/Premi ke Kemenkeu
+    KEU 05.2
+    Setiap laporan harus dapat dihasilkan secara otomatis berdasarkan data yang tersedia dalam sistem dengan memilih parameter periode dan filter yang diinginkan, dan hasilnya dapat diunduh dalam format yang dibutuhkan (excel, PDF).
+    Uraian lebih lanjut dapat dilihat pada BRS Divisi Keuangan
+    Pelaporan Keuangan
+    KEU 06 : Rekonsiliasi BPJS Kesehatan Terotomasi
+    KEU 06.1
+    Sistem harus menyediakan data potongan iuran BPJS Kesehatan per peserta per bulan secara terstruktur yang dapat digunakan sebagai bahan rekonsiliasi dengan BPJS Kesehatan dan DJPb.
+    Uraian lebih lanjut dapat dilihat pada BRS Divisi Keuangan
+    Pengelolaan DIPA dan Pembayaran Pensiun, Pelaporan Keuangan
+    KEU 06.2
+    Sistem harus dapat menghitung kompensasi lebih atau kurang antara potongan yang seharusnya dipotong berdasarkan Rekap III BPJS dengan potongan yang benar-benar disetor ke Kas Negara, dan menyajikan hasil perhitungan tersebut dalam format laporan yang sesuai untuk rekonsiliasi.
+    Uraian lebih lanjut dapat dilihat pada BRS Divisi Keuangan
+
+--- Line 772 ---
+    Pengguna : Div. Keuangan (Bidang Yarpro)
+    Prioritas  : TINGGI
+    Kolom Data:
+    No. │ RS Provider │ Periode │ Jumlah Klaim Masuk │Jumlah Klaim Selesai │ Jumlah Klaim Pending │Total Tagihan RS Provider │ Total Reimburse Peserta │ Total Nilai SP yang Diterbitkan
+    Format Output: Excel, PDF
+>>> Monitoring Polis Taspen Life
+    Nama Laporan : Monitoring Polis Taspen Life
+    Jenis : Operasional
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan (Bidang Yarpro)
+    Prioritas : TINGGI
+    Kolom Data:
+    No. │ Nomor Polis │ NRP/Nopens/KTPA Peserta │ Nama Peserta │Nominal Premi│Jenis Program Taspen Life │ Tanggal Mulai Polis │Tanggal Akhir Polis │ Premi Bulanan │ Status Polis │Status Pembayaran Premi Terakhir│Nominal Fee Base yang di terima.
+    Format Output: Excel, PDF
+    Laporan Utang Non-TGR dan SSBP/SSPB
+    Nama Laporan : Laporan Utang Non-TGR dan Bukti SSBP/SSPB
+    Jenis : Operasional, Regulatori
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan
+    Prioritas : TINGGI
+
+--- Line 773 ---
+    Prioritas  : TINGGI
+    Kolom Data:
+    No. │ RS Provider │ Periode │ Jumlah Klaim Masuk │Jumlah Klaim Selesai │ Jumlah Klaim Pending │Total Tagihan RS Provider │ Total Reimburse Peserta │ Total Nilai SP yang Diterbitkan
+    Format Output: Excel, PDF
+    Monitoring Polis Taspen Life
+>>> Nama Laporan : Monitoring Polis Taspen Life
+    Jenis : Operasional
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan (Bidang Yarpro)
+    Prioritas : TINGGI
+    Kolom Data:
+    No. │ Nomor Polis │ NRP/Nopens/KTPA Peserta │ Nama Peserta │Nominal Premi│Jenis Program Taspen Life │ Tanggal Mulai Polis │Tanggal Akhir Polis │ Premi Bulanan │ Status Polis │Status Pembayaran Premi Terakhir│Nominal Fee Base yang di terima.
+    Format Output: Excel, PDF
+    Laporan Utang Non-TGR dan SSBP/SSPB
+    Nama Laporan : Laporan Utang Non-TGR dan Bukti SSBP/SSPB
+    Jenis : Operasional, Regulatori
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan
+    Prioritas : TINGGI
+    Deskripsi: Laporan yang mencatat seluruh potongan Non-TGR (bukan Tuntutan Ganti Rugi) yang
+
+--- Line 779 ---
+    Jenis : Operasional
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan (Bidang Yarpro)
+    Prioritas : TINGGI
+    Kolom Data:
+>>> No. │ Nomor Polis │ NRP/Nopens/KTPA Peserta │ Nama Peserta │Nominal Premi│Jenis Program Taspen Life │ Tanggal Mulai Polis │Tanggal Akhir Polis │ Premi Bulanan │ Status Polis │Status Pembayaran Premi Terakhir│Nominal Fee Base yang di terima.
+    Format Output: Excel, PDF
+    Laporan Utang Non-TGR dan SSBP/SSPB
+    Nama Laporan : Laporan Utang Non-TGR dan Bukti SSBP/SSPB
+    Jenis : Operasional, Regulatori
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan
+    Prioritas : TINGGI
+    Deskripsi: Laporan yang mencatat seluruh potongan Non-TGR (bukan Tuntutan Ganti Rugi) yang
+    dipotong dari klaim peserta beserta bukti setorannya ke Kas Negara.
+    Kolom Data:
+    No. │ NRP/Nopens │ Nama Peserta │ Jenis Klaim │No. SP │ Tanggal SP │ Total Nilai SP │ Potongan Non-TGR │ NTPN SSBP │ Tanggal Setor 
+    Format Output: Excel, PDF
+    Laporan Potongan Utang Per UO/Satker
+    Nama Laporan : Rekap Potongan Utang Per UO/Kode Satker
+
+--- Line 862 ---
+    xxx.xxx
+    Dapem ke-13
+    xxx.xxx
+    JKK Perawatan
+    xxx.xxx
+>>> Taspen Life
+    xxx.xxx
+    ….
+    TOTAL
+    Persentase Serapan: xx,xx%
+    Estimasi Serapan s.d. Akhir Tahun: Rp xxx
+    Status: ■ AMAN / ▲ PERHATIAN / ● KRITIS
+    Format Output: Dashboard (real-time), Excel, PDF 
+    Alert: Kirim notifikasi kepada Kadiv Keuangan jika sisapagu < 10%
+    Rekap Setoran BPJS Triwulanan
+    Nama Laporan : Rekap Setoran Iuran BPJS Kesehatan Triwulanan
+    Jenis : Regulatori, Rekonsiliasi
+    Frekuensi : Triwulanan
+    Pengguna : Div. Keuangan
+    Prioritas : TINGGI
+
+--- Line 925 ---
+    Jenis : Operasional
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan
+    Prioritas : TINGGI
+    Kolom Data Taspen Proteksi Beasiswa (TPB)
+>>> No. │ Bulan │ Peserta │KTPA│ Nominal │ Nomor Polis│Tanggal Polis│Tanggal Bayar Polis│ Imbal Jasa (Nominal x 3%) │ DPP 11/12 (DPP x Imbal Jasa) │PPN (DPP X 12%) │ PPH 23 (Imbal Jasa X 2%) │Jumlah Tagihan (Imbal Jasa + DPP)│Imbal Jasa yang Diterima (Imbal Jasa + DPP – PPN)│Tanggal Terima Imbal Jasa.
+    Kolom Data Taspen Dwiguna Sejahtera (TDS)
+    No.│Bulan│Peserta│KTPA│Nominal│ Nomor Polis│Tanggal Polis│Tanggal Bayar Polis│Imbal Jasa (Nominal X 2,5%)│DPP 11/12 (DPP X Imbal Jasa) │PPN (DPP X 12%)│PPH 23 (Imbal Jasa X 2%)│Jumlah Tagihan (Imbal Jasa + DPP) │Imbal Jasa yang Diterima (Imbal Jasa + DPP – PPN)│Tanggal Terima Imbal Jasa.
+    Kolom Data Rekap Denda Imbal Jasa Flagging Kredit
+    No.│Nama Mitra│BA│Tanggal BA│Periode│Nomor Nota Dinas│Tanggal Nota Dinas│Tanggal Terima dari Div. Peserta│Tanggal Terima dari Bid. Pajak│No. Surat│Tanggal Surat Tagihan│Tanggal Kirim Email/Surat│Nominal Bruto│Imbal Jasa Flagging (Nominal/1,11)│DPP PPN (11/12 X Imbal Jasa│PPN 12% (12% X DPP) │Tax/PPh Ps 23 (2% X Imbal Jasa) │NAT│Tanggal Surat Diterima Mitra│Jatuh Tempo (14 hari kerja setelah surat tagihan asli diterima) │Tanggal Penerimaan│Durasi Keterlambatan (Tanggal Penerimaan – Tanggal Jatuh Tempo) │BI RATE (Berdasarkan suku bunga yang berlaku) │Denda (Jumlah Tagihan X BI RATE X Jumlah Hari Keterlambatan/365 Hari) │Nilai Pembulatan Denda.
+    Kolom Data Rekap Denda Imbal Jasa Pemanfaatan Autentikasi Digital
+    No.│Nama Mitra│Imbal Jasa│Jumlah Penerima Dapem Induk, Dapem Susulan & Pensiun Pertama (PP)│Nominal Imbal Jasa │DPP PPN (11/12 X Nominal Imbal Jasa│PPN 12% (12% X DPP) │Tax/PPh Ps 23 (2% X Nominal Imbal Jasa) │NAT│ No. Surat│Tanggal Surat Tagihan│Tanggal Kirim Email/Surat│Tanggal Surat Diterima Mitra│Jatuh Tempo (14 hari kerja setelah surat tagihan asli diterima) │Tanggal Penerimaan│Durasi Keterlambatan (Tanggal Penerimaan – Tanggal Jatuh Tempo) │BI RATE (Berdasarkan suku bunga yang berlaku) │Denda (Jumlah Tagihan X BI RATE X Jumlah Hari Keterlambatan/365 Hari) │Nilai Pembulatan Denda.
+    Format Output: Excel, PDF
+    Rekening Koran CMS Mitra (Format Standar)
+    Nama Laporan : Rekening Koran CMS Mitra Bayar (Format Standar ASABRI)
+    Jenis : Rekonsiliasi
+    Frekuensi : Bulanan (untuk rekap), Real-Time (untuk saldo)
+    Pengguna: Div. Keuangan
+    Prioritas : TINGGI
+    Deskripsi: Tarikan rekening koran dari sistem CMS setiap Mitra Bayar yang telah di-mapping ke format standar ASABRI, memungkinkan rekonsiliasi yang mudah tanpa perlu konversi manual.
+
+--- Line 927 ---
+    Pengguna : Div. Keuangan
+    Prioritas : TINGGI
+    Kolom Data Taspen Proteksi Beasiswa (TPB)
+    No. │ Bulan │ Peserta │KTPA│ Nominal │ Nomor Polis│Tanggal Polis│Tanggal Bayar Polis│ Imbal Jasa (Nominal x 3%) │ DPP 11/12 (DPP x Imbal Jasa) │PPN (DPP X 12%) │ PPH 23 (Imbal Jasa X 2%) │Jumlah Tagihan (Imbal Jasa + DPP)│Imbal Jasa yang Diterima (Imbal Jasa + DPP – PPN)│Tanggal Terima Imbal Jasa.
+    Kolom Data Taspen Dwiguna Sejahtera (TDS)
+>>> No.│Bulan│Peserta│KTPA│Nominal│ Nomor Polis│Tanggal Polis│Tanggal Bayar Polis│Imbal Jasa (Nominal X 2,5%)│DPP 11/12 (DPP X Imbal Jasa) │PPN (DPP X 12%)│PPH 23 (Imbal Jasa X 2%)│Jumlah Tagihan (Imbal Jasa + DPP) │Imbal Jasa yang Diterima (Imbal Jasa + DPP – PPN)│Tanggal Terima Imbal Jasa.
+    Kolom Data Rekap Denda Imbal Jasa Flagging Kredit
+    No.│Nama Mitra│BA│Tanggal BA│Periode│Nomor Nota Dinas│Tanggal Nota Dinas│Tanggal Terima dari Div. Peserta│Tanggal Terima dari Bid. Pajak│No. Surat│Tanggal Surat Tagihan│Tanggal Kirim Email/Surat│Nominal Bruto│Imbal Jasa Flagging (Nominal/1,11)│DPP PPN (11/12 X Imbal Jasa│PPN 12% (12% X DPP) │Tax/PPh Ps 23 (2% X Imbal Jasa) │NAT│Tanggal Surat Diterima Mitra│Jatuh Tempo (14 hari kerja setelah surat tagihan asli diterima) │Tanggal Penerimaan│Durasi Keterlambatan (Tanggal Penerimaan – Tanggal Jatuh Tempo) │BI RATE (Berdasarkan suku bunga yang berlaku) │Denda (Jumlah Tagihan X BI RATE X Jumlah Hari Keterlambatan/365 Hari) │Nilai Pembulatan Denda.
+    Kolom Data Rekap Denda Imbal Jasa Pemanfaatan Autentikasi Digital
+    No.│Nama Mitra│Imbal Jasa│Jumlah Penerima Dapem Induk, Dapem Susulan & Pensiun Pertama (PP)│Nominal Imbal Jasa │DPP PPN (11/12 X Nominal Imbal Jasa│PPN 12% (12% X DPP) │Tax/PPh Ps 23 (2% X Nominal Imbal Jasa) │NAT│ No. Surat│Tanggal Surat Tagihan│Tanggal Kirim Email/Surat│Tanggal Surat Diterima Mitra│Jatuh Tempo (14 hari kerja setelah surat tagihan asli diterima) │Tanggal Penerimaan│Durasi Keterlambatan (Tanggal Penerimaan – Tanggal Jatuh Tempo) │BI RATE (Berdasarkan suku bunga yang berlaku) │Denda (Jumlah Tagihan X BI RATE X Jumlah Hari Keterlambatan/365 Hari) │Nilai Pembulatan Denda.
+    Format Output: Excel, PDF
+    Rekening Koran CMS Mitra (Format Standar)
+    Nama Laporan : Rekening Koran CMS Mitra Bayar (Format Standar ASABRI)
+    Jenis : Rekonsiliasi
+    Frekuensi : Bulanan (untuk rekap), Real-Time (untuk saldo)
+    Pengguna: Div. Keuangan
+    Prioritas : TINGGI
+    Deskripsi: Tarikan rekening koran dari sistem CMS setiap Mitra Bayar yang telah di-mapping ke format standar ASABRI, memungkinkan rekonsiliasi yang mudah tanpa perlu konversi manual.
+    Kolom Data THT:
+    Data Dari CMS Mitra Bayar
+
+--- Line 1634 ---
+    Puti Jugalo
+    CATATAN RAPAT
+    Rapat ini dilaksanakan dalam rangka melakukan verifikasi proses bisnis asabri yandu khusus tim kepesertaan. Berikut beberapa catatan rapat hari ini:
+    Pada rapat ini dibahas 3 area utama dalam pengembangan Yandu Next Gen:
+    Modul kepesertaan; pemutakhiran data peserta (4 channel), mekanisme konversi data, listing kotor/bersih, penerbitan KTPA elektronik, serta integrasi dengan Sasmitra dan e-Dosir.
+>>> Modul hutang; jenis hutang (keterlanjuran bayar, migrasi, THR, pinjaman polis, alimentasi, dll), masalah cut-off DAPEM, kelebihan potong, serta aspirasi otomatisasi.
+    Layanan peserta; SPTB (Surat Pernyataan Tanda Bukti Diri), autentikasi biometrik bulanan, siklus hidup identitas (KTPA menjadi Nopen), fleksibelitas kantor cabang rawatan, serta integrasi mobile app dengan Yandu.
+    Yandu Next Gen harus menjadi single source of truth dengan audit trail di level aplikasi, otomasi perhitungan hutang, integrasi API Real-Time dengan mitra (Polri, Dukcapil, Kemenag, bank) serta dashboard reporting terpadu.
+    Dasar hukum dan lingkup kepesertaan
+    Regulasi: PP 102 Tahun 2015 dan PP 54 Tahun 2020.
+    Peserta: Prajurit TNI, Anggota Polri, ASN (PNS dan P3K) dilingkungan Kemhan dan Polri.
+    Awal kepesertaan: SK Pengangkatan Pangkat Pertama (masa Pendidikan belum dihitung).
+    Sifat: Asuransi social wajib dan tidak ada underwriting.
+    Terdapat transformasi program iuran: sejak 2012/2013 berubah dari manfaat pasti menjadi iuran pasti (hybrid). Implikasinya wajib melakukan pemutakhiran data per individu, bukan lagi bulk. Tingkat validitas data kepesertaan saat ini 98% (meningkat dari 88% ke 94%).
+    Modul Kepesertaan – Pemutakhiran Data
+    Channel pemutakhiran data
+    Aplikasi data link: TNI AD/AL/AU, Polri, Mabes TNI, Kemhan. Periodik tiap bulan, saat ini terpisah dari Yandu. Target Next Gen: Integrasi API.
+    Kantor cabang: Peserta datang langsung ke CS. Update langsung ke Yandu. Field tertentu (missal nama) tidak bisa diubah cabang harus melalui request ke pusat.
+    Asabri mobile: peserta update mandiri via mobile app. Data masuk status temporary, divalidasi user Kepesertaan sebelum masuk database utama.
+    Padanan Mitra (API): BKN, Kemenag, Dukcapil, Kemenkeu. BKN DAN Dukcapil sudah berjalan per bulan. Kemenag untuk status perkawinan. Kemenkeu untuk data gaji.
+
+--- Line 1681 ---
+    Modul Hutang
+    Jenis hutang yang teridentifikasi
+    Keterlanjuran bayar (tunjangan istri/anak): peserta tidak melapor perubahan status (cerai, meninggal, anak dewasa). Sistem tetap bayar.
+    Migrasi: Hutang terbawa dari aplikasi lama ke aplikasi existing akibat perbedaan data saat migrasi.
+    THR dan BG13: kelebihan bayar karena peserta ternyata pejabat negara (dobel THR) atau timing cut-off DAPEM.
+>>> Pinjaman polis: peserta ambil nilai tunai THT via pinjaman polis (saat ini di-stop).
+    Alimentasi: potongan gaji pensiun untuk mantan pasangan berdasarkan putusan pengadilan. Belum diakomodir sistem.
+    Kelebihan bayar THT/JKK/JKM: pembayaran lebih besar dari seharusnya. Saat ini peserta harus kembalikan seluruh dulu, lalu proses ulang.
+    Janda menikah lagi (PP 36/1968): Janda pensiun yang menikah lagi kehilangan hak, tapi jarang melapor. Total hutang lebih kurang Rp8 M, tingkat tagih kembali hanya 20%.
+    Masalah cutt-off dan timing DAPEM (kritis)
+    Dapem terbentuk tiap tanggal 15-25 yang berdampak pada klaim yang diproses tanggal 16-25 hanya hitung keterlanjuran sampai bulan berjalan.
+    Contoh: istri meninggal April, lapor tanggal 20. Dapem Mei sudah terbentuk dengan tunjangan istri. Hal ini berdampak pada sistem yang hanya menghitung keterlanjuran April dan bulan Mei masih terbayar.
+    Volume kejadian yang terdapat 10 – 20 kasus per bulan.
+    Kelebihan potong (saldo minus) juga terjadi dengan dugaan penyebab dari proses Dapem terbentuk sebelum data hutang terupdate.
+    THR dan BG 13 tidak dihitung dalam keterlanjuran.
+    Tidak ada unique identifier yang mengkaitkan seluruh histori pembayaran peserta lintas jenis tunjangan.
+    Multi-istri potongan hutang kadang di Nopen yang salah (milik istri lain).
+    Aspirasi untuk Next Gen (Modul Hutang)
+    Perhitungan hutang otomatis, saat input perubahan status, sistem langsung hitung tanpa Excel manual.
+    Notifikasi ke peserta, tambahkan warning sebelum cut-off kemudian info hutang dan angsuran via mobile/email/WA.
+
+--- Line 1812 ---
+    Kemudian kebutuhan user dengan pengembangan aplikasi yaitu:
+    Digitalisasi proses dengan menghilangkan ketergantungan pada berkas fisik. Penginputan dilakukan secara digital oleh masing – masing PIC UNOR/Kesatuan melalui portal web dengan keamanan ketat.
+    Menyediakan fitur pop-up peringatan atau blocking otomatis berdasarkan NIK atau Nomor KTA untuk mencegah pengajuan ganda.
+    Seluruh aplikasi (Yandu, Mobile App, Kepesertaan) harus menggunakan satu sumber data yang terintegrasi penuh.
+    Peserta harus dapat memantau status pengajuannya dari awal hingga pencairan dana melalui aplikasi untuk mengurangi pengajuan ulang yang tidak perlu.
+>>> Mengintegrasikan layanan non-program seperti Taspen Life (Asuransi jiwa/beasiswa), Asuransi kendaraan melalui Hexa, serta layanan kesehatan (Prodia).
+    Untuk tahapan berikutnya akan dilakukan:
+    Pembersihan data (cleansing) dengan melakukan pemadanan data kepesertaan sebelum diintegrasikan ke sistem baru agar data “bersih”. 
+    Melakukan rekonstruksi ERD yang mengacu pada proses bisnis. Proses diinisiasi dengan melakukan Analisa tabel yang sudah tidak digunakan didalam rangkaian database yang ada.
+    Menunggu penyelesaian proses adminstrasi NDA yang saat ini sudah berada di tingkat direksi.
+    Membangun dashboard yang menyajikan laporan sesuai dengan kebutuhan.
+    DOKUMENTASI RAPAT
+    Verifikasi proses bisnis Asabri Yandu (Aktuaria dan Akuntansi) – 15 April 2026
+    Nama Kegiatan
+    :
+    Verifikasi Proses Bisnis Asabri Yandu – Aktuaria dan Akuntansi
+    Hari, Tanggal Kegiatan
+    :
+    Rabu, 15 April 2026
+    Waktu Kegiatan
+
+--- Line 1867 ---
+    Diperlukan sinkronisasi hasil perhitungan manual Aktuaria dengan sistem sebelum aplikasi diimplementasikan pada proses Uji UAT.
+    Sesi kedua meeting dilakukan diskusi dengan tim Akuntansi, berikut catatan rapat ini:
+    Isu integrasi dan transaksi:
+    Pengembangan Yandu sebelumnya tidak melibatkan divisi Akuntansi, sehingga banyak kebutuhan laporan keuangan yang terlewat.
+    Jika terjadi kesalahan pada Surat Perintah (SP) klaim, data tersebut langsung dihapus dari Yandu. Akibatnya, riwayat transaksi hilang dan muncul selisih angka saat dilakukan audit eksternal.
+>>> Data yang dikirim dari Yandu hanya berupa nilai bersih (netto). Rincian potongan (seperti Taspen Life atau PUM KPR) tidak terekam otomatis, sehingga Akuntansi harus melakukan jurnal koreksi manual satu per satu.
+    Resiko pengelolaan PUM/BUM KPR:
+    Potongan BUM KPR yang dikelola oleh pihak eksternal (YKPSDP) sangat berisiko. Jika potongan tidak terekam dengan benar, ASABRI berisiko harus menanggung kerugian.
+    Proses rekon klaim masih bersifat semi-manual dan dilakukan setiap 6 bulan sekali, yang mengakibatkan penumpukan pekerjaan di awal bulan.
+    Kebutuhan dan aspirasi user:
+    Pembuatan API baru untuk penarikan data dari Yandu ke Dynamics/Axapta secara otomatis dan terjadwal (scheduler).
+    Penambahan fitur audit trail, sistem baru tidak boleh menghapus data historis; jika SP batal, harus muncul SP baru dengan referensi sejarah yang jelas.
+    Pemisahan program BUM dengan potongan BUM harus bisa dipecah secara spesifik menurut programnya (Umum vs Khusus).
+    Adapun rencana tindak lanjut dari masing-masing diskusi yaitu:
+    Divisi Aktuaria: akan Menyusun dan mengirimkan dokumen rumus serta parameter (MKG, Skorsing) ke OneDrive.
+    Melakukan koordinasi lanjutan untuk harmonisasi satu tahapan proses bisnis melalui rapat pleno seluruh divisi.
+    Menyiapkan unit testing untuk memastikan akurasi perhitungan sistem sesuai dengan standar Aktuaria.
+    DOKUMENTASI RAPAT
+    Verifikasi proses bisnis Asabri yandu (Keuangan) – 22 April 2026
+    Nama Kegiatan
+
+--- Line 1951 ---
+    Permasalahan yang terjadi: mapping data transaksi dari 13 mitra bank ke format standar Axapta masih dilakukan secara manual dengan resiko human error yang tinggi.
+    Berikut informasi terkait penagihan imbal jasa yang mencakup pendapatan yang diterima ASABRI melalui kerja sama dengan pihak mitra dan perbankan:
+    Imbal jasa program Kerjasama (TPB & TDS):
+    TPB (Taspen Proteksi Beasiswa): ASABRI mendapatkan imbal jasa sebesar 3% dari setiap premi yang dibayarkan peserta.
+    TDS (Taspen Dwi Guna Sejahtera): ASABRI mendapatkan imbal jasa sebesar 2,5% dari pemotongan manfaat Asuransi peserta.
+>>> Penagihan dilakukan setiap bulan setelah dilakukan rekonsiliasi data (Berita Acara) dengan pihak Taspen Life. 
+    Imbal jasa flagging kredit (mitra bank):
+    Program ini merupakan imbal jasa yang diperoleh ASABRI karena membantu mitra bank dalam “mengunci” atau menandai data peserta agar pembayaran tidak beralih ke bank lain (flagging). Proses ini tidak berhubungan langsung dengan divisi keuangan.
+    Aspirasi user terkait program imbal jasa:
+    Diharapkan sistem dapat men-generate surat tagihan imbal jasa secara otomatis berdasarkan data polis yang terbentuk di Yandu.
+    Diperlukan dashboard khusus untuk memantau status tagihan imbal jasa yang dihasilkan dari aplikasi Yandu guna mendukung pemenuhan kebutuhan klaim.
+    Pendapatan imbal jasa ini harus tercatat sebagai uang masuk (income) di Axapta secara otomatis tanpa input manual.
+    Divisi Keuangan akan mengirimkan dokumen alur proses yang di share pada saat meeting untuk dipelajari lebih lanjut.
+    Isu tambahan yang terjadi di divisi keuangan:
+    Divisi keuangan seringkali harus menyiapkan dana talangan (misalnya untuk pensiun Januari karena APBN belum cair di Desember) dengan melakukan simulasi pinjaman bank atau optimalisasi asset.
+    Ditemukan indikasi peserta sengaja mengaktifkan UKP di bulan tertentu untuk menghindari potongan hutang rutin, yang perlu dimitigasi oleh validasi sistem.
+    Isu perbedaan data antara data gaji Kemenkeu dengan data kepesertaan ASABRI untuk program THT (ada yang digaji tapi tidak tercatat sebagai peserta, dan sebaliknya harus diselesaikan melalui pemadanan data rutin).
+    DOKUMENTASI RAPAT
+    Verifikasi proses bisnis Asabri Yandu (Keuangan, SAI, dan Layanan) – 23 April 2026
+    Nama Kegiatan
+
+--- Line 1955 ---
+    TDS (Taspen Dwi Guna Sejahtera): ASABRI mendapatkan imbal jasa sebesar 2,5% dari pemotongan manfaat Asuransi peserta.
+    Penagihan dilakukan setiap bulan setelah dilakukan rekonsiliasi data (Berita Acara) dengan pihak Taspen Life. 
+    Imbal jasa flagging kredit (mitra bank):
+    Program ini merupakan imbal jasa yang diperoleh ASABRI karena membantu mitra bank dalam “mengunci” atau menandai data peserta agar pembayaran tidak beralih ke bank lain (flagging). Proses ini tidak berhubungan langsung dengan divisi keuangan.
+    Aspirasi user terkait program imbal jasa:
+>>> Diharapkan sistem dapat men-generate surat tagihan imbal jasa secara otomatis berdasarkan data polis yang terbentuk di Yandu.
+    Diperlukan dashboard khusus untuk memantau status tagihan imbal jasa yang dihasilkan dari aplikasi Yandu guna mendukung pemenuhan kebutuhan klaim.
+    Pendapatan imbal jasa ini harus tercatat sebagai uang masuk (income) di Axapta secara otomatis tanpa input manual.
+    Divisi Keuangan akan mengirimkan dokumen alur proses yang di share pada saat meeting untuk dipelajari lebih lanjut.
+    Isu tambahan yang terjadi di divisi keuangan:
+    Divisi keuangan seringkali harus menyiapkan dana talangan (misalnya untuk pensiun Januari karena APBN belum cair di Desember) dengan melakukan simulasi pinjaman bank atau optimalisasi asset.
+    Ditemukan indikasi peserta sengaja mengaktifkan UKP di bulan tertentu untuk menghindari potongan hutang rutin, yang perlu dimitigasi oleh validasi sistem.
+    Isu perbedaan data antara data gaji Kemenkeu dengan data kepesertaan ASABRI untuk program THT (ada yang digaji tapi tidak tercatat sebagai peserta, dan sebaliknya harus diselesaikan melalui pemadanan data rutin).
+    DOKUMENTASI RAPAT
+    Verifikasi proses bisnis Asabri Yandu (Keuangan, SAI, dan Layanan) – 23 April 2026
+    Nama Kegiatan
+    :
+    Verifikasi Proses Bisnis Asabri Yandu – Keuangan, SAI, dan Layanan
+    Hari, Tanggal Kegiatan
+    :
+
+--- Line 2005 ---
+    CATATAN RAPAT
+    Rapat ini dilaksanakan dalam rangka melakukan verifikasi proses bisnis asabri yandu khusus tim keuangan (lanjutan), SAI dan layanan. Berikut beberapa catatan rapat hari ini:
+    Pada sesi pertama rapat dilakukan pembahasan lanjutan bersama Divisi Keuangan.
+    Program TPB dan TDS
+    Berikut adalah gambaran kondisi saat ini untuk program TPB dan TDS:
+>>> Aplikasi TPB/TDS terpisah dari Yandu namun terhubung melalui flagging otomatis ketika data diinput di Taspen Life oleh CSO cabang.
+    TDS (khusus pensiunan): Pemotongan dari Tabungan Asuransi (TA), tidak membentuk SP sendiri (mengikuti SP TA).
+    Pemotongan TDS dilakukan dalam kelipatan Rp6.000.000 selama saldo TA mencukupi.
+    Fee TDS: 2,5% (sebagai income).
+    Pembatalan sebelum pembayaran diproses di Axapta; peserta tidak tercatat di pembukuan keuangan.
+    Kemudian ada beberapa permintaan perbaikan yang diajukan oleh user sebagai berikut:
+    Otomatisasi proses pembayaran (saat ini masih manual).
+    Integrasi sistem jika memungkinkan.
+    Format surat imbal jasa dapat digenerate oleh sistem (hanya angka dan nomor surat yang berbeda).
+    Pembayaran Pensiun dan Portal Pensiun
+    Berikut adalah gambaran kondisi saat ini untuk pembayaran pensiun & portal pensiun:
+    Dana diterima dari Kemenkeu (akhir bulan), diproses dalam 7 hari kerja.
+    Didistribusikan ke 13 mitra bayar dalam bentuk nilai neto (setelah potongan).
+    Divisi Keuangan memonitor transaksi melalui Portal Pensiun (flagging 1,2,3,4) dan CMS mitra.
+    Data Portal Pensiun berasal dari Yandu. Mitra hanya dapat mendownload data.
+

@@ -1,0 +1,146 @@
+===================== LINE 99 =====================
+    4.2.3Pembayaran Klaim Asuransi Sosial9
+    4.2.3Pengelolaan DIPA dan Pembayaran Pensiun10
+    4.3Analisis Target Rekomendasi12
+    4.3.1Penagihan JKK/JKm dan THT/Pensiun12
+    4.3.2Pembayaran Klaim Asuransi Sosial13
+    4.3.3Pengelolaan DIPA dan Pembayaran Pensiun14
+    4.3.4Pelaporan Keuangan15
+    4.4Analisis Target Berdasarkan BRS Unit Kerja16
+    4.4.1Transparansi Data Iuran THT/Pesiun Per Nama Peserta16
+    4.4.2Tagihan Iuran Otomatis Setiap Bulan17
+>>> 4.4.3Monitoring Ketersediaan Dana Pembayaran Manfaat Real-Time17
+    4.4.4Monitoring Sisa Pagu DIPA18
+    4.4.5Pelaporan Pembayaran Manfaat Terotomatis19
+    4.4.6Rekonsiliasi BPJS Kesehatan Terotomasi20
+    4.4.7Monitoring Pengembalian Keterlanjuran Bayar Pensiun Karena Klaim UDW Punah20
+    4.4.8Tagihan Imbal Jasa Mitra Otomatis21
+    4.4.9Mapping Rekening Koran CMS Mitra Bayar22
+    4.4.10Perhitungan PPh 2122
+    4.4.11Validasi dan Pemutakhiran NIK Peserta Pensiun23
+    4.4.12Penerbitan dan Distribusi Digital Bukti PotongP Ph 21 Melalui Impor Data Coretax24
+    4.4.13Rekap Data Uang Kekurangan Pensiun (UKP) untuk Validasi Perhitungan Pajak25
+    4.4.14Matriks Kebutuhan Berdasarkan BRS25
+    4.5Analisis Kebutuhan Laporan Divisi Keuangan33
+    5.Gap Analysis45
+    6.Kesimpulan dan Tindak Lanjut46
+    6.1Kesimpulan46
+    6.2Tindak Lanjut46
+    7.Lampiran47
+    7.1Aktivitas47
+    7.2Minutes Of Meeting (MOM)48
+    Pendahuluan
+    Tujuan Dokumen
+    Dokumen Business Requirement Document (BRD) dalam Perspektif Per Unit Kerja ini disusun untuk mendokumentasikan kebutuhan bisnis modernisasi YANDU saat ini menjadi YANDU Next Gen, untuk selanjutnya disebut sebagai YANDU NG, dari sudut pandang masing-masing unit kerja PT. ASABRI. Dokumen ini menyajikan analisis kondisi saat ini (AS-IS), permasalahan, kondisi yang diharapkan (TO-BE), dan analisis kesenjangan (gap analysis) yang diorganisasikan per unit kerja dan per fungsi utama, sehingga setiap unit kerja dapat dengan mudah menelaah dan memvalidasi kebutuhan yang relevan dengan tanggung jawabnya.
+    Tujuan utama dokumen:
+    Menjadi acuan bersama antara unit bisnis dan tim pengembang dalam memahami konteks, permasalahan, dan ekspektasi hasil modernisasi YANDU saat ini pada level unit kerja.
+    Memberikan dasar penelusuran (traceability) dari permasalahan operasional ke kebutuhan bisnis dan kondisi target setiap fungsi.
+    Memfasilitasi reviu dan sign-off oleh perwakilan user per fungsi utama, karena struktur dokumen mengikuti pembagian tanggung jawab di tiap divisi.
+    Melengkapi BRD utama yang diorganisasikan per proses bisnis dengan perspektif per unit kerja.
+    Pengguna Dokumen
+    Pengguna dokumen BRD ini terdiri dari:
+    Perwakilan user dan pimpinan tiap unit kerja terdiri atas:
+    Divisi Kepesertaan
+    Divisi Layanan
+    Divisi Keuangan
+    Divisi Aktuaria
+    Divisi Akuntansi
+    Divisi SPI
+    Kantor Cabang
+    Para pihak yang berkepentingan lainnya.
+    Tim pengembang YANDU NG yang terdiri atas:
+    Business Analyst
+    System Analyst
+    Product Owner
+    Programmer
+    Tim QA 
+    Para pihak yang terlibat lainnya.
+    Ruang Lingkup
+    Ruang lingkup dokumen ini mencakup analisis kebutuhan bisnis untuk unit-unit kerja yang terlibat langsung dalam pengelolaan dan penggunaan YANDU NG, yang dipecah berdasaarkan proses bisnis sebagai berikut:
+    Divisi Kepesertaan — pendaftaran peserta baru, peremajaan data peserta, perhitungan iuran premi THT/JKK/JKm, pengelolaan KPR (PUM/BUM), pembentukan DAPEM, dan pengelolaan produk asuransi sosial.
+    Divisi Layanan — pelayanan pertama pensiun & e-SKPP, pelayanan klaim peserta aktif (JKK/JKm/THT), pelayanan klaim peserta pensiun, dan komunikasi pelanggan.
+    Divisi Keuangan — Penagihan iuran/premi dan anggaran belanja pensiun, monitoring ketersediaan dan penyediaan dana untuk pembayaran klaim, pembayaran manfaat tambahan, pembayaran pinjaman uang muka (PUM) serta pengembaliannya, pencatatan dan perlaporan keuangan, serta penagihan imbal jasa (taspen life, flagging kredit, dan pemanfaatan data autentikasi digital).
+    Divisi Aktuaria — penetapan tarif iuran/premi, cadangan teknis, estimasi DIPA, dan pelaporan aktuaria.
+    Divisi Akuntansi — pencatatan akuntansi penerimaan iuran/premi, pembayaran klaim, DAPEM/DIPA pensiun, dan pelaporan keuangan ke regulator (Kemenkeu, OJK, Danantara).
+    Satuan Pengawas Internal (SPI) — pelaporan untuk keperluan audit internal (PKAT, QAIP, multi-jenis audit), audit trail, dan rekonsiliasi lintas modul.
+    Kantor Cabang — fungsi operasional layanan langsung kepada peserta di tingkat cabang.
+    Untuk setiap fungsi utama, dokumen menyajikan: Kondisi Saat Ini (AS-IS) beserta pemodelan proses bisnis BPMN AS-IS, Permasalahan, Kondisi Ke Depan (TO-BE) beserta pemodelan proses bisnis BPMN TO-BE, dan Gap Analysis. Pemodelan BPMN pada dokumen ini disajikan dalam bentuk keterangan alur proses; diagram BPMN visual akan disusun pada tahap perancangan berikutnya. Hal-hal yang berada di luar ruang lingkup mengikuti batasan yang ditetapkan dalam kontrak dan dokumen BRD utama YANDU NG.
+    Referensi
+    Bagian berikut menjelaskan daftar referensi yang digunakan sebagai acuan dalam penyusunan dokumen BRD ini:
+    PER-22 tentang Organisasi dan Tata Kerja PT ASABRI — sumber uraian tugas/fungsi.
+    Resume Risalah Rapat Perwakilan Divisi Kepesertaan, Divisi Layanan, Divisi Aktuaria, Divisi Akuntansi, Divisi Keuangan, dan Divisi SAI pada bulan April 2026.
+
+
+===================== LINE 969 =====================
+    No. │ KTPA│ Tanggal Transaksi│ Nama Penerima│Debet│Credit│Ladger Balance (Rp) │User ID│No SP│Tanggal SP│No DPS│Tanggal DPS│Mitra Bayar
+    Data Dari CMS Mitra Bayar Pembayaran Pensiun
+    No. │ Tanggal Bayar│ Trans Description│Debet│Credit│Ladger Balance (Rp) │User ID│Mitra Bayar
+    Data Hasil Mapping Dengan Yandu
+    Jenis Pensiun│Nomor Pensiun│Bulan Bayar│Nominal│Tanggal Transaksi│Kantor Cabang│Mitra Bayar
+    Data Dari CMS Mitra Bayar Penyediaan Pensiun
+    No. │ Tanggal Bayar│ Trans Description│Debet│Credit│Ladger Balance (Rp) │User ID│Mitra Bayar
+    Data Hasil Mapping Dengan Yandu
+    Jenis Pensiun│Nomor Pensiun│Bulan Bayar│Nominal│Tanggal Transaksi│Kantor Cabang│Mitra Bayar
+    Format Output: Excel (format standar yang diseragamkan dari semua mitra)
+>>> Dashboard Monitoring Dana Mitra Bayar
+    Nama Laporan : Dashboard Real-Time Ketersediaan Dana di Mitra Bayar
+    Jenis : Monitoring, Manajerial
+    Frekuensi : Real-Time (update periodik)
+    Pengguna : Div. Keuangan, Kancab, Direksi
+    Prioritas : KRITIS
+    Deskripsi: Dashboard yang menampilkan posisi dana di setiap Mitra Bayar secara Real-Time beserta kebutuhan pembayaran yang akan datang, untuk memastikan kecukupan dana pembayaran manfaat.
+    Komponen Dashboard:
+    PANEL 1 — Saldo Per Mitra Bayar (Real-time):
+    Manfaat: THT/JKK/JKm/NTIP/Pensiun (Non Dapem)
+    MITRA
+    Nomor Rekening
+    SALDO TERSEDIA
+    KEBUTUHAN PROX
+    (SP yang sudah terbit dan belum terbayar)
+    Selisih
+    STATUS
+    BRI
+    xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    ■ AMAN
+    BNI
+    xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    ■ AMAN
+    MANDIRI
+    xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    ▲ PERHATIAN
+    POS
+    xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    Rp. xxx.xxx.xxx
+    ■ AMAN
+    ….
+    PANEL 2 — Proyeksi Kebutuhan Dana Per (Manfaat) Program untuk periode Mingguan dan/atau Bulanan:
+    Kebutuhan Minggu atau Bulan Ini: Rp xxx, 
+    Diproyeksikan berdasarkan angara lain namun tidak terbatas pada: (1) trend klaim untuk periode masa yang sama dalam 3 bulan terakhir (2) data peserta yang akan mengajukan klaim sesuai Batas Usia Pensiun dan data akumulasi premi  (untuk THT dan Pensiun Pertama) (3) proyeksi aktuaria berdasarkan asumsi tingkat kejadian kecelakaan, tingkat mortalita, lapse, dll (untuk JKK, JKm, NTIP)
+    Total Saldo Tersedia: Rp xxx
+    Surplus/Defisit: +/-Rp xxx
+    PANEL 3 — Trend Saldo 3 Bulan Terakhir:
+    Grafik line chart saldo per mitra
+    PANEL 4 — Alert Aktif:
+    • Daftar mitra dengan status PERHATIAN/KRITIS
+    Format Output: Dashboard HTML/Web, PDF (snapshot), Excel Alert: Notifikasi email + SMS ke Kadiv Keuangan ketika saldo mitra mendekati batas aman
+    Laporan Rekap Iuran/Premi THT/Pensiun dan Iuran/Premi JKK/JKm
+    Nama Laporan : Rekap Iuran/Premi THT/Pensiun Per Satker (TNI AD, AL, AU, Mabes TNI, Kemhan, Polri (Tabel 1 BRS Tahap II)
+    Jenis : Operasional, Rekonsiliasi
+    Frekuensi : Bulanan
+    Pengguna : Div. Keuangan (Bidang Perbendaharaan)
+    Prioritas : KRITIS
+    Deskripsi: Rekapitulasi perhitungan iuran THT dan Dapen Per Satker (TNI AD, AL, AU, Mabes TNI, Kemhan, Polri, yang dapat dibandingkan dengan SKP-PFK Kemenkeu untuk rekonsiliasi. Ini merupakan terobosan penting karena saat ini hanya tersedia angka total.
+    Kolom Data :
+
+

@@ -149,6 +149,7 @@ export const DashboardDIPA = () => {
   });
 
   // Data Pembayaran Jenis Dapem per Bulan (TA 2026)
+  // Aturan Realisasi: Dana Realisasi Netto = Rekap III - Lebih Bayar Pajak (LB) - Saldo Uang Pensiun (SUP 45 Hari)
   const pembayaranBulanan = [
     {
       bulan: "Januari 2026",
@@ -157,20 +158,23 @@ export const DashboardDIPA = () => {
       tglBayar: "02 Jan 2026",
       status: "Selesai Cair",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan", "Dapem Rapel"],
-      totalNominal: 585_400_000_000,
-      totalM: 585.4,
-      jenisM: { induk: 525.0, susulan: 38.4, rapel: 22.0, thr: 0, ke13: 0 },
-      makM: { "513113": 88.2, "513114": 21.1, "513122": 293.5, "513123": 182.6 },
+      rekapIII: 585_400_000_000,
+      lb: 42_500_000_000, // Lebih bayar pajak akhir tahun sebelumnya yang dikompensasikan di Januari
+      sup: 1_400_000_000,  // Penarikan dana rekening peserta belum otentikasi > 45 hari
+      totalNominal: 541_500_000_000, // 585.4M - 42.5M - 1.4M
+      totalM: 541.5,
+      jenisM: { induk: 485.0, susulan: 35.5, rapel: 21.0, thr: 0, ke13: 0 },
+      makM: { "513113": 81.6, "513114": 19.5, "513122": 271.5, "513123": 168.9 },
       breakdownJenis: [
-        { jenis: "Dapem Induk", nominal: 525_000_000_000, mak: { "513113": 78_750_000_000, "513114": 18_660_000_000, "513122": 262_500_000_000, "513123": 165_090_000_000 } },
-        { jenis: "Dapem Susulan", nominal: 38_400_000_000, mak: { "513113": 5_760_000_000, "513114": 1_380_000_000, "513122": 19_200_000_000, "513123": 12_060_000_000 } },
-        { jenis: "Dapem Rapel", nominal: 22_000_000_000, mak: { "513113": 3_690_000_000, "513114": 1_060_000_000, "513122": 11_800_000_000, "513123": 5_450_000_000 } },
+        { jenis: "Dapem Induk", nominal: 485_000_000_000, mak: { "513113": 72_750_000_000, "513114": 17_240_000_000, "513122": 242_500_000_000, "513123": 152_510_000_000 } },
+        { jenis: "Dapem Susulan", nominal: 35_500_000_000, mak: { "513113": 5_320_000_000, "513114": 1_280_000_000, "513122": 17_750_000_000, "513123": 11_150_000_000 } },
+        { jenis: "Dapem Rapel", nominal: 21_000_000_000, mak: { "513113": 3_530_000_000, "513114": 980_000_000, "513122": 11_250_000_000, "513123": 5_240_000_000 } },
       ],
       breakdownMAK: {
-        "513113": 88_200_000_000,
-        "513114": 21_100_000_000,
-        "513122": 293_500_000_000,
-        "513123": 182_600_000_000,
+        "513113": 81_600_000_000,
+        "513114": 19_500_000_000,
+        "513122": 271_500_000_000,
+        "513123": 168_900_000_000,
       }
     },
     {
@@ -180,7 +184,10 @@ export const DashboardDIPA = () => {
       tglBayar: "02 Feb 2026",
       status: "Selesai Cair",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan"],
-      totalNominal: 552_100_000_000,
+      rekapIII: 554_200_000_000,
+      lb: 0,
+      sup: 2_100_000_000,
+      totalNominal: 552_100_000_000, // 554.2M - 2.1M
       totalM: 552.1,
       jenisM: { induk: 525.0, susulan: 27.1, rapel: 0, thr: 0, ke13: 0 },
       makM: { "513113": 83.0, "513114": 19.8, "513122": 277.0, "513123": 172.3 },
@@ -202,7 +209,10 @@ export const DashboardDIPA = () => {
       tglBayar: "25 Mar 2026",
       status: "Selesai Cair",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan", "Dapem Rapel", "Dapem THR"],
-      totalNominal: 951_800_000_000,
+      rekapIII: 954_300_000_000,
+      lb: 0,
+      sup: 2_500_000_000,
+      totalNominal: 951_800_000_000, // 954.3M - 2.5M
       totalM: 951.8,
       jenisM: { induk: 525.0, susulan: 26.1, rapel: 15.0, thr: 385.7, ke13: 0 },
       makM: { "513113": 144.3, "513114": 34.2, "513122": 478.5, "513123": 294.8 },
@@ -226,7 +236,10 @@ export const DashboardDIPA = () => {
       tglBayar: "01 Apr 2026",
       status: "Selesai Cair",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan"],
-      totalNominal: 554_300_000_000,
+      rekapIII: 556_100_000_000,
+      lb: 0,
+      sup: 1_800_000_000,
+      totalNominal: 554_300_000_000, // 556.1M - 1.8M
       totalM: 554.3,
       jenisM: { induk: 525.0, susulan: 29.3, rapel: 0, thr: 0, ke13: 0 },
       makM: { "513113": 83.5, "513114": 19.9, "513122": 278.0, "513123": 172.9 },
@@ -248,7 +261,10 @@ export const DashboardDIPA = () => {
       tglBayar: "02 Mei 2026",
       status: "Selesai Cair",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan", "Dapem Rapel"],
-      totalNominal: 589_200_000_000,
+      rekapIII: 591_400_000_000,
+      lb: 0,
+      sup: 2_200_000_000,
+      totalNominal: 589_200_000_000, // 591.4M - 2.2M
       totalM: 589.2,
       jenisM: { induk: 525.0, susulan: 32.2, rapel: 32.0, thr: 0, ke13: 0 },
       makM: { "513113": 88.8, "513114": 21.2, "513122": 295.4, "513123": 183.8 },
@@ -271,7 +287,10 @@ export const DashboardDIPA = () => {
       tglBayar: "02 Jun 2026",
       status: "Selesai Cair",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan", "Dapem Rapel"],
-      totalNominal: 591_500_000_000,
+      rekapIII: 593_500_000_000,
+      lb: 0,
+      sup: 2_000_000_000,
+      totalNominal: 591_500_000_000, // 593.5M - 2.0M
       totalM: 591.5,
       jenisM: { induk: 525.0, susulan: 35.5, rapel: 31.0, thr: 0, ke13: 0 },
       makM: { "513113": 89.1, "513114": 21.3, "513122": 296.6, "513123": 184.5 },
@@ -294,7 +313,10 @@ export const DashboardDIPA = () => {
       tglBayar: "01 Jul 2026",
       status: "Berjalan (Proses SP2D)",
       jenisDibayar: ["Dapem Induk", "Dapem Susulan"],
-      totalNominal: 413_400_000_000,
+      rekapIII: 415_000_000_000,
+      lb: 0,
+      sup: 1_600_000_000,
+      totalNominal: 413_400_000_000, // 415.0M - 1.6M
       totalM: 413.4,
       jenisM: { induk: 375.0, susulan: 38.4, rapel: 0, thr: 0, ke13: 0 },
       makM: { "513113": 62.4, "513114": 14.8, "513122": 207.3, "513123": 128.9 },
@@ -325,151 +347,90 @@ export const DashboardDIPA = () => {
     <div>
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
 
-      {/* EXECUTIVE HIGH-IMPACT ALERT BANNER */}
+      {/* CLEAN ENTERPRISE RUNWAY ALERT BANNER */}
       {isAlert && (
-        <div style={{
-          background: "linear-gradient(135deg, #FFF1F2 0%, #FFFFFF 50%, #FFFBEB 100%)",
-          border: "1px solid #FECDD3",
-          borderLeft: "5px solid #E11D48",
-          borderRadius: 10,
-          padding: "16px 20px",
-          marginBottom: 18,
-          boxShadow: "0 4px 16px rgba(225, 29, 72, 0.08)"
-        }}>
-          {/* Header Row: Status Badge, Title & Actions */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 8,
-                background: "#E11D48", color: "#FFFFFF",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 2px 6px rgba(225, 29, 72, 0.3)"
-              }}>
-                <AlertTriangle size={18} />
-              </div>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 14.5, fontWeight: 900, color: "#9F1239", letterSpacing: -0.2 }}>
-                    PERINGATAN AMBANG BATAS PAGU DIPA (RUNWAY ALERT)
-                  </span>
-                  <span style={{
-                    fontSize: 10, fontWeight: 800, textTransform: "uppercase",
-                    background: "#FFE4E6", color: "#E11D48",
-                    padding: "2px 8px", borderRadius: 12, border: "1px solid #FECDD3",
-                    display: "inline-flex", alignItems: "center", gap: 5
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E11D48", display: "inline-block" }} />
-                    Sisa Ketahanan Dana: ~{runwayBulan} Bulan
-                  </span>
-                </div>
-                <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 2 }}>
-                  Sisa pagu saat ini tidak mencukupi proyeksi kebutuhan hingga akhir TA 2026 berdasarkan laju realisasi terakhir
-                </div>
-              </div>
+        <div
+          style={{
+            background: "#FEF2F2",
+            border: "1px solid #FECACA",
+            borderLeft: "4px solid #DC2626",
+            borderRadius: 8,
+            padding: "12px 16px",
+            marginBottom: 18,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10, flex: 1, minWidth: 280 }}>
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                background: "#FEE2E2",
+                color: "#DC2626",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                marginTop: 1,
+              }}
+            >
+              <AlertTriangle size={16} />
             </div>
-
-            {/* Quick Actions */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button
-                onClick={() => setTab("konfigurasi")}
-                style={{
-                  background: "#FFFFFF", border: "1px solid #FDA4AF",
-                  color: "#9F1239", borderRadius: 6, padding: "6px 12px",
-                  fontSize: 11.5, fontWeight: 700, cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-                  transition: "all 0.15s ease"
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = "#FFE4E6"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "#FFFFFF"; }}
-              >
-                <span>Detail Aturan & Status Sistem</span>
-                <span>→</span>
-              </button>
-              <button
-                onClick={() => setTab("revisi")}
-                style={{
-                  background: "#E11D48", border: "none",
-                  color: "#FFFFFF", borderRadius: 6, padding: "6px 14px",
-                  fontSize: 11.5, fontWeight: 700, cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  boxShadow: "0 2px 6px rgba(225, 29, 72, 0.25)",
-                  transition: "all 0.15s ease"
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = "#BE123C"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "#E11D48"; }}
-              >
-                <span>Usulan Revisi DIPA</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 3 Visual Metric Cards Strip */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: 10,
-            marginBottom: 12
-          }}>
-            {/* Box 1: Realisasi & Sisa Bulan */}
-            <div style={{ background: "#FFFFFF", borderRadius: 8, padding: "10px 14px", border: "1px solid #FEE2E2" }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#64748B", textTransform: "uppercase" }}>Laju Realisasi Terakhir</div>
-              <div style={{ fontSize: 15, fontWeight: 900, color: "#0F172A", fontFamily: "monospace", marginTop: 2 }}>
-                {fmtM(lastMonthData.nominal)} <span style={{ fontSize: 11, fontWeight: 700, color: "#D97706" }}>× {sisaBulanDalamSetahun} Bulan Sisa</span>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13.5, fontWeight: 700, color: "#991B1B" }}>
+                  Peringatan Ketahanan Pagu DIPA TA 2026
+                </span>
+                <span
+                  style={{
+                    background: "#FEE2E2",
+                    color: "#DC2626",
+                    border: "1px solid #FECDD3",
+                    padding: "1px 7px",
+                    borderRadius: 4,
+                    fontSize: 11,
+                    fontWeight: 700,
+                  }}
+                >
+                  Sisa Runway: ~{runwayBulan} Bulan
+                </span>
               </div>
-              <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 2 }}>
-                Basis: Realisasi {lastMonthData.bulan} (Agustus s.d. Desember)
-              </div>
-            </div>
-
-            {/* Box 2: Threshold Kebutuhan */}
-            <div style={{ background: "#FFFFFF", borderRadius: 8, padding: "10px 14px", border: "1px solid #DBEAFE" }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase" }}>Threshold Kebutuhan 5 Bulan</div>
-              <div style={{ fontSize: 15, fontWeight: 900, color: "#1D4ED8", fontFamily: "monospace", marginTop: 2 }}>
-                {fmtM(thresholdKebutuhanNominal)}
-              </div>
-              <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 2 }}>
-                Target dana yang dibutuhkan s.d. akhir tahun
-              </div>
-            </div>
-
-            {/* Box 3: Sisa Pagu vs Defisit */}
-            <div style={{ background: "#FFFFFF", borderRadius: 8, padding: "10px 14px", border: "1px solid #FECDD3" }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#E11D48", textTransform: "uppercase" }}>Sisa Pagu / Estimasi Defisit</div>
-              <div style={{ fontSize: 15, fontWeight: 900, color: "#E11D48", fontFamily: "monospace", marginTop: 2 }}>
-                {fmtM(grandSisa)} <span style={{ fontSize: 11, fontWeight: 800, color: "#DC2626" }}>(-{fmtM(defisitEstimasi)})</span>
-              </div>
-              <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 2 }}>
-                Sisa dana riil saat ini vs kekurangan anggaran
+              <div style={{ fontSize: 12, color: "#7F1D1D", marginTop: 3, lineHeight: 1.5 }}>
+                Berdasarkan realisasi terakhir (<strong>{fmtM(lastMonthData.nominal)}</strong>/bln), sisa pagu <strong>{fmtM(grandSisa)}</strong> diproyeksikan tidak mencukupi kebutuhan <strong>{sisaBulanDalamSetahun} bulan ke depan ({fmtM(thresholdKebutuhanNominal)})</strong> dengan potensi defisit <strong>-{fmtM(defisitEstimasi)}</strong>.
               </div>
             </div>
           </div>
 
-          {/* Visual Runway Progress Bar */}
-          <div style={{ background: "rgba(255,255,255,0.85)", borderRadius: 8, padding: "10px 14px", border: "1px solid #FEE2E2" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, fontSize: 11 }}>
-              <span style={{ fontWeight: 700, color: "#334155" }}>
-                Visualisasi Ketahanan Runway (Sisa Dana vs Target 5 Bulan):
-              </span>
-              <span style={{ fontWeight: 800, color: "#E11D48" }}>
-                Tersedia {((grandSisa / thresholdKebutuhanNominal) * 100).toFixed(1)}% dari Threshold (Ketahanan ~{runwayBulan} Bulan)
-              </span>
-            </div>
-
-            <div style={{ height: 8, background: "#E2E8F0", borderRadius: 4, position: "relative", overflow: "hidden" }}>
-              <div style={{
-                width: `${Math.min(100, (grandSisa / thresholdKebutuhanNominal) * 100)}%`,
-                height: "100%",
-                background: "linear-gradient(90deg, #E11D48 0%, #F43F5E 100%)",
-                borderRadius: 4
-              }} />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, fontSize: 10, color: "#64748B" }}>
-              <span>Posisi Sisa Dana: <strong>{fmtM(grandSisa)}</strong></span>
-              <span style={{ color: "#E11D48", fontWeight: 700 }}>⚠️ Defisit Proyeksi: -{fmtM(defisitEstimasi)}</span>
-              <span>Target Ambang: <strong>{fmtM(thresholdKebutuhanNominal)}</strong></span>
-            </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={() => setTab("revisi")}
+              style={{
+                background: "#DC2626",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: 6,
+                padding: "7px 14px",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                whiteSpace: "nowrap",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+                transition: "background 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#B91C1C")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#DC2626")}
+            >
+              <span>Ajukan Usulan Revisi DIPA</span>
+              <span>→</span>
+            </button>
           </div>
         </div>
       )}
@@ -965,7 +926,7 @@ export const DashboardDIPA = () => {
                 </div>
 
                 {/* Banner Info Bulan Terpilih */}
-                <div style={{ background: "#F8FAFC", borderRadius: 8, padding: "12px 16px", border: "1px solid #E2E8F0", marginBottom: 14 }}>
+                <div style={{ background: "#F8FAFC", borderRadius: 8, padding: "12px 16px", border: "1px solid #E2E8F0", marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <div style={{
@@ -1008,7 +969,7 @@ export const DashboardDIPA = () => {
                     </div>
 
                     <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 11, color: "#64748B" }}>Total Realisasi Cair Bulan Ini:</div>
+                      <div style={{ fontSize: 11, color: "#64748B" }}>Total Realisasi Bulan Ini:</div>
                       <div style={{ fontSize: 17, fontWeight: 900, fontFamily: "monospace", color: "#0F172A" }}>
                         {fmtRp(selectedMonthObj.totalNominal)}
                       </div>
@@ -1165,6 +1126,31 @@ export const DashboardDIPA = () => {
                 <span style={{ fontFamily: "monospace", fontWeight: 800, color: "#0F172A" }}>
                   Realisasi {lastMonthData.bulan} ({fmtM(lastMonthData.nominal)}) × {sisaBulanDalamSetahun} Bulan Sisa (Agustus s.d. Desember) = Threshold: <strong style={{ color: "#1D4ED8" }}>{fmtM(thresholdKebutuhanNominal)}</strong>
                 </span>
+              </div>
+
+              {/* Aturan Khusus Komposisi Realisasi Dana DIPA */}
+              <div style={{ marginTop: 14, background: "#F8FAFC", borderRadius: 8, padding: "14px 16px", border: "1px solid #E2E8F0" }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#0F172A", marginBottom: 6 }}>
+                  📐 Ketentuan & Komposisi Realisasi Dana Pensiun DIPA:
+                </div>
+                <div style={{ fontSize: 12, color: "#334155", lineHeight: 1.6 }}>
+                  <div style={{ marginBottom: 6 }}>
+                    <code style={{ background: "#EFF6FF", color: "#1D4ED8", padding: "2px 6px", borderRadius: 4, fontWeight: 700 }}>
+                      Dana Realisasi Netto = Rekapitulasi III (DAPEM) - Lebih Bayar Pajak (LB) - Saldo Uang Pensiun (SUP)
+                    </code>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 11.5, color: "#475569" }}>
+                    <li style={{ marginBottom: 4 }}>
+                      <strong>Rekapitulasi III:</strong> Kebutuhan kotor tagihan pembayaran pensiun yang diterbitkan pada modul DAPEM.
+                    </li>
+                    <li style={{ marginBottom: 4 }}>
+                      <strong>Lebih Bayar Pajak (LB):</strong> Kompensasi kelebihan setor PPh 21 dari akhir tahun anggaran sebelumnya (umumnya diperhitungkan pada bulan Januari).
+                    </li>
+                    <li>
+                      <strong>Saldo Uang Pensiun (SUP):</strong> Penarikan kembali <em>(reversal)</em> uang pensiun bagi peserta yang <strong>tidak melakukan otentikasi biometrik selama 45 hari</strong> kalender, sehingga dananya ditarik kembali ke kas pengelola.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
