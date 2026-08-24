@@ -114,7 +114,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Active Page Component */}
+          {/* Active Page Componen */}
           <PageComp />
         </div>
       </div>
