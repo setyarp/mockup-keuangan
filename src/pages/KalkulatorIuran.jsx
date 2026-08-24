@@ -126,32 +126,26 @@ export const KalkulatorIuran = () => {
         </div>
       </div>
 
-      {/* Panel 2: Section Penerbitan Tagihan Iuran Kemenkeu */}
-      <div style={{ background: "#F0F4F8", borderRadius: 10, padding: "16px 20px", border: `1px solid ${COLORS.blue}`, marginBottom: 20 }}>
+      {/* Panel 2: Section Penerbitan Tagihan Iuran Kemenkeu Otomatis */}
+      <div style={{ background: "#F0F4F8", borderRadius: 10, padding: "18px 20px", border: `1px solid ${COLORS.blue}`, marginBottom: 20 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.blueDark, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
           <FileText size={16} />
-          <span>Penerbitan Surat Tagihan Iuran Kemenkeu</span>
+          <span>Penerbitan Surat Tagihan Iuran Otomatis ke Kemenkeu</span>
         </div>
+
         <div style={{ display: "flex", gap: 14, alignItems: "flex-end", flexWrap: "wrap" }}>
           <Select
-            label="Pilih Jenis Tagihan Premi (Wajib)"
+            label="Pilih Jenis & Batch Tagihan Otomatis"
             value={selectedJenisTagihan}
             onChange={setSelectedJenisTagihan}
             options={[
               "-- Pilih Jenis Tagihan Premi --",
-              "Tagihan Iuran THT & Pensiun (Digabung)",
-              "Tagihan Iuran JKK (Terpisah)",
-              "Tagihan Iuran JKm (Terpisah)"
+              "Tagihan THT & Pensiun — Batch 1",
+              "Tagihan THT & Pensiun — Batch 2",
+              "Tagihan Iuran JKK",
+              "Tagihan Iuran JKm"
             ]}
-            minW={280}
-          />
-
-          <Select
-            label="Batch Tagihan (Khusus THT/Pensiun)"
-            value={batchTagihan}
-            onChange={setBatchTagihan}
-            options={["Batch 1 (Tanggal 15)", "Batch 2 (Tanggal 25 / Akhir Bulan)"]}
-            minW={220}
+            minW={340}
           />
 
           <button
@@ -159,53 +153,86 @@ export const KalkulatorIuran = () => {
             onClick={() => {
               if (selectedJenisTagihan === "-- Pilih Jenis Tagihan Premi --") return;
 
-              if (selectedJenisTagihan === "Tagihan Iuran THT & Pensiun (Digabung)") {
+              if (selectedJenisTagihan.includes("Batch 1")) {
+                const thtB1 = totalTHT * 0.8;
+                const penB1 = totalPensiun * 0.8;
+                const totB1 = thtB1 + penB1;
+
                 setPreview({
-                  title: "Surat Tagihan Iuran THT & Pensiun (Digabung)",
-                  subtitle: `Periode ${filterPeriode} • ${batchTagihan} — Surat Tagihan ke Kemenkeu`,
+                  title: "Surat Tagihan Iuran THT & Pensiun (Batch 1)",
+                  subtitle: `Periode ${filterPeriode} • Cut-off 15 Juli 2026 (Gaji Induk) — Surat Tagihan ke Kemenkeu`,
                   type: "surat",
-                  fileName: `Surat_Tagihan_THT_Pensiun_${filterPeriode.replace(" ", "_")}_${batchTagihan.slice(0,7)}.pdf`,
+                  fileName: `Surat_Tagihan_THT_Pensiun_Batch1_${filterPeriode.replace(" ", "_")}.pdf`,
                   content: {
-                    noSurat: `001/ASABRI/TGH-THT-PEN/${filterPeriode.replace(" ", "/")}`,
+                    noSurat: `001/ASABRI/TGH-THT-PEN-B1/${filterPeriode.replace(" ", "/")}`,
                     periode: filterPeriode,
-                    batchInfo: batchTagihan,
-                    tanggal: "01 Jul 2026",
+                    cutoff: "15 Juli 2026",
+                    batchInfo: "Batch 1 (Tanggal 15) — Gaji Induk / Termin 1",
+                    tanggal: "15 Jul 2026",
                     items: [
-                      { jenis: "Iuran THT (3,25%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalTHT.toFixed(2)} M` },
-                      { jenis: "Iuran Pensiun (4,75%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalPensiun.toFixed(2)} M` },
-                    ]
+                      { jenis: "Iuran THT (3,25% - Batch 1 Gaji Induk)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${thtB1.toFixed(2)} M` },
+                      { jenis: "Iuran Pensiun (4,75% - Batch 1 Gaji Induk)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${penB1.toFixed(2)} M` },
+                    ],
+                    totalNominal: `Rp ${totB1.toFixed(2)} M`
                   }
                 });
-              } else if (selectedJenisTagihan === "Tagihan Iuran JKK (Terpisah)") {
+              } else if (selectedJenisTagihan.includes("Batch 2")) {
+                const thtB2 = totalTHT * 0.2;
+                const penB2 = totalPensiun * 0.2;
+                const totB2 = thtB2 + penB2;
+
                 setPreview({
-                  title: "Surat Tagihan Iuran JKK (Terpisah)",
-                  subtitle: `Periode ${filterPeriode} — Surat Tagihan Khusus JKK ke Kemenkeu`,
+                  title: "Surat Tagihan Iuran THT & Pensiun (Batch 2)",
+                  subtitle: `Periode ${filterPeriode} • Cut-off 25 Juli 2026 (Gaji Susulan) — Surat Tagihan ke Kemenkeu`,
+                  type: "surat",
+                  fileName: `Surat_Tagihan_THT_Pensiun_Batch2_${filterPeriode.replace(" ", "_")}.pdf`,
+                  content: {
+                    noSurat: `002/ASABRI/TGH-THT-PEN-B2/${filterPeriode.replace(" ", "/")}`,
+                    periode: filterPeriode,
+                    cutoff: "25 Juli 2026",
+                    batchInfo: "Batch 2 (Tanggal 25) — Gaji Susulan & Rekonsiliasi",
+                    tanggal: "25 Jul 2026",
+                    items: [
+                      { jenis: "Iuran THT (3,25% - Batch 2 Susulan/Kekurangan)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${thtB2.toFixed(2)} M` },
+                      { jenis: "Iuran Pensiun (4,75% - Batch 2 Susulan/Kekurangan)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${penB2.toFixed(2)} M` },
+                    ],
+                    totalNominal: `Rp ${totB2.toFixed(2)} M`
+                  }
+                });
+              } else if (selectedJenisTagihan.includes("JKK")) {
+                setPreview({
+                  title: "Surat Tagihan Iuran JKK (Bulanan)",
+                  subtitle: `Periode ${filterPeriode} • Tagihan Bulanan Tunggal (1x Sebulan) ke Kemenkeu`,
                   type: "surat",
                   fileName: `Surat_Tagihan_JKK_${filterPeriode.replace(" ", "_")}.pdf`,
                   content: {
-                    noSurat: `002/ASABRI/TGH-JKK/${filterPeriode.replace(" ", "/")}`,
+                    noSurat: `003/ASABRI/TGH-JKK/${filterPeriode.replace(" ", "/")}`,
                     periode: filterPeriode,
-                    batchInfo: "Tagihan Bulanan JKK",
-                    tanggal: "01 Jul 2026",
+                    cutoff: "25 Juli 2026",
+                    batchInfo: "Tagihan Bulanan Tunggal (1x per Bulan)",
+                    tanggal: "25 Jul 2026",
                     items: [
-                      { jenis: "Iuran JKK (0,24%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKK.toFixed(2)} M` },
-                    ]
+                      { jenis: "Iuran JKK (0,24% Basis Gaji Pokok)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKK.toFixed(2)} M` },
+                    ],
+                    totalNominal: `Rp ${totalJKK.toFixed(2)} M`
                   }
                 });
-              } else if (selectedJenisTagihan === "Tagihan Iuran JKm (Terpisah)") {
+              } else if (selectedJenisTagihan.includes("JKm")) {
                 setPreview({
-                  title: "Surat Tagihan Iuran JKm (Terpisah)",
-                  subtitle: `Periode ${filterPeriode} — Surat Tagihan Khusus JKm ke Kemenkeu`,
+                  title: "Surat Tagihan Iuran JKm (Bulanan)",
+                  subtitle: `Periode ${filterPeriode} • Tagihan Bulanan Tunggal (1x Sebulan) ke Kemenkeu`,
                   type: "surat",
                   fileName: `Surat_Tagihan_JKm_${filterPeriode.replace(" ", "_")}.pdf`,
                   content: {
-                    noSurat: `003/ASABRI/TGH-JKM/${filterPeriode.replace(" ", "/")}`,
+                    noSurat: `004/ASABRI/TGH-JKM/${filterPeriode.replace(" ", "/")}`,
                     periode: filterPeriode,
-                    batchInfo: "Tagihan Bulanan JKm",
-                    tanggal: "01 Jul 2026",
+                    cutoff: "25 Juli 2026",
+                    batchInfo: "Tagihan Bulanan Tunggal (1x per Bulan)",
+                    tanggal: "25 Jul 2026",
                     items: [
-                      { jenis: "Iuran JKm (0,20%)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKM.toFixed(2)} M` },
-                    ]
+                      { jenis: "Iuran JKm (0,20% Basis Gaji Pokok)", peserta: totalPeserta.toLocaleString(), nominal: `Rp ${totalJKM.toFixed(2)} M` },
+                    ],
+                    totalNominal: `Rp ${totalJKM.toFixed(2)} M`
                   }
                 });
               }
@@ -225,13 +252,17 @@ export const KalkulatorIuran = () => {
               boxShadow: selectedJenisTagihan === "-- Pilih Jenis Tagihan Premi --" ? "none" : "0 2px 6px rgba(13,71,161,0.3)"
             }}
           >
-            <FileText size={14} /> Download Surat Tagihan
+            <FileText size={14} /> Preview & Download Surat Tagihan
           </button>
         </div>
 
-        {selectedJenisTagihan === "-- Pilih Jenis Tagihan Premi --" && (
-          <div style={{ fontSize: 11.5, color: COLORS.orange, marginTop: 8, display: "flex", alignItems: "center", gap: 4 }}>
-            <span>⚠️ Silakan pilih field <strong>"Pilih Jenis Tagihan Premi"</strong> di atas terlebih dahulu untuk mengaktifkan tombol Download Surat Tagihan.</span>
+        {selectedJenisTagihan === "-- Pilih Jenis Tagihan Premi --" ? (
+          <div style={{ fontSize: 11.5, color: COLORS.gray600, marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
+            <span>ℹ️ <strong>Ketentuan Sistem:</strong> Tagihan THT & Pensiun dibuat 2 batch dalam sebulan (Batch 1 pada Tgl 15 & Batch 2 pada Tgl 25). Tagihan JKK dan JKm terbit otomatis 1 kali sebulan pada Tgl 25.</span>
+          </div>
+        ) : (
+          <div style={{ fontSize: 11.5, color: COLORS.blueDark, marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
+            <span>✅ Surat tagihan siap dipratinjau dengan data kalkulasi aktif ({totalPeserta.toLocaleString()} peserta).</span>
           </div>
         )}
       </div>

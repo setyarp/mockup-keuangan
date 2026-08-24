@@ -27,6 +27,11 @@ export const PreviewModal = ({ preview, onClose }) => {
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, textDecoration: "underline" }}>SURAT TAGIHAN</div>
                   <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>{content?.noSurat || "No. 001/ASABRI/TGH/VII/2026"}</div>
+                  {content?.batchInfo && (
+                    <div style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", background: "#E3F2FD", color: COLORS.blueDark, borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                      📌 {content.batchInfo}
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: 12, lineHeight: 1.8, color: COLORS.gray800 }}>
                   <p>Kepada Yth,<br/><strong>{content?.tujuan || "Direktur Jenderal Perbendaharaan — Kementerian Keuangan RI"}</strong></p>
@@ -42,6 +47,12 @@ export const PreviewModal = ({ preview, onClose }) => {
                       ]).map((it, i) => (
                         <tr key={i}><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6 }}>{it.jenis}</td><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right" }}>{it.peserta}</td><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right", fontWeight: 700 }}>{it.nominal}</td></tr>
                       ))}
+                      {content?.totalNominal && (
+                        <tr style={{ background: "#F1F5F9", fontWeight: 700 }}>
+                          <td colSpan={2} style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right" }}>Total Tagihan:</td>
+                          <td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right", color: COLORS.blueDark }}>{content.totalNominal}</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                   <p>Demikian surat tagihan ini kami sampaikan. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>

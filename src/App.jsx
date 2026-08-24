@@ -20,6 +20,7 @@ import {
   DashboardDIPA,
   RekonBPJS,
   ReportGenerator,
+  KonfigurasiManfaat,
 } from "./pages";
 
 const PAGES = {
@@ -33,10 +34,11 @@ const PAGES = {
   dana: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
   rekonrk: { title: "Standarisasi Format CMS & Rekonsiliasi Rekening Koran", component: RekonRekeningKoran },
   klaim: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
-  kredit: { title: "Penarikan Kelebihan Bayar UDW Punah", component: KreditPiutang },
+  kredit: { title: "Penagihan Keterlanjuran Bayar", component: KreditPiutang },
   imbaljasa: { title: "Tagihan Imbal Jasa Mitra Bayar", component: TagihanImbalJasa },
   tlpolis: { title: "Portofolio Polis & Premi Taspen Life", component: TaspenPolis },
   tlimbaljasa: { title: "Tagihan Imbal Jasa Taspen Life", component: TaspenImbalJasa },
+  konfigurasi_manfaat: { title: "Master Mitra & Parameter Pengembangan Manfaat", component: KonfigurasiManfaat },
   pajak: { title: "Administrasi PPh 21 & Bukti Potong", component: Perpajakan },
   ukp: { title: "Tabel 24 — Rekap UKP (Uang Kena Pajak) Peserta Pensiun Bulanan", component: RekapUKP },
   dipa: { title: "Realisasi & Sisa Pagu DIPA TA 2026", component: DashboardDIPA },

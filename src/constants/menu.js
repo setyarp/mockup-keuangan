@@ -83,19 +83,14 @@ export const MENU = [
   {
     section: "PENAGIHAN & PIUTANG",
     items: [
-      {
-        icon: "shield",
-        label: "Penagihan Kelebihan Bayar",
-        children: [
-          { id: "kredit", label: "Penarikan UDW Punah" },
-        ],
-      },
+      { id: "kredit", icon: "shield", label: "Penagihan Keterlanjuran Bayar" },
       {
         icon: "card",
-        label: "Penagihan Imbal Jasa",
+        label: "Penagihan Pengembangan Manfaat",
         children: [
           { id: "imbaljasa", label: "Imbal Jasa Mitra Bayar" },
           { id: "tlimbaljasa", label: "Imbal Jasa Taspen Life" },
+          { id: "konfigurasi_manfaat", label: "Master Mitra & Parameter Manfaat" },
         ],
       },
     ],

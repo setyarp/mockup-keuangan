@@ -134,6 +134,18 @@ $$\text{Basis Gaji (THT \& Pensiun)} = Gaji\ Pokok + Tunjangan\ Istri/Suami + Tu
 ### B. Rekonsiliasi Penerimaan vs SKP-PFK Kemenkeu
 $$\mathbf{Selisih\ Iuran} = \mathbf{Realisasi\ Penerimaan\ Kas\ (SKP-PFK)} - \mathbf{Kalkulasi\ Target\ Sistem}$$
 
+### C. Siklus & Frekuensi Otomasi Penerbitan Surat Tagihan Iuran
+Sistem secara otomatis men-generate Surat Tagihan Iuran ke Kemenkeu berdasarkan 2 jadwal *cut-off* bulanan:
+
+1. **Jadwal Cut-off Tahap 1 (Tanggal 15 / Mid-Month):**
+   * **Tagihan THT & Pensiun (Batch 1):** Diterbitkan otomatis untuk data gaji induk / kepesertaan awal bulan. Format dokumen menggabungkan rincian THT (3,25%) dan Pensiun (4,75%).
+2. **Jadwal Cut-off Tahap 2 (Tanggal 25 / End-Month):**
+   * **Tagihan THT & Pensiun (Batch 2):** Diterbitkan otomatis untuk data gaji susulan, kekurangan, atau penyesuaian akhir bulan.
+   * **Tagihan JKK (Bulanan):** Diterbitkan 1 kali per bulan untuk total gaji pokok bulan berjalan.
+   * **Tagihan JKm (Bulanan):** Diterbitkan 1 kali per bulan untuk total gaji pokok bulan berjalan.
+
+$$\text{Total Tagihan Bulanan THT/Pensiun} = \text{Nominal Batch 1} + \text{Nominal Batch 2}$$
+
 ---
 
 ## 6. 📊 Administrasi Perpajakan & UKP (`Perpajakan` & `RekapUKP`)

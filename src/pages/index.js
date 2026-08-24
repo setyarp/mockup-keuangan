@@ -16,3 +16,4 @@ export { DashboardDIPA } from "./DashboardDIPA";
 export { RekonBPJS } from "./RekonBPJS";
 export { ReportGenerator } from "./ReportGenerator";
 export { MonitoringKlaim } from "./MonitoringKlaim";
+export { KonfigurasiManfaat } from "./KonfigurasiManfaat";
