@@ -28,9 +28,10 @@ import {
 } from "lucide-react";
 import { COLORS, LINE_COLORS, IC } from "../constants/colors";
 import { StatCard, SectionTitle, Badge, Select, SearchInput, Btn, NoData, PreviewModal } from "../components/common";
+import { RekonRekeningKoran } from "./RekonRekeningKoran";
 
-export const DashboardDana = () => {
-  const [activeTab, setActiveTab] = useState("monitoring");
+export const DashboardDana = ({ initialTab = "monitoring" }) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [periodeView, setPeriodeView] = useState("Bulanan"); // "Mingguan" | "Bulanan"
   const [selectedMitraView, setSelectedMitraView] = useState("Semua Mitra (Konsolidasi)");
   const [selectedMitraFilter, setSelectedMitraFilter] = useState("Semua");
@@ -326,43 +327,12 @@ export const DashboardDana = () => {
         </div>
       )}
 
-      {/* Top Stat Cards */}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
-        <StatCard
-          icon={<Building2 size={IC} />}
-          label="Total Saldo Tersedia (CMS)"
-          value={`Rp ${totalSaldoTersedia} M`}
-          sub={`${mitraData.length} Mitra Bayar Penyaluran Aktif`}
-          color={COLORS.blue}
-        />
-        <StatCard
-          icon={<TrendingUp size={IC} />}
-          label="Kebutuhan Prox (SP Terbit)"
-          value={`Rp ${totalKebutuhanProx} M`}
-          sub="SP THT, JKK, JKm siap ditransfer"
-          color={COLORS.orange}
-        />
-        <StatCard
-          icon={<FileCheck2 size={IC} />}
-          label="SP Terealisasi Bulan Ini"
-          value={`${totalSpTerealisasi} SP`}
-          sub={`Rp ${totalNominalSalur} M tersalurkan (${overallSuccessRate}%)`}
-          color={COLORS.green}
-        />
-        <StatCard
-          icon={totalSelisih >= 0 ? <CheckCircle2 size={IC} /> : <AlertTriangle size={IC} />}
-          label="Posisi Likuiditas Salur"
-          value={`${totalSelisih >= 0 ? "+" : ""}Rp ${totalSelisih} M`}
-          sub={totalSelisih >= 0 ? "Kecukupan likuiditas aman" : "Perlu dropping tambahan"}
-          color={totalSelisih >= 0 ? COLORS.green : COLORS.red}
-        />
-      </div>
-
       {/* Navigation Tabs */}
       <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
         {[
-          { id: "monitoring", label: "Dashboard Monitoring Ketersediaan & Realisasi Dana (THT, JKK, JKm)" },
-          { id: "rekap", label: "Rekapitulasi Penyaluran & Mapping CMS Bank" }
+          { id: "monitoring", label: "Dashboard Monitoring Ketersediaan & Realisasi Dana" },
+          { id: "mapping_cms", label: "Standarisasi & Rekonsiliasi Rekening Koran (Mapping CMS)" },
+          { id: "rekap", label: "Rekapitulasi Penyaluran Harian CMS" }
         ].map(t => (
           <button
             key={t.id}
@@ -387,6 +357,38 @@ export const DashboardDana = () => {
       {/* TAB 1: MONITORING KETERSEDIAAN DANA */}
       {activeTab === "monitoring" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Top Stat Cards */}
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <StatCard
+              icon={<Building2 size={IC} />}
+              label="Total Saldo Tersedia (CMS)"
+              value={`Rp ${totalSaldoTersedia} M`}
+              sub={`${mitraData.length} Mitra Bayar Penyaluran Aktif`}
+              color={COLORS.blue}
+            />
+            <StatCard
+              icon={<TrendingUp size={IC} />}
+              label="Kebutuhan Prox (SP Terbit)"
+              value={`Rp ${totalKebutuhanProx} M`}
+              sub="SP THT, JKK, JKm siap ditransfer"
+              color={COLORS.orange}
+            />
+            <StatCard
+              icon={<FileCheck2 size={IC} />}
+              label="SP Terealisasi Bulan Ini"
+              value={`${totalSpTerealisasi} SP`}
+              sub={`Rp ${totalNominalSalur} M tersalurkan (${overallSuccessRate}%)`}
+              color={COLORS.green}
+            />
+            <StatCard
+              icon={totalSelisih >= 0 ? <CheckCircle2 size={IC} /> : <AlertTriangle size={IC} />}
+              label="Posisi Likuiditas Salur"
+              value={`${totalSelisih >= 0 ? "+" : ""}Rp ${totalSelisih} M`}
+              sub={totalSelisih >= 0 ? "Kecukupan likuiditas aman" : "Perlu dropping tambahan"}
+              color={totalSelisih >= 0 ? COLORS.green : COLORS.red}
+            />
+          </div>
+
           {/* PANEL 1 — Saldo Per Mitra Bayar (Real-Time CMS) */}
           <div
             style={{
@@ -866,7 +868,12 @@ export const DashboardDana = () => {
         </div>
       )}
 
-      {/* TAB 2: REKAPITULASI PENYALURAN & MAPPING CMS */}
+      {/* TAB 2: STANDARISASI & REKONSILIASI REKENING KORAN (MAPPING CMS) */}
+      {activeTab === "mapping_cms" && (
+        <RekonRekeningKoran />
+      )}
+
+      {/* TAB 3: REKAPITULASI PENYALURAN HARIAN CMS */}
       {activeTab === "rekap" && (
         <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, boxShadow: "0 1px 4px rgba(0,0,0,0.03)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>

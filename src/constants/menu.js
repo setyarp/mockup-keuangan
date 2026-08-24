@@ -40,12 +40,6 @@ export const MENU = [
     ],
   },
   {
-    section: "REKONSILIASI PERBANKAN",
-    items: [
-      { id: "standarisasi_cms", icon: "bank", label: "Standarisasi Format CMS" },
-    ],
-  },
-  {
     section: "PENERIMAAN IURAN",
     items: [
       {

@@ -25,14 +25,14 @@ import {
 
 const PAGES = {
   dashboard: { title: "Ikhtisar Keuangan", component: DashboardKeuangan },
-  standarisasi_cms: { title: "Standarisasi Format CMS & Rekonsiliasi Rekening Koran", component: RekonRekeningKoran },
+  standarisasi_cms: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
   kalkulator: { title: "Perhitungan Iuran Peserta", component: KalkulatorIuran },
   rekonsiliasi: { title: "Rekonsiliasi Penerimaan Dana", component: RekonsIuran },
   tagihan: { title: "Penerbitan Tagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
   listsp: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
   bayarpensiun: { title: "DAPEM — Daftar Rekapitulasi Pembayaran Pensiun", component: PembayaranPensiun },
   dana: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
-  rekonrk: { title: "Standarisasi Format CMS & Rekonsiliasi Rekening Koran", component: RekonRekeningKoran },
+  rekonrk: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
   klaim: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
   kredit: { title: "Penagihan Keterlanjuran Bayar", component: KreditPiutang },
   imbaljasa: { title: "Tagihan Imbal Jasa Mitra Bayar", component: TagihanImbalJasa },

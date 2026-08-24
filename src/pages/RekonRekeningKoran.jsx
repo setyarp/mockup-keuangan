@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
-import { Layers, Download, TrendingDown, RefreshCw, Sparkles, Printer, FileUp, CheckCircle2, Eye } from "lucide-react";
+import { Layers, Download, TrendingDown, RefreshCw, Printer, FileUp, CheckCircle2, Eye } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import { StatCard, SectionTitle, Btn, Select, SearchInput, Badge, NoData, PreviewModal } from "../components/common";
 
@@ -113,9 +113,14 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
 
   const fmt = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
 
-  // Smart Upload & Parsing Engine
+  // Smart Upload & Parsing Engine (Hanya menerima berkas .csv dan .xlsx)
   const processUploadedFile = (file) => {
     if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (ext !== "csv" && ext !== "xlsx") {
+      alert("Format berkas tidak didukung. Modul ini hanya menerima berkas berformat .csv atau .xlsx!");
+      return;
+    }
     setUploadedFileName(file.name);
     setUploadStatus("processing");
 
@@ -290,7 +295,6 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
   const totalManfaat = dataList.filter((d) => d.kategori === "manfaat").reduce((a, b) => a + b.debet, 0);
   const totalSetoranBalik = dataList.filter((d) => d.kategori === "setoran_balik").reduce((a, b) => a + b.credit, 0);
   const totalJasaGiro = dataList.filter((d) => d.kategori === "jasa_giro").reduce((a, b) => a + b.credit, 0);
-  const matchRate = totalTransaksi > 0 ? ((dataList.filter((d) => d.status.includes("Matched") || d.status.includes("Dropping")).length / totalTransaksi) * 100).toFixed(1) : 100;
 
   // Real Excel Export Function
   const exportToOfficialExcel = () => {
@@ -418,94 +422,18 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
         <StatCard icon={<Download size={IC} />} label="Dropping Dana Masuk" value={fmt(totalDropping)} sub="Setoran Giro Kas Negara" color={COLORS.blueDark} />
         <StatCard icon={<TrendingDown size={IC} />} label="Realisasi Pembayaran" value={fmt(totalManfaat)} sub="Debet Manfaat ke Peserta" color={COLORS.orange} />
         <StatCard icon={<RefreshCw size={IC} />} label="Setoran Balik (Keterlanjuran)" value={fmt(totalSetoranBalik)} sub="Pengembalian Dana Peserta" color={COLORS.green} />
-        <StatCard icon={<Sparkles size={IC} />} label="Tingkat Kecocokan" value={totalTransaksi > 0 ? `${matchRate}%` : "—"} sub="Live Auto-Mapping Engine" color={COLORS.accent} />
       </div>
 
-      {/* Smart File Upload Zone */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
-        <SectionTitle action={
-          <div style={{ display: "flex", gap: 8 }}>
-            {dataList.length === 0 ? (
-              <Btn variant="outline" size="sm" onClick={() => { setDataList(RAW_SAMPLE_RK); setUploadedFileName("RK ALL MITRA 2026 .APBN & NTIP.xlsx (Standar Divisi)"); setUploadStatus("idle"); }}>
-                <Sparkles size={13} /> Muat Contoh Data (Simulasi)
-              </Btn>
-            ) : (
-              <>
-                <Btn variant="outline" size="sm" onClick={() => { setDataList([]); setUploadedFileName(""); setUploadStatus("idle"); }}>
-                  <RefreshCw size={13} /> Kosongkan Data
-                </Btn>
-                <Btn variant="outline" size="sm" onClick={exportToOfficialExcel}>
-                  <Download size={13} /> Ekspor Format Standar (.xlsx)
-                </Btn>
-                <Btn size="sm" onClick={() => setPreview({
-                  title: "Preview Berita Acara Rekonsiliasi Rekening Koran Mitra Bayar",
-                  subtitle: `Hasil Verifikasi Mutasi Bank Periode Mei 2026 • ${uploadedFileName || "Semua Mitra"}`,
-                  type: "surat",
-                  fileName: `BA_Rekonsiliasi_Rekening_Koran_${new Date().toISOString().slice(0,10)}.pdf`,
-                  content: {
-                    noSurat: "BA-REKON/RK-MITRA/V/2026",
-                    tujuan: "Direktur Keuangan & Kepala Divisi Pengelolaan Kas PT ASABRI (Persero)",
-                    periode: "Mei 2026",
-                    cutoff: "31 Mei 2026",
-                    tanggal: "06 Juni 2026",
-                    items: [
-                      { jenis: "Total Dropping Dana Masuk (Kredit)", peserta: "Setoran Giro Kemenkeu", nominal: fmt(totalDropping) },
-                      { jenis: "Total Realisasi Pembayaran Manfaat (Debet)", peserta: `${dataList.filter(d => d.kategori === 'manfaat').length} peserta`, nominal: fmt(totalManfaat) },
-                      { jenis: "Penerimaan Pengembalian Keterlanjuran Bayar (UDW)", peserta: `${dataList.filter(d => d.kategori === 'setoran_balik').length} kasus`, nominal: fmt(totalSetoranBalik) },
-                      { jenis: "Pendapatan Jasa Giro Bank", peserta: "Akumulasi Bunga", nominal: fmt(totalJasaGiro) }
-                    ]
-                  }
-                })}>
-                  <Printer size={13} /> Cetak BA Rekonsiliasi (.pdf)
-                </Btn>
-              </>
-            )}
-          </div>
-        }>
-          Uji Coba Unggah & Parser Rekening Koran Mitra (CMS ke Format Standar Divisi)
-        </SectionTitle>
-
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept=".xlsx, .xls, .csv, .txt"
-          style={{ display: "none" }}
-          onChange={(e) => {
-            if (e.target.files?.[0]) processUploadedFile(e.target.files[0]);
-          }}
-        />
-
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          style={{
-            border: `2px dashed ${isDragOver ? COLORS.blue : "#94A3B8"}`,
-            borderRadius: 10,
-            padding: "26px 20px",
-            textAlign: "center",
-            background: isDragOver ? "#EFF6FF" : "#F8FAFC",
-            cursor: "pointer",
-            transition: "all 0.2s"
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#E2E8F0", display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.blueDark }}>
-              <FileUp size={24} />
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>
-              Tarik & Letakkan Berkas Rekening Koran CMS di Sini, atau <span style={{ color: COLORS.blue, textDecoration: "underline" }}>Klik untuk Memilih Berkas</span>
-            </div>
-            <div style={{ fontSize: 12, color: "#64748B", maxWidth: 640 }}>
-              Mendukung berkas <strong>Excel (.xlsx / .xls)</strong>, <strong>CSV</strong>, atau <strong>Text (.txt)</strong> yang diunduh dari CMS Mandiri, BRI, BNI, Woori Saudara, BTN, atau format standar Divisi. Sistem akan membaca, mengekstrak KTPA/Nominal, dan memetakan langsung ke format baku secara presisi.
-            </div>
-            <div style={{ marginTop: 4, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5, background: "#E0F2FE", color: "#0369A1", padding: "4px 12px", borderRadius: 20, fontWeight: 600 }}>
-              <CheckCircle2 size={13} /> Berkas Aktif: {uploadedFileName}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Hidden File Input (.csv, .xlsx only) */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".xlsx, .csv"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          if (e.target.files?.[0]) processUploadedFile(e.target.files[0]);
+        }}
+      />
 
       {/* Category Navigation Tabs */}
       <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
@@ -537,8 +465,68 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
 
       {/* Main Table Card */}
       <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}` }}>
+        {/* Card Header & Action Toolbar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#0F172A" }}>
+              Standarisasi & Rekonsiliasi Rekening Koran Mitra Bayar
+            </div>
+            <div style={{ fontSize: 12, color: "#64748B", marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
+              {uploadedFileName ? (
+                <>
+                  <span style={{ color: COLORS.green, fontWeight: 700 }}>● Berkas Aktif:</span>
+                  <strong style={{ color: "#0F172A" }}>{uploadedFileName}</strong>
+                  <span style={{ color: "#94A3B8" }}>•</span>
+                  <span style={{ color: "#64748B" }}>Format (.csv, .xlsx)</span>
+                </>
+              ) : (
+                <span style={{ color: "#64748B" }}>
+                  Pemadanan otomatis mutasi CMS ke format standar Divisi (.csv, .xlsx)
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Btn size="sm" variant={dataList.length > 0 ? "outline" : "default"} onClick={() => fileInputRef.current?.click()}>
+              <FileUp size={13} /> {dataList.length > 0 ? "Ganti / Unggah Berkas (.csv, .xlsx)" : "Unggah Berkas (.csv, .xlsx)"}
+            </Btn>
+            {dataList.length > 0 && (
+              <>
+                <Btn variant="outline" size="sm" onClick={() => { setDataList([]); setUploadedFileName(""); setUploadStatus("idle"); }}>
+                  <RefreshCw size={13} /> Kosongkan Data
+                </Btn>
+                <Btn variant="outline" size="sm" onClick={exportToOfficialExcel}>
+                  <Download size={13} /> Ekspor Format Standar (.xlsx)
+                </Btn>
+                <Btn size="sm" onClick={() => setPreview({
+                  title: "Preview Berita Acara Rekonsiliasi Rekening Koran Mitra Bayar",
+                  subtitle: `Hasil Verifikasi Mutasi Bank Periode Mei 2026 • ${uploadedFileName || "Semua Mitra"}`,
+                  type: "surat",
+                  fileName: `BA_Rekonsiliasi_Rekening_Koran_${new Date().toISOString().slice(0,10)}.pdf`,
+                  content: {
+                    noSurat: "BA-REKON/RK-MITRA/V/2026",
+                    tujuan: "Direktur Keuangan & Kepala Divisi Pengelolaan Kas PT ASABRI (Persero)",
+                    periode: "Mei 2026",
+                    cutoff: "31 Mei 2026",
+                    tanggal: "06 Juni 2026",
+                    items: [
+                      { jenis: "Total Dropping Dana Masuk (Kredit)", peserta: "Setoran Giro Kemenkeu", nominal: fmt(totalDropping) },
+                      { jenis: "Total Realisasi Pembayaran Manfaat (Debet)", peserta: `${dataList.filter(d => d.kategori === 'manfaat').length} peserta`, nominal: fmt(totalManfaat) },
+                      { jenis: "Penerimaan Pengembalian Keterlanjuran Bayar (UDW)", peserta: `${dataList.filter(d => d.kategori === 'setoran_balik').length} kasus`, nominal: fmt(totalSetoranBalik) },
+                      { jenis: "Pendapatan Jasa Giro Bank", peserta: "Akumulasi Bunga", nominal: fmt(totalJasaGiro) }
+                    ]
+                  }
+                })}>
+                  <Printer size={13} /> Cetak BA Rekonsiliasi (.pdf)
+                </Btn>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Filter Controls */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end", background: "#F8FAFC", padding: "12px 14px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
           <div>
             <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4 }}>Tanggal Awal</label>
             <input
@@ -567,23 +555,29 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
         </div>
 
         {dataList.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "48px 24px", background: "#F8FAFC", borderRadius: 8, border: "1px dashed #CBD5E1" }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#E2E8F0", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#64748B", marginBottom: 12 }}>
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              textAlign: "center",
+              padding: "48px 24px",
+              background: isDragOver ? "#EFF6FF" : "#F8FAFC",
+              borderRadius: 8,
+              border: `2px dashed ${isDragOver ? COLORS.blue : "#CBD5E1"}`,
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#E2E8F0", display: "inline-flex", alignItems: "center", justifyContent: "center", color: COLORS.blueDark, marginBottom: 12 }}>
               <FileUp size={28} />
             </div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "#0F172A", marginBottom: 6 }}>
               Belum Ada Berkas Rekening Koran yang Diunggah
             </div>
-            <div style={{ fontSize: 13, color: "#64748B", maxWidth: 520, margin: "0 auto 18px", lineHeight: 1.5 }}>
-              Silakan unggah 1 berkas rekening koran mitra (dari folder <strong>Downloads\Januari</strong>) melalui area upload di atas untuk mencoba proses auto-parsing dan mapping format standar divisi secara langsung.
-            </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <Btn size="sm" onClick={() => fileInputRef.current?.click()}>
-                <FileUp size={14} /> Pilih File Rekening Koran
-              </Btn>
-              <Btn size="sm" variant="outline" onClick={() => { setDataList(RAW_SAMPLE_RK); setUploadedFileName("RK ALL MITRA 2026 .APBN & NTIP.xlsx (Standar Divisi)"); setUploadStatus("idle"); }}>
-                <Sparkles size={14} /> Coba dengan Data Sampel
-              </Btn>
+            <div style={{ fontSize: 13, color: "#64748B", maxWidth: 520, margin: "0 auto", lineHeight: 1.5 }}>
+              Tarik & letakkan berkas rekening koran mitra di sini, atau <span style={{ color: COLORS.blue, textDecoration: "underline", fontWeight: 600 }}>klik area ini untuk memilih berkas</span> (.csv, .xlsx).
             </div>
           </div>
         ) : filtered.length === 0 ? (
