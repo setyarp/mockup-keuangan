@@ -131,6 +131,7 @@ export const KreditPiutang = () => {
       hariTerlambat: 0
     }
   ];
+  //nambah hari
 
   const fmt = (n) => `Rp ${Math.round(n).toLocaleString("id-ID")}`;
 
@@ -368,8 +369,8 @@ export const KreditPiutang = () => {
         {filtered.length === 0 ? (
           <NoData />
         ) : (
-          <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+          <div style={{ overflowX: "auto", borderRadius: 6, border: `1px solid #CBD5E1` }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
                 <tr style={{ background: "#1E293B", color: COLORS.white }}>
                   {[
@@ -390,15 +391,13 @@ export const KreditPiutang = () => {
                     <th
                       key={i}
                       style={{
-                        padding: "11px 14px",
+                        padding: "10px 12px",
                         textAlign: [5, 11, 12].includes(i) ? "right" : [0, 6, 7, 8, 9, 10].includes(i) ? "center" : "left",
                         fontWeight: 700,
-                        fontSize: 12,
                         color: COLORS.white,
                         borderBottom: `1px solid #334155`,
                         borderRight: i < 12 ? "1px solid #334155" : "none",
-                        whiteSpace: "nowrap",
-                        letterSpacing: "0.2px"
+                        whiteSpace: "nowrap"
                       }}
                     >
                       {c}
@@ -414,107 +413,65 @@ export const KreditPiutang = () => {
                   return (
                     <tr
                       key={i}
-                      style={{
-                        borderBottom: `1px solid #E2E8F0`,
-                        background: k.status === "Terlambat" ? "#FFFBEB" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF",
-                        transition: "background 0.15s ease"
-                      }}
+                      style={{ borderBottom: `1px solid #E2E8F0`, background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF" }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = "#F1F5F9")}
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background =
-                          k.status === "Terlambat" ? "#FFFBEB" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")
-                      }
+                      onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")}
                     >
-                      {/* No */}
-                      <td style={{ padding: "10px 14px", color: "#64748B", textAlign: "center", fontSize: 12, borderRight: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "9px 12px", color: "#64748B", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
                         {k.no}
                       </td>
-
-                      {/* No. Ref Kasus */}
-                      <td style={{ padding: "10px 14px", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
-                        <span style={{ fontWeight: 700, color: COLORS.blueDark, fontFamily: "monospace", fontSize: 12 }}>
-                          {k.ref}
-                        </span>
+                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                        <span style={{ fontWeight: 700, color: COLORS.blueDark, fontFamily: "monospace" }}>{k.ref}</span>
                       </td>
-
-                      {/* Nama Peserta */}
-                      <td style={{ padding: "10px 14px", borderRight: "1px solid #E2E8F0", fontWeight: 700, color: "#0F172A", minWidth: 160, fontSize: 12.5 }}>
+                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", fontWeight: 700, color: "#0F172A", minWidth: 150 }}>
                         {k.nama}
                       </td>
-
-                      {/* NRP / NIP */}
-                      <td style={{ padding: "10px 14px", borderRight: "1px solid #E2E8F0", fontFamily: "monospace", color: "#475569", fontSize: 12, whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", fontFamily: "monospace", color: "#334155", fontSize: 11.5, whiteSpace: "nowrap" }}>
                         {k.nrp}
                       </td>
-
-                      {/* Satker & Unor */}
-                      <td style={{ padding: "10px 14px", borderRight: "1px solid #E2E8F0", minWidth: 140 }}>
-                        <div style={{ fontWeight: 600, color: "#1E293B", fontSize: 12.5 }}>{k.satker}</div>
-                        <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 2 }}>{k.unor}</div>
+                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", minWidth: 130 }}>
+                        <div style={{ fontWeight: 600, color: "#334155" }}>{k.satker}</div>
+                        <div style={{ fontSize: 11, color: "#64748B" }}>{k.unor}</div>
                       </td>
-
-                      {/* Terlanjur Bayar */}
-                      <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", fontSize: 12.5, borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         {fmt(k.jumlah)}
                       </td>
-
-                      {/* Tgl Pengajuan */}
-                      <td style={{ padding: "10px 14px", textAlign: "center", fontSize: 12, color: "#475569", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "center", fontSize: 11.5, color: "#475569", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         {k.tglPengajuan}
                       </td>
-
-                      {/* Jatuh Tempo */}
-                      <td style={{ padding: "10px 14px", textAlign: "center", fontSize: 12, color: "#475569", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "center", fontSize: 11.5, color: "#475569", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         {k.jatuhTempo}
                       </td>
-
-                      {/* Tgl Bayar */}
-                      <td style={{ padding: "10px 14px", textAlign: "center", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "center", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         {k.tglBayar ? (
-                          <span style={{ fontWeight: 700, color: "#166534", background: "#DCFCE7", padding: "2px 8px", borderRadius: 4, fontSize: 11.5 }}>
+                          <span style={{ fontWeight: 600, color: COLORS.green, fontSize: 11.5 }}>
                             {k.tglBayar}
                           </span>
                         ) : (
-                          <span style={{ color: "#94A3B8", fontSize: 12 }}>—</span>
+                          <span style={{ color: "#94A3B8" }}>—</span>
                         )}
                       </td>
-
-                      {/* Status */}
-                      <td style={{ padding: "10px 14px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
                         <Badge color={statusColor(k.status)}>{k.status}</Badge>
                       </td>
-
-                      {/* Durasi Terlambat */}
-                      <td style={{ padding: "10px 14px", textAlign: "center", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "center", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         {k.hariTerlambat > 0 ? (
-                          <span style={{ color: "#DC2626", fontWeight: 700, background: "#FEE2E2", padding: "2px 8px", borderRadius: 4, fontSize: 11.5 }}>
-                            {k.hariTerlambat} Hari
-                          </span>
+                          <span style={{ color: "#DC2626", fontWeight: 700 }}>{k.hariTerlambat} Hari</span>
                         ) : (
-                          <span style={{ color: "#94A3B8", fontSize: 12 }}>—</span>
+                          <span style={{ color: "#94A3B8" }}>—</span>
                         )}
                       </td>
-
-                      {/* Denda (1‰/Hari) */}
-                      <td style={{ padding: "10px 14px", textAlign: "right", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         {denda > 0 ? (
-                          <span style={{ fontWeight: 800, color: "#DC2626", fontFamily: "monospace", fontSize: 12.5 }}>
+                          <span style={{ fontWeight: 800, color: "#DC2626", fontFamily: "monospace" }}>
                             +{fmt(denda)}
                           </span>
                         ) : (
-                          <span style={{ color: "#94A3B8", fontSize: 12 }}>Rp 0</span>
+                          <span style={{ color: "#94A3B8" }}>Rp 0</span>
                         )}
                       </td>
-
-                      {/* Total Wajib Disetor */}
-                      <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, fontSize: 12.5, whiteSpace: "nowrap" }}>
-                        {k.status === "Dikembalikan" ? (
-                          <span style={{ color: "#166534" }}>Rp 0 (Lunas)</span>
-                        ) : k.status === "Terlambat" ? (
-                          <span style={{ color: "#DC2626" }}>{fmt(totalWajib)}</span>
-                        ) : (
-                          <span style={{ color: COLORS.blueDark }}>{fmt(totalWajib)}</span>
-                        )}
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: k.status === "Dikembalikan" ? COLORS.green : COLORS.blueDark, whiteSpace: "nowrap", background: k.status === "Terlambat" ? "#FEF2F2" : "transparent" }}>
+                        {k.status === "Dikembalikan" ? "Rp 0 (Lunas)" : fmt(totalWajib)}
                       </td>
                     </tr>
                   );
