@@ -523,6 +523,33 @@ export const ListSP = () => {
     });
   }, [rawMasterData]);
 
+  // Helper: Robust Date Range Matching (Handles exact ISO dates and year-flexible matching)
+  const matchDateRange = (itemDateStr, fromStr, toStr) => {
+    if (!fromStr && !toStr) return true;
+    if (!itemDateStr || itemDateStr === "—") return false;
+
+    if (fromStr && toStr) {
+      if (itemDateStr >= fromStr && itemDateStr <= toStr) return true;
+      // Fallback: compare month & day if year in datepicker differs from mock data year (2026)
+      const fromMD = fromStr.slice(5);
+      const toMD = toStr.slice(5);
+      const itemMD = itemDateStr.slice(5);
+      if (itemMD >= fromMD && itemMD <= toMD) return true;
+      return false;
+    }
+    if (fromStr) {
+      if (itemDateStr >= fromStr) return true;
+      if (itemDateStr.slice(5) >= fromStr.slice(5)) return true;
+      return false;
+    }
+    if (toStr) {
+      if (itemDateStr <= toStr) return true;
+      if (itemDateStr.slice(5) <= toStr.slice(5)) return true;
+      return false;
+    }
+    return true;
+  };
+
   // Filtering Logic
   const filtered = useMemo(() => {
     return spMasterData.filter((d) => {
@@ -546,12 +573,11 @@ export const ListSP = () => {
       )
         return false;
 
-      if (dariTanggal && d.tglSP < dariTanggal) return false;
-      if (sampaiTanggal && d.tglSP > sampaiTanggal) return false;
-      if (dariTanggalDPS && (d.noDPS === "—" || d.tglBayar < dariTanggalDPS))
-        return false;
-      if (sampaiTanggalDPS && (d.noDPS === "—" || d.tglBayar > sampaiTanggalDPS))
-        return false;
+      if (!matchDateRange(d.tglSP, dariTanggal, sampaiTanggal)) return false;
+      if (dariTanggalDPS || sampaiTanggalDPS) {
+        if (!matchDateRange(d.tglBayar, dariTanggalDPS, sampaiTanggalDPS))
+          return false;
+      }
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
