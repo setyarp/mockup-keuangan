@@ -12,11 +12,8 @@ import {
   User,
   CreditCard,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   Layers,
   FileText,
-  SlidersHorizontal,
   X,
   Eye,
   Download,
@@ -38,10 +35,7 @@ export const ListSP = () => {
   // State: Apakah data sudah dieksekusi / ditampilkan
   const [hasSearched, setHasSearched] = useState(false);
 
-  // State Toggle Section Filter Khusus
-  const [filterKhususOpen, setFilterKhususOpen] = useState(false);
-
-  // State Filter Utama
+  // State Filter
   const [searchQuery, setSearchQuery] = useState("");
   const [produk, setProduk] = useState("-- Silahkan Pilih Produk --");
   const [dariTanggal, setDariTanggal] = useState("");
@@ -733,17 +727,6 @@ export const ListSP = () => {
     }
   };
 
-  // Count active filters in the specialized section to show badge
-  const specializedFilterCount = [
-    status !== "Semua",
-    unor !== "-- Silahkan Pilih Unit Organisasi --",
-    cabang !== "-- Silahkan Pilih Cabang --",
-    statusPersonil !== "-- Silahkan Pilih Status Personil --",
-    mitraBayar !== "Semua",
-    manfaat !== "-- Silahkan Pilih Manfaat --",
-    Boolean(dariTanggalDPS || sampaiTanggalDPS),
-  ].filter(Boolean).length;
-
   return (
     <div>
       {/* PREVIEW EXPORT MODAL */}
@@ -1144,67 +1127,37 @@ export const ListSP = () => {
             >
               <Filter size={18} />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
-              Filter
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
+                Filter Parameter SP
+              </div>
+              <div style={{ fontSize: 11.5, color: COLORS.gray500 }}>
+                Pencarian dan kriteria filter surat perintah
+              </div>
             </div>
           </div>
 
-          {/* Right: Actions (Toggle Section Filter Khusus & Reset) */}
+          {/* Right: Actions */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button
-              onClick={() => setFilterKhususOpen(!filterKhususOpen)}
-              style={{
-                border: `1px solid ${filterKhususOpen ? COLORS.blue : COLORS.gray300}`,
-                background: filterKhususOpen ? "#EFF6FF" : COLORS.white,
-                color: filterKhususOpen ? COLORS.blue : COLORS.gray700,
-                padding: "6px 12px",
-                borderRadius: 6,
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                transition: "all 0.15s ease",
-              }}
-            >
-              <SlidersHorizontal size={13} />
-              <span>{filterKhususOpen ? "Tutup Filter Khusus" : "Filter Khusus"}</span>
-              {specializedFilterCount > 0 && !filterKhususOpen && (
-                <span
-                  style={{
-                    background: COLORS.blue,
-                    color: COLORS.white,
-                    fontSize: 10.5,
-                    fontWeight: 700,
-                    padding: "1px 6px",
-                    borderRadius: 10,
-                  }}
-                >
-                  {specializedFilterCount}
-                </span>
-              )}
-              {filterKhususOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-            </button>
-
             {activeFilterList.length > 0 && (
               <button
                 onClick={handleResetAllFilters}
                 style={{
-                  border: "none",
-                  background: "transparent",
+                  border: `1px solid #FECACA`,
+                  background: "#FEF2F2",
                   color: COLORS.red,
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: 4,
-                  padding: "6px 10px",
+                  gap: 5,
+                  padding: "6px 12px",
                   borderRadius: 6,
+                  transition: "all 0.15s ease",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#FEF2F2")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#FEE2E2")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#FEF2F2")}
               >
                 <RotateCcw size={12} /> Reset Filter
               </button>
@@ -1212,18 +1165,19 @@ export const ListSP = () => {
           </div>
         </div>
 
-        {/* PRIMARY FILTER CONTROLS: HANYA Cari Data, Produk, dan Rentang Tanggal SP */}
-        <div style={{ padding: "18px 20px" }}>
+        {/* ALL FILTER CONTROLS DISPLAYED DIRECTLY */}
+        <div style={{ padding: "20px", boxSizing: "border-box" }}>
+          {/* Row 1: Cari Data, Program Produk, Status Pembayaran, Status Personil */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1.8fr 1.4fr 1.6fr",
-              gap: 16,
+              gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr)",
+              gap: 14,
               alignItems: "flex-end",
             }}
           >
             {/* 1. Search Input */}
-            <div>
+            <div style={{ minWidth: 0 }}>
               <label
                 style={{
                   fontSize: 12,
@@ -1237,7 +1191,7 @@ export const ListSP = () => {
               >
                 <Search size={13} color={COLORS.blue} /> Cari Data SP / Peserta
               </label>
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", minWidth: 0 }}>
                 <input
                   type="text"
                   value={searchQuery}
@@ -1245,7 +1199,7 @@ export const ListSP = () => {
                   placeholder="Ketik No. SP, Nama, NRP, KTPA, Rekening..."
                   style={{
                     width: "100%",
-                    padding: "9px 12px 9px 34px",
+                    padding: "8.5px 12px 8.5px 34px",
                     borderRadius: 6,
                     border: `1px solid ${COLORS.gray300}`,
                     fontSize: 12.5,
@@ -1285,7 +1239,7 @@ export const ListSP = () => {
             </div>
 
             {/* 2. Program Produk */}
-            <div>
+            <div style={{ minWidth: 0 }}>
               <label
                 style={{
                   fontSize: 12,
@@ -1307,8 +1261,168 @@ export const ListSP = () => {
               />
             </div>
 
-            {/* 3. Rentang Tanggal SP */}
-            <div>
+            {/* 3. Status Pembayaran */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <CheckSquare size={13} color={COLORS.blue} /> Status Pembayaran
+              </label>
+              <Select
+                value={status}
+                onChange={setStatus}
+                options={statusDropdownOptions}
+                minW="100%"
+              />
+            </div>
+
+            {/* 4. Status Personil */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <User size={13} color={COLORS.blue} /> Status Personil
+              </label>
+              <Select
+                value={statusPersonil}
+                onChange={setStatusPersonil}
+                options={statusPersonilOptions}
+                minW="100%"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Unor, Cabang ASABRI, Mitra Bayar, Jenis Manfaat */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr)",
+              gap: 14,
+              alignItems: "flex-end",
+              marginTop: 14,
+            }}
+          >
+            {/* 5. Unit Organisasi (Unor) */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <Shield size={13} color={COLORS.blue} /> Unit Organisasi (Unor)
+              </label>
+              <Select
+                value={unor}
+                onChange={setUnor}
+                options={unorOptions}
+                minW="100%"
+              />
+            </div>
+
+            {/* 6. Kantor Cabang ASABRI */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <Building2 size={13} color={COLORS.blue} /> Kantor Cabang ASABRI
+              </label>
+              <Select
+                value={cabang}
+                onChange={setCabang}
+                options={cabangOptions}
+                minW="100%"
+              />
+            </div>
+
+            {/* 7. Mitra Perbankan / Bayar */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <CreditCard size={13} color={COLORS.blue} /> Mitra Bayar
+              </label>
+              <Select
+                value={mitraBayar}
+                onChange={setMitraBayar}
+                options={mitraOptions}
+                minW="100%"
+              />
+            </div>
+
+            {/* 8. Jenis Manfaat */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <FileText size={13} color={COLORS.blue} /> Jenis Manfaat
+              </label>
+              <Select
+                value={manfaat}
+                onChange={setManfaat}
+                options={manfaatOptions}
+                minW="100%"
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Rentang Tanggal SP & Rentang Tanggal DPS */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+              gap: 14,
+              alignItems: "flex-end",
+              marginTop: 14,
+            }}
+          >
+            {/* 9. Rentang Tanggal SP */}
+            <div style={{ minWidth: 0 }}>
               <label
                 style={{
                   fontSize: 12,
@@ -1328,7 +1442,8 @@ export const ListSP = () => {
                   value={dariTanggal}
                   onChange={(e) => setDariTanggal(e.target.value)}
                   style={{
-                    width: "100%",
+                    flex: 1,
+                    minWidth: 0,
                     padding: "7.5px 9px",
                     borderRadius: 6,
                     border: `1px solid ${COLORS.gray300}`,
@@ -1337,13 +1452,64 @@ export const ListSP = () => {
                     boxSizing: "border-box",
                   }}
                 />
-                <span style={{ fontSize: 11, color: COLORS.gray400 }}>s/d</span>
+                <span style={{ fontSize: 11, color: COLORS.gray400, fontWeight: 500, flexShrink: 0 }}>s/d</span>
                 <input
                   type="date"
                   value={sampaiTanggal}
                   onChange={(e) => setSampaiTanggal(e.target.value)}
                   style={{
-                    width: "100%",
+                    flex: 1,
+                    minWidth: 0,
+                    padding: "7.5px 9px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12,
+                    background: COLORS.white,
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* 10. Rentang Tanggal DPS */}
+            <div style={{ minWidth: 0 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: COLORS.gray700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  marginBottom: 6,
+                }}
+              >
+                <Calendar size={13} color={COLORS.blue} /> Rentang Tanggal DPS (Pembayaran)
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <input
+                  type="date"
+                  value={dariTanggalDPS}
+                  onChange={(e) => setDariTanggalDPS(e.target.value)}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    padding: "7.5px 9px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12,
+                    background: COLORS.white,
+                    boxSizing: "border-box",
+                  }}
+                />
+                <span style={{ fontSize: 11, color: COLORS.gray400, fontWeight: 500, flexShrink: 0 }}>s/d</span>
+                <input
+                  type="date"
+                  value={sampaiTanggalDPS}
+                  onChange={(e) => setSampaiTanggalDPS(e.target.value)}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
                     padding: "7.5px 9px",
                     borderRadius: 6,
                     border: `1px solid ${COLORS.gray300}`,
@@ -1355,227 +1521,6 @@ export const ListSP = () => {
               </div>
             </div>
           </div>
-
-          {/* SECTION FILTER KHUSUS (Status Pembayaran, Unor, Kantor Cabang, Status Personil, dsb.) */}
-          {filterKhususOpen && (
-            <div
-              style={{
-                marginTop: 18,
-                paddingTop: 18,
-                borderTop: "1px dashed #CBD5E1",
-                background: "#F8FAFC",
-                margin: "18px -20px -18px -20px",
-                padding: "18px 20px",
-              }}
-            >
-              {/* Row 1 Filter Khusus: Status Pembayaran, Unor, Cabang, Status Personil */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.2fr 1.4fr 1.4fr 1.2fr",
-                  gap: 14,
-                  alignItems: "flex-end",
-                }}
-              >
-                {/* 1. Status Pembayaran */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <CheckSquare size={13} color={COLORS.blue} /> Status Pembayaran
-                  </label>
-                  <Select
-                    value={status}
-                    onChange={setStatus}
-                    options={statusDropdownOptions}
-                    minW="100%"
-                  />
-                </div>
-
-                {/* 2. Unit Organisasi (Unor) */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Shield size={13} color={COLORS.blue} /> Unit Organisasi (Unor)
-                  </label>
-                  <Select
-                    value={unor}
-                    onChange={setUnor}
-                    options={unorOptions}
-                    minW="100%"
-                  />
-                </div>
-
-                {/* 3. Kantor Cabang ASABRI */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Building2 size={13} color={COLORS.blue} /> Kantor Cabang ASABRI
-                  </label>
-                  <Select
-                    value={cabang}
-                    onChange={setCabang}
-                    options={cabangOptions}
-                    minW="100%"
-                  />
-                </div>
-
-                {/* 4. Status Personil */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <User size={13} color={COLORS.blue} /> Status Personil
-                  </label>
-                  <Select
-                    value={statusPersonil}
-                    onChange={setStatusPersonil}
-                    options={statusPersonilOptions}
-                    minW="100%"
-                  />
-                </div>
-              </div>
-
-              {/* Row 2 Filter Khusus: Mitra Bayar, Tanggal DPS, Rincian Manfaat */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.5fr 1.5fr 2fr",
-                  gap: 14,
-                  alignItems: "flex-end",
-                  marginTop: 14,
-                }}
-              >
-                {/* Mitra Bayar */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <CreditCard size={13} color={COLORS.blue} /> Mitra Perbankan / Bayar
-                  </label>
-                  <Select
-                    value={mitraBayar}
-                    onChange={setMitraBayar}
-                    options={mitraOptions}
-                    minW="100%"
-                  />
-                </div>
-
-                {/* Rentang Tanggal DPS */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Calendar size={13} color={COLORS.blue} /> Rentang Tanggal DPS
-                  </label>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <input
-                      type="date"
-                      value={dariTanggalDPS}
-                      onChange={(e) => setDariTanggalDPS(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "7.5px 9px",
-                        borderRadius: 6,
-                        border: `1px solid ${COLORS.gray300}`,
-                        fontSize: 12,
-                        background: COLORS.white,
-                        boxSizing: "border-box",
-                      }}
-                    />
-                    <span style={{ fontSize: 11, color: COLORS.gray400 }}>s/d</span>
-                    <input
-                      type="date"
-                      value={sampaiTanggalDPS}
-                      onChange={(e) => setSampaiTanggalDPS(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "7.5px 9px",
-                        borderRadius: 6,
-                        border: `1px solid ${COLORS.gray300}`,
-                        fontSize: 12,
-                        background: COLORS.white,
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Rincian Manfaat */}
-                <div>
-                  <label
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <FileText size={13} color={COLORS.blue} /> Rincian Jenis Manfaat (Kode Manfaat)
-                  </label>
-                  <Select
-                    value={manfaat}
-                    onChange={setManfaat}
-                    options={manfaatOptions}
-                    minW="100%"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ACTIVE FILTER CHIPS */}
           {activeFilterList.length > 0 && (
