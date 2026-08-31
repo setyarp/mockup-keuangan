@@ -22,7 +22,7 @@ export const DashboardDIPA = () => {
       key: "induk",
       nama: "Dapem Induk",
       icon: "wallet",
-      warna: "#1565C0",
+      warna: "#0141A8",
       mak: [
         { kode: "513113", uraian: "PENS PNS KEMHAN (513113)", kelompok: "PNS Kemenhan", pagu: 630_000_000_000, real: 472_500_000_000 },
         { kode: "513114", uraian: "PENS PNS POLRI (513114)", kelompok: "PNS POLRI", pagu: 150_000_000_000, real: 112_000_000_000 },
@@ -113,12 +113,12 @@ export const DashboardDIPA = () => {
   const makList = [
     { kode: "513122", nama: "PENS TNI", sub: "TNI (AD, AL, AU)", iconColor: "#059669" },
     { kode: "513123", nama: "PENS POLRI", sub: "POLRI", iconColor: "#7C3AED" },
-    { kode: "513113", nama: "PENS PNS KEMHAN", sub: "PNS Kemenhan", iconColor: "#1565C0" },
+    { kode: "513113", nama: "PENS PNS KEMHAN", sub: "PNS Kemenhan", iconColor: "#0141A8" },
     { kode: "513114", nama: "PENS PNS POLRI", sub: "PNS POLRI", iconColor: "#0891B2" },
   ];
 
   const jenisMeta = [
-    { key: "induk", nama: "Dapem Induk", color: "#1565C0" },
+    { key: "induk", nama: "Dapem Induk", color: "#0141A8" },
     { key: "susulan", nama: "Dapem Susulan", color: "#059669" },
     { key: "rapel", nama: "Dapem Rapel", color: "#D97706" },
     { key: "thr", nama: "Dapem THR", color: "#7C3AED" },
@@ -128,7 +128,7 @@ export const DashboardDIPA = () => {
   const makMeta = [
     { key: "513122", nama: "513122 (TNI)", short: "TNI", color: "#059669" },
     { key: "513123", nama: "513123 (POLRI)", short: "POLRI", color: "#7C3AED" },
-    { key: "513113", nama: "513113 (PNS Kemhan)", short: "PNS Kemhan", color: "#1565C0" },
+    { key: "513113", nama: "513113 (PNS Kemhan)", short: "PNS Kemhan", color: "#0141A8" },
     { key: "513114", nama: "513114 (PNS Polri)", short: "PNS Polri", color: "#0891B2" },
   ];
 
@@ -440,7 +440,7 @@ export const DashboardDIPA = () => {
         <div style={{ background: "#FFFFFF", borderRadius: 8, padding: "14px 16px", border: "1px solid #E2E8F0", boxShadow: "0 1px 3px rgba(0,0,0,0.03)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
             <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5 }}>Pagu Berjalan TA 2026</span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: "#1565C0", background: "#EFF6FF", padding: "1px 6px", borderRadius: 4 }}>DIPA Induk + Rev</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: "#0141A8", background: "#EFF6FF", padding: "1px 6px", borderRadius: 4 }}>DIPA Induk + Rev</span>
           </div>
           <div style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>{fmtM(grand.pagu)}</div>
           <div style={{ fontSize: 11, color: "#64748B", marginTop: 4 }}>
@@ -500,7 +500,7 @@ export const DashboardDIPA = () => {
             marginBottom: -2
           }}>
             {t.l}
-            {t.c ? <span style={{ background: tab === t.id ? "#E3F2FD" : COLORS.gray200, color: tab === t.id ? COLORS.blue : COLORS.gray700, padding: "1px 7px", borderRadius: 10, fontSize: 11, fontWeight: 700 }}>{t.c}</span> : null}
+            {t.c ? <span style={{ background: tab === t.id ? "#EFF6FF" : COLORS.gray200, color: tab === t.id ? COLORS.blue : COLORS.gray700, padding: "1px 7px", borderRadius: 10, fontSize: 11, fontWeight: 700 }}>{t.c}</span> : null}
             {t.alertDot && <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#DC2626", display: "inline-block" }} title="Peringatan Defisit Aktif" />}
           </button>
         ))}
@@ -658,7 +658,7 @@ export const DashboardDIPA = () => {
                             >
                               {/* Slot Background Highlight */}
                               {isActive && (
-                                <rect x={slotX + 2} y={padT - 18} width={slotW - 4} height={plotH + 20} fill="#1565C0" opacity="0.07" rx="5" />
+                                <rect x={slotX + 2} y={padT - 18} width={slotW - 4} height={plotH + 20} fill="#0141A8" opacity="0.07" rx="5" />
                               )}
 
                               {/* Bars Rendering */}
@@ -786,7 +786,7 @@ export const DashboardDIPA = () => {
                     {/* POLRI */}
                     <circle cx="60" cy="60" r="46" fill="transparent" stroke="#7C3AED" strokeWidth="16" strokeDasharray={`${0.314 * 289.02} 289.02`} strokeDashoffset={`-${0.500 * 289.02}`} />
                     {/* Kemhan */}
-                    <circle cx="60" cy="60" r="46" fill="transparent" stroke="#1565C0" strokeWidth="16" strokeDasharray={`${0.150 * 289.02} 289.02`} strokeDashoffset={`-${(0.500 + 0.314) * 289.02}`} />
+                    <circle cx="60" cy="60" r="46" fill="transparent" stroke="#0141A8" strokeWidth="16" strokeDasharray={`${0.150 * 289.02} 289.02`} strokeDashoffset={`-${(0.500 + 0.314) * 289.02}`} />
                     {/* PNS POLRI */}
                     <circle cx="60" cy="60" r="46" fill="transparent" stroke="#0891B2" strokeWidth="16" strokeDasharray={`${0.036 * 289.02} 289.02`} strokeDashoffset={`-${(0.500 + 0.314 + 0.150) * 289.02}`} />
                   </svg>
@@ -956,7 +956,7 @@ export const DashboardDIPA = () => {
                                 style={{
                                   fontSize: 10.5, fontWeight: 700, padding: "1px 6px", borderRadius: 3,
                                   background: isTHR ? "#7C3AED14" : isRapel ? "#FEF3C7" : isSusulan ? "#ECFDF5" : "#EFF6FF",
-                                  color: isTHR ? "#7C3AED" : isRapel ? "#D97706" : isSusulan ? "#059669" : "#1565C0",
+                                  color: isTHR ? "#7C3AED" : isRapel ? "#D97706" : isSusulan ? "#059669" : "#0141A8",
                                   border: `1px solid ${isTHR ? "#E9D5FF" : isRapel ? "#FDE68A" : isSusulan ? "#A7F3D0" : "#BFDBFE"}`
                                 }}
                               >
@@ -981,13 +981,13 @@ export const DashboardDIPA = () => {
                 <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1", background: "#FFFFFF", boxShadow: "0 1px 3px rgba(15,23,42,0.03)" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                     <thead>
-                      <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                        <th style={{ padding: "9px 12px", textAlign: "left", fontWeight: 700, borderRight: "1px solid #334155" }}>Jenis Dapem</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>513113 (PNS Kemhan)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>513114 (PNS Polri)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>513122 (TNI)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>513123 (Polri)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700 }}>Total Bulan Ini (Rp)</th>
+                      <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                        <th style={{ padding: "9px 12px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Jenis Dapem</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>513113 (PNS Kemhan)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>513114 (PNS Polri)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>513122 (TNI)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>513123 (Polri)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800 }}>Total Bulan Ini (Rp)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1055,15 +1055,15 @@ export const DashboardDIPA = () => {
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                   {["No. Revisi", "Tanggal", "Jenis Dapem", "Pagu Sebelum", "Pagu Sesudah", "Selisih", "Alasan Revisi"].map((c, i) => (
-                    <th key={i} style={{ padding: "11px 14px", textAlign: i >= 3 && i <= 5 ? "right" : "left", fontWeight: 700, color: COLORS.white, borderBottom: `1px solid #334155`, borderRight: i < 6 ? "1px solid #334155" : "none", whiteSpace: "nowrap" }}>{c}</th>
+                    <th key={i} style={{ padding: "11px 14px", textAlign: i >= 3 && i <= 5 ? "right" : "left", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: i < 6 ? "1px solid #E2E8F0" : "none", whiteSpace: "nowrap" }}>{c}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>{revisiLog.map((r, i) => (
                 <tr key={i} style={{ borderBottom: `1px solid #E2E8F0`, background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF" }} onMouseEnter={e => e.currentTarget.style.background = "#F1F5F9"} onMouseLeave={e => e.currentTarget.style.background = i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"}>
-                  <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11.5, color: "#7B1FA2", fontWeight: 600, borderRight: "1px solid #E2E8F0" }}>{r.no}</td>
+                  <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11.5, color: "#7C3AED", fontWeight: 600, borderRight: "1px solid #E2E8F0" }}>{r.no}</td>
                   <td style={{ padding: "10px 14px", fontSize: 12, borderRight: "1px solid #E2E8F0" }}>{r.tgl}</td>
                   <td style={{ padding: "10px 14px", borderRight: "1px solid #E2E8F0" }}><Badge color="blue">{r.jenis}</Badge></td>
                   <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #E2E8F0" }}>{fmtRp(r.sebelum)}</td>
@@ -1269,15 +1269,15 @@ export const DashboardDIPA = () => {
                 <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                     <thead>
-                      <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 700, width: 40, borderRight: "1px solid #334155" }}>No</th>
-                        <th style={{ padding: "9px 12px", textAlign: "left", fontWeight: 700, borderRight: "1px solid #334155" }}>Periode Bulan</th>
-                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 700, borderRight: "1px solid #334155" }}>Tipe Data</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>Realisasi (Rn)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 700, borderRight: "1px solid #334155" }}>Sisa Bulan (12 - n)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>Threshold Ambang (Rn × Sisa)</th>
-                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>Sisa Pagu DIPA</th>
-                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 700 }}>Status Alert</th>
+                      <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 800, width: 40, borderRight: "1px solid #E2E8F0" }}>No</th>
+                        <th style={{ padding: "9px 12px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Periode Bulan</th>
+                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Tipe Data</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Realisasi (Rn)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Sisa Bulan (12 - n)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Threshold Ambang (Rn × Sisa)</th>
+                        <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Sisa Pagu DIPA</th>
+                        <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 800 }}>Status Alert</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1304,7 +1304,7 @@ export const DashboardDIPA = () => {
                               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                 <span>{b.nama}</span>
                                 {isCurrent && (
-                                  <span style={{ fontSize: 9.5, background: "#1565C0", color: "#FFFFFF", padding: "1px 5px", borderRadius: 3, fontWeight: 800 }}>
+                                  <span style={{ fontSize: 9.5, background: "#0141A8", color: "#FFFFFF", padding: "1px 5px", borderRadius: 3, fontWeight: 800 }}>
                                     Bulan Ini
                                   </span>
                                 )}

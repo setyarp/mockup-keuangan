@@ -590,16 +590,16 @@ export const Perpajakan = () => {
             <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
-                  <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                    <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #334155" }}>No</th>
-                    <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #334155" }}>Peserta Pensiun</th>
-                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>MAK</th>
-                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Kode Jiwa / PTKP</th>
-                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Kategori TER</th>
-                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>Penghasilan Bruto</th>
-                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Tarif TER</th>
-                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh 21 TER Dipotong</th>
-                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Tunjuk Silang</th>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                    <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #E2E8F0" }}>No</th>
+                    <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Peserta Pensiun</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>MAK</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Kode Jiwa / PTKP</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Kategori TER</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Penghasilan Bruto</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Tarif TER</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 TER Dipotong</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Tunjuk Silang</th>
                     <th style={{ padding: "9px 10px", textAlign: "center" }}>Status</th>
                   </tr>
                 </thead>
@@ -700,16 +700,16 @@ export const Perpajakan = () => {
           <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                  <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #334155" }}>No</th>
-                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #334155" }}>Peserta Pensiun</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>Bruto Setahun</th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #334155" }}>Biaya Pensiun (5%)</th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #334155" }}>PTKP</th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #334155" }}>PKP Setahun</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh Terutang (P17)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh Dipotong Jan–Nov (TER)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh Dipotong Desember</th>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                  <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #E2E8F0" }}>No</th>
+                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Peserta Pensiun</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Setahun</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Biaya Pensiun (5%)</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PTKP</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PKP Setahun</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Terutang (P17)</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Dipotong Jan–Nov (TER)</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Dipotong Desember</th>
                   <th style={{ padding: "9px 10px", textAlign: "center" }}>Status Pelunasan</th>
                 </tr>
               </thead>
@@ -798,17 +798,17 @@ export const Perpajakan = () => {
           <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                  <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #334155" }}>No</th>
-                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #334155" }}>Peserta Pensiun</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>MAK</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Kode Jiwa</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>Bruto Setahun</th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #334155" }}>Biaya Pensiun</th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #334155" }}>PKP Setahun</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh Terutang Setahun</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh Jan–Nov (TER)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh Desember</th>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                  <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #E2E8F0" }}>No</th>
+                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Peserta Pensiun</th>
+                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>MAK</th>
+                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Kode Jiwa</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Setahun</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Biaya Pensiun</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PKP Setahun</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Terutang Setahun</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Jan–Nov (TER)</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Desember</th>
                   <th style={{ padding: "9px 10px", textAlign: "center" }}>Status NPWP</th>
                 </tr>
               </thead>
@@ -874,15 +874,15 @@ export const Perpajakan = () => {
           <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                  <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #334155" }}>No</th>
-                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #334155" }}>Peserta Pensiun</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Masa Pajak</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>Bruto Bulanan</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh 21 Metode TER (Baru)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh 21 Metode Pasal 17 (Lama)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>Selisih (TER - P17)</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>% Selisih</th>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                  <th style={{ padding: "9px 10px", textAlign: "center", width: 40, borderRight: "1px solid #E2E8F0" }}>No</th>
+                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Peserta Pensiun</th>
+                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Masa Pajak</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Bulanan</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Metode TER (Baru)</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Metode Pasal 17 (Lama)</th>
+                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Selisih (TER - P17)</th>
+                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>% Selisih</th>
                   <th style={{ padding: "9px 10px", textAlign: "center" }}>Status Evaluasi</th>
                 </tr>
               </thead>
@@ -1078,12 +1078,12 @@ export const Perpajakan = () => {
               <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
-                    <tr style={{ background: "#1E293B", color: "#FFFFFF" }}>
-                      <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #334155" }}>Nama Peserta</th>
-                      <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>NIK</th>
-                      <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>NPWP</th>
-                      <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #334155" }}>PPh 21 Terutang (A2)</th>
-                      <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #334155" }}>Kanal Akses</th>
+                    <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                      <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Nama Peserta</th>
+                      <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>NIK</th>
+                      <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>NPWP</th>
+                      <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Terutang (A2)</th>
+                      <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Kanal Akses</th>
                       <th style={{ padding: "9px 10px", textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>

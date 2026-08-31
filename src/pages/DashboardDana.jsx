@@ -441,17 +441,17 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
             <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
                 <thead>
-                  <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                     {["Nama Mitra Bayar", "No. Rekening Giro CMS", "Program Manfaat", "Saldo Tersedia", "Kebutuhan Prox (SP Terbit)", "Selisih (+/-)", "Status"].map((c, i) => (
                       <th
                         key={i}
                         style={{
                           padding: "11px 14px",
                           textAlign: i >= 3 && i <= 5 ? "right" : "left",
-                          fontWeight: 700,
-                          color: COLORS.white,
-                          borderBottom: `1px solid #334155`,
-                          borderRight: i < 6 ? "1px solid #334155" : "none",
+                          fontWeight: 800,
+                          color: "#64748B",
+                          borderBottom: `1px solid #E2E8F0`,
+                          borderRight: i < 6 ? "1px solid #E2E8F0" : "none",
                           whiteSpace: "nowrap"
                         }}
                       >
@@ -466,12 +466,12 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       key={m.id}
                       style={{
                         borderBottom: `1px solid #E2E8F0`,
-                        background: m.status === "Kritis" ? "#FFEBEE" : m.status === "Perhatian" ? "#FFF8E1" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"
+                        background: m.status === "Kritis" ? "#FFF1F2" : m.status === "Perhatian" ? "#FFF8E1" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"
                       }}
                       onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                       onMouseLeave={e => e.currentTarget.style.opacity = "1"}
                     >
-                      <td style={{ padding: "10px 14px", fontWeight: 700, color: m.status === "Kritis" ? "#B71C1C" : "#0F172A", borderRight: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "10px 14px", fontWeight: 700, color: m.status === "Kritis" ? "#BE123C" : "#0F172A", borderRight: "1px solid #E2E8F0" }}>
                         {m.mitra}
                       </td>
                       <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: 11.5, color: COLORS.blueDark, fontWeight: 600, borderRight: "1px solid #E2E8F0" }}>
@@ -601,7 +601,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
                 <div style={{ display: "flex", gap: 16, alignItems: "center", fontSize: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ width: 16, height: 4, background: "#1976D2", borderRadius: 2, display: "inline-block" }} />
+                    <span style={{ width: 16, height: 4, background: "#0141A8", borderRadius: 2, display: "inline-block" }} />
                     <strong style={{ color: COLORS.gray900 }}>Kurva Proyeksi Kebutuhan Dana (THT, JKK, JKm)</strong>
                   </div>
                 </div>
@@ -645,19 +645,19 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       ))}
 
                       {/* Curve Line (Solid Blue) */}
-                      <polyline points={ptsKebutuhan} fill="none" stroke="#1976D2" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+                      <polyline points={ptsKebutuhan} fill="none" stroke="#0141A8" strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
 
                       {/* Data Points + Values */}
                       {chartKebutuhanSeries.map((v, i) => (
                         <g key={`k-${i}`}>
-                          <circle cx={xAt(i)} cy={yAt(v)} r="5" fill={COLORS.white} stroke="#1976D2" strokeWidth="3" />
+                          <circle cx={xAt(i)} cy={yAt(v)} r="5" fill={COLORS.white} stroke="#0141A8" strokeWidth="3" />
                           <text
                             x={xAt(i)}
                             y={yAt(v) - 10}
                             textAnchor="middle"
                             fontSize="11"
                             fontWeight="800"
-                            fill="#1976D2"
+                            fill="#0141A8"
                             fontFamily="monospace"
                           >
                             Rp {v} M
@@ -705,11 +705,11 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                 {/* Legends */}
                 <div style={{ display: "flex", gap: 14, alignItems: "center", fontSize: 12, paddingBottom: 6 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ width: 14, height: 14, background: "#1976D2", borderRadius: 3, display: "inline-block" }} />
+                    <span style={{ width: 14, height: 14, background: "#0141A8", borderRadius: 3, display: "inline-block" }} />
                     <strong style={{ color: COLORS.gray800 }}>Total SP Diterbitkan</strong>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ width: 14, height: 14, background: "#2E7D32", borderRadius: 3, display: "inline-block" }} />
+                    <span style={{ width: 14, height: 14, background: "#059669", borderRadius: 3, display: "inline-block" }} />
                     <strong style={{ color: COLORS.gray800 }}>SP Terealisasi (Cair)</strong>
                   </div>
                 </div>
@@ -762,7 +762,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             width={barW}
                             height={h1}
                             rx={4}
-                            fill="#1976D2"
+                            fill="#0141A8"
                             style={{ cursor: "pointer", transition: "opacity 0.2s" }}
                             onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                             onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -773,7 +773,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             textAnchor="middle"
                             fontSize="10.5"
                             fontWeight="800"
-                            fill="#1976D2"
+                            fill="#0141A8"
                             fontFamily="monospace"
                           >
                             {m.spTotal}
@@ -786,7 +786,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             width={barW}
                             height={h2}
                             rx={4}
-                            fill="#2E7D32"
+                            fill="#059669"
                             style={{ cursor: "pointer", transition: "opacity 0.2s" }}
                             onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                             onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -797,7 +797,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             textAnchor="middle"
                             fontSize="10.5"
                             fontWeight="800"
-                            fill="#2E7D32"
+                            fill="#059669"
                             fontFamily="monospace"
                           >
                             {m.spRealisasi}
@@ -823,7 +823,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             width={68}
                             height={18}
                             rx={4}
-                            fill={m.rateRealisasi >= 95 ? "#E8F5E9" : m.rateRealisasi >= 90 ? "#E3F2FD" : "#FFF8E1"}
+                            fill={m.rateRealisasi >= 95 ? "#ECFDF5" : m.rateRealisasi >= 90 ? "#EFF6FF" : "#FFF8E1"}
                             stroke={m.rateRealisasi >= 95 ? "#A5D6A7" : m.rateRealisasi >= 90 ? "#90CAF9" : "#FFE082"}
                           />
                           <text
@@ -832,7 +832,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             textAnchor="middle"
                             fontSize="10"
                             fontWeight="800"
-                            fill={m.rateRealisasi >= 95 ? "#2E7D32" : m.rateRealisasi >= 90 ? "#1565C0" : "#E65100"}
+                            fill={m.rateRealisasi >= 95 ? "#059669" : m.rateRealisasi >= 90 ? "#0141A8" : "#B45309"}
                           >
                             {m.rateRealisasi}% Cair
                           </text>
@@ -851,7 +851,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                   <div style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray900, marginBottom: 2 }}>{m.mitra}</div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: COLORS.gray600 }}>
                     <span>Terealisasi:</span>
-                    <strong style={{ color: "#2E7D32" }}>{m.spRealisasi} / {m.spTotal} SP</strong>
+                    <strong style={{ color: "#059669" }}>{m.spRealisasi} / {m.spTotal} SP</strong>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: COLORS.gray600, marginTop: 2 }}>
                     <span>Nominal Salur:</span>
@@ -927,17 +927,17 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
             <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
                 <thead>
-                  <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                     {["No", "No. Referensi CMS", "NRP / NOPEN", "Nama Penerima Manfaat", "Program Manfaat", "Mitra Bayar", "No. SP (YANDU)", "Nominal", "Waktu", "Kantor Cabang", "Status"].map((c, i) => (
                       <th
                         key={i}
                         style={{
                           padding: "10px 12px",
                           textAlign: i === 7 ? "right" : "left",
-                          fontWeight: 700,
-                          color: COLORS.white,
-                          borderBottom: `1px solid #334155`,
-                          borderRight: i < 10 ? "1px solid #334155" : "none",
+                          fontWeight: 800,
+                          color: "#64748B",
+                          borderBottom: `1px solid #E2E8F0`,
+                          borderRight: i < 10 ? "1px solid #E2E8F0" : "none",
                           whiteSpace: "nowrap"
                         }}
                       >
@@ -952,7 +952,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       key={r.no}
                       style={{
                         borderBottom: `1px solid #E2E8F0`,
-                        background: r.status === "Gagal" ? "#FFEBEE" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"
+                        background: r.status === "Gagal" ? "#FFF1F2" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"
                       }}
                       onMouseEnter={e => {
                         if (r.status !== "Gagal") e.currentTarget.style.background = "#F1F5F9";

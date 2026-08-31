@@ -117,7 +117,7 @@ export const RekonBPJS = () => {
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
 
       {/* Info Distribusi */}
-      <div style={{ background: "#E3F2FD", borderRadius: 8, padding: "12px 18px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12.5, border: `1px solid ${COLORS.blue}40` }}>
+      <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "12px 18px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12.5, border: `1px solid ${COLORS.blue}40` }}>
         <span style={{ color: "#0F172A" }}>Dokumen Rekonsiliasi Iuran BPJS Kesehatan (ASKES) diselaraskan langsung dengan <strong>4 MAK DAPEM Resmi (Rekapitulasi III)</strong> untuk didistribusikan ke <strong>BPJS Kesehatan</strong> dan <strong>DJPb Kemenkeu</strong>.</span>
         <div style={{ display: "flex", gap: 8 }}>
           <Btn variant="outline" size="sm" onClick={() => setPreview({ title: "Preview Laporan Rekonsiliasi BPJS Kesehatan (Rekap III DAPEM)", subtitle: `Periode ${filterBulan} — Format Resmi DJPb`, type: "table", fileName: `Rekonsiliasi_BPJS_DAPEM_${filterBulan.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`, content: { columns: ["No", "Kode MAK", "Kelompok Pensiun DAPEM", "Total Jiwa", "Target Rekap III (Pot. ASKES)", "Realisasi Setoran", "Kompensasi (+/-)"], rows: filteredRekap.map(r => [r.no, r.mak, r.namaKelompok, fmtJiwa(r.jiwa), fmt(r.targetRekap3), fmt(r.realisasi), (r.realisasi - r.targetRekap3 >= 0 ? "+" : "-") + " " + fmt(r.realisasi - r.targetRekap3)]), totalRows: filteredRekap.length + 1 } })}>Ekspor Excel</Btn>
@@ -212,15 +212,15 @@ export const RekonBPJS = () => {
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1` }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
-                  <th style={{ padding: "11px 14px", textAlign: "center", fontWeight: 700, width: 50, borderRight: "1px solid #334155" }}>NO</th>
-                  <th style={{ padding: "11px 14px", textAlign: "left", fontWeight: 700, width: 120, borderRight: "1px solid #334155" }}>KODE MAK</th>
-                  <th style={{ padding: "11px 16px", textAlign: "left", fontWeight: 700, borderRight: "1px solid #334155" }}>KELOMPOK PENSIUN DAPEM</th>
-                  <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 700, width: 130, borderRight: "1px solid #334155" }}>TOTAL JIWA</th>
-                  <th style={{ padding: "11px 16px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>TARGET REKAP III (ASKES)</th>
-                  <th style={{ padding: "11px 16px", textAlign: "right", fontWeight: 700, borderRight: "1px solid #334155" }}>REALISASI SETORAN</th>
-                  <th style={{ padding: "11px 16px", textAlign: "right", fontWeight: 700, width: 160, borderRight: "1px solid #334155" }}>KOMPENSASI (+/-)</th>
-                  <th style={{ padding: "11px 14px", textAlign: "center", fontWeight: 700, width: 100 }}>STATUS</th>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                  <th style={{ padding: "11px 14px", textAlign: "center", fontWeight: 800, width: 50, borderRight: "1px solid #E2E8F0" }}>NO</th>
+                  <th style={{ padding: "11px 14px", textAlign: "left", fontWeight: 800, width: 120, borderRight: "1px solid #E2E8F0" }}>KODE MAK</th>
+                  <th style={{ padding: "11px 16px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>KELOMPOK PENSIUN DAPEM</th>
+                  <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 800, width: 130, borderRight: "1px solid #E2E8F0" }}>TOTAL JIWA</th>
+                  <th style={{ padding: "11px 16px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>TARGET REKAP III (ASKES)</th>
+                  <th style={{ padding: "11px 16px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>REALISASI SETORAN</th>
+                  <th style={{ padding: "11px 16px", textAlign: "right", fontWeight: 800, width: 160, borderRight: "1px solid #E2E8F0" }}>KOMPENSASI (+/-)</th>
+                  <th style={{ padding: "11px 14px", textAlign: "center", fontWeight: 800, width: 100 }}>STATUS</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,17 +244,17 @@ export const RekonBPJS = () => {
                   );
                 })}
                 {/* Total Row */}
-                <tr style={{ background: "#0F172A", color: COLORS.white, fontWeight: 800 }}>
-                  <td colSpan={3} style={{ padding: "12px 16px", fontWeight: 800, color: COLORS.white, letterSpacing: 0.3 }}>
+                <tr style={{ background: "#F8FAFC", borderTop: "2px solid #E2E8F0", color: "#1E293B", fontWeight: 800 }}>
+                  <td colSpan={3} style={{ padding: "12px 16px", fontWeight: 800, color: "#1E293B", letterSpacing: 0.3 }}>
                     JUMLAH GRAND TOTAL (SELURUH MAK DAPEM)
                   </td>
-                  <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#93C5FD" }}>
+                  <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#1D4ED8" }}>
                     {fmtJiwa(totalJiwa)}
                   </td>
-                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.white }}>
+                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#1E293B" }}>
                     {fmt(totalTarget)}
                   </td>
-                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#86EFAC" }}>
+                  <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#047857" }}>
                     {fmt(totalRealisasi)}
                   </td>
                   <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "monospace", fontWeight: 900, color: "#F59E0B" }}>
@@ -327,9 +327,9 @@ export const RekonBPJS = () => {
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1` }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                   {["NRP/NIP", "Nama Peserta", "Kode MAK", "Kelompok DAPEM", "Unor / Satker", "Target Rekap III", "Realisasi Potong", "Kompensasi (+/-)", "Keterangan"].map((c, i) => (
-                    <th key={i} style={{ padding: "9px 12px", textAlign: i >= 5 && i <= 7 ? "right" : "left", fontWeight: 700, color: COLORS.white, borderRight: "1px solid #334155", whiteSpace: "nowrap" }}>{c}</th>
+                    <th key={i} style={{ padding: "9px 12px", textAlign: i >= 5 && i <= 7 ? "right" : "left", fontWeight: 800, color: "#64748B", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>{c}</th>
                   ))}
                 </tr>
               </thead>
@@ -439,16 +439,16 @@ export const RekonBPJS = () => {
             <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1` }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
                 <thead>
-                  <tr style={{ background: "#1E293B", color: COLORS.white }}>
-                    <th style={{ padding: "11px 12px", textAlign: "center", fontWeight: 700, width: 45, borderRight: "1px solid #334155" }}>No.</th>
-                    <th style={{ padding: "11px 12px", textAlign: "center", fontWeight: 700, width: 95, borderRight: "1px solid #334155" }}>Bulan</th>
-                    <th style={{ padding: "11px 14px", textAlign: "left", fontWeight: 700, borderRight: "1px solid #334155" }}>Kelompok Peserta</th>
-                    <th style={{ padding: "11px 12px", textAlign: "right", fontWeight: 700, width: 115, borderRight: "1px solid #334155" }}>Jumlah Peserta</th>
-                    <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 700, width: 155, borderRight: "1px solid #334155" }}>Total Iuran (Rekap III)</th>
-                    <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 700, width: 175, borderRight: "1px solid #334155" }}>Iuran yang Dipotong dari Dapem</th>
-                    <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 700, width: 175, borderRight: "1px solid #334155" }}>Iuran yang Disetor (NTPN)</th>
-                    <th style={{ padding: "11px 12px", textAlign: "center", fontWeight: 700, width: 105, borderRight: "1px solid #334155" }}>Tanggal Setor</th>
-                    <th style={{ padding: "11px 12px", textAlign: "right", fontWeight: 700, width: 110 }}>Selisih</th>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                    <th style={{ padding: "11px 12px", textAlign: "center", fontWeight: 800, width: 45, borderRight: "1px solid #E2E8F0" }}>No.</th>
+                    <th style={{ padding: "11px 12px", textAlign: "center", fontWeight: 800, width: 95, borderRight: "1px solid #E2E8F0" }}>Bulan</th>
+                    <th style={{ padding: "11px 14px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Kelompok Peserta</th>
+                    <th style={{ padding: "11px 12px", textAlign: "right", fontWeight: 800, width: 115, borderRight: "1px solid #E2E8F0" }}>Jumlah Peserta</th>
+                    <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 800, width: 155, borderRight: "1px solid #E2E8F0" }}>Total Iuran (Rekap III)</th>
+                    <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 800, width: 175, borderRight: "1px solid #E2E8F0" }}>Iuran yang Dipotong dari Dapem</th>
+                    <th style={{ padding: "11px 14px", textAlign: "right", fontWeight: 800, width: 175, borderRight: "1px solid #E2E8F0" }}>Iuran yang Disetor (NTPN)</th>
+                    <th style={{ padding: "11px 12px", textAlign: "center", fontWeight: 800, width: 105, borderRight: "1px solid #E2E8F0" }}>Tanggal Setor</th>
+                    <th style={{ padding: "11px 12px", textAlign: "right", fontWeight: 800, width: 110 }}>Selisih</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -471,26 +471,26 @@ export const RekonBPJS = () => {
                     </tr>
                   ))}
                   {/* Total Row */}
-                  <tr style={{ background: "#0F172A", color: COLORS.white, fontWeight: 800 }}>
-                    <td colSpan={3} style={{ padding: "12px 14px", fontWeight: 800, color: COLORS.white, letterSpacing: 0.3 }}>
+                  <tr style={{ background: "#F8FAFC", borderTop: "2px solid #E2E8F0", color: "#1E293B", fontWeight: 800 }}>
+                    <td colSpan={3} style={{ padding: "12px 14px", fontWeight: 800, color: "#1E293B", letterSpacing: 0.3 }}>
                       JUMLAH GRAND TOTAL (SELURUH MAK DAPEM)
                     </td>
-                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#93C5FD" }}>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#1D4ED8" }}>
                       {fmtJiwa(totalSetoranPeserta)}
                     </td>
-                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.white }}>
+                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#1E293B" }}>
                       {fmt(totalSetoranRekap3)}
                     </td>
-                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#93C5FD" }}>
+                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#1D4ED8" }}>
                       {fmt(totalSetoranPotongDapem)}
                     </td>
-                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#86EFAC" }}>
+                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#047857" }}>
                       {fmt(totalSetoranNtpn)}
                     </td>
                     <td style={{ padding: "12px 12px", textAlign: "center", fontSize: 12, color: "#CBD5E1" }}>
                       10 Jun 2026
                     </td>
-                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 900, color: "#86EFAC" }}>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 900, color: "#047857" }}>
                       {totalSetoranSelisih === 0 ? "Rp 0 (Match)" : fmt(totalSetoranSelisih)}
                     </td>
                   </tr>

@@ -313,7 +313,7 @@ export const GeneratorTagihan = () => {
                 width: 46,
                 height: 46,
                 borderRadius: 12,
-                background: "linear-gradient(135deg, #0D47A1, #1976D2)",
+                background: "linear-gradient(135deg, #0D47A1, #0141A8)",
                 color: COLORS.white,
                 display: "flex",
                 alignItems: "center",
@@ -351,7 +351,7 @@ export const GeneratorTagihan = () => {
             style={{
               marginTop: 16,
               padding: "12px 16px",
-              background: "#E8F5E9",
+              background: "#ECFDF5",
               borderRadius: 8,
               border: `1px solid ${COLORS.green}`,
               color: "#1B5E20",
@@ -361,7 +361,7 @@ export const GeneratorTagihan = () => {
               gap: 10
             }}
           >
-            <CheckCircle2 size={18} color="#2E7D32" />
+            <CheckCircle2 size={18} color="#059669" />
             <span>{syncNotice}</span>
           </div>
         )}
@@ -374,7 +374,7 @@ export const GeneratorTagihan = () => {
               background: "#F0F7FF",
               borderRadius: 10,
               padding: "14px 18px",
-              border: `1px solid #BBDEFB`,
+              border: `1px solid #BFDBFE`,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center"
@@ -393,7 +393,7 @@ export const GeneratorTagihan = () => {
                 </div>
               </div>
             </div>
-            <span style={{ fontSize: 11.5, fontWeight: 700, padding: "4px 10px", borderRadius: 20, background: "#E3F2FD", color: COLORS.blueDark }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, padding: "4px 10px", borderRadius: 20, background: "#EFF6FF", color: COLORS.blueDark }}>
               Terbentuk Otomatis
             </span>
           </div>
@@ -411,7 +411,7 @@ export const GeneratorTagihan = () => {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: "#E65100", color: COLORS.white, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: "#B45309", color: COLORS.white, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Clock size={18} />
               </div>
               <div>
@@ -423,7 +423,7 @@ export const GeneratorTagihan = () => {
                 </div>
               </div>
             </div>
-            <span style={{ fontSize: 11.5, fontWeight: 700, padding: "4px 10px", borderRadius: 20, background: "#FFF3E0", color: "#E65100" }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, padding: "4px 10px", borderRadius: 20, background: "#FFFBEB", color: "#B45309" }}>
               Terbentuk Otomatis
             </span>
           </div>
@@ -524,9 +524,9 @@ export const GeneratorTagihan = () => {
                         height: 44,
                         borderRadius: 10,
                         background:
-                          t.jenis.includes("THT") ? "#E3F2FD" : t.jenis === "JKK" ? "#FFF3E0" : "#F3E5F5",
+                          t.jenis.includes("THT") ? "#EFF6FF" : t.jenis === "JKK" ? "#FFFBEB" : "#F3E5F5",
                         color:
-                          t.jenis.includes("THT") ? COLORS.blueDark : t.jenis === "JKK" ? COLORS.orange : "#7B1FA2",
+                          t.jenis.includes("THT") ? COLORS.blueDark : t.jenis === "JKK" ? COLORS.orange : "#7C3AED",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center"
@@ -660,7 +660,7 @@ export const GeneratorTagihan = () => {
                       </div>
                       <div style={{ padding: "12px 14px", background: t.tglTTD ? COLORS.greenLight : COLORS.yellowLight, borderRadius: 8 }}>
                         <div style={{ fontSize: 11, color: COLORS.gray500 }}>✍️ Tanda Tangan Kadiv</div>
-                        <div style={{ fontWeight: 700, color: t.tglTTD ? COLORS.green : "#F57F17", marginTop: 2 }}>
+                        <div style={{ fontWeight: 700, color: t.tglTTD ? COLORS.green : "#B45309", marginTop: 2 }}>
                           {t.tglTTD || "Menunggu TTD"}
                         </div>
                       </div>
@@ -674,7 +674,7 @@ export const GeneratorTagihan = () => {
                       </div>
                       <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
                         <thead>
-                          <tr style={{ background: "#EDF2F7", color: COLORS.gray700 }}>
+                          <tr style={{ background: "#F8FAFC", color: COLORS.gray700 }}>
                             <th style={{ padding: "6px 10px", textAlign: "left", borderRadius: "4px 0 0 4px" }}>Item Iuran</th>
                             <th style={{ padding: "6px 10px", textAlign: "right" }}>Jumlah Peserta</th>
                             <th style={{ padding: "6px 10px", textAlign: "right", borderRadius: "0 4px 4px 0" }}>Nominal</th>
@@ -756,7 +756,7 @@ export const GeneratorTagihan = () => {
                     )}
 
                     {/* Postal Notification Note */}
-                    <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#F57F17", display: "flex", gap: 8, marginBottom: 14 }}>
+                    <div style={{ background: COLORS.yellowLight, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#B45309", display: "flex", gap: 8, marginBottom: 14 }}>
                       <Mail size={15} style={{ flexShrink: 0, marginTop: 2 }} />
                       <span>SOP Dinas: Surat tagihan fisik yang sudah ditandatangani asli dikirimkan ke Direktorat Jenderal Perbendaharaan Kemenkeu melalui ekspedisi pos kedinasan.</span>
                     </div>

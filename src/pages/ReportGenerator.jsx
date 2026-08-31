@@ -609,7 +609,7 @@ export const ReportGenerator = () => {
                 padding: "8px 16px",
                 borderRadius: 6,
                 border: "none",
-                background: "#B71C1C",
+                background: "#BE123C",
                 color: COLORS.white,
                 fontSize: 13,
                 fontWeight: 700,

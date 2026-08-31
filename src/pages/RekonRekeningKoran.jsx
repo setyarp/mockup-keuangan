@@ -587,25 +587,25 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5, whiteSpace: "nowrap" }}>
               {/* Level 1 Header: Dual Block Categories */}
               <thead>
-                <tr style={{ background: "#0F172A", color: COLORS.white }}>
-                  <th colSpan={8} style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, background: "#1E293B", borderRight: "2px solid #64748B", letterSpacing: 0.5, fontSize: 12 }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                  <th colSpan={8} style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, background: "#F8FAFC", borderRight: "2px solid #CBD5E1", letterSpacing: 0.5, fontSize: 12 }}>
                     🏦 DATA DARI CMS MITRA BAYAR (REKENING KORAN ASLI)
                   </th>
-                  <th colSpan={13} style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, background: "#0D3B7A", letterSpacing: 0.5, fontSize: 12 }}>
+                  <th colSpan={13} style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, background: "#F8FAFC", letterSpacing: 0.5, fontSize: 12 }}>
                     ✨ DATA HASIL MAPPING DENGAN YANDU (STANDAR DIVISI)
                   </th>
                 </tr>
                 {/* Level 2 Header: Individual Columns */}
-                <tr style={{ background: "#334155", color: COLORS.white }}>
+                <tr style={{ background: "#F1F5F9", color: "#64748B" }}>
                   {/* Left Block Cols */}
                   {["No.", "Tanggal Bayar", "Trans Description", "Debet (Rp)", "Credit (Rp)", "Ledger Balance (Rp)", "User ID", "Mitra Bayar"].map((c, i) => (
-                    <th key={`l-${i}`} style={{ padding: "9px 10px", textAlign: i === 3 || i === 4 || i === 5 ? "right" : "left", fontWeight: 700, borderRight: i === 7 ? "2px solid #64748B" : "1px solid #475569" }}>
+                    <th key={`l-${i}`} style={{ padding: "9px 10px", textAlign: i === 3 || i === 4 || i === 5 ? "right" : "left", fontWeight: 800, borderRight: i === 7 ? "2px solid #CBD5E1" : "1px solid #CBD5E1" }}>
                       {c}
                     </th>
                   ))}
                   {/* Right Block Cols */}
                   {["NOMOR KTPA", "SKS / DB", "UDW / DK", "BP / GUGUR", "BEASISWA", "JUMLAH DITERIMA", "NO SP", "TGL SP", "NO DPS", "TGL DPS", "KODE BAYAR", "KANCAB", "STATUS / AKSI"].map((c, i) => (
-                    <th key={`r-${i}`} style={{ padding: "9px 10px", textAlign: i >= 1 && i <= 5 ? "right" : "left", fontWeight: 700, borderRight: i < 12 ? "1px solid #475569" : "none" }}>
+                    <th key={`r-${i}`} style={{ padding: "9px 10px", textAlign: i >= 1 && i <= 5 ? "right" : "left", fontWeight: 800, borderRight: i < 12 ? "1px solid #CBD5E1" : "none" }}>
                       {c}
                     </th>
                   ))}
@@ -695,7 +695,7 @@ export const RekonRekeningKoran = ({ initialTab = "semua" }) => {
           <div style={{ display: "flex", gap: 12 }}>
             <span><strong style={{ color: COLORS.blue }}>■</strong> Dropping Dana</span>
             <span><strong style={{ color: COLORS.green }}>■</strong> Pembayaran Manfaat / Setoran Balik</span>
-            <span><strong style={{ color: "#F57F17" }}>■</strong> Jasa Giro</span>
+            <span><strong style={{ color: "#B45309" }}>■</strong> Jasa Giro</span>
           </div>
         </div>
       </div>

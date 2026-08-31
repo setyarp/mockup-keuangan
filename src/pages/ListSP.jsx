@@ -723,12 +723,12 @@ export const ListSP = () => {
 
   const getUnorBadgeStyle = (u) => {
     switch (u) {
-      case "TNI AD": return { bg: "#E8F5E9", text: "#2E7D32", border: "#C8E6C9" };
+      case "TNI AD": return { bg: "#ECFDF5", text: "#059669", border: "#C8E6C9" };
       case "TNI AL": return { bg: "#E1F5FE", text: "#0277BD", border: "#B3E5FC" };
-      case "TNI AU": return { bg: "#E0F7FA", text: "#00838F", border: "#B2EBF2" };
+      case "TNI AU": return { bg: "#E0F7FA", text: "#0891B2", border: "#B2EBF2" };
       case "POLRI": return { bg: "#EDE7F6", text: "#512DA8", border: "#D1C4E9" };
-      case "MABES TNI": return { bg: "#FFF3E0", text: "#E65100", border: "#FFE0B2" };
-      case "KEMHAN": return { bg: "#F3E5F5", text: "#7B1FA2", border: "#E1BEE7" };
+      case "MABES TNI": return { bg: "#FFFBEB", text: "#B45309", border: "#FFE0B2" };
+      case "KEMHAN": return { bg: "#F3E5F5", text: "#7C3AED", border: "#E1BEE7" };
       default: return { bg: "#F1F5F9", text: "#475569", border: "#CBD5E1" };
     }
   };
@@ -1135,7 +1135,7 @@ export const ListSP = () => {
                 width: 34,
                 height: 34,
                 borderRadius: 8,
-                background: "#E3F2FD",
+                background: "#EFF6FF",
                 color: COLORS.blue,
                 display: "flex",
                 alignItems: "center",
@@ -1868,17 +1868,17 @@ export const ListSP = () => {
                 }}
               >
                 <thead>
-                  <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                     {columnsList.map((c, i) => (
                       <th
                         key={i}
                         style={{
                           padding: "11px 12px",
                           textAlign: i >= 8 && i <= 10 ? "right" : i === 0 || i === 13 ? "center" : "left",
-                          fontWeight: 700,
-                          color: COLORS.white,
-                          borderBottom: `1px solid #334155`,
-                          borderRight: i < columnsList.length - 1 ? "1px solid #334155" : "none",
+                          fontWeight: 800,
+                          color: "#64748B",
+                          borderBottom: `1px solid #E2E8F0`,
+                          borderRight: i < columnsList.length - 1 ? "1px solid #E2E8F0" : "none",
                         }}
                       >
                         {c}

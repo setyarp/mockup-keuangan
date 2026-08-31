@@ -96,7 +96,7 @@ export const KalkulatorIuran = () => {
         {showCol("THT") && <StatCard icon={<BarChart3 size={IC} />} label="Total Iuran THT" value={`Rp ${totalTHT.toFixed(2)} M`} sub="3,25% × (GP+T.Istri+T.Anak)" color={COLORS.blue} />}
         {showCol("Pensiun") && <StatCard icon={<BarChart3 size={IC} />} label="Total Iuran Pensiun" value={`Rp ${totalPensiun.toFixed(2)} M`} sub="4,75% × (GP+T.Istri+T.Anak)" color={COLORS.green} />}
         {showCol("JKK") && <StatCard icon={<Shield size={IC} />} label="Total Iuran JKK" value={`Rp ${totalJKK.toFixed(2)} M`} sub="0,24% × (GP+T.Istri+T.Anak)" color={COLORS.orange} />}
-        {showCol("JKm") && <StatCard icon={<Lock size={IC} />} label="Total Iuran JKm" value={`Rp ${totalJKM.toFixed(2)} M`} sub="0,20% × (GP+T.Istri+T.Anak)" color="#7B1FA2" />}
+        {showCol("JKm") && <StatCard icon={<Lock size={IC} />} label="Total Iuran JKm" value={`Rp ${totalJKM.toFixed(2)} M`} sub="0,20% × (GP+T.Istri+T.Anak)" color="#7C3AED" />}
       </div>
 
       {/* Panel 1: Filter Tampilan Rekap Tabel */}
@@ -276,16 +276,16 @@ export const KalkulatorIuran = () => {
               id: "TNI",
               name: "TENTARA NASIONAL INDONESIA (TNI)",
               bgColor: "#1B5E20",
-              badgeBg: "#E8F5E9",
-              badgeColor: "#2E7D32",
+              badgeBg: "#ECFDF5",
+              badgeColor: "#059669",
               items: satkerData.filter(s => s.kode.startsWith("TNI"))
             },
             {
               id: "POLRI",
               name: "KEPOLISIAN NEGARA REPUBLIK INDONESIA (POLRI)",
               bgColor: "#0D47A1",
-              badgeBg: "#E3F2FD",
-              badgeColor: "#1565C0",
+              badgeBg: "#EFF6FF",
+              badgeColor: "#0141A8",
               items: satkerData.filter(s => s.kode.includes("POLRI"))
             },
             {
@@ -357,7 +357,7 @@ export const KalkulatorIuran = () => {
           });
         })()}
 
-        <div style={{ marginTop: 16, padding: "14px 16px", background: "#E3F2FD", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ marginTop: 16, padding: "14px 16px", background: "#EFF6FF", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontWeight: 700, fontSize: 15, color: COLORS.blueDark }}>Grand Total {filterSatker !== "Semua" ? filterSatker : "Seluruh Instansi & Satker"} {filterJenis !== "Semua" ? `(${filterJenis})` : ""}</span>
           <span style={{ fontWeight: 800, fontSize: 20, color: COLORS.blueDark }}>Rp {((showCol("THT") ? totalTHT : 0) + (showCol("Pensiun") ? totalPensiun : 0) + (showCol("JKK") ? totalJKK : 0) + (showCol("JKm") ? totalJKM : 0)).toFixed(2)} M</span>
         </div>

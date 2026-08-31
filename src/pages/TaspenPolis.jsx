@@ -1060,7 +1060,7 @@ export const TaspenPolis = () => {
                 /* TABEL 1: FORMAT STANDAR BRD V5 (Line 772-779) */
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
-                    <tr style={{ background: "#0F172A", color: COLORS.white }}>
+                    <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                       {[
                         "No.",
                         "Nomor Polis",
@@ -1080,10 +1080,10 @@ export const TaspenPolis = () => {
                           style={{
                             padding: "10px 11px",
                             textAlign: i === 5 || i === 6 || i === 10 ? "right" : "left",
-                            fontWeight: 700,
-                            color: COLORS.white,
-                            borderBottom: `1px solid #334155`,
-                            borderRight: i < 11 ? "1px solid #334155" : "none",
+                            fontWeight: 800,
+                            color: "#64748B",
+                            borderBottom: `1px solid #E2E8F0`,
+                            borderRight: i < 11 ? "1px solid #E2E8F0" : "none",
                             whiteSpace: "nowrap",
                             fontSize: 11.5,
                           }}
@@ -1255,7 +1255,7 @@ export const TaspenPolis = () => {
                 /* TABEL 2: FORMAT TABEL 5 BRS (Kepesertaan Cabang) */
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
-                    <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                    <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                       {[
                         "Cabang",
                         "No. KTPA",
@@ -1275,10 +1275,10 @@ export const TaspenPolis = () => {
                           style={{
                             padding: "10px 11px",
                             textAlign: i === 9 ? "right" : "left",
-                            fontWeight: 700,
-                            color: COLORS.white,
-                            borderBottom: `1px solid #334155`,
-                            borderRight: i < 11 ? "1px solid #334155" : "none",
+                            fontWeight: 800,
+                            color: "#64748B",
+                            borderBottom: `1px solid #E2E8F0`,
+                            borderRight: i < 11 ? "1px solid #E2E8F0" : "none",
                             whiteSpace: "nowrap",
                             fontSize: 11.5,
                           }}
@@ -1665,8 +1665,8 @@ export const TaspenPolis = () => {
                         <thead>
                           <tr
                             style={{
-                              background: "#334155",
-                              color: COLORS.white,
+                              background: "#F1F5F9",
+                              color: "#64748B",
                             }}
                           >
                             {[
@@ -1681,11 +1681,11 @@ export const TaspenPolis = () => {
                                 style={{
                                   padding: "9px 12px",
                                   textAlign: k >= 2 ? "right" : "left",
-                                  fontWeight: 700,
-                                  color: COLORS.white,
-                                  borderBottom: `1px solid #475569`,
+                                  fontWeight: 800,
+                                  color: "#64748B",
+                                  borderBottom: `1px solid #CBD5E1`,
                                   borderRight:
-                                    k < 4 ? "1px solid #475569" : "none",
+                                    k < 4 ? "1px solid #CBD5E1" : "none",
                                 }}
                               >
                                 {c}
@@ -1765,8 +1765,8 @@ export const TaspenPolis = () => {
                           ))}
                           <tr
                             style={{
-                              background: "#0F172A",
-                              color: COLORS.white,
+                              background: "#F8FAFC", borderTop: "2px solid #E2E8F0",
+                              color: "#1E293B",
                               fontWeight: 800,
                             }}
                           >
@@ -1774,7 +1774,7 @@ export const TaspenPolis = () => {
                               colSpan={2}
                               style={{
                                 padding: "10px 12px",
-                                color: COLORS.white,
+                                color: "#1E293B",
                               }}
                             >
                               Total {sec.title.split("(")[1]?.replace(")", "")}
@@ -1783,7 +1783,7 @@ export const TaspenPolis = () => {
                               style={{
                                 padding: "10px 12px",
                                 textAlign: "right",
-                                color: "#93C5FD",
+                                color: "#1D4ED8",
                               }}
                             >
                               {totPeserta.toLocaleString("id-ID")}
@@ -1793,7 +1793,7 @@ export const TaspenPolis = () => {
                                 padding: "10px 12px",
                                 textAlign: "right",
                                 fontFamily: "monospace",
-                                color: COLORS.white,
+                                color: "#1E293B",
                               }}
                             >
                               {fmt(totPremi)}
@@ -1803,7 +1803,7 @@ export const TaspenPolis = () => {
                                 padding: "10px 12px",
                                 textAlign: "right",
                                 fontFamily: "monospace",
-                                color: "#86EFAC",
+                                color: "#047857",
                                 fontSize: 13,
                               }}
                             >
@@ -1958,7 +1958,7 @@ export const TaspenPolis = () => {
                 borderRadius: 12,
                 padding: "40px 24px",
                 textAlign: "center",
-                background: dragOver ? "#E3F2FD" : COLORS.gray50,
+                background: dragOver ? "#EFF6FF" : COLORS.gray50,
                 cursor: "pointer",
               }}
             >

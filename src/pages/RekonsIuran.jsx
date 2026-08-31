@@ -216,11 +216,11 @@ export const RekonsIuran = () => {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
-            <div style={{ background: "#E3F2FD", borderRadius: 8, padding: 16, textAlign: "center" }}>
+            <div style={{ background: "#EFF6FF", borderRadius: 8, padding: 16, textAlign: "center" }}>
               <div style={{ fontSize: 12, color: COLORS.gray700, marginBottom: 4 }}>Total Target Realisasi ({filterJenis})</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: COLORS.blue }}>{fmtB(totalSistem)}</div>
             </div>
-            <div style={{ background: "#E8F5E9", borderRadius: 8, padding: 16, textAlign: "center" }}>
+            <div style={{ background: "#ECFDF5", borderRadius: 8, padding: 16, textAlign: "center" }}>
               <div style={{ fontSize: 12, color: COLORS.gray700, marginBottom: 4 }}>Total SKP-PFK Kemenkeu</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: COLORS.green }}>{fmtB(totalSKP)}</div>
             </div>
@@ -283,11 +283,11 @@ export const RekonsIuran = () => {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
-            <div style={{ background: "#FFF3E0", borderRadius: 8, padding: 16, textAlign: "center" }}>
+            <div style={{ background: "#FFFBEB", borderRadius: 8, padding: 16, textAlign: "center" }}>
               <div style={{ fontSize: 12, color: COLORS.gray700, marginBottom: 4 }}>Total Realisasi Penerimaan (JKK+JKm)</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: COLORS.orange }}>{fmtB(totalRealJKKCombined)}</div>
             </div>
-            <div style={{ background: "#E3F2FD", borderRadius: 8, padding: 16, textAlign: "center" }}>
+            <div style={{ background: "#EFF6FF", borderRadius: 8, padding: 16, textAlign: "center" }}>
               <div style={{ fontSize: 12, color: COLORS.gray700, marginBottom: 4 }}>Total Potensi Data Kepesertaan</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: COLORS.blue }}>{fmtB(totalPotensiKepesertaan)}</div>
             </div>

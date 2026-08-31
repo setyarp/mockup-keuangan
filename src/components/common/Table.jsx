@@ -1,22 +1,33 @@
 import { COLORS } from "../../constants/colors";
 
+// Mengikuti DataTable.tsx di FE: kepala tabel terang (slate-50) dengan teks
+// kecil huruf besar, tanpa zebra dan tanpa garis vertikal — hanya pemisah
+// baris tipis dan sorot saat kursor lewat.
 export const Table = ({ columns, data, alignRightCols = [] }) => (
-  <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+  <div
+    style={{
+      overflowX: "auto",
+      borderRadius: 12,
+      border: `1px solid ${COLORS.gray200}`,
+      background: COLORS.white,
+      boxShadow: "0 1px 2px rgba(15,23,42,0.05)",
+    }}
+  >
+    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
       <thead>
-        <tr style={{ background: "#1E293B", color: COLORS.white }}>
+        <tr style={{ background: COLORS.gray50, borderBottom: `1px solid ${COLORS.gray200}` }}>
           {columns.map((c, i) => (
             <th
               key={i}
               style={{
-                padding: "11px 14px",
+                padding: "11px 16px",
                 textAlign: alignRightCols.includes(i) ? "right" : "left",
-                fontWeight: 700,
-                color: COLORS.white,
-                borderBottom: "1px solid #334155",
-                borderRight: i < columns.length - 1 ? "1px solid #334155" : "none",
+                fontWeight: 800,
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                color: COLORS.gray500,
                 whiteSpace: "nowrap",
-                letterSpacing: 0.2
               }}
             >
               {c}
@@ -29,22 +40,22 @@ export const Table = ({ columns, data, alignRightCols = [] }) => (
           <tr
             key={i}
             style={{
-              borderBottom: `1px solid #E2E8F0`,
-              background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF",
-              transition: "background 0.15s ease"
+              borderBottom: `1px solid ${COLORS.gray100}`,
+              background: COLORS.white,
+              transition: "background 0.15s ease",
             }}
-            onMouseEnter={e => e.currentTarget.style.background = "#F1F5F9"}
-            onMouseLeave={e => e.currentTarget.style.background = i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(248,250,252,0.9)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.white)}
           >
             {row.map((cell, j) => (
               <td
                 key={j}
                 style={{
-                  padding: "10px 14px",
-                  color: "#0F172A",
-                  borderRight: j < row.length - 1 ? "1px solid #E2E8F0" : "none",
+                  padding: "13px 16px",
+                  color: COLORS.gray700,
+                  fontWeight: 600,
                   textAlign: alignRightCols.includes(j) ? "right" : "left",
-                  fontSize: 12.5
+                  fontSize: 12,
                 }}
               >
                 {cell}

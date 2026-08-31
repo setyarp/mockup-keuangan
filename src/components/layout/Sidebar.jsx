@@ -29,6 +29,8 @@ export const Sidebar = ({
         borderRight: `1px solid ${COLORS.gray200}`,
         overflowY: "auto",
         flexShrink: 0,
+        padding: "0 12px",
+        userSelect: "none",
       }}
     >
       {MENU.map((section, si) => (
@@ -36,11 +38,11 @@ export const Sidebar = ({
           {/* Section Header */}
           <div
             style={{
-              padding: "8px 20px 6px",
+              padding: "8px 10px 6px",
               fontSize: 10,
-              fontWeight: 800,
+              fontWeight: 700,
               color: COLORS.gray400,
-              letterSpacing: 1.2,
+              letterSpacing: 0.8,
               textTransform: "uppercase",
             }}
           >
@@ -60,19 +62,20 @@ export const Sidebar = ({
                     alignItems: "center",
                     gap: 10,
                     width: "100%",
-                    padding: "9px 20px",
+                    padding: isActive ? "9px 10px 9px 6px" : "8px 10px",
                     border: "none",
                     cursor: "pointer",
-                    fontSize: 13,
+                    fontSize: 12,
                     textAlign: "left",
-                    transition: "all 0.18s ease",
-                    background: isActive ? "#E3F2FD" : "transparent",
-                    color: isActive ? COLORS.blue : COLORS.gray700,
-                    fontWeight: isActive ? 700 : 400,
-                    borderLeft: isActive ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+                    transition: "background 0.12s ease, color 0.12s ease",
+                    background: isActive ? "rgba(239,246,255,0.8)" : "transparent",
+                    color: isActive ? "#1E40AF" : COLORS.gray700,
+                    fontWeight: isActive ? 700 : 600,
+                    borderLeft: isActive ? `4px solid ${COLORS.blueLight}` : "none",
+                    borderRadius: isActive ? "0 8px 8px 0" : 8,
                   }}
                   onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.background = "#F1F5F9";
+                    if (!isActive) e.currentTarget.style.background = COLORS.gray50;
                   }}
                   onMouseLeave={(e) => {
                     if (!isActive) e.currentTarget.style.background = "transparent";
@@ -85,7 +88,7 @@ export const Sidebar = ({
                       transition: "transform 0.15s ease",
                     }}
                   >
-                    {renderIcon(item.icon, 16, isActive ? COLORS.blue : COLORS.gray500)}
+                    {renderIcon(item.icon, 16, isActive ? COLORS.blue : COLORS.gray400)}
                   </span>
                   <span>{item.label}</span>
                 </button>
@@ -106,23 +109,25 @@ export const Sidebar = ({
                     alignItems: "center",
                     justifyContent: "space-between",
                     width: "100%",
-                    padding: "9px 20px",
+                    padding: "8px 10px",
                     border: "none",
                     cursor: "pointer",
-                    fontSize: 13,
+                    fontSize: 12,
                     textAlign: "left",
-                    background: "transparent",
-                    transition: "all 0.18s ease",
-                    color: hasActiveChild ? COLORS.blue : COLORS.gray700,
-                    fontWeight: hasActiveChild ? 700 : 500,
-                    borderLeft: "3px solid transparent",
+                    background: hasActiveChild ? COLORS.gray50 : "transparent",
+                    transition: "background 0.12s ease, color 0.12s ease",
+                    color: hasActiveChild ? "#1E40AF" : COLORS.gray700,
+                    fontWeight: hasActiveChild ? 700 : 600,
+                    borderRadius: 8,
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.gray50)}
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = hasActiveChild ? COLORS.gray50 : "transparent")
+                  }
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ display: "flex", opacity: hasActiveChild ? 1 : 0.6 }}>
-                      {renderIcon(item.icon, 16, hasActiveChild ? COLORS.blue : COLORS.gray500)}
+                      {renderIcon(item.icon, 16, hasActiveChild ? COLORS.blue : COLORS.gray400)}
                     </span>
                     <span>{item.label}</span>
                   </div>
@@ -138,7 +143,14 @@ export const Sidebar = ({
 
                 {/* Children */}
                 {isExpanded && (
-                  <div style={{ overflow: "hidden" }}>
+                  <div
+                    style={{
+                      overflow: "hidden",
+                      marginLeft: 16,
+                      paddingLeft: 8,
+                      borderLeft: `1px solid ${COLORS.gray100}`,
+                    }}
+                  >
                     {item.children.map((child, ci) => {
                       const isActive = activePage === child.id;
                       const isDisabled = child.disabled;
@@ -151,20 +163,20 @@ export const Sidebar = ({
                             alignItems: "center",
                             gap: 8,
                             width: "100%",
-                            padding: "7px 20px 7px 48px",
+                            padding: "7px 10px",
                             border: "none",
                             cursor: isDisabled ? "not-allowed" : "pointer",
-                            fontSize: 12.5,
+                            fontSize: 12,
                             textAlign: "left",
-                            transition: "all 0.18s ease",
-                            background: isActive ? "#E3F2FD" : "transparent",
-                            color: isDisabled ? COLORS.gray400 : isActive ? COLORS.blue : COLORS.gray600,
-                            fontWeight: isActive ? 700 : 400,
+                            transition: "background 0.12s ease, color 0.12s ease",
+                            background: isActive ? "rgba(239,246,255,0.8)" : "transparent",
+                            color: isDisabled ? COLORS.gray400 : isActive ? "#1E40AF" : COLORS.gray700,
+                            fontWeight: isActive ? 700 : 600,
                             opacity: isDisabled ? 0.5 : 1,
-                            borderLeft: isActive ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+                            borderRadius: 8,
                           }}
                           onMouseEnter={(e) => {
-                            if (!isActive && !isDisabled) e.currentTarget.style.background = "#F8FAFC";
+                            if (!isActive && !isDisabled) e.currentTarget.style.background = COLORS.gray50;
                           }}
                           onMouseLeave={(e) => {
                             if (!isActive && !isDisabled) e.currentTarget.style.background = "transparent";
@@ -172,10 +184,11 @@ export const Sidebar = ({
                         >
                           <span
                             style={{
-                              width: 4,
-                              height: 4,
+                              width: 6,
+                              height: 6,
                               borderRadius: "50%",
-                              background: isDisabled ? COLORS.gray300 : isActive ? COLORS.blue : COLORS.gray400,
+                              margin: "0 6px",
+                              background: isDisabled ? COLORS.gray200 : isActive ? COLORS.blueLight : COLORS.gray300,
                               flexShrink: 0,
                             }}
                           />
@@ -205,7 +218,7 @@ export const Sidebar = ({
           })}
 
           {/* Section divider */}
-          {si < MENU.length - 1 && <div style={{ margin: "8px 20px", borderBottom: `1px solid ${COLORS.gray200}` }} />}
+          {si < MENU.length - 1 && <div style={{ margin: "8px 10px", borderBottom: `1px solid ${COLORS.gray100}` }} />}
         </div>
       ))}
     </div>

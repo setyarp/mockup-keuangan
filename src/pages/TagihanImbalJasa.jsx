@@ -188,9 +188,9 @@ export const TagihanImbalJasa = () => {
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                   {["No. Tagihan", "Mitra Bayar", "Program", "Jenis Imbal Jasa", "Periode", "Tgl. Terbit", "Jatuh Tempo", "Tgl. Dibayar", "Status", "Aksi"].map((c, i) => (
-                    <th key={i} style={{ padding: "11px 14px", textAlign: "left", fontWeight: 700, color: COLORS.white, borderBottom: `1px solid #334155`, borderRight: i < 9 ? "1px solid #334155" : "none", whiteSpace: "nowrap" }}>{c}</th>
+                    <th key={i} style={{ padding: "11px 14px", textAlign: "left", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: i < 9 ? "1px solid #E2E8F0" : "none", whiteSpace: "nowrap" }}>{c}</th>
                   ))}
                 </tr>
               </thead>

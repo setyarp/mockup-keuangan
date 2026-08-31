@@ -234,7 +234,7 @@ export const RekapUKP = () => {
 
                 <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray800, marginBottom: 10 }}>Ringkasan Penerimaan UKP</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-                  <div style={{ padding: 12, background: "#E3F2FD", borderRadius: 8, textAlign: "center" }}>
+                  <div style={{ padding: 12, background: "#EFF6FF", borderRadius: 8, textAlign: "center" }}>
                     <div style={{ fontSize: 11, color: COLORS.blue }}>Bln. Diterima</div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.blueDark }}>{d.blnDiterima} Bulan</div>
                   </div>
@@ -252,11 +252,11 @@ export const RekapUKP = () => {
                 <div style={{ border: `1px solid #CBD5E1`, borderRadius: 8, overflow: "hidden" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                     <thead>
-                      <tr style={{ background: "#1E293B", color: COLORS.white }}>
-                        <th style={{ padding: "8px 12px", textAlign: "left", color: COLORS.white, borderRight: "1px solid #334155" }}>Bulan</th>
-                        <th style={{ padding: "8px 12px", textAlign: "right", color: COLORS.white, borderRight: "1px solid #334155" }}>Penghasilan Bruto</th>
-                        <th style={{ padding: "8px 12px", textAlign: "right", color: COLORS.white, borderRight: "1px solid #334155" }}>Pengembalian</th>
-                        <th style={{ padding: "8px 12px", textAlign: "right", color: COLORS.white }}>UKP Neto</th>
+                      <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                        <th style={{ padding: "8px 12px", textAlign: "left", color: "#64748B", borderRight: "1px solid #E2E8F0" }}>Bulan</th>
+                        <th style={{ padding: "8px 12px", textAlign: "right", color: "#64748B", borderRight: "1px solid #E2E8F0" }}>Penghasilan Bruto</th>
+                        <th style={{ padding: "8px 12px", textAlign: "right", color: "#64748B", borderRight: "1px solid #E2E8F0" }}>Pengembalian</th>
+                        <th style={{ padding: "8px 12px", textAlign: "right", color: "#64748B" }}>UKP Neto</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -337,9 +337,9 @@ export const RekapUKP = () => {
           <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                   {["No.", "NIK", "NRP/Nopens", "Nama", "Kode Jiwa", "Jabatan / Pangkat", "Jenis UKP", "Bln. Diterima", "Bln. Dikembalikan", "PTKP", "Total UKP Neto Bulan Ini", "UKP Kumulatif Tahun Ini", "Aksi"].map((c, i) => (
-                    <th key={i} style={{ padding: "11px 12px", textAlign: i >= 10 && i <= 11 ? "right" : "left", fontWeight: 700, color: COLORS.white, borderBottom: `1px solid #334155`, borderRight: i < 12 ? "1px solid #334155" : "none", whiteSpace: "nowrap" }}>{c}</th>
+                    <th key={i} style={{ padding: "11px 12px", textAlign: i >= 10 && i <= 11 ? "right" : "left", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: i < 12 ? "1px solid #E2E8F0" : "none", whiteSpace: "nowrap" }}>{c}</th>
                   ))}
                 </tr>
               </thead>

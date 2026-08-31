@@ -2,13 +2,13 @@ import { COLORS } from "../../constants/colors";
 
 export const Btn = ({ children, variant = "primary", onClick, size = "md", style, disabled, ...props }) => {
   const styles = {
-    primary: { background: COLORS.blue, color: COLORS.white, border: "none", hoverBg: COLORS.blueDark, shadow: "0 2px 6px rgba(21,101,192,0.25)" },
-    outline: { background: "transparent", color: COLORS.blue, border: `1px solid ${COLORS.blue}`, hoverBg: "#E3F2FD", shadow: "0 2px 4px rgba(21,101,192,0.12)" },
-    danger: { background: COLORS.red, color: COLORS.white, border: "none", hoverBg: "#B71C1C", shadow: "0 2px 6px rgba(198,40,40,0.25)" },
-    ghost: { background: "transparent", color: COLORS.gray700, border: `1px solid ${COLORS.gray300}`, hoverBg: "#F1F5F9", shadow: "0 1px 3px rgba(0,0,0,0.06)" }
+    primary: { background: COLORS.blue, color: COLORS.white, border: "1px solid transparent", hoverBg: "#1E40AF", shadow: "0 1px 2px rgba(15,23,42,0.05)" },
+    outline: { background: COLORS.white, color: COLORS.blue, border: `1px solid #BFDBFE`, hoverBg: "#EFF6FF", shadow: "0 1px 2px rgba(15,23,42,0.05)" },
+    danger: { background: COLORS.red, color: COLORS.white, border: "1px solid transparent", hoverBg: "#BE123C", shadow: "0 1px 2px rgba(15,23,42,0.05)" },
+    ghost: { background: COLORS.white, color: COLORS.gray700, border: `1px solid ${COLORS.gray300}`, hoverBg: COLORS.gray50, shadow: "0 1px 2px rgba(15,23,42,0.05)" }
   };
   const s = styles[variant] || styles.primary;
-  const pd = size === "sm" ? "6px 12px" : "8px 18px";
+  const pd = size === "sm" ? "6px 14px" : "9px 16px";
   return (
     <button
       onClick={onClick}
@@ -16,9 +16,10 @@ export const Btn = ({ children, variant = "primary", onClick, size = "md", style
       style={{
         ...s,
         padding: pd,
-        borderRadius: 6,
-        fontSize: size === "sm" ? 12 : 13,
-        fontWeight: 600,
+        borderRadius: size === "sm" ? 8 : 10,
+        fontSize: size === "sm" ? 11 : 12,
+        fontWeight: 800,
+        letterSpacing: -0.1,
         cursor: disabled ? "not-allowed" : "pointer",
         display: "inline-flex",
         alignItems: "center",

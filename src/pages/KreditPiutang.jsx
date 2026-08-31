@@ -372,7 +372,7 @@ export const KreditPiutang = () => {
           <div style={{ overflowX: "auto", borderRadius: 6, border: `1px solid #CBD5E1` }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                   {[
                     "No",
                     "No. Ref Kasus",
@@ -393,10 +393,10 @@ export const KreditPiutang = () => {
                       style={{
                         padding: "10px 12px",
                         textAlign: [5, 11, 12].includes(i) ? "right" : [0, 6, 7, 8, 9, 10].includes(i) ? "center" : "left",
-                        fontWeight: 700,
-                        color: COLORS.white,
-                        borderBottom: `1px solid #334155`,
-                        borderRight: i < 12 ? "1px solid #334155" : "none",
+                        fontWeight: 800,
+                        color: "#64748B",
+                        borderBottom: `1px solid #E2E8F0`,
+                        borderRight: i < 12 ? "1px solid #E2E8F0" : "none",
                         whiteSpace: "nowrap"
                       }}
                     >

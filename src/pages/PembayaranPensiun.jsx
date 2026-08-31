@@ -669,20 +669,20 @@ export const PembayaranPensiun = () => {
                     <div style={{ overflowX: "auto" }}>
                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                         <thead>
-                          <tr style={{ background: "#1E293B", color: COLORS.white }}>
-                            <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, color: COLORS.white, width: 220, borderRight: `1px solid #334155` }}>JENIS PENSIUN</th>
-                            <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 700, color: COLORS.white, width: 170, borderRight: `1px solid #334155` }}>JUMLAH JIWA</th>
-                            <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 700, color: COLORS.white, width: 210, borderRight: `1px solid #334155` }}>JUMLAH BRUTO</th>
-                            <th colSpan={6} style={{ padding: "8px 10px", textAlign: "center", fontWeight: 700, color: COLORS.white, borderBottom: `1px solid #334155`, borderRight: `1px solid #334155` }}>POTONGAN</th>
-                            <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#93C5FD", width: 160 }}>JUMLAH NETTO</th>
+                          <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                            <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 220, borderRight: `1px solid #E2E8F0` }}>JENIS PENSIUN</th>
+                            <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 170, borderRight: `1px solid #E2E8F0` }}>JUMLAH JIWA</th>
+                            <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 210, borderRight: `1px solid #E2E8F0` }}>JUMLAH BRUTO</th>
+                            <th colSpan={6} style={{ padding: "8px 10px", textAlign: "center", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: `1px solid #E2E8F0` }}>POTONGAN</th>
+                            <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#1D4ED8", width: 160 }}>JUMLAH NETTO</th>
                           </tr>
-                          <tr style={{ background: "#334155", color: "#F8FAFC", fontSize: 11 }}>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>PPh 21</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>ASKES</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>TGR</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>NON TGR</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>Lain-Lain</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 700, color: "#FCA5A5", borderRight: `1px solid #475569` }}>Jumlah</th>
+                          <tr style={{ background: "#F1F5F9", color: "#475569", fontSize: 11 }}>
+                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>PPh 21</th>
+                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>ASKES</th>
+                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>TGR</th>
+                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>NON TGR</th>
+                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>Lain-Lain</th>
+                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 800, color: "#BE123C", borderRight: `1px solid #CBD5E1` }}>Jumlah</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -759,20 +759,20 @@ export const PembayaranPensiun = () => {
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                     <thead>
-                      <tr style={{ background: "#1E293B", color: COLORS.white }}>
-                        <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, color: COLORS.white, width: 220, borderRight: `1px solid #334155` }}>REKAP PER JENIS PENSIUN</th>
-                        <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 700, color: COLORS.white, width: 170, borderRight: `1px solid #334155` }}>JUMLAH JIWA</th>
-                        <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 700, color: COLORS.white, width: 210, borderRight: `1px solid #334155` }}>JUMLAH BRUTO</th>
-                        <th colSpan={6} style={{ padding: "8px 10px", textAlign: "center", fontWeight: 700, color: COLORS.white, borderBottom: `1px solid #334155`, borderRight: `1px solid #334155` }}>TOTAL POTONGAN GABUNGAN</th>
-                        <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#93C5FD", width: 160 }}>JUMLAH NETTO</th>
+                      <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                        <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 220, borderRight: `1px solid #E2E8F0` }}>REKAP PER JENIS PENSIUN</th>
+                        <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 170, borderRight: `1px solid #E2E8F0` }}>JUMLAH JIWA</th>
+                        <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 210, borderRight: `1px solid #E2E8F0` }}>JUMLAH BRUTO</th>
+                        <th colSpan={6} style={{ padding: "8px 10px", textAlign: "center", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: `1px solid #E2E8F0` }}>TOTAL POTONGAN GABUNGAN</th>
+                        <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#1D4ED8", width: 160 }}>JUMLAH NETTO</th>
                       </tr>
-                      <tr style={{ background: "#334155", color: "#F8FAFC", fontSize: 11 }}>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>PPh 21</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>ASKES</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>TGR</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>NON TGR</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#F8FAFC", borderRight: `1px solid #475569` }}>Lain-Lain</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 700, color: "#FCA5A5", borderRight: `1px solid #475569` }}>Jumlah</th>
+                      <tr style={{ background: "#F1F5F9", color: "#475569", fontSize: 11 }}>
+                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>PPh 21</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>ASKES</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>TGR</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>NON TGR</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>Lain-Lain</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 800, color: "#BE123C", borderRight: `1px solid #CBD5E1` }}>Jumlah</th>
                       </tr>
                     </thead>
                     <tbody>

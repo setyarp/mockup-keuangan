@@ -1212,7 +1212,7 @@ export const TaspenImbalJasa = () => {
                 }}
               >
                 <thead>
-                  <tr style={{ background: "#0F172A", color: COLORS.white }}>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                     {[
                       "No. Tagihan",
                       "Program",
@@ -1231,10 +1231,10 @@ export const TaspenImbalJasa = () => {
                         style={{
                           padding: "11px 13px",
                           textAlign: i === 4 || i === 5 || i === 6 || i === 8 ? "right" : "left",
-                          fontWeight: 700,
-                          color: COLORS.white,
-                          borderBottom: `1px solid #334155`,
-                          borderRight: i < 10 ? "1px solid #334155" : "none",
+                          fontWeight: 800,
+                          color: "#64748B",
+                          borderBottom: `1px solid #E2E8F0`,
+                          borderRight: i < 10 ? "1px solid #E2E8F0" : "none",
                           whiteSpace: "nowrap",
                           fontSize: 11.5,
                         }}
@@ -1490,7 +1490,7 @@ export const TaspenImbalJasa = () => {
               }}
             >
               <thead>
-                <tr style={{ background: "#1E293B", color: COLORS.white }}>
+                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                   {[
                     "No",
                     "Bulan",
@@ -1514,9 +1514,9 @@ export const TaspenImbalJasa = () => {
                         padding: "9px 10px",
                         textAlign:
                           i === 4 || (i >= 8 && i <= 13) ? "right" : "left",
-                        fontWeight: 700,
-                        borderBottom: `1px solid #334155`,
-                        borderRight: i < 14 ? "1px solid #334155" : "none",
+                        fontWeight: 800,
+                        borderBottom: `1px solid #E2E8F0`,
+                        borderRight: i < 14 ? "1px solid #E2E8F0" : "none",
                         whiteSpace: "nowrap",
                         fontSize: 11,
                       }}

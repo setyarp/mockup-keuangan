@@ -136,7 +136,7 @@ export const DashboardKeuangan = () => {
                       style={{
                         padding: "3px 8px",
                         borderRadius: 4,
-                        background: "#E3F2FD",
+                        background: "#EFF6FF",
                         color: COLORS.blueDark,
                         fontFamily: "monospace",
                         fontWeight: 700,
@@ -192,17 +192,17 @@ export const DashboardKeuangan = () => {
         <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
             <thead>
-              <tr style={{ background: "#1E293B", color: COLORS.white }}>
+              <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                 {["No. Surat", "Jenis Tagihan", "Batch", "Acuan Tagihan", "Nominal", "Cut-off", "Status Dokumen"].map((c, i) => (
                   <th
                     key={i}
                     style={{
                       padding: "11px 14px",
                       textAlign: "left",
-                      fontWeight: 700,
-                      color: COLORS.white,
-                      borderBottom: `1px solid #334155`,
-                      borderRight: i < 6 ? "1px solid #334155" : "none",
+                      fontWeight: 800,
+                      color: "#64748B",
+                      borderBottom: `1px solid #E2E8F0`,
+                      borderRight: i < 6 ? "1px solid #E2E8F0" : "none",
                       whiteSpace: "nowrap"
                     }}
                   >

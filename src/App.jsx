@@ -57,12 +57,12 @@ export default function App() {
   return (
     <div
       style={{
-        fontFamily: "'Inter', -apple-system, sans-serif",
+        fontFamily: "'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif",
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: COLORS.gray100,
-        color: COLORS.gray900,
+        background: COLORS.gray50,
+        color: COLORS.gray700,
       }}
     >
       {/* Top Header Bar */}
@@ -91,24 +91,27 @@ export default function App() {
             }}
           >
             <div>
-              <div style={{ fontSize: 11, color: COLORS.gray500, marginBottom: 2 }}>
-                Beranda › Keuangan › {page.title}
+              <div style={{ fontSize: 12, color: COLORS.gray400, fontWeight: 500, marginBottom: 4 }}>
+                Beranda › Keuangan › <b style={{ color: COLORS.gray700, fontWeight: 600 }}>{page.title}</b>
               </div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.gray900, margin: 0 }}>
+              <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.4, color: COLORS.gray900, margin: 0 }}>
                 {page.title}
               </h2>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Calendar size={14} color={COLORS.white} />
-              <span
-                style={{
-                  background: COLORS.blueDark,
-                  color: COLORS.white,
-                  padding: "6px 14px",
-                  borderRadius: 6,
-                  fontSize: 12,
-                }}
-              >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: COLORS.white,
+                border: `1px solid ${COLORS.gray200}`,
+                borderRadius: 10,
+                padding: "7px 14px",
+                boxShadow: "0 1px 2px rgba(15,23,42,0.05)",
+              }}
+            >
+              <Calendar size={14} color={COLORS.gray400} />
+              <span style={{ color: COLORS.gray700, fontSize: 12, fontWeight: 700 }}>
                 Minggu, 06 Juli 2026
               </span>
             </div>
