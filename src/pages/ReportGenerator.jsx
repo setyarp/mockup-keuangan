@@ -196,13 +196,14 @@ export const ReportGenerator = () => {
     {
       id: "BRD-4.5.21",
       category: "Perpajakan & Bukti Potong PPh 21",
-      title: "Rekap Perhitungan PPh 21 TER Masa Januari s.d. November",
-      desc: "Rincian pemotongan PPh 21 bulanan berdasarkan Tarif Efektif Rata-Rata (Kategori A, B, C) untuk masa pajak Januari sampai dengan November.",
-      columns: ["NIK", "NRP/NOPEN", "Nama Peserta", "Masa Pajak", "Status PTKP", "Penghasilan Bruto", "Kategori TER", "Tarif TER", "PPh 21 TER Terutang", "PPh Dipotong"],
+      title: "Rekap Perhitungan PPh 21 Bulanan (TER Masa Jan-Nov & P17 Peserta Berhenti)",
+      desc: "Rincian pemotongan PPh 21 bulanan berdasarkan Tarif Efektif Rata-Rata (Kategori A, B, C) untuk Masa Januari s.d. November dan PPh Pasal 17 bagi peserta yang berhenti menerima pensiun sebelum Desember.",
+      columns: ["NIK", "NRP/NOPEN", "Nama Peserta", "Masa Pajak", "Status PTKP", "Penghasilan Bruto", "Metode Perhitungan", "Tarif Berlaku", "PPh 21 TER / P17", "PPh Dipotong"],
       rows: [
-        ["3171012345670001", "195801234", "Purn. Mayjen TNI Hendra", "Juli 2026", "K/1", "Rp 5.764.000", "TER A", "0,50%", "Rp 28.820", "Rp 28.820"],
-        ["3275098765430002", "196205432", "Purn. Kombes Pol Bambang", "Juli 2026", "K/2", "Rp 5.529.000", "TER B", "0,25%", "Rp 13.820", "Rp 13.820"],
-        ["3374045678900003", "196009871", "Purn. Pembina IV/a Siti A.", "Juli 2026", "TK/0", "Rp 3.450.000", "TER A", "0,00%", "Rp 0", "Rp 0"]
+        ["3171012345670001", "195801234", "Purn. Mayjen TNI Hendra", "Juli 2026", "K/1", "Rp 5.764.000", "TER Bulanan", "0,50%", "Rp 28.820", "Rp 28.820"],
+        ["3275098765430002", "196205432", "Purn. Kombes Pol Bambang", "Juli 2026", "K/2", "Rp 5.529.000", "TER Bulanan", "0,25%", "Rp 13.820", "Rp 13.820"],
+        ["3271046708660002", "1966081406", "Letkol Inf Dedi S. (Berhenti Mei)", "Mei 2026", "K/0", "Rp 9.000.000", "Pasal 17 (Dapem Terakhir)", "P17 Nihil", "Rp 0", "Rp 0 (Lunas)"],
+        ["3374045678900003", "196009871", "Purn. Pembina IV/a Siti A.", "Juli 2026", "TK/0", "Rp 3.450.000", "TER Bulanan", "0,00%", "Rp 0", "Rp 0"]
       ],
       totalRows: 435670
     },

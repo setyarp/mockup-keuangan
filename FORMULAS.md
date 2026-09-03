@@ -150,10 +150,31 @@ $$\text{Total Tagihan Bulanan THT/Pensiun} = \text{Nominal Batch 1} + \text{Nomi
 
 ## 6. 📊 Administrasi Perpajakan & UKP (`Perpajakan` & `RekapUKP`)
 
-### A. Skema PPh 21 TER vs Pasal 17
-* **TER (Tarif Efektif Rata-Rata):** Diterapkan bulanan (Masa Januari s.d. November) sesuai Kategori A, B, atau C berdasarkan status PTKP.
-* **Pasal 17 UU HPP (Masa Pajak Terakhir / Desember):**
-  $$\text{PPh 21 Kurang/Lebih Bayar} = \text{PPh 21 Tahunan (Pasal 17)} - \sum_{i=1}^{11} \text{PPh 21 TER Bulanan}$$
+### A. Skema PPh 21 Bulanan (TER vs Pasal 17) & Peserta Berhenti Sebelum Desember
+Sesuai **BRD Keuangan & Perpajakan V5 (PJK 01, Line 566 & 696)** dan **PMK No. 168 Tahun 2023**:
+
+1. **Peserta Reguler Aktif (Masa Januari s.d. November):**
+   Dihitung menggunakan **Tarif Efektif Rata-Rata (TER)** Kategori A, B, atau C:
+   $$\text{PPh 21 TER Bulanan} = \text{Penghasilan Bruto Bulanan} \times \text{Tarif TER}$$
+
+2. **Peserta yang Berhenti Menerima Penghasilan Sebelum Desember (Bulan $m_{\text{stop}}$):**
+   * Pada bulan ke-$1$ s.d. $(m_{\text{stop}} - 1)$, peserta dipotong menggunakan tarif TER bulanan.
+   * Pada **Bulan ke-$m_{\text{stop}}$ (Dapem Terakhir)**, perhitungan pajak beralih menggunakan **Tarif PPh Pasal 17**:
+     $$\text{Bruto Kumulatif} = \sum_{i=1}^{m_{\text{stop}}} \text{Penghasilan Bruto}_i$$
+     $$\text{Biaya Pensiun Prorata} = \min(5\% \times \text{Bruto Kumulatif},\ 200.000 \times m_{\text{stop}})$$
+     $$\text{Penghasilan Netto Kumulatif} = \text{Bruto Kumulatif} - \text{Biaya Pensiun Prorata}$$
+     $$\text{PKP} = \max(0,\ \text{Penghasilan Netto Kumulatif} - \text{PTKP Setahun})$$
+     $$\text{PPh Pasal 17 Terutang} = \text{TarifProgresif}(\text{PKP})$$
+     $$\text{PPh 21 Dipotong Bulan Terakhir} = \max\left(0,\ \text{PPh Pasal 17 Terutang} - \sum_{i=1}^{m_{\text{stop}}-1} \text{PPh 21 TER}_i\right)$$
+   * Pada bulan-bulan berikutnya ($m > m_{\text{stop}}$), status peserta menjadi **Non-Aktif (Tutup Dapem)** dengan Bruto Rp 0 dan PPh Rp 0.
+
+3. **Masa Pajak Desember (Penyesuaian Akhir Tahun untuk Peserta Aktif 12 Bulan):**
+   $$\text{PPh 21 Kurang/Lebih Bayar Desember} = \text{PPh 21 Tahunan (Pasal 17)} - \sum_{i=1}^{11} \text{PPh 21 TER Bulanan}$$
+
+### B. Ketentuan Penghapusan Sanksi Tarif 20% Non-NPWP (PMK 168/2023 & Coretax)
+* Sesuai **UU Harmonisasi Peraturan Perpajakan (UU HPP)** dan **PMK No. 168 Tahun 2023 Pasal 13–20**, sanksi kenaikan tarif 20% lebih tinggi bagi Wajib Pajak Orang Pribadi yang tidak memiliki NPWP **RESMI DIHAPUSKAN** terhitung mulai 1 Januari 2024.
+* Pemadanan NIK 16-Digit: NIK peserta pensiun tervalidasi Dukcapil berfungsi langsung sebagai NPWP pada sistem Coretax DJP.
+* Sesuai **BRD PJK 02.3 (Line 717)**: Jika NIK belum tersedia/belum tervalidasi, sistem menerbitkan **NIK Sementara** untuk ditindaklanjuti tanpa mendenda peserta dengan tarif 20% lebih tinggi. Seluruh perhitungan menggunakan **Tarif Standar (100% Normal)**.
 
 ---
 
