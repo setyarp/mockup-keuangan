@@ -1337,9 +1337,9 @@ export const Perpajakan = () => {
                         <button
                           onClick={() => setDetailKalkulasi(d)}
                           style={{
-                            background: d.isDapemTerakhir ? "#EDE9FE" : "#EFF6FF",
-                            border: `1px solid ${d.isDapemTerakhir ? "#C4B5FD" : "#BFDBFE"}`,
-                            color: d.isDapemTerakhir ? "#6D28D9" : COLORS.blue,
+                            background: "#EFF6FF",
+                            border: `1px solid #BFDBFE`,
+                            color: COLORS.blue,
                             padding: "3px 8px",
                             borderRadius: 4,
                             cursor: "pointer",
@@ -1350,7 +1350,7 @@ export const Perpajakan = () => {
                             gap: 4,
                           }}
                         >
-                          <Eye size={12} /> {d.isDapemTerakhir ? "Lihat P17" : "Rincian"}
+                          <Eye size={12} /> Rincian
                         </button>
                       </td>
                     </tr>
@@ -1920,7 +1920,7 @@ export const Perpajakan = () => {
                               })
                             }
                           >
-                            <Eye size={12} /> Preview 1721-A2
+                            <Eye size={12} /> Rincian
                           </Btn>
                         </td>
                       </tr>
