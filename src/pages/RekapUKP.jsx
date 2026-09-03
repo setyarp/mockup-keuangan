@@ -301,7 +301,7 @@ export const RekapUKP = () => {
               <FileText size={14} /> Ekspor PDF Laporan
             </Btn>
           </div>
-        }>Tabel 24 — Rekap UKP (Uang Kena Pajak) Peserta Pensiun Bulanan</SectionTitle>
+        }>Tabel 24 — Rekap UKP (Uang Kekurangan Pensiun) Peserta Pensiun Bulanan</SectionTitle>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-end" }}>
           <div>

@@ -40,7 +40,7 @@ const PAGES = {
   tlimbaljasa: { title: "Tagihan Imbal Jasa Taspen Life", component: TaspenImbalJasa },
   konfigurasi_manfaat: { title: "Master Mitra & Parameter Pengembangan Manfaat", component: KonfigurasiManfaat },
   pajak: { title: "Administrasi PPh 21 & Bukti Potong", component: Perpajakan },
-  ukp: { title: "Tabel 24 — Rekap UKP (Uang Kena Pajak) Peserta Pensiun Bulanan", component: RekapUKP },
+  ukp: { title: "Tabel 24 — Rekap UKP (Uang Kekurangan Pensiun) Peserta Pensiun Bulanan", component: RekapUKP },
   dipa: { title: "Realisasi & Sisa Pagu DIPA TA 2026", component: DashboardDIPA },
   bpjs: { title: "Rekonsiliasi Iuran BPJS Kesehatan", component: RekonBPJS },
   laporan: { title: "Laporan & Ekspor Data", component: ReportGenerator },

@@ -39,7 +39,10 @@ export const Perpajakan = () => {
   const [preview, setPreview] = useState(null);
   const [detailKalkulasi, setDetailKalkulasi] = useState(null);
 
-  const fmt = (n) => `Rp ${Math.round(n || 0).toLocaleString("id-ID")}`;
+  const fmt = (n) =>
+    n < 0
+      ? `-Rp ${Math.abs(Math.round(n)).toLocaleString("id-ID")}`
+      : `Rp ${Math.round(n || 0).toLocaleString("id-ID")}`;
 
   const BULAN_OPTIONS = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -388,6 +391,8 @@ export const Perpajakan = () => {
     let statusKepesertaanFilter = "TER Reguler (Aktif)";
     let isDapemTerakhir = false;
     let isPascaBerhenti = false;
+    let isLebihBayar = false;
+    let pphKumulatifJanBulanIni = 0;
 
     if (p.isBerhenti) {
       if (currentMonthIdx < p.bulanBerhentiIdx) {
@@ -401,9 +406,10 @@ export const Perpajakan = () => {
         pphTERBulanIni = p.brutoBulanan * p.tarifTER;
         pphP17BulanIni = 0;
         pphDipotongBulanIni = pphTERBulanIni;
+        pphKumulatifJanBulanIni = pphTERBulanIni * currentMonthIdx;
       } else if (currentMonthIdx === p.bulanBerhentiIdx) {
         // BULAN BERHENTI: DAPEM TERAKHIR SEBELUM DESEMBER
-        // Sesuai BRD PJK 01.1 & 4.5.21: Menggunakan Tarif PPh Pasal 17
+        // Sesuai BRD PJK 01.1 & PMK 168/2023: Menggunakan Tarif PPh Pasal 17
         isDapemTerakhir = true;
         statusBulanIni = "Pasal 17 (Dapem Terakhir)";
         statusKepesertaanFilter = "Pasal 17 (Dapem Terakhir)";
@@ -414,11 +420,18 @@ export const Perpajakan = () => {
         pkpKumulatif = Math.max(0, nettoKumulatif - p.ptkp);
         pphP17Terutang = calcPPhPasal17(pkpKumulatif);
         pphTERSebelumnya = (p.bulanBerhentiIdx - 1) * (p.brutoBulanan * p.tarifTER);
-        pphDipotongBulanIni = Math.max(0, pphP17Terutang - pphTERSebelumnya);
-        metodePerhitungan = "PPh Pasal 17 (Dapem Terakhir)";
+
+        // Perhitungan Selisih: Jika P17 < PPh TER yang telah dipotong sebelumnya,
+        // maka terjadi LEBIH BAYAR (angka negatif, dikembalikan ke peserta sesuai PMK 168/2023 Pasal 17 ayat 3)
+        const selisihP17vsTER = pphP17Terutang - pphTERSebelumnya;
+        pphDipotongBulanIni = selisihP17vsTER;
+        isLebihBayar = selisihP17vsTER < 0;
+        metodePerhitungan = isLebihBayar ? "Pasal 17 (Lebih Bayar)" : "PPh Pasal 17 (Dapem Terakhir)";
         tarifBulanIniStr = "Pasal 17 Progresif";
         pphTERBulanIni = p.brutoBulanan * p.tarifTER;
         pphP17BulanIni = pphP17Terutang;
+        // PPh Kumulatif Jan s.d. Bulan Ini = net setoran ke kas negara setelah dikurangi kelebihan bayar yang dikembalikan
+        pphKumulatifJanBulanIni = pphTERSebelumnya + pphDipotongBulanIni;
       } else {
         // Pasca bulan berhenti (Dapem ditutup)
         isPascaBerhenti = true;
@@ -436,7 +449,10 @@ export const Perpajakan = () => {
         tarifBulanIniStr = "—";
         pphTERBulanIni = 0;
         pphP17BulanIni = 0;
+        pphKumulatifJanBulanIni = pphP17Terutang;
       }
+    } else {
+      pphKumulatifJanBulanIni = pphTERBulanIni * currentMonthIdx;
     }
 
     return {
@@ -445,6 +461,8 @@ export const Perpajakan = () => {
       statusKepesertaanFilter,
       brutoBulanIni,
       kumulatifBruto,
+      pphKumulatifJanBulanIni,
+      isLebihBayar,
       metodePerhitungan,
       tarifBulanIniStr,
       pphTERBulanIni,
@@ -489,7 +507,9 @@ export const Perpajakan = () => {
     const pphDipotongJanNov = pphTERBulanan * bulanTER;
 
     // Pemotongan Penyesuaian Akhir (Masa Desember atau Dapem Terakhir)
-    const pphPenyesuaianAkhir = Math.max(0, pphTerutangSetahunP17 - pphDipotongJanNov);
+    // Sesuai PMK 168/2023: bisa bernilai negatif (Lebih Bayar Dikembalikan)
+    const pphPenyesuaianAkhir = pphTerutangSetahunP17 - pphDipotongJanNov;
+    const isLebihBayarTahunan = pphPenyesuaianAkhir < 0;
 
     // PPh Bulanan Metode Lama (Pasal 17 Rata-Rata)
     const pphP17Bulanan = pphTerutangSetahunP17 / bulanDiterima;
@@ -506,11 +526,14 @@ export const Perpajakan = () => {
       bulanTER,
       pphDipotongJanNov,
       pphPenyesuaianAkhir,
+      isLebihBayarTahunan,
       pphP17Bulanan,
       selisihBulanan: pphTERBulanan - pphP17Bulanan,
       selisihPersen: pphP17Bulanan > 0 ? (((pphTERBulanan - pphP17Bulanan) / pphP17Bulanan) * 100).toFixed(1) : "0",
       masaPerolehanStr: p.isBerhenti ? `01 - 0${bulanDiterima}` : "01 - 12",
-      keteranganPelunasan: p.isBerhenti ? `Lunas Masa ${p.bulanBerhentiNama} (Dapem Terakhir)` : "Lunas Masa Desember"
+      keteranganPelunasan: p.isBerhenti
+        ? (isLebihBayarTahunan ? `Lebih Bayar Dikembalikan (Masa ${p.bulanBerhentiNama})` : `Lunas Masa ${p.bulanBerhentiNama} (Dapem Terakhir)`)
+        : (isLebihBayarTahunan ? "Lebih Bayar Dikembalikan (Masa Des)" : "Lunas Masa Desember")
     };
   });
 
@@ -527,10 +550,16 @@ export const Perpajakan = () => {
     return matchSatker && matchMAK && matchTS && matchSearch;
   });
 
-  // Summary Metrics Bulanan
+  // Summary Metrics Bulanan (Dasar Penyetoran & Tagihan ke Kemenkeu)
   const totalPesertaBulanIni = filteredDataBulanan.length;
   const totalBrutoBulanIni = filteredDataBulanan.reduce((a, b) => a + b.brutoBulanIni, 0);
+  const totalKumulatifBrutoBulanIni = filteredDataBulanan.reduce((a, b) => a + b.kumulatifBruto, 0);
+  const totalPPhKumulatifBulanIni = filteredDataBulanan.reduce((a, b) => a + b.pphKumulatifJanBulanIni, 0);
   const totalPPhDipotongBulanIni = filteredDataBulanan.reduce((a, b) => a + b.pphDipotongBulanIni, 0);
+  const totalLebihBayarBulanIni = filteredDataBulanan
+    .filter((d) => d.pphDipotongBulanIni < 0)
+    .reduce((a, b) => a + Math.abs(b.pphDipotongBulanIni), 0);
+  const jumlahPesertaLebihBayar = filteredDataBulanan.filter((d) => d.pphDipotongBulanIni < 0).length;
   const totalPesertaTER = filteredDataBulanan.filter((d) => d.statusKepesertaanFilter === "TER Reguler (Aktif)").length;
   const totalPesertaP17Berhenti = filteredDataBulanan.filter((d) => d.statusKepesertaanFilter === "Pasal 17 (Dapem Terakhir)").length;
   const totalPesertaNonAktif = filteredDataBulanan.filter((d) => d.statusKepesertaanFilter === "Non-Aktif (Pasca Berhenti)").length;
@@ -568,33 +597,93 @@ export const Perpajakan = () => {
     if (tab === "ter_jan_nov") {
       setPreview({
         title: `Laporan Rekap PPh 21 Bulanan — Masa ${filterBulanTER} 2026`,
-        subtitle: "Rekapitulasi Perhitungan PPh 21 Menggunakan Tarif TER dan Tarif Pasal 17 (Peserta Berhenti)",
+        subtitle: `Rekapitulasi Perhitungan PPh 21 Menggunakan Tarif TER dan Tarif Pasal 17 (Dapem Terakhir Peserta Berhenti) — Sesuai PMK 168/2023`,
         type: "table",
         fileName: `Rekap_PPh21_Bulanan_${filterBulanTER}_2026.xlsx`,
         content: {
           columns: [
-            "No", "Jenis Dapem", "MAK", "NIK", "NRP", "Nama Peserta", "Jabatan", "Kode Jiwa",
-            "Bruto Bulan Ini", "Kumulatif Bruto", "Metode Perhitungan", "Tarif Berlaku",
-            "PPh 21 TER", "PPh 21 P17 Berhenti", "PPh Dipotong", "Status Kepesertaan"
+            "No",
+            "MAK",
+            "NIK",
+            "NRP / Nopens",
+            "Peserta Pensiun",
+            "Jabatan Terakhir",
+            "Status PTKP",
+            "Bruto Bulan Ini",
+            "Bruto Kumulatif",
+            "PPh Kumulatif",
+            "Metode Perhitungan",
+            "Tarif Berlaku",
+            "PPh 21 TER",
+            "PPh P17 (Berhenti)",
+            "PPh Dipotong Bulan Ini",
+            "Tunjuk Silang",
+          ],
+          alignments: [
+            "center",
+            "center",
+            "center",
+            "center",
+            "left",
+            "left",
+            "center",
+            "right",
+            "right",
+            "right",
+            "center",
+            "center",
+            "right",
+            "right",
+            "right",
+            "center",
           ],
           rows: filteredDataBulanan.map((d, i) => [
             i + 1,
-            d.dapem,
             d.mak,
             d.nik,
             d.nrp,
             d.nama,
             d.jabatan,
-            d.kodeJiwa,
+            `${d.kodeJiwa} (${fmt(d.ptkp)})`,
             fmt(d.brutoBulanIni),
             fmt(d.kumulatifBruto),
+            fmt(d.pphKumulatifJanBulanIni),
             d.metodePerhitungan,
             d.tarifBulanIniStr,
-            fmt(d.pphTERBulanIni),
+            d.isPascaBerhenti ? "—" : fmt(d.pphTERBulanIni),
             d.isDapemTerakhir ? fmt(d.pphP17BulanIni) : "—",
-            fmt(d.pphDipotongBulanIni),
-            d.statusBulanIni
+            d.pphDipotongBulanIni < 0
+              ? `- ${fmt(Math.abs(d.pphDipotongBulanIni))} (LB Dikembalikan)`
+              : fmt(d.pphDipotongBulanIni),
+            d.tunjukSilang ? "Ganda" : "—",
           ]),
+          totalRow: [
+            {
+              colSpan: 7,
+              text: `TOTAL MASA ${filterBulanTER.toUpperCase()} (${filteredDataBulanan.length} PESERTA)`,
+              align: "left",
+            },
+            { text: fmt(totalBrutoBulanIni), align: "right" },
+            { text: fmt(totalKumulatifBrutoBulanIni), align: "right" },
+            { text: fmt(totalPPhKumulatifBulanIni), align: "right" },
+            { colSpan: 2, text: "—", align: "center" },
+            {
+              text: fmt(filteredDataBulanan.reduce((a, b) => a + b.pphTERBulanIni, 0)),
+              align: "right",
+              color: "#1D4ED8",
+            },
+            {
+              text: fmt(filteredDataBulanan.reduce((a, b) => a + b.pphP17BulanIni, 0)),
+              align: "right",
+              color: "#7C3AED",
+            },
+            {
+              text: fmt(totalPPhDipotongBulanIni),
+              align: "right",
+              color: totalPPhDipotongBulanIni >= 0 ? "#1D4ED8" : "#059669",
+            },
+            { text: "—", align: "center" },
+          ],
           totalRows: filteredDataBulanan.length,
         },
       });
@@ -605,10 +694,94 @@ export const Perpajakan = () => {
         type: "table",
         fileName: "Rekap_PPh_Pasal17_Penyesuaian_2026.xlsx",
         content: {
-          columns: ["No", "MAK", "NIK", "NRP", "Nama Peserta", "Jabatan", "Masa Perolehan", "Bruto Setahun", "Biaya Pensiun", "PTKP", "PKP", "PPh Terutang P17", "PPh TER Sebelumnya", "PPh Penyesuaian Terakhir", "Status Pelunasan"],
+          columns: [
+            "No",
+            "MAK",
+            "NIK",
+            "NRP / Nopens",
+            "Peserta Pensiun",
+            "Jabatan Terakhir",
+            "Masa Perolehan",
+            "Bruto Kumulatif",
+            "Biaya Pensiun",
+            "PTKP",
+            "PKP",
+            "PPh Terutang (P17)",
+            "PPh TER Sebelumnya",
+            "PPh Dipotong Terakhir",
+            "Status Pelunasan",
+          ],
+          alignments: [
+            "center",
+            "center",
+            "center",
+            "center",
+            "left",
+            "left",
+            "center",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "center",
+          ],
           rows: filteredDataTahunan.map((d, i) => [
-            i + 1, d.mak, d.nik, d.nrp, d.nama, d.jabatan, `${d.bulanDiterima} Bulan (${d.masaPerolehanStr})`, fmt(d.brutoSetahun), fmt(d.biayaPensiunSetahun), fmt(d.ptkp), fmt(d.pkp), fmt(d.pphTerutangSetahunP17), fmt(d.pphDipotongJanNov), fmt(d.pphPenyesuaianAkhir), d.keteranganPelunasan
+            i + 1,
+            d.mak,
+            d.nik,
+            d.nrp,
+            d.nama,
+            d.jabatan,
+            `${d.bulanDiterima} Bulan (${d.masaPerolehanStr})`,
+            fmt(d.brutoSetahun),
+            fmt(d.biayaPensiunSetahun),
+            fmt(d.ptkp),
+            fmt(d.pkp),
+            fmt(d.pphTerutangSetahunP17),
+            fmt(d.pphDipotongJanNov),
+            d.pphPenyesuaianAkhir < 0
+              ? `- ${fmt(Math.abs(d.pphPenyesuaianAkhir))} (LB Dikembalikan)`
+              : fmt(d.pphPenyesuaianAkhir),
+            d.keteranganPelunasan,
           ]),
+          totalRow: [
+            {
+              colSpan: 7,
+              text: `TOTAL AKUMULASI SELURUH PESERTA (${filteredDataTahunan.length} WP)`,
+              align: "left",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.brutoSetahun, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.biayaPensiunSetahun, 0)),
+              align: "right",
+            },
+            { text: "—", align: "center" },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pkp, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphTerutangSetahunP17, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphDipotongJanNov, 0)),
+              align: "right",
+              color: "#059669",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphPenyesuaianAkhir, 0)),
+              align: "right",
+              color: "#7C3AED",
+            },
+            { text: "100% Selaras", align: "center", color: "#059669" },
+          ],
           totalRows: filteredDataTahunan.length,
         },
       });
@@ -619,10 +792,92 @@ export const Perpajakan = () => {
         type: "table",
         fileName: "Rekap_SPT_Tahunan_PPh21_2026.xlsx",
         content: {
-          columns: ["No", "MAK", "NIK", "NRP", "Nama Peserta", "Jabatan", "Kode Jiwa", "Masa Kerja", "Bruto Setahun", "Biaya Pensiun", "PKP", "PPh Terutang (P17)", "Status Pemadanan NPWP"],
+          columns: [
+            "No",
+            "MAK",
+            "NIK",
+            "NRP / Nopens",
+            "Peserta Pensiun",
+            "Jabatan Terakhir",
+            "Kode Jiwa",
+            "Masa",
+            "Bruto Setahun",
+            "Biaya Pensiun",
+            "PKP Setahun",
+            "PPh Terutang Setahun",
+            "Kredit PPh TER",
+            "PPh Pelunasan",
+            "Status Pemadanan NPWP",
+          ],
+          alignments: [
+            "center",
+            "center",
+            "center",
+            "center",
+            "left",
+            "left",
+            "center",
+            "center",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "right",
+            "center",
+          ],
           rows: filteredDataTahunan.map((d, i) => [
-            i + 1, d.mak, d.nik, d.nrp, d.nama, d.jabatan, d.kodeJiwa, `${d.bulanDiterima} Bln`, fmt(d.brutoSetahun), fmt(d.biayaPensiunSetahun), fmt(d.pkp), fmt(d.pphTerutangSetahunP17), d.statusNPWP
+            i + 1,
+            d.mak,
+            d.nik,
+            d.nrp,
+            d.nama,
+            d.jabatan,
+            d.kodeJiwa,
+            d.masaPerolehanStr,
+            fmt(d.brutoSetahun),
+            fmt(d.biayaPensiunSetahun),
+            fmt(d.pkp),
+            fmt(d.pphTerutangSetahunP17),
+            fmt(d.pphDipotongJanNov),
+            fmt(d.pphPenyesuaianAkhir),
+            d.statusNPWP.includes("Sementara") ? "NIK Sementara (Validasi)" : "NIK Terpadan Valid",
           ]),
+          totalRow: [
+            {
+              colSpan: 8,
+              text: `TOTAL AKUMULASI TAHUNAN (${filteredDataTahunan.length} WP)`,
+              align: "left",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.brutoSetahun, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.biayaPensiunSetahun, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pkp, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphTerutangSetahunP17, 0)),
+              align: "right",
+              color: "#1E40AF",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphDipotongJanNov, 0)),
+              align: "right",
+              color: "#059669",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphPenyesuaianAkhir, 0)),
+              align: "right",
+              color: "#7C3AED",
+            },
+            { text: "100% Terpadan Valid", align: "center", color: "#059669" },
+          ],
           totalRows: filteredDataTahunan.length,
         },
       });
@@ -633,24 +888,133 @@ export const Perpajakan = () => {
         type: "table",
         fileName: "Audit_Komparasi_TER_vs_Pasal17_2026.xlsx",
         content: {
-          columns: ["No", "NIK", "NRP", "Nama Peserta", "Jabatan", "Masa Pajak", "Bruto Bulanan", "PPh 21 TER", "PPh Pasal 17 (Avg)", "Selisih (Rp)", "% Selisih", "Keterangan Audit"],
+          columns: [
+            "No",
+            "NIK",
+            "NRP / Nopens",
+            "Peserta Pensiun",
+            "Jabatan Terakhir",
+            "Masa Pajak",
+            "Bruto Bulanan",
+            "PPh 21 Metode TER (Baru)",
+            "PPh 21 Metode Pasal 17 (Lama)",
+            "Selisih (TER - P17)",
+            "% Selisih",
+            "Status Evaluasi",
+          ],
+          alignments: [
+            "center",
+            "center",
+            "center",
+            "left",
+            "left",
+            "center",
+            "right",
+            "right",
+            "right",
+            "right",
+            "center",
+            "center",
+          ],
           rows: filteredDataTahunan.map((d, i) => [
-            i + 1, d.nik, d.nrp, d.nama, d.jabatan, filterBulanTER, fmt(d.brutoBulanan), fmt(d.pphTERBulanan), fmt(d.pphP17Bulanan), (d.selisihBulanan > 0 ? "+" : "") + fmt(d.selisihBulanan), `${d.selisihPersen}%`, d.selisihBulanan === 0 ? "Setara" : d.selisihBulanan > 0 ? "TER Lebih Tinggi" : "TER Lebih Rendah"
+            i + 1,
+            d.nik,
+            d.nrp,
+            d.nama,
+            d.jabatan,
+            `${filterBulanTER} 2026`,
+            fmt(d.brutoBulanan),
+            fmt(d.pphTERBulanan),
+            fmt(d.pphP17Bulanan),
+            (d.selisihBulanan > 0 ? "+" : "") + fmt(d.selisihBulanan),
+            `${d.selisihPersen}%`,
+            d.selisihBulanan === 0 ? "Setara" : d.selisihBulanan > 0 ? "TER Lebih Tinggi" : "TER Lebih Rendah",
           ]),
+          totalRow: [
+            {
+              colSpan: 6,
+              text: `TOTAL EVALUASI AUDIT (${filteredDataTahunan.length} SAMPEL)`,
+              align: "left",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.brutoBulanan, 0)),
+              align: "right",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphTERBulanan, 0)),
+              align: "right",
+              color: "#1D4ED8",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphP17Bulanan, 0)),
+              align: "right",
+            },
+            {
+              text:
+                (filteredDataTahunan.reduce((a, b) => a + b.selisihBulanan, 0) > 0 ? "+" : "") +
+                fmt(filteredDataTahunan.reduce((a, b) => a + b.selisihBulanan, 0)),
+              align: "right",
+              color: filteredDataTahunan.reduce((a, b) => a + b.selisihBulanan, 0) > 0 ? "#DC2626" : "#059669",
+            },
+            { text: "—", align: "center" },
+            { text: "TER Terverifikasi", align: "center", color: "#059669" },
+          ],
           totalRows: filteredDataTahunan.length,
         },
       });
     } else {
       setPreview({
-        title: "Log Distribusi Bukti Potong 1721-A2 & Integrasi Coretax DJP",
+        title: "Penerbitan Digital Bukti Potong 1721-A2 & Integrasi Coretax DJP",
         subtitle: "Monitoring Distribusi Digital Bukti Potong ke Peserta Pensiun (Tanpa Sanksi 20%)",
         type: "table",
-        fileName: "Log_Distribusi_Bukti_Potong_A2.xlsx",
+        fileName: "Log_Distribusi_Bukti_Potong_1721A2.xlsx",
         content: {
-          columns: ["Nama Peserta", "NIK", "NRP", "Jabatan", "NPWP / Format NIK", "Masa Perolehan", "Status Pemadanan Coretax", "Kanal Akses", "Status Distribusi"],
-          rows: filteredDataTahunan.map((d) => [
-            d.nama, d.nik, d.nrp, d.jabatan, d.npwp, d.masaPerolehanStr, d.statusNPWP, "Portal Peserta + Aplikasi AMA", uploadStep >= 2 ? "Terdistribusi" : "Siap Kirim"
+          columns: [
+            "No",
+            "NIK Dukcapil",
+            "NRP / Nopens",
+            "Nama Peserta",
+            "Jabatan Terakhir",
+            "NPWP / Status Coretax",
+            "Masa Perolehan",
+            "PPh 21 Terutang (A2)",
+            "Kanal Akses",
+          ],
+          alignments: [
+            "center",
+            "center",
+            "center",
+            "left",
+            "left",
+            "center",
+            "center",
+            "right",
+            "center",
+          ],
+          rows: filteredDataTahunan.map((d, i) => [
+            i + 1,
+            d.nik,
+            d.nrp,
+            d.nama,
+            d.jabatan,
+            d.npwp,
+            d.masaPerolehanStr,
+            fmt(d.pphTerutangSetahunP17),
+            "Portal Peserta / AMA",
           ]),
+          totalRow: [
+            {
+              colSpan: 7,
+              text: `TOTAL DOKUMEN 1721-A2 (${filteredDataTahunan.length} DOKUMEN)`,
+              align: "left",
+            },
+            {
+              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphTerutangSetahunP17, 0)),
+              align: "right",
+              color: "#1E293B",
+            },
+            { text: "100% Siap Akses", align: "center", color: "#059669" },
+          ],
           totalRows: filteredDataTahunan.length,
         },
       });
@@ -905,13 +1269,28 @@ export const Perpajakan = () => {
                             - {fmt(detailKalkulasi.pphTERSebelumnya)}
                           </td>
                         </tr>
-                        <tr style={{ background: "#EDE9FE", fontWeight: 800 }}>
-                          <td style={{ padding: "10px 12px", color: "#5B21B6" }}>9</td>
-                          <td colSpan={2} style={{ padding: "10px 12px", color: "#4C1D95", fontSize: 13 }}>
-                            PPh 21 yang Dipotong pada Dapem Terakhir ({detailKalkulasi.bulanBerhentiNama} 2026)
+                        <tr style={{ background: detailKalkulasi.pphDipotongBulanIni < 0 ? "#ECFDF5" : "#EDE9FE", fontWeight: 800 }}>
+                          <td style={{ padding: "10px 12px", color: detailKalkulasi.pphDipotongBulanIni < 0 ? "#065F46" : "#5B21B6" }}>9</td>
+                          <td colSpan={2} style={{ padding: "10px 12px", color: detailKalkulasi.pphDipotongBulanIni < 0 ? "#065F46" : "#4C1D95", fontSize: 13 }}>
+                            {detailKalkulasi.pphDipotongBulanIni < 0
+                              ? `Posisi PPh 21 Dapem Terakhir (Masa ${detailKalkulasi.bulanBerhentiNama} 2026)`
+                              : `PPh 21 yang Dipotong pada Dapem Terakhir (${detailKalkulasi.bulanBerhentiNama} 2026)`}
                           </td>
-                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontSize: 14, color: "#4338CA" }}>
-                            {detailKalkulasi.isDapemTerakhir ? fmt(detailKalkulasi.pphDipotongBulanIni) : "Rp 0 (Non-Aktif)"}
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontSize: 14, color: detailKalkulasi.pphDipotongBulanIni < 0 ? "#059669" : "#4338CA" }}>
+                            {detailKalkulasi.isDapemTerakhir ? (
+                              detailKalkulasi.pphDipotongBulanIni < 0 ? (
+                                <div>
+                                  <span>- {fmt(Math.abs(detailKalkulasi.pphDipotongBulanIni))}</span>
+                                  <div style={{ fontSize: 10.5, fontWeight: 700, color: "#065F46", marginTop: 2 }}>
+                                    Lebih Bayar (Wajib Dikembalikan ke Peserta)
+                                  </div>
+                                </div>
+                              ) : (
+                                fmt(detailKalkulasi.pphDipotongBulanIni)
+                              )
+                            ) : (
+                              "Rp 0 (Non-Aktif)"
+                            )}
                           </td>
                         </tr>
                       </>
@@ -939,6 +1318,26 @@ export const Perpajakan = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Informasi Khusus Lebih Bayar Peserta Berhenti */}
+              {detailKalkulasi.pphDipotongBulanIni < 0 && (
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: "10px 14px",
+                    background: "#ECFDF5",
+                    border: "1px solid #A7F3D0",
+                    borderRadius: 8,
+                    fontSize: 11.5,
+                    color: "#065F46",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <strong>📌 Ketentuan Lebih Bayar (PMK No. 168 Tahun 2023 Pasal 17 ayat 3 &amp; BRD PJK 01.1):</strong>
+                  <br />
+                  Akumulasi PPh TER yang telah dipotong dari Januari s.d. bulan sebelum berhenti ({fmt(detailKalkulasi.pphTERSebelumnya)}) melebihi PPh Pasal 17 terutang setahun ({fmt(detailKalkulasi.pphP17Terutang)}). Kelebihan pemotongan sebesar <strong>{fmt(Math.abs(detailKalkulasi.pphDipotongBulanIni))}</strong> <u>wajib dikembalikan</u> oleh PT ASABRI kepada penerima pensiun bersamaan dengan pembayaran Dapem bulan {detailKalkulasi.bulanBerhentiNama} 2026 (menambah uang pensiun netto yang diterima). Nilai ini sekaligus menjadi kompensasi pengurang setoran pajak ASABRI ke Kas Negara pada masa pajak berjalan.
+                </div>
+              )}
 
               {/* Status Pemadanan Regulasi Footer Alert */}
               <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center", background: "#F0FDF4", border: "1px solid #BBF7D0", padding: "10px 14px", borderRadius: 8 }}>
@@ -1204,18 +1603,53 @@ export const Perpajakan = () => {
               </div>
             </div>
             <div style={{ background: "#F5F3FF", borderRadius: 6, padding: "10px 14px", border: "1px solid #DDD6FE" }}>
-              <div style={{ fontSize: 11, color: "#6D28D9" }}>Total PPh 21 Dipotong</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#7C3AED", fontFamily: "monospace" }}>
+              <div style={{ fontSize: 11, color: "#6D28D9" }}>PPh 21 Dipotong (Netto Setoran)</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: totalPPhDipotongBulanIni >= 0 ? "#7C3AED" : "#059669", fontFamily: "monospace" }}>
                 {fmt(totalPPhDipotongBulanIni)}
               </div>
             </div>
+            <div style={{ background: "#F0FDF4", borderRadius: 6, padding: "10px 14px", border: "1px solid #BBF7D0" }}>
+              <div style={{ fontSize: 11, color: "#166534" }}>PPh Kumulatif Jan-{filterBulanTER.slice(0, 3)}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", fontFamily: "monospace" }}>
+                {fmt(totalPPhKumulatifBulanIni)}
+              </div>
+              <div style={{ fontSize: 10, color: "#166534", marginTop: 2 }}>Dasar Setor/Tagihan Kemenkeu</div>
+            </div>
             <div style={{ background: "#ECFDF5", borderRadius: 6, padding: "10px 14px", border: "1px solid #A7F3D0" }}>
-              <div style={{ fontSize: 11, color: "#059669" }}>Komposisi Metode</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#065F46", marginTop: 2 }}>
-                TER: <strong>{totalPesertaTER}</strong> • P17 Berhenti: <strong>{totalPesertaP17Berhenti}</strong> • Non-Aktif: <strong>{totalPesertaNonAktif}</strong>
+              <div style={{ fontSize: 11, color: "#059669" }}>Posisi Lebih Bayar (LB)</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: totalLebihBayarBulanIni > 0 ? "#059669" : "#64748B", marginTop: 2 }}>
+                {totalLebihBayarBulanIni > 0 ? `- ${fmt(totalLebihBayarBulanIni)} (${jumlahPesertaLebihBayar} WP)` : "Nihil (0 WP)"}
+              </div>
+              <div style={{ fontSize: 10, color: "#047857", marginTop: 2 }}>
+                TER: {totalPesertaTER} • P17: {totalPesertaP17Berhenti}
               </div>
             </div>
           </div>
+
+          {/* Banner Peringatan Jika Ada Lebih Bayar */}
+          {jumlahPesertaLebihBayar > 0 && (
+            <div
+              style={{
+                background: "#FEF3C7",
+                border: "1px solid #FCD34D",
+                borderRadius: 8,
+                padding: "10px 14px",
+                marginBottom: 16,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontSize: 12,
+                color: "#92400E",
+              }}
+            >
+              <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0 }} />
+              <div>
+                <strong>Perhatian Pemotongan PPh 21 Masa {filterBulanTER} 2026:</strong> Terdapat{" "}
+                <strong>{jumlahPesertaLebihBayar} peserta pensiun</strong> (Dapem terakhir) dengan posisi{" "}
+                <strong>LEBIH BAYAR sebesar {fmt(totalLebihBayarBulanIni)}</strong> yang wajib dikembalikan langsung kepada peserta pada slip Dapem bulan ini (PMK 168/2023 Pasal 17 ayat 3). Nilai setoran PPh 21 ke Kas Negara berkurang secara netto menjadi <strong>{fmt(totalPPhDipotongBulanIni)}</strong>.
+              </div>
+            </div>
+          )}
 
           <SectionTitle>
             Rekap Perhitungan PPh 21 Bulanan — Masa {filterBulanTER} 2026 (TER &amp; Pasal 17 Dapem Terakhir)
@@ -1236,12 +1670,13 @@ export const Perpajakan = () => {
                     <th style={{ padding: "9px 10px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Jabatan Terakhir</th>
                     <th style={{ padding: "9px 8px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Status PTKP</th>
                     <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Bulan Ini</th>
-                    <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Kumulatif Jan-{filterBulanTER.slice(0, 3)}</th>
+                    <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Kumulatif</th>
+                    <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Kumulatif</th>
                     <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Metode Perhitungan</th>
                     <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Tarif Berlaku</th>
                     <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 TER</th>
                     <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh P17 (Berhenti)</th>
-                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Dipotong</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Dipotong Bulan Ini</th>
                     <th style={{ padding: "9px 8px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Tunjuk Silang</th>
                     <th style={{ padding: "9px 10px", textAlign: "center" }}>Aksi</th>
                   </tr>
@@ -1293,8 +1728,11 @@ export const Perpajakan = () => {
                       <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0" }}>
                         {fmt(d.kumulatifBruto)}
                       </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0" }}>
+                        {fmt(d.pphKumulatifJanBulanIni)}
+                      </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
-                        <Badge color={d.isDapemTerakhir ? "purple" : d.isPascaBerhenti ? "gray" : "blue"}>
+                        <Badge color={d.isLebihBayar ? "orange" : d.isDapemTerakhir ? "purple" : d.isPascaBerhenti ? "gray" : "blue"}>
                           {d.metodePerhitungan}
                         </Badge>
                       </td>
@@ -1307,8 +1745,35 @@ export const Perpajakan = () => {
                       <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: d.isDapemTerakhir ? "#7C3AED" : "#94A3B8", borderRight: "1px solid #E2E8F0" }}>
                         {d.isDapemTerakhir ? fmt(d.pphP17BulanIni) : "—"}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: d.pphDipotongBulanIni > 0 ? (d.isDapemTerakhir ? "#6D28D9" : "#1D4ED8") : "#64748B", borderRight: "1px solid #E2E8F0" }}>
-                        {fmt(d.pphDipotongBulanIni)}
+                      <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>
+                        {d.pphDipotongBulanIni < 0 ? (
+                          <div>
+                            <span style={{ color: "#059669", fontWeight: 800, fontSize: 12.5 }}>
+                              - {fmt(Math.abs(d.pphDipotongBulanIni))}
+                            </span>
+                            <div style={{ marginTop: 2 }}>
+                              <span
+                                style={{
+                                  fontSize: 9.5,
+                                  fontWeight: 700,
+                                  background: "#ECFDF5",
+                                  color: "#065F46",
+                                  padding: "1.5px 6px",
+                                  borderRadius: 4,
+                                  border: "1px solid #A7F3D0",
+                                  display: "inline-block",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                Lebih Bayar (Dikembalikan)
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: d.pphDipotongBulanIni > 0 ? (d.isDapemTerakhir ? "#6D28D9" : "#1D4ED8") : "#64748B" }}>
+                            {fmt(d.pphDipotongBulanIni)}
+                          </span>
+                        )}
                       </td>
                       <td style={{ padding: "8px 8px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
                         {d.tunjukSilang ? (
@@ -1364,7 +1829,10 @@ export const Perpajakan = () => {
                       {fmt(totalBrutoBulanIni)}
                     </td>
                     <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #CBD5E1" }}>
-                      {fmt(filteredDataBulanan.reduce((a, b) => a + b.kumulatifBruto, 0))}
+                      {fmt(totalKumulatifBrutoBulanIni)}
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #CBD5E1" }}>
+                      {fmt(totalPPhKumulatifBulanIni)}
                     </td>
                     <td colSpan={2} style={{ borderRight: "1px solid #CBD5E1" }} />
                     <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", color: "#1D4ED8", borderRight: "1px solid #CBD5E1" }}>
@@ -1373,7 +1841,7 @@ export const Perpajakan = () => {
                     <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", color: "#7C3AED", borderRight: "1px solid #CBD5E1" }}>
                       {fmt(filteredDataBulanan.reduce((a, b) => a + b.pphP17BulanIni, 0))}
                     </td>
-                    <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: "#1D4ED8", fontWeight: 900, borderRight: "1px solid #CBD5E1" }}>
+                    <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: totalPPhDipotongBulanIni >= 0 ? "#1D4ED8" : "#059669", fontWeight: 900, borderRight: "1px solid #CBD5E1" }}>
                       {fmt(totalPPhDipotongBulanIni)}
                     </td>
                     <td colSpan={2} />
@@ -1481,11 +1949,36 @@ export const Perpajakan = () => {
                     <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: "#059669", borderRight: "1px solid #E2E8F0" }}>
                       {fmt(d.pphDipotongJanNov)}
                     </td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#7C3AED", borderRight: "1px solid #E2E8F0" }}>
-                      {fmt(d.pphPenyesuaianAkhir)}
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>
+                      {d.pphPenyesuaianAkhir < 0 ? (
+                        <div>
+                          <span style={{ color: "#059669", fontWeight: 800, fontSize: 12.5 }}>
+                            - {fmt(Math.abs(d.pphPenyesuaianAkhir))}
+                          </span>
+                          <div style={{ marginTop: 2 }}>
+                            <span
+                              style={{
+                                fontSize: 9.5,
+                                fontWeight: 700,
+                                background: "#ECFDF5",
+                                color: "#065F46",
+                                padding: "1.5px 6px",
+                                borderRadius: 4,
+                                border: "1px solid #A7F3D0",
+                                display: "inline-block",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Lebih Bayar (Dikembalikan)
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <span style={{ color: "#7C3AED" }}>{fmt(d.pphPenyesuaianAkhir)}</span>
+                      )}
                     </td>
                     <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                      <Badge color="green">{d.keteranganPelunasan}</Badge>
+                      <Badge color={d.pphPenyesuaianAkhir < 0 ? "orange" : "green"}>{d.keteranganPelunasan}</Badge>
                     </td>
                   </tr>
                 ))}

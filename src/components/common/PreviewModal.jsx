@@ -7,7 +7,7 @@ export const PreviewModal = ({ preview, onClose }) => {
   const { title, subtitle, type, content, fileName } = preview;
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: 680, maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: preview?.width || (type === "table" && (content?.columns?.length || 0) > 6 ? (content?.columns?.length > 10 ? 1100 : 880) : 680), maxWidth: "96vw", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>{title}</div>
@@ -67,26 +67,92 @@ export const PreviewModal = ({ preview, onClose }) => {
             )}
             {type === "table" && (
               <div style={{ padding: 16 }}>
-                <div style={{ background: COLORS.white, borderRadius: 8, overflow: "hidden", border: `1px solid #CBD5E1` }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <div style={{ background: COLORS.white, borderRadius: 8, overflowX: "auto", border: `1px solid #CBD5E1` }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: (content?.columns?.length || 0) > 7 ? 960 : "100%" }}>
                     <thead>
                       <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                        {(content?.columns || []).map((c, i) => (
-                          <th key={i} style={{ padding: "9px 12px", textAlign: "left", borderBottom: `1px solid #E2E8F0`, borderRight: i < (content?.columns?.length || 0) - 1 ? "1px solid #E2E8F0" : "none", fontWeight: 800, color: "#64748B" }}>{c}</th>
-                        ))}
+                        {(content?.columns || []).map((c, i) => {
+                          const align = content?.alignments?.[i] || "left";
+                          return (
+                            <th
+                              key={i}
+                              style={{
+                                padding: "9px 12px",
+                                textAlign: align,
+                                borderBottom: `1px solid #E2E8F0`,
+                                borderRight: i < (content?.columns?.length || 0) - 1 ? "1px solid #E2E8F0" : "none",
+                                fontWeight: 800,
+                                color: "#64748B",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {c}
+                            </th>
+                          );
+                        })}
                       </tr>
                     </thead>
                     <tbody>
                       {(content?.rows || []).map((row, i) => (
                         <tr key={i} style={{ borderBottom: `1px solid #E2E8F0`, background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF" }}>
-                          {row.map((cell, j) => (
-                            <td key={j} style={{ padding: "8px 12px", color: "#0F172A", borderRight: j < row.length - 1 ? "1px solid #E2E8F0" : "none" }}>{cell}</td>
-                          ))}
+                          {row.map((cell, j) => {
+                            const align = content?.alignments?.[j] || (typeof cell === "number" || (typeof cell === "string" && (cell.startsWith("Rp") || cell.endsWith("%"))) ? "right" : "left");
+                            const isRpOrCode = typeof cell === "string" && (cell.startsWith("Rp") || /^\d{10,}$/.test(cell));
+                            return (
+                              <td
+                                key={j}
+                                style={{
+                                  padding: "8px 12px",
+                                  color: "#0F172A",
+                                  textAlign: align,
+                                  fontFamily: isRpOrCode ? "monospace" : "inherit",
+                                  borderRight: j < row.length - 1 ? "1px solid #E2E8F0" : "none",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {cell}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>
+                    {content?.totalRow && (
+                      <tfoot>
+                        <tr style={{ background: "#F1F5F9", fontWeight: 800, borderTop: "2px solid #CBD5E1" }}>
+                          {content.totalRow.map((cell, j) => {
+                            const isObj = typeof cell === "object" && cell !== null && !Array.isArray(cell);
+                            const text = isObj ? cell.text : cell;
+                            const colSpan = isObj ? (cell.colSpan || 1) : 1;
+                            const align = isObj && cell.align ? cell.align : (j === 0 ? "left" : "right");
+                            return (
+                              <td
+                                key={j}
+                                colSpan={colSpan}
+                                style={{
+                                  padding: "9px 12px",
+                                  color: (isObj && cell.color) ? cell.color : "#0F172A",
+                                  textAlign: align,
+                                  borderRight: "1px solid #CBD5E1",
+                                  fontFamily: (isObj && cell.mono) || (typeof text === "string" && text.startsWith("Rp")) ? "monospace" : "inherit",
+                                  fontWeight: 800,
+                                  whiteSpace: "nowrap",
+                                  ...(isObj && cell.style ? cell.style : {}),
+                                }}
+                              >
+                                {text}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      </tfoot>
+                    )}
                   </table>
-                  {(content?.totalRows || 0) > 5 && <div style={{ fontSize: 11, color: COLORS.gray500, padding: 10, textAlign: "center", background: "#F8FAFC" }}>... dan {content.totalRows - 5} baris lainnya</div>}
+                  {(content?.totalRows || 0) > (content?.rows?.length || 0) && (
+                    <div style={{ fontSize: 11, color: COLORS.gray500, padding: 10, textAlign: "center", background: "#F8FAFC" }}>
+                      ... dan {content.totalRows - content.rows.length} baris lainnya
+                    </div>
+                  )}
                 </div>
               </div>
             )}
