@@ -610,7 +610,6 @@ export const Perpajakan = () => {
             "Jabatan Terakhir",
             "Status PTKP",
             "Bruto Bulan Ini",
-            "Bruto Kumulatif",
             "PPh Kumulatif",
             "Metode Perhitungan",
             "Tarif Berlaku",
@@ -629,7 +628,6 @@ export const Perpajakan = () => {
             "center",
             "right",
             "right",
-            "right",
             "center",
             "center",
             "right",
@@ -646,7 +644,6 @@ export const Perpajakan = () => {
             d.jabatan,
             `${d.kodeJiwa} (${fmt(d.ptkp)})`,
             fmt(d.brutoBulanIni),
-            fmt(d.kumulatifBruto),
             fmt(d.pphKumulatifJanBulanIni),
             d.metodePerhitungan,
             d.tarifBulanIniStr,
@@ -664,7 +661,6 @@ export const Perpajakan = () => {
               align: "left",
             },
             { text: fmt(totalBrutoBulanIni), align: "right" },
-            { text: fmt(totalKumulatifBrutoBulanIni), align: "right" },
             { text: fmt(totalPPhKumulatifBulanIni), align: "right" },
             { colSpan: 2, text: "—", align: "center" },
             {
@@ -1609,7 +1605,7 @@ export const Perpajakan = () => {
               </div>
             </div>
             <div style={{ background: "#F0FDF4", borderRadius: 6, padding: "10px 14px", border: "1px solid #BBF7D0" }}>
-              <div style={{ fontSize: 11, color: "#166534" }}>PPh Kumulatif Jan-{filterBulanTER.slice(0, 3)}</div>
+              <div style={{ fontSize: 11, color: "#166534" }}>PPh Kumulatif</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", fontFamily: "monospace" }}>
                 {fmt(totalPPhKumulatifBulanIni)}
               </div>
@@ -1670,7 +1666,6 @@ export const Perpajakan = () => {
                     <th style={{ padding: "9px 10px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Jabatan Terakhir</th>
                     <th style={{ padding: "9px 8px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Status PTKP</th>
                     <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Bulan Ini</th>
-                    <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Kumulatif</th>
                     <th style={{ padding: "9px 10px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh Kumulatif</th>
                     <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Metode Perhitungan</th>
                     <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Tarif Berlaku</th>
@@ -1724,9 +1719,6 @@ export const Perpajakan = () => {
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 600, color: d.brutoBulanIni === 0 ? "#94A3B8" : "#0F172A", borderRight: "1px solid #E2E8F0" }}>
                         {fmt(d.brutoBulanIni)}
-                      </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0" }}>
-                        {fmt(d.kumulatifBruto)}
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "right", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0" }}>
                         {fmt(d.pphKumulatifJanBulanIni)}
@@ -1827,9 +1819,6 @@ export const Perpajakan = () => {
                     </td>
                     <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #CBD5E1" }}>
                       {fmt(totalBrutoBulanIni)}
-                    </td>
-                    <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #CBD5E1" }}>
-                      {fmt(totalKumulatifBrutoBulanIni)}
                     </td>
                     <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #CBD5E1" }}>
                       {fmt(totalPPhKumulatifBulanIni)}
