@@ -8,3 +8,4 @@ export { ProgressBar } from "./ProgressBar";
 export { SectionTitle } from "./SectionTitle";
 export { NoData } from "./NoData";
 export { PreviewModal } from "./PreviewModal";
+export { Tooltip } from "./Tooltip";

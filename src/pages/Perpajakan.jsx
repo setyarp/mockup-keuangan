@@ -30,6 +30,8 @@ import { StatCard, SectionTitle, Btn, Select, Badge, NoData, PreviewModal } from
 export const Perpajakan = () => {
   const [tab, setTab] = useState("ter_jan_nov");
   const [filterBulanTER, setFilterBulanTER] = useState("Juli");
+  const [filterBulanKomparasi, setFilterBulanKomparasi] = useState("Juli");
+  const [modalRincian12Bulan, setModalRincian12Bulan] = useState(null);
   const [filterSatker, setFilterSatker] = useState("Semua");
   const [filterMAK, setFilterMAK] = useState("Semua");
   const [filterStatusPeserta, setFilterStatusPeserta] = useState("Semua");
@@ -49,6 +51,22 @@ export const Perpajakan = () => {
     "Juli", "Agustus", "September", "Oktober", "November"
   ];
   const currentMonthIdx = BULAN_OPTIONS.indexOf(filterBulanTER) + 1;
+
+  const OPSI_BULAN_KOMPARASI = [
+    "Akumulasi Setahun (Full Year)",
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
 
   // Master Data Peserta Pensiun untuk Simulasi Perpajakan (Lengkap dengan Kode Jiwa, TER, P17, Tunjuk Silang, dan Pemadanan NIK)
   const masterPesertaPajak = [
@@ -520,6 +538,124 @@ export const Perpajakan = () => {
     return tax;
   };
 
+  // Helper kalkulasi komparasi per bulan spesifik (Bulan 1 s.d. 12)
+  const getKomparasiPerBulan = (p, monthIdx) => {
+    const bulanNames = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    const namaBulan = bulanNames[monthIdx - 1];
+    const bulanDiterima = p.isBerhenti ? p.bulanBerhentiIdx : 12;
+    const brutoSetahun = p.brutoBulanan * bulanDiterima;
+    const biayaPensiunSetahun = Math.min(brutoSetahun * 0.05, 200000 * bulanDiterima);
+    const nettoSetahun = brutoSetahun - biayaPensiunSetahun;
+    const pkpSetahun = Math.max(0, nettoSetahun - p.ptkp);
+    const pphSetahunP17 = calcPPhPasal17(pkpSetahun);
+    const pphP17Bulanan = bulanDiterima > 0 ? pphSetahunP17 / bulanDiterima : 0;
+
+    // Pasca berhenti
+    if (p.isBerhenti && monthIdx > p.bulanBerhentiIdx) {
+      return {
+        bulanIdx: monthIdx,
+        namaBulan,
+        bruto: 0,
+        pphBaru: 0,
+        pphLama: 0,
+        selisih: 0,
+        selisihPersen: "0.0",
+        status: "Non-Aktif (Pasca Berhenti)",
+        badgeColor: "gray",
+        keterangan: `Dapem ditutup sejak ${p.bulanBerhentiNama} (${p.alasanBerhenti})`,
+      };
+    }
+
+    // Dapem Terakhir (Berhenti di bulan ini)
+    if (p.isBerhenti && monthIdx === p.bulanBerhentiIdx) {
+      const kumulatifBruto = p.brutoBulanan * monthIdx;
+      const biayaPensiunKumulatif = Math.min(kumulatifBruto * 0.05, 200000 * monthIdx);
+      const nettoKumulatif = kumulatifBruto - biayaPensiunKumulatif;
+      const pkpKumulatif = Math.max(0, nettoKumulatif - p.ptkp);
+      const pphP17Terutang = calcPPhPasal17(pkpKumulatif);
+      const kreditTERSebelumnya = (monthIdx - 1) * (p.brutoBulanan * p.tarifTER);
+      const pphDipotongBulanIni = pphP17Terutang - kreditTERSebelumnya;
+      const selisih = pphDipotongBulanIni - pphP17Bulanan;
+      const selisihPersen = pphP17Bulanan > 0 ? ((selisih / pphP17Bulanan) * 100).toFixed(1) : "0.0";
+
+      return {
+        bulanIdx: monthIdx,
+        namaBulan,
+        bruto: p.brutoBulanan,
+        pphBaru: pphDipotongBulanIni,
+        pphLama: pphP17Bulanan,
+        selisih,
+        selisihPersen,
+        status: pphDipotongBulanIni < 0 ? "Lebih Bayar Dikembalikan" : "Dapem Terakhir (Pasal 17)",
+        badgeColor: pphDipotongBulanIni < 0 ? "green" : "purple",
+        keterangan: `Penyesuaian Dapem Terakhir (${p.alasanBerhenti})`,
+      };
+    }
+
+    // Bulan Desember (Rekonsiliasi Tahunan)
+    if (monthIdx === 12) {
+      const pphTERSebelumnya = 11 * (p.brutoBulanan * p.tarifTER);
+      const pphDesember = pphSetahunP17 - pphTERSebelumnya;
+      const selisih = pphDesember - pphP17Bulanan;
+      const selisihPersen = pphP17Bulanan > 0 ? ((selisih / pphP17Bulanan) * 100).toFixed(1) : "0.0";
+
+      return {
+        bulanIdx: monthIdx,
+        namaBulan,
+        bruto: p.brutoBulanan,
+        pphBaru: pphDesember,
+        pphLama: pphP17Bulanan,
+        selisih,
+        selisihPersen,
+        status: pphDesember < 0 ? "Lebih Bayar (Rekonsiliasi)" : selisih === 0 ? "Setara" : selisih > 0 ? "TER Kurang Bayar" : "TER Lebih Bayar",
+        badgeColor: pphDesember < 0 ? "green" : selisih === 0 ? "gray" : selisih > 0 ? "red" : "blue",
+        keterangan: "Rekonsiliasi Akhir Tahun (Pasal 17 Tahunan)",
+      };
+    }
+
+    // Bulan Reguler (Januari - November)
+    const pphTER = p.brutoBulanan * p.tarifTER;
+    const selisih = pphTER - pphP17Bulanan;
+    const selisihPersen = pphP17Bulanan > 0 ? ((selisih / pphP17Bulanan) * 100).toFixed(1) : "0.0";
+
+    return {
+      bulanIdx: monthIdx,
+      namaBulan,
+      bruto: p.brutoBulanan,
+      pphBaru: pphTER,
+      pphLama: pphP17Bulanan,
+      selisih,
+      selisihPersen,
+      status: selisih === 0 ? "Setara" : selisih > 0 ? "TER Lebih Tinggi" : "TER Lebih Rendah",
+      badgeColor: selisih === 0 ? "gray" : selisih > 0 ? "red" : "green",
+      keterangan: `Tarif Efektif Rata-Rata (${p.kategoriTER} - ${(p.tarifTER * 100).toFixed(2)}%)`,
+    };
+  };
+
+  // Helper generator matriks 12 bulan lengkap untuk 1 peserta
+  const generate12BulanPeserta = (p) => {
+    const list = [];
+    for (let m = 1; m <= 12; m++) {
+      list.push(getKomparasiPerBulan(p, m));
+    }
+    const totalBruto = list.reduce((a, b) => a + b.bruto, 0);
+    const totalPPhBaru = list.reduce((a, b) => a + b.pphBaru, 0);
+    const totalPPhLama = list.reduce((a, b) => a + b.pphLama, 0);
+    const totalSelisih = totalPPhBaru - totalPPhLama;
+
+    return {
+      peserta: p,
+      months: list,
+      totalBruto,
+      totalPPhBaru,
+      totalPPhLama,
+      totalSelisih,
+    };
+  };
+
   // 1. EVALUASI DINAMIS REKAP PPH 21 BULANAN (TAB 1)
   // Berdasarkan filterBulanTER (Januari s.d. November)
   const dataBulanan = masterPesertaPajak.map((p) => {
@@ -707,6 +843,66 @@ export const Perpajakan = () => {
     return matchSatker && matchMAK && matchTS && matchSearch;
   });
 
+  // 3. DATA KOMPARASI AUDIT BERDASARKAN FILTER BULAN / TAHUNAN (TAB 4)
+  const isKomparasiTahunan = filterBulanKomparasi === "Akumulasi Setahun (Full Year)";
+  const bulanKomparasiIdx = isKomparasiTahunan ? 12 : OPSI_BULAN_KOMPARASI.indexOf(filterBulanKomparasi); // 1..12
+
+  const dataKomparasiAudit = masterPesertaPajak.map((p) => {
+    if (isKomparasiTahunan) {
+      const bulanDiterima = p.isBerhenti ? p.bulanBerhentiIdx : 12;
+      const brutoSetahun = p.brutoBulanan * bulanDiterima;
+      const biayaPensiunSetahun = Math.min(brutoSetahun * 0.05, 200000 * bulanDiterima);
+      const nettoSetahun = brutoSetahun - biayaPensiunSetahun;
+      const pkp = Math.max(0, nettoSetahun - p.ptkp);
+      const pphTerutangSetahun = calcPPhPasal17(pkp);
+
+      return {
+        ...p,
+        masaPajakLabel: p.isBerhenti ? `${p.masaPerolehanStr} (${p.bulanBerhentiNama} Berhenti)` : "Jan–Des 2026 (Setahun Penuh)",
+        brutoEvaluasi: brutoSetahun,
+        pphBaruEvaluasi: pphTerutangSetahun,
+        pphLamaEvaluasi: pphTerutangSetahun,
+        selisihEvaluasi: 0,
+        selisihPersenStr: "0.0%",
+        statusEvaluasi: "Setara 100% (Rekonsiliasi Imbang)",
+        badgeColor: "gray",
+        keteranganEvaluasi: "Rekonsiliasi Tahunan Final (Nihil Selisih)",
+      };
+    } else {
+      const res = getKomparasiPerBulan(p, bulanKomparasiIdx);
+      return {
+        ...p,
+        masaPajakLabel: `${filterBulanKomparasi} 2026`,
+        brutoEvaluasi: res.bruto,
+        pphBaruEvaluasi: res.pphBaru,
+        pphLamaEvaluasi: res.pphLama,
+        selisihEvaluasi: res.selisih,
+        selisihPersenStr: `${res.selisihPersen}%`,
+        statusEvaluasi: res.status,
+        badgeColor: res.badgeColor,
+        keteranganEvaluasi: res.keterangan,
+        isDapemTerakhirBulanIni: p.isBerhenti && bulanKomparasiIdx === p.bulanBerhentiIdx,
+      };
+    }
+  });
+
+  const filteredDataKomparasi = dataKomparasiAudit.filter((d) => {
+    const matchSatker = filterSatker === "Semua" || d.satker === filterSatker;
+    const matchMAK = filterMAK === "Semua" || d.mak === filterMAK;
+    const matchTS = filterTunjukSilang === "Semua" || (filterTunjukSilang === "Ya" ? d.tunjukSilang : !d.tunjukSilang);
+    const matchSearch = searchQuery === "" ||
+      d.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.nik.includes(searchQuery) ||
+      d.nrp.includes(searchQuery) ||
+      (d.jabatan && d.jabatan.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchSatker && matchMAK && matchTS && matchSearch;
+  });
+
+  const totalBrutoKomparasi = filteredDataKomparasi.reduce((a, b) => a + b.brutoEvaluasi, 0);
+  const totalPPhBaruKomparasi = filteredDataKomparasi.reduce((a, b) => a + b.pphBaruEvaluasi, 0);
+  const totalPPhLamaKomparasi = filteredDataKomparasi.reduce((a, b) => a + b.pphLamaEvaluasi, 0);
+  const totalSelisihKomparasi = totalPPhBaruKomparasi - totalPPhLamaKomparasi;
+
   // Summary Metrics Bulanan (Dasar Penyetoran & Tagihan ke Kemenkeu)
   const totalPesertaBulanIni = filteredDataBulanan.length;
   const totalBrutoBulanIni = filteredDataBulanan.reduce((a, b) => a + b.brutoBulanIni, 0);
@@ -751,8 +947,9 @@ export const Perpajakan = () => {
     },
   ];
 
-  const handleExportTab = () => {
-    if (tab === "ter_jan_nov") {
+  const handleExportTab = (tabName) => {
+    const targetTab = typeof tabName === "string" ? tabName : tab;
+    if (targetTab === "ter_jan_nov") {
       setPreview({
         title: `Laporan Rekap PPh 21 Bulanan — Masa ${filterBulanTER} 2026`,
         subtitle: `Rekapitulasi Perhitungan PPh 21 Menggunakan Tarif TER dan Tarif Pasal 17 (Dapem Terakhir Peserta Berhenti) — Sesuai PMK 168/2023`,
@@ -841,7 +1038,7 @@ export const Perpajakan = () => {
           totalRows: filteredDataBulanan.length,
         },
       });
-    } else if (tab === "pasal17_des") {
+    } else if (targetTab === "pasal17_des") {
       setPreview({
         title: "Laporan Rekap PPh Pasal 17 Penyesuaian Akhir Tahun & Masa Terakhir 2026",
         subtitle: "Perhitungan Penyesuaian Akhir Tahun Masa Desember dan Dapem Terakhir Peserta Berhenti",
@@ -939,7 +1136,7 @@ export const Perpajakan = () => {
           totalRows: filteredDataTahunan.length,
         },
       });
-    } else if (tab === "spt_tahunan") {
+    } else if (targetTab === "spt_tahunan") {
       setPreview({
         title: "Laporan Rekapitulasi SPT Tahunan PPh 21 Badan PT ASABRI ke DJP Online",
         subtitle: "Dasar Pengisian Formulir SPT Tahunan PPh 21 Badan (100% Tarif Normal Sesuai PMK 168/2023)",
@@ -1035,12 +1232,12 @@ export const Perpajakan = () => {
           totalRows: filteredDataTahunan.length,
         },
       });
-    } else if (tab === "komparasi_audit") {
+    } else if (targetTab === "komparasi_audit") {
       setPreview({
-        title: "Laporan Audit Komparatif: PPh 21 Metode TER vs PPh Pasal 17",
-        subtitle: "Alat Uji Petik Verifikasi dan Audit Kepatuhan Perpajakan PT ASABRI",
+        title: `Laporan Audit Komparatif: PPh 21 Metode TER vs PPh Pasal 17 — ${filterBulanKomparasi}`,
+        subtitle: `Alat Uji Petik Verifikasi dan Audit Kepatuhan Perpajakan PT ASABRI (${filteredDataKomparasi.length} Peserta Terpilih)`,
         type: "table",
-        fileName: "Audit_Komparasi_TER_vs_Pasal17_2026.xlsx",
+        fileName: `Audit_Komparasi_TER_vs_Pasal17_${filterBulanKomparasi.replace(/\s+/g, "_")}_2026.xlsx`,
         content: {
           columns: [
             "No",
@@ -1048,13 +1245,14 @@ export const Perpajakan = () => {
             "NRP / Nopens",
             "Peserta Pensiun",
             "Jabatan Terakhir",
+            "Satker",
             "Masa Pajak",
-            "Bruto Bulanan",
-            "PPh 21 Metode TER (Baru)",
-            "PPh 21 Metode Pasal 17 (Lama)",
-            "Selisih (TER - P17)",
+            "Penghasilan Bruto",
+            "PPh 21 Metode Baru (TER / Penyesuaian)",
+            "PPh 21 Metode Lama (Pasal 17 Rata2)",
+            "Selisih (Baru - Lama)",
             "% Selisih",
-            "Status Evaluasi",
+            "Status Evaluasi Audit",
           ],
           alignments: [
             "center",
@@ -1062,6 +1260,7 @@ export const Perpajakan = () => {
             "center",
             "left",
             "left",
+            "left",
             "center",
             "right",
             "right",
@@ -1070,50 +1269,50 @@ export const Perpajakan = () => {
             "center",
             "center",
           ],
-          rows: filteredDataTahunan.map((d, i) => [
+          rows: filteredDataKomparasi.map((d, i) => [
             i + 1,
             d.nik,
             d.nrp,
             d.nama,
             d.jabatan,
-            `${filterBulanTER} 2026`,
-            fmt(d.brutoBulanan),
-            fmt(d.pphTERBulanan),
-            fmt(d.pphP17Bulanan),
-            (d.selisihBulanan > 0 ? "+" : "") + fmt(d.selisihBulanan),
-            `${d.selisihPersen}%`,
-            d.selisihBulanan === 0 ? "Setara" : d.selisihBulanan > 0 ? "TER Lebih Tinggi" : "TER Lebih Rendah",
+            d.satker,
+            d.masaPajakLabel,
+            fmt(d.brutoEvaluasi),
+            fmt(d.pphBaruEvaluasi),
+            fmt(d.pphLamaEvaluasi),
+            (d.selisihEvaluasi > 0 ? "+" : "") + fmt(d.selisihEvaluasi),
+            d.selisihPersenStr,
+            d.statusEvaluasi,
           ]),
           totalRow: [
             {
-              colSpan: 6,
-              text: `TOTAL EVALUASI AUDIT (${filteredDataTahunan.length} SAMPEL)`,
+              colSpan: 7,
+              text: `TOTAL EVALUASI AUDIT (${filteredDataKomparasi.length} PESERTA)`,
               align: "left",
             },
             {
-              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.brutoBulanan, 0)),
+              text: fmt(totalBrutoKomparasi),
               align: "right",
             },
             {
-              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphTERBulanan, 0)),
+              text: fmt(totalPPhBaruKomparasi),
               align: "right",
               color: "#1D4ED8",
             },
             {
-              text: fmt(filteredDataTahunan.reduce((a, b) => a + b.pphP17Bulanan, 0)),
+              text: fmt(totalPPhLamaKomparasi),
               align: "right",
+              color: "#475569",
             },
             {
-              text:
-                (filteredDataTahunan.reduce((a, b) => a + b.selisihBulanan, 0) > 0 ? "+" : "") +
-                fmt(filteredDataTahunan.reduce((a, b) => a + b.selisihBulanan, 0)),
+              text: (totalSelisihKomparasi > 0 ? "+" : "") + fmt(totalSelisihKomparasi),
               align: "right",
-              color: filteredDataTahunan.reduce((a, b) => a + b.selisihBulanan, 0) > 0 ? "#DC2626" : "#059669",
+              color: totalSelisihKomparasi === 0 ? "#059669" : totalSelisihKomparasi > 0 ? "#DC2626" : "#059669",
             },
             { text: "—", align: "center" },
-            { text: "TER Terverifikasi", align: "center", color: "#059669" },
+            { text: isKomparasiTahunan ? "100% Imbang (Audit Sesuai)" : "Tervalidasi", align: "center", color: "#059669" },
           ],
-          totalRows: filteredDataTahunan.length,
+          totalRows: filteredDataKomparasi.length,
         },
       });
     } else {
@@ -1704,13 +1903,6 @@ export const Perpajakan = () => {
             );
           })}
         </div>
-
-        <div style={{ paddingBottom: 6 }}>
-          <Btn variant="primary" size="sm" onClick={handleExportTab}>
-            <Download size={14} />
-            <span>Ekspor Laporan</span>
-          </Btn>
-        </div>
       </div>
 
       {/* FILTER CONTROLS TOOLBAR */}
@@ -1736,19 +1928,21 @@ export const Perpajakan = () => {
             minW={130}
           />
         )}
+        {tab === "komparasi_audit" && (
+          <Select
+            label="Masa Pajak (Bulan)"
+            value={filterBulanKomparasi}
+            onChange={setFilterBulanKomparasi}
+            options={OPSI_BULAN_KOMPARASI}
+            minW={210}
+          />
+        )}
         <Select
           label="Satker / Unor"
           value={filterSatker}
           onChange={setFilterSatker}
           options={["Semua", "TNI AD", "TNI AL", "TNI AU", "POLRI", "ASN Kemenhan", "ASN Polri"]}
           minW={130}
-        />
-        <Select
-          label="Kode MAK"
-          value={filterMAK}
-          onChange={setFilterMAK}
-          options={["Semua", "513113", "513114", "513122", "513123"]}
-          minW={110}
         />
         {tab === "ter_jan_nov" && (
           <Select
@@ -1964,35 +2158,41 @@ export const Perpajakan = () => {
               </span>
             </div>
 
-            {totalLebihBayarBulanIni > 0 && (
-              <button
-                onClick={() =>
-                  setFilterStatusPeserta((prev) =>
-                    prev === "Lebih Bayar (LB Dikembalikan)" ? "Semua" : "Lebih Bayar (LB Dikembalikan)"
-                  )
-                }
-                title="PMK 168/2023 Ps. 17(3): Nilai LB dikembalikan ke slip Dapem peserta dan mengompensasi setoran kas negara."
-                style={{
-                  background: filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "#0F172A" : "#F8FAFC",
-                  color: filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "#FFFFFF" : "#065F46",
-                  border: filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "1px solid #0F172A" : "1px solid #A7F3D0",
-                  padding: "3px 10px",
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <AlertTriangle size={12} color={filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "#FCD34D" : "#059669"} />
-                <span>{jumlahPesertaLebihBayar} WP Lebih Bayar (-{fmt(totalLebihBayarBulanIni)})</span>
-                <span style={{ fontSize: 10, opacity: 0.8 }}>
-                  {filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "• Reset" : "• Lihat WP"}
-                </span>
-              </button>
-            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {totalLebihBayarBulanIni > 0 && (
+                <button
+                  onClick={() =>
+                    setFilterStatusPeserta((prev) =>
+                      prev === "Lebih Bayar (LB Dikembalikan)" ? "Semua" : "Lebih Bayar (LB Dikembalikan)"
+                    )
+                  }
+                  title="PMK 168/2023 Ps. 17(3): Nilai LB dikembalikan ke slip Dapem peserta dan mengompensasi setoran kas negara."
+                  style={{
+                    background: filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "#0F172A" : "#F8FAFC",
+                    color: filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "#FFFFFF" : "#065F46",
+                    border: filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "1px solid #0F172A" : "1px solid #A7F3D0",
+                    padding: "3px 10px",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <AlertTriangle size={12} color={filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "#FCD34D" : "#059669"} />
+                  <span>{jumlahPesertaLebihBayar} WP Lebih Bayar (-{fmt(totalLebihBayarBulanIni)})</span>
+                  <span style={{ fontSize: 10, opacity: 0.8 }}>
+                    {filterStatusPeserta === "Lebih Bayar (LB Dikembalikan)" ? "• Reset" : "• Lihat WP"}
+                  </span>
+                </button>
+              )}
+              <Btn variant="primary" size="sm" onClick={() => handleExportTab("ter_jan_nov")}>
+                <Download size={13} />
+                <span>Ekspor Rekap Bulanan (Excel)</span>
+              </Btn>
+            </div>
           </div>
 
           {filteredDataBulanan.length === 0 ? (
@@ -2241,9 +2441,15 @@ export const Perpajakan = () => {
                 <Info size={11} color="#64748B" /> Ketentuan Cakupan P17
               </span>
             </div>
-            <span style={{ fontSize: 11.5, color: "#64748B" }}>
-              Dasar Regulasi: <strong>PMK No. 168/2023 Ps. 16 &amp; 17</strong>
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 11.5, color: "#64748B" }}>
+                Dasar Regulasi: <strong>PMK No. 168/2023 Ps. 16 &amp; 17</strong>
+              </span>
+              <Btn variant="primary" size="sm" onClick={() => handleExportTab("pasal17_des")}>
+                <Download size={13} />
+                <span>Ekspor Rekap P17 (Excel)</span>
+              </Btn>
+            </div>
           </div>
 
           <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
@@ -2385,7 +2591,14 @@ export const Perpajakan = () => {
       {/* ========================================================================= */}
       {tab === "spt_tahunan" && (
         <div style={{ background: "#FFFFFF", borderRadius: 8, padding: 18, border: "1px solid #E2E8F0" }}>
-          <SectionTitle>
+          <SectionTitle
+            action={
+              <Btn variant="primary" size="sm" onClick={() => handleExportTab("spt_tahunan")}>
+                <Download size={13} />
+                <span>Ekspor SPT Tahunan (Excel)</span>
+              </Btn>
+            }
+          >
             Rekapitulasi PPh Pasal 17 Tahunan (Dasar Pengisian SPT Tahunan PPh 21 PT ASABRI ke DJP)
           </SectionTitle>
 
@@ -2475,100 +2688,500 @@ export const Perpajakan = () => {
       {/* TAB 4: PERBANDINGAN & AUDIT TER VS PASAL 17 (BRD 4.5.25) */}
       {/* ========================================================================= */}
       {tab === "komparasi_audit" && (
-        <div style={{ background: "#FFFFFF", borderRadius: 8, padding: 18, border: "1px solid #E2E8F0" }}>
-          <SectionTitle>
-            Perbandingan Nilai PPh 21 Metode TER vs Metode Lama PPh Pasal 17 (Audit Trail)
-          </SectionTitle>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Header & Controls */}
+          <div style={{ background: "#FFFFFF", borderRadius: 8, padding: 18, border: "1px solid #E2E8F0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
+              <div>
+                <SectionTitle action={<Badge color="blue">Audit Trail &amp; Verifikasi Komparatif</Badge>}>
+                  Perbandingan Nilai PPh 21 Metode Baru (TER) vs Metode Lama (PPh Pasal 17)
+                </SectionTitle>
+                <div style={{ fontSize: 12, color: "#64748B", marginTop: 4, lineHeight: 1.5 }}>
+                  Sarana verifikasi, uji petik, dan audit komparasi atas fluktuasi potongan bulanan (Masa Januari s.d. November) serta pembuktian rekonsiliasi tahunan (Masa Desember / Dapem Terakhir) sesuai <strong>PMK 168/2023</strong> dan <strong>PP 58/2023</strong>.
+                </div>
+              </div>
 
-          <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-              <thead>
-                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                  <th style={{ padding: "9px 8px", textAlign: "center", width: 36, borderRight: "1px solid #E2E8F0" }}>No</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>NIK</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>NRP / Nopens</th>
-                  <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Peserta Pensiun</th>
-                  <th style={{ padding: "9px 10px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Jabatan Terakhir</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Masa Pajak</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Bruto Bulanan</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Metode TER (Baru)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Metode Pasal 17 (Lama)</th>
-                  <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Selisih (TER - P17)</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>% Selisih</th>
-                  <th style={{ padding: "9px 10px", textAlign: "center" }}>Status Evaluasi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDataTahunan.map((d, i) => {
-                  const isZero = d.selisihBulanan === 0;
-                  const isHigher = d.selisihBulanan > 0;
-                  return (
-                    <tr
-                      key={d.id}
-                      style={{ borderBottom: "1px solid #E2E8F0", background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F1F5F9")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")}
-                    >
-                      <td style={{ padding: "8px 8px", textAlign: "center", color: "#64748B", borderRight: "1px solid #E2E8F0" }}>{i + 1}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
-                        {d.nik}
-                      </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
-                        {d.nrp}
-                      </td>
-                      <td style={{ padding: "8px 12px", borderRight: "1px solid #E2E8F0", fontWeight: 700, color: "#0F172A" }}>
-                        {d.nama}
-                      </td>
-                      <td style={{ padding: "8px 10px", borderRight: "1px solid #E2E8F0", fontSize: 11.5, color: "#1E293B", fontWeight: 600 }}>
-                        {d.jabatan}
-                      </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: 600, color: "#334155", borderRight: "1px solid #E2E8F0" }}>
-                        {filterBulanTER} 2026
-                      </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: "#0F172A", borderRight: "1px solid #E2E8F0" }}>
-                        {fmt(d.brutoBulanan)}
-                      </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1D4ED8", borderRight: "1px solid #E2E8F0" }}>
-                        {fmt(d.pphTERBulanan)}
-                      </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: "#475569", borderRight: "1px solid #E2E8F0" }}>
-                        {fmt(d.pphP17Bulanan)}
-                      </td>
-                      <td
+              <Btn variant="primary" size="sm" onClick={() => handleExportTab("komparasi_audit")}>
+                <Download size={13} /> Ekspor Tabel Komparasi (Excel)
+              </Btn>
+            </div>
+
+            {/* Stat Cards Summary */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
+              <StatCard
+                icon={<Users size={IC} />}
+                label="Total Peserta Sampel"
+                value={`${filteredDataKomparasi.length} WP`}
+                sub={`Mode: ${filterBulanKomparasi}`}
+                color={COLORS.blue}
+              />
+              <StatCard
+                icon={<Building2 size={IC} />}
+                label={`Bruto ${isKomparasiTahunan ? "Setahun" : "Masa Ini"}`}
+                value={fmt(totalBrutoKomparasi)}
+                sub="Total dasar pemotongan pajak"
+                color={COLORS.gray800}
+              />
+              <StatCard
+                icon={<Calculator size={IC} />}
+                label={`PPh 21 Baru (${isKomparasiTahunan ? "Tahunan" : "TER/P17"})`}
+                value={fmt(totalPPhBaruKomparasi)}
+                sub="Metode Baru (PP 58 & PMK 168)"
+                color={COLORS.blueDark}
+              />
+              <StatCard
+                icon={<Scale size={IC} />}
+                label={`PPh 21 Lama (${isKomparasiTahunan ? "Tahunan" : "P17 Rata2"})`}
+                value={fmt(totalPPhLamaKomparasi)}
+                sub="Simulasi Metode Lama (Pasal 17)"
+                color={COLORS.gray600}
+              />
+              <StatCard
+                icon={<AlertTriangle size={IC} />}
+                label="Selisih Bersih (Delta)"
+                value={(totalSelisihKomparasi > 0 ? "+" : "") + fmt(totalSelisihKomparasi)}
+                sub={totalSelisihKomparasi === 0 ? "100% Imbang (Nihil Selisih)" : totalSelisihKomparasi > 0 ? "TER Lebih Tinggi di masa ini" : "TER Lebih Rendah di masa ini"}
+                color={totalSelisihKomparasi === 0 ? COLORS.green : totalSelisihKomparasi > 0 ? COLORS.red : COLORS.orange}
+              />
+            </div>
+
+            {/* Mode Banner Alert */}
+            <div
+              style={{
+                background: isKomparasiTahunan ? "#F0FDF4" : "#EFF6FF",
+                border: `1px solid ${isKomparasiTahunan ? "#BBF7D0" : "#BFDBFE"}`,
+                borderRadius: 8,
+                padding: "10px 14px",
+                marginBottom: 14,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                fontSize: 12,
+                color: isKomparasiTahunan ? "#166534" : "#1E40AF",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {isKomparasiTahunan ? <CheckCircle2 size={16} color="#16A34A" /> : <Info size={16} color="#2563EB" />}
+                <span>
+                  {isKomparasiTahunan ? (
+                    <>
+                      <strong>Tampilan Akumulasi Tahunan (Full Year):</strong> Membuktikan bahwa secara total setahun, perhitungan pajak antara Metode Baru (TER Jan–Nov + Desember P17) dan Metode Lama (Pasal 17) <strong>bernilai identik 100% (selisih Rp 0)</strong>.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Tampilan Evaluasi Masa {filterBulanKomparasi} 2026:</strong> Menampilkan perbandingan riil potongan pajak bulanan. Klik tombol <strong>"Rincian 12 Bulan"</strong> pada baris peserta untuk melihat matriks lengkap dari Januari s.d. Desember.
+                    </>
+                  )}
+                </span>
+              </div>
+              <Badge color={isKomparasiTahunan ? "green" : "blue"}>
+                {isKomparasiTahunan ? "Rekonsiliasi Sempurna" : `Masa ${filterBulanKomparasi}`}
+              </Badge>
+            </div>
+
+            {/* Table */}
+            <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
+                    <th style={{ padding: "9px 8px", textAlign: "center", width: 36, borderRight: "1px solid #E2E8F0" }}>No</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>NIK</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>NRP / Nopens</th>
+                    <th style={{ padding: "9px 12px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Peserta Pensiun</th>
+                    <th style={{ padding: "9px 10px", textAlign: "left", borderRight: "1px solid #E2E8F0" }}>Jabatan Terakhir</th>
+                    <th style={{ padding: "9px 8px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>PTKP</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Masa Pajak</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Penghasilan Bruto</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Metode Baru</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>PPh 21 Metode Lama</th>
+                    <th style={{ padding: "9px 12px", textAlign: "right", borderRight: "1px solid #E2E8F0" }}>Selisih (Baru - Lama)</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>% Selisih</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>Status Evaluasi</th>
+                    <th style={{ padding: "9px 10px", textAlign: "center" }}>Aksi Audit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDataKomparasi.map((d, i) => {
+                    const isZero = d.selisihEvaluasi === 0;
+                    const isHigher = d.selisihEvaluasi > 0;
+                    return (
+                      <tr
+                        key={d.id}
                         style={{
-                          padding: "8px 12px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          fontWeight: 700,
-                          color: isZero ? "#64748B" : isHigher ? "#DC2626" : "#059669",
-                          borderRight: "1px solid #E2E8F0",
+                          borderBottom: "1px solid #E2E8F0",
+                          background: d.isDapemTerakhirBulanIni
+                            ? "#FAF5FF"
+                            : isZero
+                            ? (i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")
+                            : isHigher
+                            ? "#FFFBFB"
+                            : "#F0FDF4",
                         }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#F1F5F9")}
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = d.isDapemTerakhirBulanIni
+                            ? "#FAF5FF"
+                            : isZero
+                            ? (i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")
+                            : isHigher
+                            ? "#FFFBFB"
+                            : "#F0FDF4")
+                        }
                       >
-                        {isHigher ? "+" : ""}{fmt(d.selisihBulanan)}
-                      </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "center",
-                          fontFamily: "monospace",
-                          fontWeight: 700,
-                          color: isZero ? "#64748B" : isHigher ? "#DC2626" : "#059669",
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {d.selisihPersen}%
-                      </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                        <Badge color={isZero ? "gray" : isHigher ? "red" : "green"}>
-                          {isZero ? "Setara" : isHigher ? "TER Lebih Tinggi" : "TER Lebih Rendah"}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td style={{ padding: "8px 8px", textAlign: "center", color: "#64748B", borderRight: "1px solid #E2E8F0" }}>{i + 1}</td>
+                        <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
+                          {d.nik}
+                        </td>
+                        <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
+                          {d.nrp}
+                        </td>
+                        <td style={{ padding: "8px 12px", borderRight: "1px solid #E2E8F0" }}>
+                          <div style={{ fontWeight: 700, color: "#0F172A" }}>{d.nama}</div>
+                          <div style={{ fontSize: 10.5, color: "#64748B" }}>{d.satker} (MAK {d.mak})</div>
+                        </td>
+                        <td style={{ padding: "8px 10px", borderRight: "1px solid #E2E8F0", fontSize: 11.5, color: "#1E293B", fontWeight: 600 }}>
+                          {d.jabatan}
+                        </td>
+                        <td style={{ padding: "8px 8px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
+                          <span style={{ fontWeight: 800, color: "#0F172A" }}>{d.kodeJiwa}</span>
+                          <div style={{ fontSize: 9.5, color: "#64748B" }}>{d.kategoriTER}</div>
+                        </td>
+                        <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: 600, color: "#334155", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
+                          {d.masaPajakLabel}
+                        </td>
+                        <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: d.brutoEvaluasi === 0 ? "#94A3B8" : "#0F172A", borderRight: "1px solid #E2E8F0", fontWeight: 600 }}>
+                          {fmt(d.brutoEvaluasi)}
+                        </td>
+                        <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: d.pphBaruEvaluasi < 0 ? "#059669" : "#1D4ED8", borderRight: "1px solid #E2E8F0" }}>
+                          {d.pphBaruEvaluasi < 0 ? `- ${fmt(Math.abs(d.pphBaruEvaluasi))} (LB)` : fmt(d.pphBaruEvaluasi)}
+                        </td>
+                        <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: "#475569", borderRight: "1px solid #E2E8F0" }}>
+                          {fmt(d.pphLamaEvaluasi)}
+                        </td>
+                        <td
+                          style={{
+                            padding: "8px 12px",
+                            textAlign: "right",
+                            fontFamily: "monospace",
+                            fontWeight: 700,
+                            color: isZero ? "#64748B" : isHigher ? "#DC2626" : "#059669",
+                            borderRight: "1px solid #E2E8F0",
+                          }}
+                        >
+                          {isZero ? "Rp 0" : (isHigher ? "+" : "") + fmt(d.selisihEvaluasi)}
+                        </td>
+                        <td
+                          style={{
+                            padding: "8px 10px",
+                            textAlign: "center",
+                            fontFamily: "monospace",
+                            fontWeight: 700,
+                            color: isZero ? "#64748B" : isHigher ? "#DC2626" : "#059669",
+                            borderRight: "1px solid #E2E8F0",
+                          }}
+                        >
+                          {d.selisihPersenStr}
+                        </td>
+                        <td style={{ padding: "8px 10px", textAlign: "center", borderRight: "1px solid #E2E8F0" }}>
+                          <Badge color={d.badgeColor}>
+                            {d.statusEvaluasi}
+                          </Badge>
+                        </td>
+                        <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                          <button
+                            onClick={() => setModalRincian12Bulan(d)}
+                            style={{
+                              background: "#EFF6FF",
+                              border: "1px solid #BFDBFE",
+                              color: "#1D4ED8",
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              cursor: "pointer",
+                              fontSize: 11,
+                              fontWeight: 700,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <Calendar size={12} /> Rincian 12 Bulan
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {/* Total Row */}
+                  <tr style={{ background: "#F1F5F9", fontWeight: 800 }}>
+                    <td colSpan={7} style={{ padding: "9px 12px", color: "#0F172A", borderRight: "1px solid #CBD5E1" }}>
+                      TOTAL EVALUASI AUDIT ({filteredDataKomparasi.length} PESERTA) — {filterBulanKomparasi}
+                    </td>
+                    <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", borderRight: "1px solid #CBD5E1" }}>
+                      {fmt(totalBrutoKomparasi)}
+                    </td>
+                    <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: "#1D4ED8", borderRight: "1px solid #CBD5E1", fontSize: 13 }}>
+                      {fmt(totalPPhBaruKomparasi)}
+                    </td>
+                    <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: "#475569", borderRight: "1px solid #CBD5E1", fontSize: 13 }}>
+                      {fmt(totalPPhLamaKomparasi)}
+                    </td>
+                    <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: totalSelisihKomparasi === 0 ? "#059669" : totalSelisihKomparasi > 0 ? "#DC2626" : "#059669", borderRight: "1px solid #CBD5E1", fontSize: 13 }}>
+                      {totalSelisihKomparasi === 0 ? "Rp 0" : (totalSelisihKomparasi > 0 ? "+" : "") + fmt(totalSelisihKomparasi)}
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "center", borderRight: "1px solid #CBD5E1" }}>—</td>
+                    <td colSpan={2} style={{ padding: "9px 10px", textAlign: "center" }}>
+                      <Badge color={totalSelisihKomparasi === 0 ? "green" : "blue"}>
+                        {totalSelisihKomparasi === 0 ? "✓ 100% Selaras Imbang" : "Audit Terverifikasi"}
+                      </Badge>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* ========================================================================= */}
+          {/* MODAL RINCIAN 12 BULAN KOMPARASI PER PESERTA */}
+          {/* ========================================================================= */}
+          {modalRincian12Bulan && (() => {
+            const data12Bulan = generate12BulanPeserta(modalRincian12Bulan);
+            const p = modalRincian12Bulan;
+            return (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(15, 23, 42, 0.65)",
+                  backdropFilter: "blur(4px)",
+                  zIndex: 9999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20,
+                }}
+                onClick={() => setModalRincian12Bulan(null)}
+              >
+                <div
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 12,
+                    width: "100%",
+                    maxWidth: 1020,
+                    maxHeight: "92vh",
+                    overflowY: "auto",
+                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
+                    border: "1px solid #CBD5E1",
+                    padding: 24,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header Modal */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, borderBottom: "1px solid #E2E8F0", paddingBottom: 14 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <Scale size={20} color="#1D4ED8" />
+                        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#0F172A" }}>
+                          Matriks Komparasi 12 Bulan: Metode Baru (TER) vs Metode Lama (Pasal 17)
+                        </h3>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 12.5, color: "#64748B" }}>
+                        Rincian perbandingan bulan ke bulan untuk pembuktian kesetaraan rekonsiliasi tahunan sesuai <strong>PMK 168/2023</strong> &amp; <strong>PP 58/2023</strong>.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setModalRincian12Bulan(null)}
+                      style={{
+                        background: "#F1F5F9",
+                        border: "none",
+                        borderRadius: 6,
+                        padding: 6,
+                        cursor: "pointer",
+                        color: "#64748B",
+                      }}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Info Peserta Cards */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10, marginBottom: 18, background: "#F8FAFC", padding: 12, borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                    <div>
+                      <div style={{ fontSize: 10.5, textTransform: "uppercase", fontWeight: 700, color: "#64748B" }}>Nama &amp; NRP</div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: "#0F172A" }}>{p.nama}</div>
+                      <div style={{ fontSize: 11, fontFamily: "monospace", color: "#3B82F6" }}>NRP: {p.nrp}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10.5, textTransform: "uppercase", fontWeight: 700, color: "#64748B" }}>NIK / NPWP</div>
+                      <div style={{ fontSize: 12, fontFamily: "monospace", color: "#0F172A" }}>{p.nik}</div>
+                      <div style={{ fontSize: 11, color: "#059669" }}>{p.statusNPWP}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10.5, textTransform: "uppercase", fontWeight: 700, color: "#64748B" }}>Satker &amp; Jabatan</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#0F172A" }}>{p.satker} (MAK {p.mak})</div>
+                      <div style={{ fontSize: 11, color: "#64748B" }}>{p.jabatan}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10.5, textTransform: "uppercase", fontWeight: 700, color: "#64748B" }}>Kode Jiwa &amp; PTKP</div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: "#0F172A" }}>{p.kodeJiwa} ({p.kategoriTER})</div>
+                      <div style={{ fontSize: 11, color: "#64748B" }}>PTKP: {fmt(p.ptkp)}/thn</div>
+                    </div>
+                  </div>
+
+                  {/* Tabel Matriks 12 Bulan */}
+                  <div style={{ overflowX: "auto", borderRadius: 8, border: "1px solid #CBD5E1", marginBottom: 16 }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ background: "#F1F5F9", color: "#475569" }}>
+                          <th style={{ padding: "8px 10px", textAlign: "center", width: 40, borderRight: "1px solid #CBD5E1" }}>Masa</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left", width: 110, borderRight: "1px solid #CBD5E1" }}>Bulan</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", borderRight: "1px solid #CBD5E1" }}>Bruto Bulanan</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", borderRight: "1px solid #CBD5E1" }}>PPh 21 Baru (TER / P17)</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", borderRight: "1px solid #CBD5E1" }}>PPh 21 Lama (P17 Rata2)</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", borderRight: "1px solid #CBD5E1" }}>Selisih Bulanan</th>
+                          <th style={{ padding: "8px 12px", textAlign: "left" }}>Keterangan &amp; Mekanisme</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data12Bulan.months.map((m, idx) => {
+                          const isZero = m.selisih === 0;
+                          const isPositive = m.selisih > 0;
+                          const isDesember = m.bulanIdx === 12;
+                          const isBerhenti = p.isBerhenti && m.bulanIdx === p.bulanBerhentiIdx;
+                          return (
+                            <tr
+                              key={idx}
+                              style={{
+                                borderBottom: "1px solid #E2E8F0",
+                                background: isBerhenti
+                                  ? "#FAF5FF"
+                                  : isDesember
+                                  ? "#EFF6FF"
+                                  : m.status.includes("Non-Aktif")
+                                  ? "#F8FAFC"
+                                  : idx % 2 === 1
+                                  ? "#F8FAFC"
+                                  : "#FFFFFF",
+                              }}
+                            >
+                              <td style={{ padding: "8px 10px", textAlign: "center", color: "#64748B", borderRight: "1px solid #E2E8F0", fontWeight: 700 }}>
+                                {String(m.bulanIdx).padStart(2, "0")}
+                              </td>
+                              <td style={{ padding: "8px 12px", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0" }}>
+                                {m.namaBulan}
+                              </td>
+                              <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: m.bruto === 0 ? "#94A3B8" : "#0F172A", borderRight: "1px solid #E2E8F0" }}>
+                                {fmt(m.bruto)}
+                              </td>
+                              <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: m.pphBaru < 0 ? "#059669" : "#1D4ED8", borderRight: "1px solid #E2E8F0" }}>
+                                {m.pphBaru < 0 ? `- ${fmt(Math.abs(m.pphBaru))} (LB)` : fmt(m.pphBaru)}
+                              </td>
+                              <td style={{ padding: "8px 12px", textAlign: "right", fontFamily: "monospace", color: "#475569", borderRight: "1px solid #E2E8F0" }}>
+                                {fmt(m.pphLama)}
+                              </td>
+                              <td
+                                style={{
+                                  padding: "8px 12px",
+                                  textAlign: "right",
+                                  fontFamily: "monospace",
+                                  fontWeight: 700,
+                                  color: isZero ? "#64748B" : isPositive ? "#DC2626" : "#059669",
+                                  borderRight: "1px solid #E2E8F0",
+                                }}
+                              >
+                                {isZero ? "Rp 0" : (isPositive ? "+" : "") + fmt(m.selisih)}
+                              </td>
+                              <td style={{ padding: "8px 12px" }}>
+                                <Badge color={m.badgeColor}>{m.status}</Badge>
+                                <span style={{ fontSize: 11, color: "#64748B", marginLeft: 6 }}>{m.keterangan}</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+
+                        {/* BARIS TOTAL AKUMULASI SETAHUN */}
+                        <tr style={{ background: "#F1F5F9", fontWeight: 800, borderTop: "2px solid #CBD5E1" }}>
+                          <td colSpan={2} style={{ padding: "10px 12px", color: "#0F172A", borderRight: "1px solid #CBD5E1" }}>
+                            TOTAL SETAHUN (AKUMULASI)
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#0F172A", borderRight: "1px solid #CBD5E1" }}>
+                            {fmt(data12Bulan.totalBruto)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#1D4ED8", fontSize: 13, borderRight: "1px solid #CBD5E1" }}>
+                            {fmt(data12Bulan.totalPPhBaru)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#475569", fontSize: 13, borderRight: "1px solid #CBD5E1" }}>
+                            {fmt(data12Bulan.totalPPhLama)}
+                          </td>
+                          <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#059669", fontSize: 13, borderRight: "1px solid #CBD5E1" }}>
+                            {fmt(data12Bulan.totalSelisih)}
+                          </td>
+                          <td style={{ padding: "10px 12px" }}>
+                            <Badge color="green">✓ 100% REKONSILIASI IMBANG (SELISIH NIHIL)</Badge>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Callout Box Edukasi */}
+                  <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 8, padding: "12px 16px", marginBottom: 16, display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <CheckCircle2 size={18} color="#16A34A" style={{ marginTop: 2, flexShrink: 0 }} />
+                    <div style={{ fontSize: 12, color: "#166534", lineHeight: 1.5 }}>
+                      <strong>Hasil Audit &amp; Verifikasi Rekonsiliasi:</strong>
+                      <br />
+                      Meskipun pada Masa Januari s.d. November potongan PPh 21 menggunakan tarif TER menghasilkan deviasi bulanan dibanding metode lama Pasal 17, <strong>akumulasi setahun penuh terbukti 100% identik dan imbang (selisih Rp 0)</strong>. Pada bulan terakhir ({p.isBerhenti ? `Masa ${p.bulanBerhentiNama} sebagai Dapem Terakhir` : "Masa Desember sebagai Rekonsiliasi Akhir"}), sistem otomatis menyesuaikan potongan agar akumulasi setoran persis sama dengan PPh Pasal 17 setahun penuh sesuai amanat PMK 168/2023.
+                    </div>
+                  </div>
+
+                  {/* Footer Modal */}
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                    <Btn
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPreview({
+                          title: `Rincian Komparasi 12 Bulan — ${p.nama}`,
+                          subtitle: `NRP: ${p.nrp} • NIK: ${p.nik} • Status PTKP: ${p.kodeJiwa}`,
+                          type: "table",
+                          fileName: `Rincian_Komparasi_12Bulan_${p.nrp}.xlsx`,
+                          content: {
+                            columns: ["Masa", "Bulan", "Bruto Bulanan", "PPh 21 Baru", "PPh 21 Lama", "Selisih", "Keterangan"],
+                            alignments: ["center", "left", "right", "right", "right", "right", "left"],
+                            rows: data12Bulan.months.map(m => [
+                              String(m.bulanIdx).padStart(2, "0"),
+                              m.namaBulan,
+                              fmt(m.bruto),
+                              fmt(m.pphBaru),
+                              fmt(m.pphLama),
+                              fmt(m.selisih),
+                              m.keterangan,
+                            ]),
+                            totalRow: [
+                              { colSpan: 2, text: "TOTAL SETAHUN", align: "left" },
+                              { text: fmt(data12Bulan.totalBruto), align: "right" },
+                              { text: fmt(data12Bulan.totalPPhBaru), align: "right" },
+                              { text: fmt(data12Bulan.totalPPhLama), align: "right" },
+                              { text: fmt(data12Bulan.totalSelisih), align: "right" },
+                              { text: "100% Rekonsiliasi Imbang", align: "center" },
+                            ],
+                            totalRows: 12,
+                          }
+                        })
+                      }
+                    >
+                      <Download size={13} /> Ekspor Rincian (Excel)
+                    </Btn>
+                    <Btn variant="primary" size="sm" onClick={() => setModalRincian12Bulan(null)}>
+                      Tutup
+                    </Btn>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -2579,11 +3192,16 @@ export const Perpajakan = () => {
         <div style={{ background: "#FFFFFF", borderRadius: 8, padding: 18, border: "1px solid #E2E8F0" }}>
           <SectionTitle
             action={
-              uploadStep > 0 && (
-                <Btn variant="ghost" size="sm" onClick={() => setUploadStep(0)}>
-                  <RefreshCw size={13} /> Ulangi Alur
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                {uploadStep > 0 && (
+                  <Btn variant="ghost" size="sm" onClick={() => setUploadStep(0)}>
+                    <RefreshCw size={13} /> Ulangi Alur
+                  </Btn>
+                )}
+                <Btn variant="primary" size="sm" onClick={() => handleExportTab("bukpot_coretax")}>
+                  <Download size={13} /> Ekspor Rekap 1721-A2 (Excel)
                 </Btn>
-              )
+              </div>
             }
           >
             Penerbitan Digital Bukti Potong 1721-A2 &amp; Integrasi Coretax DJP
