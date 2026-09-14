@@ -10,6 +10,8 @@ import {
   GeneratorTagihan,
   ListSP,
   PembayaranPensiun,
+  DapemSusulan,
+  NonDapemRekap,
   DashboardDana,
   KreditPiutang,
   TagihanImbalJasa,
@@ -21,6 +23,7 @@ import {
   RekonBPJS,
   ReportGenerator,
   KonfigurasiManfaat,
+  ReportKU,
 } from "./pages";
 
 const PAGES = {
@@ -28,28 +31,35 @@ const PAGES = {
   standarisasi_cms: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
   kalkulator: { title: "Perhitungan Iuran Peserta", component: KalkulatorIuran },
   rekonsiliasi: { title: "Rekonsiliasi Penerimaan Dana", component: RekonsIuran },
-  tagihan: { title: "Penerbitan Tagihan Iuran ke Kemenkeu", component: GeneratorTagihan },
-  listsp: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
-  bayarpensiun: { title: "DAPEM — Daftar Rekapitulasi Pembayaran Pensiun", component: PembayaranPensiun },
+  tagihan: { title: "Penagihan Iuran Ke Kemenkeu", component: GeneratorTagihan },
+  listsp: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: () => <ListSP defaultTab="listsp" /> },
+  jkk_perawatan: { title: "Surat Perintah Pembayaran — JKK Perawatan RS Provider", component: () => <ListSP defaultTab="jkk" /> },
+  hutang_pum: { title: "Daftar Penyaluran & Pelunasan Piutang PUM KPR", component: () => <ListSP defaultTab="pum" /> },
+  bayarpensiun: { title: "DAPEM Induk — Pembayaran Pensiun Rutin Bulanan", component: () => <PembayaranPensiun defaultTab="induk" /> },
+  dapem_susulan: { title: "DAPEM Susulan — Pembayaran Pensiun Termin Susulan", component: () => <PembayaranPensiun defaultTab="susulan" /> },
+  non_dapem: { title: "NON-DAPEM — Pembayaran Pertama (PP), UKP & UDW", component: () => <PembayaranPensiun defaultTab="nondapem" /> },
   dana: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
   rekonrk: { title: "Ketersediaan Dana & Rekening Koran Mitra Bayar", component: DashboardDana },
-  klaim: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: ListSP },
+  klaim: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: () => <ListSP defaultTab="listsp" /> },
   kredit: { title: "Penagihan Keterlanjuran Bayar", component: KreditPiutang },
   imbaljasa: { title: "Tagihan Imbal Jasa Mitra Bayar", component: TagihanImbalJasa },
+  imbaljasa_flagging: { title: "Tagihan Imbal Jasa — Flagging Kredit", component: () => <TagihanImbalJasa defaultTab="flagging" /> },
+  imbaljasa_auth: { title: "Tagihan Imbal Jasa — Authentikasi Digital", component: () => <TagihanImbalJasa defaultTab="auth" /> },
   tlpolis: { title: "Portofolio Polis & Premi Taspen Life", component: TaspenPolis },
   tlimbaljasa: { title: "Tagihan Imbal Jasa Taspen Life", component: TaspenImbalJasa },
-  konfigurasi_manfaat: { title: "Master Mitra & Parameter Pengembangan Manfaat", component: KonfigurasiManfaat },
+  konfigurasi_manfaat: { title: "Parameter Suku Bunga", component: KonfigurasiManfaat },
   pajak: { title: "Administrasi PPh 21 & Bukti Potong", component: Perpajakan },
   ukp: { title: "Tabel 24 — Rekap UKP (Uang Kekurangan Pensiun) Peserta Pensiun Bulanan", component: RekapUKP },
   dipa: { title: "Realisasi & Sisa Pagu DIPA TA 2026", component: DashboardDIPA },
   bpjs: { title: "Rekonsiliasi Iuran BPJS Kesehatan", component: RekonBPJS },
+  report_ku: { title: "Report KU", hideDefaultHeader: true, component: ReportKU },
   laporan: { title: "Laporan & Ekspor Data", component: ReportGenerator },
 };
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [expandedMenus, setExpandedMenus] = useState(["Administrasi Iuran Peserta"]);
+  const [expandedMenus, setExpandedMenus] = useState(["Administrasi Iuran Peserta", "Perintah Pembayaran", "Administrasi DAPEM", "PELAPORAN"]);
 
   const page = PAGES[activePage] || PAGES.dashboard;
   const PageComp = page.component;
@@ -82,40 +92,42 @@ export default function App() {
         {/* Content Area */}
         <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
           {/* Breadcrumb & Date Header */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 12, color: COLORS.gray400, fontWeight: 500, marginBottom: 4 }}>
-                Beranda › Keuangan › <b style={{ color: COLORS.gray700, fontWeight: 600 }}>{page.title}</b>
-              </div>
-              <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.4, color: COLORS.gray900, margin: 0 }}>
-                {page.title}
-              </h2>
-            </div>
+          {!page.hideDefaultHeader && (
             <div
               style={{
                 display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
-                gap: 8,
-                background: COLORS.white,
-                border: `1px solid ${COLORS.gray200}`,
-                borderRadius: 10,
-                padding: "7px 14px",
-                boxShadow: "0 1px 2px rgba(15,23,42,0.05)",
+                marginBottom: 20,
               }}
             >
-              <Calendar size={14} color={COLORS.gray400} />
-              <span style={{ color: COLORS.gray700, fontSize: 12, fontWeight: 700 }}>
-                Minggu, 06 Juli 2026
-              </span>
+              <div>
+                <div style={{ fontSize: 12, color: COLORS.gray400, fontWeight: 500, marginBottom: 4 }}>
+                  Beranda › Keuangan › <b style={{ color: COLORS.gray700, fontWeight: 600 }}>{page.title}</b>
+                </div>
+                <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.4, color: COLORS.gray900, margin: 0 }}>
+                  {page.title}
+                </h2>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: COLORS.white,
+                  border: `1px solid ${COLORS.gray200}`,
+                  borderRadius: 10,
+                  padding: "7px 14px",
+                  boxShadow: "0 1px 2px rgba(15,23,42,0.05)",
+                }}
+              >
+                <Calendar size={14} color={COLORS.gray400} />
+                <span style={{ color: COLORS.gray700, fontSize: 12, fontWeight: 700 }}>
+                  Minggu, 06 Juli 2026
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Active Page Componen */}
           <PageComp />

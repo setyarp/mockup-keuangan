@@ -48,7 +48,7 @@ export const MENU = [
         children: [
           { id: "kalkulator", label: "Perhitungan Iuran Peserta" },
           { id: "rekonsiliasi", label: "Rekonsiliasi Penerimaan Dana" },
-          { id: "tagihan", label: "Penerbitan Tagihan Kemenkeu", disabled: true },
+          { id: "tagihan", label: "Penagihan Iuran Ke Kemenkeu" },
         ],
       },
     ],
@@ -58,10 +58,21 @@ export const MENU = [
     items: [
       {
         icon: "file",
-        label: "Perintah & Realisasi Pembayaran",
+        label: "Perintah Pembayaran",
         children: [
           { id: "listsp", label: "List SP (Surat Perintah)" },
-          { id: "bayarpensiun", label: "DAPEM" },
+          { id: "jkk_perawatan", label: "JKK Perawatan" },
+          { id: "hutang_pum", label: "Hutang PUM KPR" },
+        ],
+      },
+      {
+        icon: "clip",
+        label: "Administrasi DAPEM",
+        children: [
+          { id: "bayarpensiun", label: "DAPEM Induk" },
+          { id: "dapem_susulan", label: "DAPEM Susulan" },
+          { id: "non_dapem", label: "Non-Dapem (PP, UKP, UDW)" },
+          { id: "report_ku", label: "Report KU" },
         ],
       },
       {
@@ -82,9 +93,10 @@ export const MENU = [
         icon: "card",
         label: "Penagihan Pengembangan Manfaat",
         children: [
-          { id: "imbaljasa", label: "Imbal Jasa Mitra Bayar" },
+          { id: "imbaljasa_flagging", label: "Imbal Jasa — Flagging Kredit" },
+          { id: "imbaljasa_auth", label: "Imbal Jasa — Auth Digital" },
           { id: "tlimbaljasa", label: "Imbal Jasa Taspen Life" },
-          { id: "konfigurasi_manfaat", label: "Master Mitra & Parameter Manfaat" },
+          { id: "konfigurasi_manfaat", label: "Parameter Suku Bunga" },
         ],
       },
     ],

@@ -46,8 +46,16 @@ ehthumbs.db
 *.temp
 extracted_brd_tax.txt
 extracted_*.txt
+brd_*.txt
+brs_*.txt
+scratch_*.txt
+screenshot*.png
 
 # Document / Reference Files
 *.pdf
 *.docx
 *.doc
+
+# Internal Handover & Developer Documents (Excluded from git)
+panduan_teknis_monitoring_dana_developer.md
+rencana_otomasi_monitoring_dana_masuk.md

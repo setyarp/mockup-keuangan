@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   CheckCircle2,
   Percent,
@@ -12,6 +12,17 @@ import {
   TrendingUp,
   Receipt,
   Scale,
+  Search,
+  Filter,
+  Download,
+  Plus,
+  Eye,
+  Info,
+  Sliders,
+  ShieldCheck,
+  Building2,
+  User,
+  Calendar,
 } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import {
@@ -26,318 +37,577 @@ import {
 } from "../components/common";
 
 export const TaspenImbalJasa = () => {
-  const [subTab, setSubTab] = useState("tagihan"); // "tagihan" vs "rincian_brd"
-  const [filterProgram, setFilterProgram] = useState("Semua");
+  // Hanya 2 Tab Utama: "tpb" vs "tds" (Sesuai Permintaan User)
+  const [activeTab, setActiveTab] = useState("tpb"); // "tpb" | "tds"
+
+  // Filter & Search States
+  const [filterBulan, setFilterBulan] = useState("Semua");
   const [filterStatus, setFilterStatus] = useState("Semua");
-  const [searchTagihan, setSearchTagihan] = useState("");
-  const [detailTagihan, setDetailTagihan] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [showTarif, setShowTarif] = useState(false);
-  const [tarifTDS, setTarifTDS] = useState(2.5);
-  const [tarifTPB, setTarifTPB] = useState(3.0);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Parameter Rates
+  const [tarifTPB, setTarifTPB] = useState(3.0); // 3.0% untuk TPB
+  const [tarifTDS, setTarifTDS] = useState(2.5); // 2.5% untuk TDS
   const [pphRate, setPphRate] = useState(2.0); // 2% PPh 23
   const [ppnRate, setPpnRate] = useState(12.0); // 12% PPN
-  const [dppRatio, setDppRatio] = useState(11 / 12); // DPP Nilai Lain 11/12
-  const [biRate, setBiRate] = useState(5.75); // BI Rate 5.75%
+  const [showConfigModal, setShowConfigModal] = useState(false);
 
-  const fmt = (n) => `Rp ${Math.round(n).toLocaleString("id-ID")}`;
-  const progColor = (p) =>
-    p.includes("TDS")
-      ? "blue"
-      : p.includes("JKK")
-      ? "orange"
-      : "green";
-  const progShort = (p) =>
-    p.includes("TDS")
-      ? "TDS (2,5%)"
-      : p.includes("JKK")
-      ? "TPB-JKK (3%)"
-      : "TPB-JKM (3%)";
+  // Modal States
+  const [detailModal, setDetailModal] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [tambahModal, setTambahModal] = useState(false);
 
-  // Data tagihan imbal jasa berbasis SP Premi yang telah diselesaikan
-  const allTagihan = [
-    {
-      no: "TIJ-2606-001",
-      program: "TDS (Taspen Dwiguna Sejahtera)",
-      kodeProgram: "TDS",
-      noSP: "SP/TL/2026/06/001",
-      periode: "Mei 2026",
-      jmlPolis: 2,
-      premi: 12000000,
-      tarif: 2.5,
-      tglTerbit: "18 Jun 2026",
-      jatuhTempo: "08 Jul 2026", // 14 hari kerja
-      tglBayar: "02 Jul 2026",
-      hariTerlambat: 0,
-      status: "Dibayar",
-      pesertaContoh: "Serka Ahmad Fauzi, Briptu Rina Marlina",
-    },
-    {
-      no: "TIJ-2606-002",
-      program: "TPB - Proteksi Beasiswa JKK",
-      kodeProgram: "TPB_JKK",
-      noSP: "SP/TL/2026/06/002",
-      periode: "Mei 2026",
-      jmlPolis: 1,
-      premi: 7440000,
-      tarif: 3.0,
-      tglTerbit: "18 Jun 2026",
-      jatuhTempo: "08 Jul 2026",
-      tglBayar: null,
-      hariTerlambat: 12,
-      status: "Belum Dibayar",
-      pesertaContoh: "Letkol Bambang Suharto",
-    },
-    {
-      no: "TIJ-2606-003",
-      program: "TPB - Proteksi Beasiswa JKm",
-      kodeProgram: "TPB_JKM",
-      noSP: "SP/TL/2026/06/003",
-      periode: "Mei 2026",
-      jmlPolis: 2,
-      premi: 7200000,
-      tarif: 3.0,
-      tglTerbit: "18 Jun 2026",
-      jatuhTempo: "08 Jul 2026",
-      tglBayar: "05 Jul 2026",
-      hariTerlambat: 0,
-      status: "Dibayar",
-      pesertaContoh: "AKP Dedi Kurniawan, Pembina Utama Dr. Ratna",
-    },
-    {
-      no: "TIJ-2605-001",
-      program: "TDS (Taspen Dwiguna Sejahtera)",
-      kodeProgram: "TDS",
-      noSP: "SP/TL/2026/05/001",
-      periode: "April 2026",
-      jmlPolis: 2,
-      premi: 12000000,
-      tarif: 2.5,
-      tglTerbit: "18 Mei 2026",
-      jatuhTempo: "08 Jun 2026",
-      tglBayar: "15 Jun 2026",
-      hariTerlambat: 7,
-      status: "Terlambat",
-      pesertaContoh: "Peltu Hendra Wijaya, Bripka Anwar Ibrahim",
-    },
-    {
-      no: "TIJ-2605-002",
-      program: "TPB - Proteksi Beasiswa JKK",
-      kodeProgram: "TPB_JKK",
-      noSP: "SP/TL/2026/05/002",
-      periode: "April 2026",
-      jmlPolis: 1,
-      premi: 6480000,
-      tarif: 3.0,
-      tglTerbit: "18 Mei 2026",
-      jatuhTempo: "08 Jun 2026",
-      tglBayar: "28 Mei 2026",
-      hariTerlambat: 0,
-      status: "Dibayar",
-      pesertaContoh: "Penata Tk.I Siti Nurhaliza",
-    },
-    {
-      no: "TIJ-2607-001",
-      program: "TDS (Taspen Dwiguna Sejahtera)",
-      kodeProgram: "TDS",
-      noSP: "SP/TL/2026/07/001",
-      periode: "Juni 2026",
-      jmlPolis: 2,
-      premi: 12000000,
-      tarif: 2.5,
-      tglTerbit: "20 Jul 2026",
-      jatuhTempo: "10 Agu 2026",
-      tglBayar: null,
-      hariTerlambat: 0,
-      status: "Menunggu Pembayaran",
-      pesertaContoh: "Serka Ahmad Fauzi, Briptu Rina Marlina",
-    },
-  ];
+  // Helper Formatter
+  const fmt = (n) =>
+    typeof n === "number" ? `Rp ${Math.round(n).toLocaleString("id-ID")}` : "—";
 
-  // Data Rincian Individu Format BRD V5 (Line 271-273)
-  const rincianBRD = [
+  // -------------------------------------------------------------
+  // DATA MOCK RESMI SPESIFIKASI BRD V5 (Line 271-273)
+  // Format Kolom Identik:
+  // No | Bulan | Peserta | KTPA | Nominal | Nomor Polis | Tanggal Polis |
+  // Tanggal Bayar Polis | Imbal Jasa | DPP 11/12 | PPN (DPP X 12%) |
+  // PPH 23 (Imbal Jasa X 2%) | Jumlah Tagihan | Imbal Jasa yang Diterima |
+  // Tanggal Terima Imbal Jasa
+  // -------------------------------------------------------------
+  const [rawTpbData, setRawTpbData] = useState([
     {
-      id: "R1",
-      bulan: "Juni 2026",
-      peserta: "Serka Ahmad Fauzi",
-      ktpa: "KTPA-0012845",
-      nominalPremi: 6000000,
-      noPolis: "TL-TDS-2026-00145",
-      tglPolis: "05 Jan 2026",
-      tglBayarPolis: "15 Jan 2026",
-      program: "TDS",
-      tarif: 0.025,
-      tglTerima: "10 Jul 2026",
-    },
-    {
-      id: "R2",
-      bulan: "Juni 2026",
-      peserta: "Briptu Rina Marlina",
-      ktpa: "KTPA-0012846",
-      nominalPremi: 6000000,
-      noPolis: "TL-TDS-2026-00146",
-      tglPolis: "05 Feb 2026",
-      tglBayarPolis: "15 Feb 2026",
-      program: "TDS",
-      tarif: 0.025,
-      tglTerima: "10 Jul 2026",
-    },
-    {
-      id: "R3",
+      id: "TPB-001",
+      no: 1,
       bulan: "Juni 2026",
       peserta: "Letkol Bambang Suharto",
       ktpa: "KTPA-0012847",
       nominalPremi: 7440000,
       noPolis: "TL-JKK-2026-00089",
-      tglPolis: "08 Mar 2026",
-      tglBayarPolis: "18 Mar 2026",
-      program: "TPB",
-      tarif: 0.03,
-      tglTerima: "—",
+      tanggalPolis: "08 Mar 2026",
+      tanggalBayarPolis: "18 Mar 2026",
+      programSub: "TPB-JKK",
+      tanggalTerima: "15 Jul 2026",
+      status: "Diterima",
     },
     {
-      id: "R4",
+      id: "TPB-002",
+      no: 2,
       bulan: "Juni 2026",
       peserta: "Penata Tk.I Siti Nurhaliza",
       ktpa: "KTPA-0012848",
       nominalPremi: 6480000,
       noPolis: "TL-JKK-2026-00090",
-      tglPolis: "10 Apr 2026",
-      tglBayarPolis: "20 Apr 2026",
-      program: "TPB",
-      tarif: 0.03,
-      tglTerima: "—",
+      tanggalPolis: "10 Apr 2026",
+      tanggalBayarPolis: "20 Apr 2026",
+      programSub: "TPB-JKK",
+      tanggalTerima: "15 Jul 2026",
+      status: "Diterima",
     },
     {
-      id: "R5",
+      id: "TPB-003",
+      no: 3,
       bulan: "Juni 2026",
       peserta: "AKP Dedi Kurniawan",
       ktpa: "KTPA-0012849",
       nominalPremi: 3720000,
       noPolis: "TL-JKM-2026-00034",
-      tglPolis: "12 Mei 2026",
-      tglBayarPolis: "20 Mei 2026",
-      program: "TPB",
-      tarif: 0.03,
-      tglTerima: "15 Jul 2026",
+      tanggalPolis: "12 Mei 2026",
+      tanggalBayarPolis: "20 Mei 2026",
+      programSub: "TPB-JKM",
+      tanggalTerima: "18 Jul 2026",
+      status: "Diterima",
     },
     {
-      id: "R6",
+      id: "TPB-004",
+      no: 4,
       bulan: "Juni 2026",
       peserta: "Pembina Utama Dr. Ratna",
       ktpa: "KTPA-0012851",
       nominalPremi: 3480000,
       noPolis: "TL-JKM-2026-00035",
-      tglPolis: "15 Jun 2026",
-      tglBayarPolis: "22 Jun 2026",
-      program: "TPB",
-      tarif: 0.03,
-      tglTerima: "15 Jul 2026",
+      tanggalPolis: "15 Jun 2026",
+      tanggalBayarPolis: "22 Jun 2026",
+      programSub: "TPB-JKM",
+      tanggalTerima: "25 Jul 2026",
+      status: "Diterima",
     },
-  ];
+    {
+      id: "TPB-005",
+      no: 5,
+      bulan: "Juni 2026",
+      peserta: "Kapten Inf. Agus Salim",
+      ktpa: "KTPA-0012853",
+      nominalPremi: 5200000,
+      noPolis: "TL-JKK-2026-00095",
+      tanggalPolis: "18 Jun 2026",
+      tanggalBayarPolis: "25 Jun 2026",
+      programSub: "TPB-JKK",
+      tanggalTerima: "—",
+      status: "Belum Diterima",
+    },
+    {
+      id: "TPB-006",
+      no: 6,
+      bulan: "Juni 2026",
+      peserta: "Mayor Mar. Joko Prasetyo",
+      ktpa: "KTPA-0012855",
+      nominalPremi: 4800000,
+      noPolis: "TL-JKM-2026-00039",
+      tanggalPolis: "20 Jun 2026",
+      tanggalBayarPolis: "28 Jun 2026",
+      programSub: "TPB-JKM",
+      tanggalTerima: "—",
+      status: "Belum Diterima",
+    },
+  ]);
 
-  // Rumus Perpajakan Resmi BRD V5 (Line 271-273 & Line 275-277)
-  const calcTax = (premi, tarifPercent, hariTerlambat = 0) => {
-    const imbalJasaBruto = (premi * tarifPercent) / 100;
-    const dpp = (11 / 12) * imbalJasaBruto;
-    const ppn = (ppnRate / 100) * dpp; // 12% x (11/12 x Imbal Jasa) = 11% x Imbal Jasa
-    const pph23 = (pphRate / 100) * imbalJasaBruto; // 2% x Imbal Jasa
-    const jumlahTagihan = imbalJasaBruto + ppn; // Tagihan Bruto ke Mitra
-    const imbalJasaNeto = imbalJasaBruto + ppn - pph23; // Imbal Jasa yang Diterima
-    const denda =
-      hariTerlambat > 0
-        ? Math.round(
-            (jumlahTagihan * (biRate / 100) * hariTerlambat) / 365
-          )
-        : 0;
+  const [rawTdsData, setRawTdsData] = useState([
+    {
+      id: "TDS-001",
+      no: 1,
+      bulan: "Juni 2026",
+      peserta: "Serka Ahmad Fauzi",
+      ktpa: "KTPA-0012845",
+      nominalPremi: 6000000,
+      noPolis: "TL-TDS-2026-00145",
+      tanggalPolis: "05 Jan 2026",
+      tanggalBayarPolis: "15 Jan 2026",
+      programSub: "TDS-Pensiun",
+      tanggalTerima: "10 Jul 2026",
+      status: "Diterima",
+    },
+    {
+      id: "TDS-002",
+      no: 2,
+      bulan: "Juni 2026",
+      peserta: "Briptu Rina Marlina",
+      ktpa: "KTPA-0012846",
+      nominalPremi: 6000000,
+      noPolis: "TL-TDS-2026-00146",
+      tanggalPolis: "05 Feb 2026",
+      tanggalBayarPolis: "15 Feb 2026",
+      programSub: "TDS-Pensiun",
+      tanggalTerima: "10 Jul 2026",
+      status: "Diterima",
+    },
+    {
+      id: "TDS-003",
+      no: 3,
+      bulan: "Juni 2026",
+      peserta: "Peltu Hendra Wijaya",
+      ktpa: "KTPA-0012850",
+      nominalPremi: 12000000,
+      noPolis: "TL-TDS-2026-00147",
+      tanggalPolis: "10 Mar 2026",
+      tanggalBayarPolis: "20 Mar 2026",
+      programSub: "TDS-Pensiun",
+      tanggalTerima: "12 Jul 2026",
+      status: "Diterima",
+    },
+    {
+      id: "TDS-004",
+      no: 4,
+      bulan: "Juni 2026",
+      peserta: "Bripka Anwar Ibrahim",
+      ktpa: "KTPA-0012852",
+      nominalPremi: 6000000,
+      noPolis: "TL-TDS-2026-00148",
+      tanggalPolis: "12 Apr 2026",
+      tanggalBayarPolis: "22 Apr 2026",
+      programSub: "TDS-Pensiun",
+      tanggalTerima: "15 Jul 2026",
+      status: "Diterima",
+    },
+    {
+      id: "TDS-005",
+      no: 5,
+      bulan: "Juni 2026",
+      peserta: "Kolonel Cpl. Bambang Tri",
+      ktpa: "KTPA-0012854",
+      nominalPremi: 18000000,
+      noPolis: "TL-TDS-2026-00149",
+      tanggalPolis: "15 Mei 2026",
+      tanggalBayarPolis: "25 Mei 2026",
+      programSub: "TDS-Pensiun",
+      tanggalTerima: "—",
+      status: "Belum Diterima",
+    },
+    {
+      id: "TDS-006",
+      no: 6,
+      bulan: "Juni 2026",
+      peserta: "Letda Kav. Supriyadi",
+      ktpa: "KTPA-0012856",
+      nominalPremi: 6000000,
+      noPolis: "TL-TDS-2026-00150",
+      tanggalPolis: "18 Jun 2026",
+      tanggalBayarPolis: "28 Jun 2026",
+      programSub: "TDS-Pensiun",
+      tanggalTerima: "—",
+      status: "Belum Diterima",
+    },
+  ]);
+
+  // Form State untuk Tambah Baris
+  const [newRow, setNewRow] = useState({
+    bulan: "Juni 2026",
+    peserta: "Mayor Laut Faisal",
+    ktpa: "KTPA-0012860",
+    nominalPremi: 6000000,
+    noPolis: "TL-2026-NEW",
+    tanggalPolis: "20 Jun 2026",
+    tanggalBayarPolis: "28 Jun 2026",
+    tanggalTerima: "—",
+    status: "Belum Diterima",
+  });
+
+  // Kalkulator Baris Pajak Resmi BRD
+  const calcRow = (item, currentTarif) => {
+    const nominalPremi = item.nominalPremi || 0;
+    // Imbal Jasa (Nominal x Tarif %)
+    const imbalJasa = (nominalPremi * currentTarif) / 100;
+    // DPP 11/12 (DPP x Imbal Jasa)
+    const dpp = (11 / 12) * imbalJasa;
+    // PPN (DPP X 12%)
+    const ppn = (ppnRate / 100) * dpp; // = 11% x Imbal Jasa
+    // PPH 23 (Imbal Jasa X 2%)
+    const pph23 = (pphRate / 100) * imbalJasa;
+    // Jumlah Tagihan (Imbal Jasa + PPN)
+    const jumlahTagihan = imbalJasa + ppn;
+    // Imbal Jasa yang Diterima (Imbal Jasa + PPN - PPh 23)
+    const imbalJasaDiterima = jumlahTagihan - pph23;
+
     return {
-      imbalJasaBruto,
+      ...item,
+      tarif: currentTarif,
+      imbalJasa,
       dpp,
       ppn,
       pph23,
       jumlahTagihan,
-      imbalJasaNeto,
-      denda,
+      imbalJasaDiterima,
     };
   };
 
-  const statusColor = (s) =>
-    s === "Dibayar"
-      ? "green"
-      : s === "Terlambat"
-      ? "orange"
-      : s === "Belum Dibayar"
-      ? "red"
-      : "gray";
-
-  const filtered = allTagihan.filter((t) => {
-    if (filterProgram !== "Semua" && t.program !== filterProgram) return false;
-    if (filterStatus !== "Semua" && t.status !== filterStatus) return false;
-    if (
-      searchTagihan &&
-      !t.no.toLowerCase().includes(searchTagihan.toLowerCase()) &&
-      !t.noSP.toLowerCase().includes(searchTagihan.toLowerCase())
-    )
-      return false;
-    return true;
-  });
-
-  const totalBruto = allTagihan.reduce((a, t) => a + calcTax(t.premi, t.tarif).imbalJasaBruto, 0);
-  const totalNeto = allTagihan.reduce((a, t) => a + calcTax(t.premi, t.tarif).imbalJasaNeto, 0);
-  const totalDenda = allTagihan.reduce(
-    (a, t) => a + calcTax(t.premi, t.tarif, t.hariTerlambat).denda,
-    0
+  // Computed Data TPB & TDS
+  const computedTpb = useMemo(
+    () => rawTpbData.map((r) => calcRow(r, tarifTPB)),
+    [rawTpbData, tarifTPB, ppnRate, pphRate]
   );
-  const terlambatCount = allTagihan.filter((t) => t.hariTerlambat > 0).length;
-  const lunasCount = allTagihan.filter((t) => t.status === "Dibayar").length;
 
-  const riwayatTarif = [
-    {
-      tgl: "01 Jan 2026",
-      prog: "TDS (Taspen Dwiguna Sejahtera)",
-      lama: "2,0%",
-      baru: "2,5%",
-      oleh: "Kadiv Keuangan",
-      ket: "Perjanjian Kerjasama Pemasaran & Administrasi 2026",
-    },
-    {
-      tgl: "01 Jan 2026",
-      prog: "TPB (Proteksi Beasiswa)",
-      lama: "2,5%",
-      baru: "3,0%",
-      oleh: "Kadiv Keuangan",
-      ket: "Peningkatan tarif imbal jasa program perlindungan anak",
-    },
-  ];
+  const computedTds = useMemo(
+    () => rawTdsData.map((r) => calcRow(r, tarifTDS)),
+    [rawTdsData, tarifTDS, ppnRate, pphRate]
+  );
+
+  // Filtered Data Sesuai Tab Aktif
+  const activeComputedList = useMemo(() => {
+    const source = activeTab === "tpb" ? computedTpb : computedTds;
+    return source.filter((row) => {
+      if (filterBulan !== "Semua" && row.bulan !== filterBulan) return false;
+      if (filterStatus !== "Semua" && row.status !== filterStatus) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const match =
+          row.peserta.toLowerCase().includes(q) ||
+          row.ktpa.toLowerCase().includes(q) ||
+          row.noPolis.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [activeTab, computedTpb, computedTds, filterBulan, filterStatus, searchQuery]);
+
+  // Agregat Tab Aktif
+  const agg = useMemo(() => {
+    const totalPremi = activeComputedList.reduce((a, b) => a + b.nominalPremi, 0);
+    const totalImbalJasa = activeComputedList.reduce((a, b) => a + b.imbalJasa, 0);
+    const totalDPP = activeComputedList.reduce((a, b) => a + b.dpp, 0);
+    const totalPPN = activeComputedList.reduce((a, b) => a + b.ppn, 0);
+    const totalPPh23 = activeComputedList.reduce((a, b) => a + b.pph23, 0);
+    const totalTagihan = activeComputedList.reduce((a, b) => a + b.jumlahTagihan, 0);
+    const totalDiterima = activeComputedList.reduce((a, b) => a + b.imbalJasaDiterima, 0);
+    const countLunas = activeComputedList.filter((r) => r.status === "Diterima").length;
+    const countBelum = activeComputedList.filter((r) => r.status === "Belum Diterima").length;
+    return {
+      totalPremi,
+      totalImbalJasa,
+      totalDPP,
+      totalPPN,
+      totalPPh23,
+      totalTagihan,
+      totalDiterima,
+      countLunas,
+      countBelum,
+    };
+  }, [activeComputedList]);
+
+  // Handler: Tambah Data
+  const handleSaveTambah = () => {
+    const newItem = {
+      id: `${activeTab.toUpperCase()}-${String(Date.now()).slice(-4)}`,
+      no: (activeTab === "tpb" ? rawTpbData.length : rawTdsData.length) + 1,
+      bulan: newRow.bulan,
+      peserta: newRow.peserta,
+      ktpa: newRow.ktpa,
+      nominalPremi: Number(newRow.nominalPremi),
+      noPolis: newRow.noPolis,
+      tanggalPolis: newRow.tanggalPolis,
+      tanggalBayarPolis: newRow.tanggalBayarPolis,
+      programSub: activeTab === "tpb" ? "TPB-JKK" : "TDS-Pensiun",
+      tanggalTerima: newRow.tanggalTerima,
+      status: newRow.status,
+    };
+
+    if (activeTab === "tpb") {
+      setRawTpbData([...rawTpbData, newItem]);
+    } else {
+      setRawTdsData([...rawTdsData, newItem]);
+    }
+    setTambahModal(false);
+  };
+
+  // Handler: Ekspor Excel
+  const handleEksporExcel = () => {
+    const progLabel = activeTab === "tpb" ? "TPB" : "TDS";
+    setPreview({
+      title: `Ekspor Rekapitulasi Tagihan Imbal Jasa ${progLabel}`,
+      subtitle: `Format Resmi 15 Kolom BRD Keuangan (Tarif ${activeTab === "tpb" ? tarifTPB : tarifTDS}%)`,
+      type: "table",
+      fileName: `Rekap_Imbal_Jasa_${progLabel}_TaspenLife.xlsx`,
+      content: {
+        columns: [
+          "No.",
+          "Bulan",
+          "Peserta",
+          "KTPA",
+          "Nominal",
+          "Nomor Polis",
+          "Tanggal Polis",
+          "Tanggal Bayar Polis",
+          `Imbal Jasa (${activeTab === "tpb" ? tarifTPB : tarifTDS}%)`,
+          "DPP 11/12",
+          "PPN 12%",
+          "PPh 23 (2%)",
+          "Jumlah Tagihan",
+          "Imbal Jasa Diterima",
+          "Tanggal Terima",
+        ],
+        rows: activeComputedList.map((r) => [
+          r.no,
+          r.bulan,
+          r.peserta,
+          r.ktpa,
+          fmt(r.nominalPremi),
+          r.noPolis,
+          r.tanggalPolis,
+          r.tanggalBayarPolis,
+          fmt(r.imbalJasa),
+          fmt(r.dpp),
+          fmt(r.ppn),
+          fmt(r.pph23),
+          fmt(r.jumlahTagihan),
+          fmt(r.imbalJasaDiterima),
+          r.tanggalTerima,
+        ]),
+        totalRows: activeComputedList.length,
+      },
+    });
+  };
+
+  // Handler: Cetak Surat Tagihan Resmi
+  const handleCetakTagihan = (item) => {
+    const isTPB = activeTab === "tpb";
+    setPreview({
+      title: "Surat Tagihan Imbal Jasa Taspen Life",
+      subtitle: `${item.peserta} — Polis: ${item.noPolis}`,
+      type: "surat",
+      fileName: `Surat_Tagihan_ImbalJasa_${item.ktpa}.pdf`,
+      content: {
+        noSurat: `S-TAG/KEU/TL-${isTPB ? "TPB" : "TDS"}/2026/06/${String(item.no).padStart(3, "0")}`,
+        tujuan: "Direksi PT Asuransi Jiwa Taspen (Taspen Life)",
+        periode: `Imbal Jasa ${isTPB ? "Taspen Proteksi Beasiswa (TPB)" : "Taspen Dwiguna Sejahtera (TDS)"} — Periode ${item.bulan}`,
+        cutoff: "14 Hari Kerja",
+        tanggal: "15 Juli 2026",
+        items: [
+          { jenis: "Nama Peserta / Pemegang Polis", peserta: item.peserta, nominal: "KTPA: " + item.ktpa },
+          { jenis: "Nomor Polis & Tanggal Penerbitan", peserta: item.noPolis, nominal: "Tgl: " + item.tanggalPolis },
+          { jenis: "Tanggal Pembayaran Premi oleh Peserta", peserta: "Verifikasi Kas", nominal: item.tanggalBayarPolis },
+          { jenis: "Nominal Premi Bruto", peserta: "Basis Premi", nominal: fmt(item.nominalPremi) },
+          { jenis: `Imbal Jasa (${isTPB ? tarifTPB : tarifTDS}% × Nominal Premi)`, peserta: "Fee Base", nominal: fmt(item.imbalJasa) },
+          { jenis: "Dasar Pengenaan Pajak (11/12 × Imbal Jasa)", peserta: "DPP Nilai Lain", nominal: fmt(item.dpp) },
+          { jenis: "PPN 12% (12% × DPP)", peserta: "PPN Terutang", nominal: fmt(item.ppn) },
+          { jenis: "PPh Pasal 23 (2% × Imbal Jasa)", peserta: "Potongan Pajak", nominal: `-${fmt(item.pph23)}` },
+          { jenis: "TOTAL JUMLAH TAGIHAN KE TASPEN LIFE", peserta: "Imbal Jasa + PPN", nominal: fmt(item.jumlahTagihan) },
+          { jenis: "IMBAL JASA BERSIH DITERIMA ASABRI (NETO)", peserta: "Hak Bersih ASABRI", nominal: fmt(item.imbalJasaDiterima) },
+        ],
+      },
+    });
+  };
 
   return (
     <div>
+      {/* Global Preview Modal */}
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
 
-      {/* Modal Parameter Tarif & Perpajakan */}
-      {showTarif && (
+      {/* Modal Pengaturan Parameter Tarif */}
+      {showConfigModal && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(15, 23, 42, 0.6)",
+            background: "rgba(15,23,42,0.6)",
             backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: 1000,
+            zIndex: 1100,
           }}
-          onClick={() => setShowTarif(false)}
+          onClick={() => setShowConfigModal(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               background: COLORS.white,
               borderRadius: 14,
-              width: 660,
+              width: 500,
+              maxWidth: "95vw",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
+              border: `1px solid ${COLORS.gray200}`,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "18px 24px",
+                borderBottom: `1px solid ${COLORS.gray200}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: COLORS.gray50,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ background: "#EFF6FF", padding: 8, borderRadius: 8, color: COLORS.blue }}>
+                  <Sliders size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
+                    Parameter Tarif Imbal Jasa & Perpajakan
+                  </h3>
+                  <p style={{ margin: 0, fontSize: 12, color: COLORS.gray500 }}>
+                    Sesuai Ketentuan BRD V5 (Line 271-273)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowConfigModal(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: COLORS.gray400 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 6 }}>
+                  Tarif Imbal Jasa TPB (Taspen Proteksi Beasiswa)
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={tarifTPB}
+                    onChange={(e) => setTarifTPB(parseFloat(e.target.value) || 0)}
+                    style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray300}`, fontSize: 14, fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray600 }}>%</span>
+                </div>
+                <span style={{ fontSize: 11, color: COLORS.gray400, marginTop: 4, display: "block" }}>
+                  Standar BRD: 3,00% dari Premi Bruto Program TPB (JKK & JKm)
+                </span>
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 6 }}>
+                  Tarif Imbal Jasa TDS (Taspen Dwiguna Sejahtera)
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={tarifTDS}
+                    onChange={(e) => setTarifTDS(parseFloat(e.target.value) || 0)}
+                    style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray300}`, fontSize: 14, fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray600 }}>%</span>
+                </div>
+                <span style={{ fontSize: 11, color: COLORS.gray400, marginTop: 4, display: "block" }}>
+                  Standar BRD: 2,50% dari Premi Bruto Program TDS (Tabungan Asuransi Pensiun)
+                </span>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Tarif PPN
+                  </label>
+                  <input
+                    type="number"
+                    value={ppnRate}
+                    onChange={(e) => setPpnRate(parseFloat(e.target.value) || 0)}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: 11, color: COLORS.gray400, marginTop: 2, display: "block" }}>
+                    12% × DPP (11/12)
+                  </span>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Tarif PPh Pasal 23
+                  </label>
+                  <input
+                    type="number"
+                    value={pphRate}
+                    onChange={(e) => setPphRate(parseFloat(e.target.value) || 0)}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontWeight: 700 }}
+                  />
+                  <span style={{ fontSize: 11, color: COLORS.gray400, marginTop: 2, display: "block" }}>
+                    2% × Imbal Jasa
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+                <Btn variant="primary" onClick={() => setShowConfigModal(false)}>
+                  Terapkan Parameter
+                </Btn>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Perhitungan Baris */}
+      {detailModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15,23,42,0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+          }}
+          onClick={() => setDetailModal(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: COLORS.white,
+              borderRadius: 14,
+              width: 620,
+              maxWidth: "95vw",
               maxHeight: "90vh",
-              overflow: "auto",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              overflowY: "auto",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
               border: `1px solid ${COLORS.gray200}`,
             }}
           >
@@ -345,243 +615,145 @@ export const TaspenImbalJasa = () => {
               style={{
                 padding: "20px 24px",
                 borderBottom: `1px solid ${COLORS.gray200}`,
-                background: "#0F172A",
-                color: COLORS.white,
-                borderRadius: "14px 14px 0 0",
                 display: "flex",
                 justifyContent: "space-between",
-                alignItems: "center",
+                alignItems: "flex-start",
+                background: COLORS.gray50,
               }}
             >
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>
-                  Parameter Tarif Imbal Jasa &amp; Perpajakan BRD V5
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <Badge color={activeTab === "tpb" ? "orange" : "blue"}>
+                    {activeTab === "tpb" ? "Taspen Proteksi Beasiswa (TPB)" : "Taspen Dwiguna Sejahtera (TDS)"}
+                  </Badge>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray500 }}>
+                    {detailModal.ktpa}
+                  </span>
                 </div>
-                <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 2 }}>
-                  Sesuai acuan BR-TL-08 &amp; Ketentuan Pajak UU HPP / PMK
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: COLORS.gray900 }}>
+                  Detail Perhitungan Imbal Jasa & Pajak Polis
+                </h3>
+                <div style={{ fontSize: 13, color: COLORS.gray600, marginTop: 2 }}>
+                  Peserta: <b>{detailModal.peserta}</b> • No. Polis: {detailModal.noPolis}
                 </div>
               </div>
               <button
-                onClick={() => setShowTarif(false)}
-                style={{
-                  background: "rgba(255,255,255,0.1)",
-                  border: "none",
-                  color: COLORS.white,
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  fontSize: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                onClick={() => setDetailModal(null)}
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: COLORS.gray400, fontSize: 22 }}
               >
                 ✕
               </button>
             </div>
 
             <div style={{ padding: 24 }}>
-              {/* Parameter Tarif Program */}
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: COLORS.gray700,
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                  marginBottom: 12,
-                }}
-              >
-                1. Tarif Imbal Jasa per Program (Fee Base)
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
-                {[
-                  {
-                    l: "TDS (Taspen Dwiguna Sejahtera)",
-                    v: tarifTDS,
-                    set: setTarifTDS,
-                    c: "blue",
-                    note: "Khusus pensiunan dari potongan Tabungan Asuransi",
-                  },
-                  {
-                    l: "TPB (Taspen Proteksi Beasiswa)",
-                    v: tarifTPB,
-                    set: setTarifTPB,
-                    c: "orange",
-                    note: "Program perlindungan beasiswa anak prajurit JKK/JKm",
-                  },
-                ].map((x, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 14px",
-                      background: COLORS.gray50,
-                      borderRadius: 8,
-                      border: `1px solid ${COLORS.gray200}`,
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <Badge color={x.c}>{x.l.split(" ")[0]}</Badge>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>
-                          {x.l}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 4 }}>
-                        {x.note}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={x.v}
-                        onChange={(e) => x.set(Number(e.target.value))}
-                        style={{
-                          padding: "6px 10px",
-                          borderRadius: 6,
-                          border: `1px solid ${COLORS.gray300}`,
-                          width: 75,
-                          fontSize: 14,
-                          textAlign: "right",
-                          fontWeight: 700,
-                        }}
-                      />
-                      <span style={{ fontSize: 13, color: COLORS.gray600, fontWeight: 600 }}>%</span>
+              {/* Informasi Polis */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", color: COLORS.gray700, marginBottom: 10 }}>
+                  Informasi Kepesertaan & Polis
+                </div>
+                <div style={{ background: COLORS.gray50, padding: 14, borderRadius: 8, border: `1px solid ${COLORS.gray200}`, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12.5 }}>
+                  <div>
+                    <span style={{ color: COLORS.gray500 }}>Nama Peserta:</span>
+                    <div style={{ fontWeight: 700, color: COLORS.gray900 }}>{detailModal.peserta}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: COLORS.gray500 }}>Nomor KTPA:</span>
+                    <div style={{ fontWeight: 700, fontFamily: "monospace" }}>{detailModal.ktpa}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: COLORS.gray500 }}>Nomor Polis:</span>
+                    <div style={{ fontWeight: 700, color: COLORS.blue }}>{detailModal.noPolis}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: COLORS.gray500 }}>Tanggal Terbit Polis:</span>
+                    <div style={{ fontWeight: 600 }}>{detailModal.tanggalPolis}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: COLORS.gray500 }}>Tanggal Bayar Polis:</span>
+                    <div style={{ fontWeight: 600 }}>{detailModal.tanggalBayarPolis}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: COLORS.gray500 }}>Tanggal Terima Imbal Jasa:</span>
+                    <div style={{ fontWeight: 700, color: detailModal.status === "Diterima" ? COLORS.green : COLORS.red }}>
+                      {detailModal.tanggalTerima}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Parameter Perpajakan & Denda */}
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: COLORS.gray700,
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                  marginBottom: 12,
-                }}
-              >
-                2. Parameter Perpajakan &amp; Suku Bunga Denda (BI Rate)
-              </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: 12,
-                  marginBottom: 20,
-                }}
-              >
-                <div style={{ padding: 12, background: COLORS.gray50, borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray800, marginBottom: 4 }}>
-                    DPP PPN Nilai Lain
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.blueDark }}>
-                    11 / 12 (91,67%)
-                  </div>
-                  <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 2 }}>
-                    Dasar Pengenaan Pajak
-                  </div>
-                </div>
-
-                <div style={{ padding: 12, background: COLORS.gray50, borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray800, marginBottom: 4 }}>
-                    Tarif PPN
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input
-                      type="number"
-                      value={ppnRate}
-                      onChange={(e) => setPpnRate(Number(e.target.value))}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        border: `1px solid ${COLORS.gray300}`,
-                        width: 60,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        textAlign: "right",
-                      }}
-                    />
-                    <span style={{ fontSize: 12 }}>%</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 2 }}>
-                    12% × DPP (efektif 11%)
-                  </div>
-                </div>
-
-                <div style={{ padding: 12, background: COLORS.gray50, borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray800, marginBottom: 4 }}>
-                    Suku Bunga BI Rate
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input
-                      type="number"
-                      step="0.25"
-                      value={biRate}
-                      onChange={(e) => setBiRate(Number(e.target.value))}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        border: `1px solid ${COLORS.gray300}`,
-                        width: 60,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        textAlign: "right",
-                      }}
-                    />
-                    <span style={{ fontSize: 12 }}>%</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: COLORS.gray400, marginTop: 2 }}>
-                    Acuan denda tahunan/365
-                  </div>
                 </div>
               </div>
 
-              {/* Live Simulasi */}
-              <div
-                style={{
-                  padding: 16,
-                  background: "#F0FDF4",
-                  border: "1px solid #BBF7D0",
-                  borderRadius: 10,
-                  marginBottom: 20,
-                }}
-              >
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#166534", marginBottom: 6 }}>
-                  Simulasi Formula Resmi BRD V5 — Contoh Premi Rp 10.000.000 (Tarif TPB {tarifTPB}%)
+              {/* Tabel Verifikasi Perhitungan Pajak */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", color: COLORS.gray700, marginBottom: 10 }}>
+                  Verifikasi Formula Perpajakan (BRD Line 271-273)
                 </div>
-                {(() => {
-                  const s = calcTax(10000000, tarifTPB);
-                  return (
-                    <div style={{ fontSize: 12, fontFamily: "monospace", color: "#14532D", lineHeight: 1.8 }}>
-                      • <strong>Imbal Jasa Bruto:</strong> {fmt(s.imbalJasaBruto)} ({tarifTPB}% × Premi)<br />
-                      • <strong>DPP 11/12:</strong> {fmt(s.dpp)} (11/12 × Imbal Jasa)<br />
-                      • <strong>PPN 12%:</strong> +{fmt(s.ppn)} (12% × DPP)<br />
-                      • <strong>PPh 23 (2%):</strong> −{fmt(s.pph23)} (2% × Imbal Jasa)<br />
-                      • <strong>Jumlah Tagihan Bruto:</strong> {fmt(s.jumlahTagihan)} (Imbal Jasa + PPN)<br />
-                      • <strong>Imbal Jasa Diterima (Neto):</strong>{" "}
-                      <strong style={{ color: COLORS.blueDark, fontSize: 13 }}>
-                        {fmt(s.imbalJasaNeto)}
-                      </strong>{" "}
-                      (Imbal Jasa + PPN − PPh 23)
-                    </div>
-                  );
-                })()}
+                <div style={{ border: `1px solid ${COLORS.gray200}`, borderRadius: 8, overflow: "hidden" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                    <tbody>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.white }}>
+                        <td style={{ padding: "10px 14px", color: COLORS.gray600 }}>Nominal Premi Bruto</td>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 700 }}>
+                          {fmt(detailModal.nominalPremi)}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.gray50 }}>
+                        <td style={{ padding: "10px 14px", color: COLORS.gray600 }}>
+                          Imbal Jasa <span style={{ fontSize: 11, color: COLORS.gray400 }}>({detailModal.tarif}% × Nominal Premi)</span>
+                        </td>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 700, color: COLORS.blue }}>
+                          {fmt(detailModal.imbalJasa)}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.white }}>
+                        <td style={{ padding: "10px 14px", color: COLORS.gray600 }}>
+                          DPP PPN Nilai Lain <span style={{ fontSize: 11, color: COLORS.gray400 }}>(11/12 × Imbal Jasa)</span>
+                        </td>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 600 }}>
+                          {fmt(detailModal.dpp)}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.white }}>
+                        <td style={{ padding: "10px 14px", color: COLORS.gray600 }}>
+                          PPN 12% <span style={{ fontSize: 11, color: COLORS.gray400 }}>(12% × DPP PPN)</span>
+                        </td>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 600, color: "#4F46E5" }}>
+                          +{fmt(detailModal.ppn)}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.white }}>
+                        <td style={{ padding: "10px 14px", color: COLORS.gray600 }}>
+                          Tax / PPh Pasal 23 <span style={{ fontSize: 11, color: COLORS.gray400 }}>(2% × Imbal Jasa)</span>
+                        </td>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 600, color: COLORS.red }}>
+                          -{fmt(detailModal.pph23)}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.gray50 }}>
+                        <td style={{ padding: "10px 14px", fontWeight: 700, color: COLORS.gray800 }}>
+                          Jumlah Tagihan ke Taspen Life <span style={{ fontSize: 11, color: COLORS.gray400 }}>(Imbal Jasa + PPN)</span>
+                        </td>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
+                          {fmt(detailModal.jumlahTagihan)}
+                        </td>
+                      </tr>
+                      <tr style={{ background: "#EFF6FF" }}>
+                        <td style={{ padding: "12px 14px", fontWeight: 800, color: COLORS.blue }}>
+                          Imbal Jasa yang Diterima PT ASABRI (Neto / NAT)
+                        </td>
+                        <td style={{ padding: "12px 14px", textAlign: "right", fontWeight: 800, color: COLORS.blue, fontSize: 15 }}>
+                          {fmt(detailModal.imbalJasaDiterima)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <Btn variant="ghost" size="sm" onClick={() => setShowTarif(false)}>
-                  Batal
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20 }}>
+                <Btn variant="outline" onClick={() => handleCetakTagihan(detailModal)}>
+                  <FileText size={14} /> Cetak Nota Tagihan
                 </Btn>
-                <Btn size="sm" onClick={() => setShowTarif(false)}>
-                  Simpan Parameter
+                <Btn variant="primary" onClick={() => setDetailModal(null)}>
+                  Tutup
                 </Btn>
               </div>
             </div>
@@ -589,1127 +761,638 @@ export const TaspenImbalJasa = () => {
         </div>
       )}
 
-      {/* Modal Detail Tagihan Lengkap */}
-      {detailTagihan &&
-        (() => {
-          const t = detailTagihan;
-          const c = calcTax(t.premi, t.tarif, t.hariTerlambat);
-          return (
+      {/* Modal Input Baris Baru */}
+      {tambahModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15,23,42,0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+          }}
+          onClick={() => setTambahModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: COLORS.white,
+              borderRadius: 14,
+              width: 560,
+              maxWidth: "95vw",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
+              border: `1px solid ${COLORS.gray200}`,
+            }}
+          >
             <div
               style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(15, 23, 42, 0.6)",
-                backdropFilter: "blur(4px)",
+                padding: "18px 24px",
+                borderBottom: `1px solid ${COLORS.gray200}`,
                 display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
+                background: COLORS.gray50,
               }}
-              onClick={() => setDetailTagihan(null)}
             >
-              <div
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  background: COLORS.white,
-                  borderRadius: 14,
-                  width: 560,
-                  maxHeight: "90vh",
-                  overflow: "auto",
-                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                  border: `1px solid ${COLORS.gray200}`,
-                }}
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
+                  Tambah Data Imbal Jasa ({activeTab === "tpb" ? "TPB - 3%" : "TDS - 2,5%"})
+                </h3>
+                <p style={{ margin: 0, fontSize: 12, color: COLORS.gray500 }}>
+                  Perhitungan DPP (11/12), PPN 12%, PPh 23 (2%), dan Imbal Jasa Diterima dihitung otomatis
+                </p>
+              </div>
+              <button
+                onClick={() => setTambahModal(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: COLORS.gray400 }}
               >
-                <div
-                  style={{
-                    padding: "20px 24px",
-                    borderBottom: `1px solid ${COLORS.gray200}`,
-                    background: "#0F172A",
-                    color: COLORS.white,
-                    borderRadius: "14px 14px 0 0",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 11, color: "#94A3B8", textTransform: "uppercase", letterSpacing: 1 }}>
-                      Surat Tagihan Imbal Jasa PT ASABRI (Persero)
-                    </div>
-                    <div style={{ fontSize: 18, fontWeight: 700, marginTop: 2 }}>
-                      {t.no}
-                    </div>
-                    <div style={{ fontSize: 12.5, color: "#CBD5E1", marginTop: 2 }}>
-                      {t.program} • Periode {t.periode}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setDetailTagihan(null)}
-                    style={{
-                      background: "rgba(255,255,255,0.1)",
-                      border: "none",
-                      color: COLORS.white,
-                      width: 32,
-                      height: 32,
-                      borderRadius: "50%",
-                      cursor: "pointer",
-                      fontSize: 16,
-                    }}
-                  >
-                    ✕
-                  </button>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Nama Peserta
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.peserta}
+                    onChange={(e) => setNewRow({ ...newRow, peserta: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
                 </div>
-
-                <div style={{ padding: 24 }}>
-                  <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Badge color={statusColor(t.status)}>
-                      {t.hariTerlambat === 0 && t.status === "Dibayar"
-                        ? "Dibayar tepat waktu"
-                        : t.status}
-                    </Badge>
-                    <span style={{ fontSize: 12, color: COLORS.gray500 }}>
-                      No. SP Premi: <strong style={{ color: COLORS.gray800 }}>{t.noSP}</strong>
-                    </span>
-                  </div>
-
-                  {/* Rincian Header */}
-                  <div
-                    style={{
-                      borderTop: `1px solid ${COLORS.gray200}`,
-                      paddingTop: 14,
-                      marginBottom: 16,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        color: COLORS.gray600,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                        marginBottom: 8,
-                      }}
-                    >
-                      Informasi Penagihan
-                    </div>
-                    {[
-                      ["Mitra Pembayar", "PT Asuransi Jiwa Taspen (Taspen Life)"],
-                      ["Jumlah Polis Terkait", `${t.jmlPolis} Polis Peserta`],
-                      ["Nama Peserta", t.pesertaContoh],
-                      ["Tanggal Terbit", t.tglTerbit],
-                      ["Jatuh Tempo (14 Hari Kerja)", t.jatuhTempo],
-                      ["Tanggal Penerimaan Pembayaran", t.tglBayar || "— (Belum Diterima)"],
-                    ].map(([label, val], i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          padding: "6px 0",
-                          borderBottom: `1px solid ${COLORS.gray100}`,
-                          fontSize: 12.5,
-                        }}
-                      >
-                        <span style={{ color: COLORS.gray500 }}>{label}</span>
-                        <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{val}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Rincian Perpajakan BRD V5 */}
-                  <div style={{ marginBottom: 16 }}>
-                    <div
-                      style={{
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        color: COLORS.gray600,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                        marginBottom: 8,
-                      }}
-                    >
-                      Rincian Perhitungan Perpajakan (BRD Line 271-273)
-                    </div>
-                    {[
-                      ["Total Premi Asuransi", fmt(t.premi)],
-                      [`Imbal Jasa Bruto (${t.tarif}%)`, fmt(c.imbalJasaBruto)],
-                      ["DPP PPN Nilai Lain (11/12 × Imbal Jasa)", fmt(c.dpp)],
-                      [`PPN ${ppnRate}% (12% × DPP)`, "+ " + fmt(c.ppn)],
-                      [`PPh 23 (2% × Imbal Jasa)`, "− " + fmt(c.pph23)],
-                      ["Jumlah Tagihan Bruto ke Mitra (Imbal Jasa + PPN)", fmt(c.jumlahTagihan)],
-                    ].map(([label, val], i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          padding: "6px 0",
-                          borderBottom: `1px solid ${COLORS.gray100}`,
-                          fontSize: 12.5,
-                        }}
-                      >
-                        <span style={{ color: COLORS.gray600 }}>{label}</span>
-                        <span style={{ fontWeight: 500, color: COLORS.gray800, fontFamily: "monospace" }}>
-                          {val}
-                        </span>
-                      </div>
-                    ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "8px 0",
-                        fontSize: 13,
-                        background: "#EFF6FF",
-                        borderRadius: 6,
-                        marginTop: 6,
-                        paddingLeft: 8,
-                        paddingRight: 8,
-                      }}
-                    >
-                      <span style={{ fontWeight: 700, color: COLORS.blueDark }}>
-                        Imbal Jasa Bersih Diterima (Neto)
-                      </span>
-                      <span style={{ fontWeight: 800, color: COLORS.blueDark, fontFamily: "monospace" }}>
-                        {fmt(c.imbalJasaNeto)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Denda Keterlambatan */}
-                  <div style={{ marginBottom: 20 }}>
-                    <div
-                      style={{
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        color: COLORS.gray600,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                        marginBottom: 8,
-                      }}
-                    >
-                      Denda Keterlambatan Pembayaran
-                    </div>
-                    {c.denda === 0 ? (
-                      <div
-                        style={{
-                          background: "#F0FDF4",
-                          borderRadius: 8,
-                          padding: "10px 14px",
-                          fontSize: 12.5,
-                          color: "#166534",
-                          display: "flex",
-                          gap: 8,
-                          alignItems: "center",
-                        }}
-                      >
-                        <CheckCircle2 size={16} />
-                        <span>Tidak ada denda — pembayaran tepat waktu atau belum melewati jatuh tempo</span>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          background: "#FEF2F2",
-                          border: "1px solid #FECACA",
-                          borderRadius: 8,
-                          padding: "10px 14px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            padding: "4px 0",
-                            fontSize: 12.5,
-                          }}
-                        >
-                          <span style={{ color: COLORS.gray600 }}>Durasi Keterlambatan</span>
-                          <span style={{ fontWeight: 700, color: COLORS.red }}>
-                            {t.hariTerlambat} hari kalender
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            padding: "4px 0",
-                            fontSize: 12.5,
-                          }}
-                        >
-                          <span style={{ color: COLORS.gray600 }}>
-                            Formula Denda (Tagihan × {biRate}% × {t.hariTerlambat} / 365)
-                          </span>
-                          <span style={{ fontWeight: 800, color: COLORS.red, fontFamily: "monospace" }}>
-                            {fmt(c.denda)}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 0",
-                      borderTop: `2px solid ${COLORS.gray300}`,
-                    }}
-                  >
-                    <span style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.gray800 }}>
-                      Grand Total Tagihan + Denda:
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 20,
-                        fontWeight: 800,
-                        color: COLORS.gray900,
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {fmt(c.jumlahTagihan + c.denda)}
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                      justifyContent: "flex-end",
-                      marginTop: 16,
-                    }}
-                  >
-                    <Btn
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setDetailTagihan(null);
-                        setPreview({
-                          title: `Surat Tagihan Imbal Jasa ${t.no}`,
-                          subtitle: `PT Asuransi Jiwa Taspen • Periode ${t.periode}`,
-                          type: "surat",
-                          fileName: `Surat_Tagihan_${t.no}.pdf`,
-                          content: {
-                            noSurat: t.no,
-                            tujuan: "Direksi PT Asuransi Jiwa Taspen (Taspen Life)",
-                            periode: t.periode,
-                            cutoff: t.jatuhTempo,
-                            tanggal: t.tglTerbit,
-                            items: [
-                              {
-                                jenis: `${t.program} (Imbal Jasa Bruto ${t.tarif}%)`,
-                                peserta: `${t.jmlPolis} Polis`,
-                                nominal: fmt(c.imbalJasaBruto),
-                              },
-                              {
-                                jenis: `PPN ${ppnRate}% atas DPP Nilai Lain (${fmt(c.dpp)})`,
-                                peserta: "—",
-                                nominal: fmt(c.ppn),
-                              },
-                              {
-                                jenis: `Potongan PPh 23 (2%)`,
-                                peserta: "—",
-                                nominal: `(${fmt(c.pph23)})`,
-                              },
-                              ...(c.denda > 0
-                                ? [
-                                    {
-                                      jenis: `Denda Keterlambatan (${t.hariTerlambat} hari × BI Rate ${biRate}%)`,
-                                      peserta: "—",
-                                      nominal: fmt(c.denda),
-                                    },
-                                  ]
-                                : []),
-                            ],
-                          },
-                        });
-                      }}
-                    >
-                      Cetak Surat Tagihan Resmi
-                    </Btn>
-                    <Btn size="sm" onClick={() => setDetailTagihan(null)}>
-                      Tutup
-                    </Btn>
-                  </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Nomor KTPA
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.ktpa}
+                    onChange={(e) => setNewRow({ ...newRow, ktpa: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
                 </div>
               </div>
-            </div>
-          );
-        })()}
 
-      {/* Action Header */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Bulan / Periode
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.bulan}
+                    onChange={(e) => setNewRow({ ...newRow, bulan: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Nominal Premi (Rp)
+                  </label>
+                  <input
+                    type="number"
+                    step="100000"
+                    value={newRow.nominalPremi}
+                    onChange={(e) => setNewRow({ ...newRow, nominalPremi: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 14, fontWeight: 700 }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Nomor Polis
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.noPolis}
+                    onChange={(e) => setNewRow({ ...newRow, noPolis: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Tanggal Terbit Polis
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.tanggalPolis}
+                    onChange={(e) => setNewRow({ ...newRow, tanggalPolis: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Tanggal Bayar Polis
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.tanggalBayarPolis}
+                    onChange={(e) => setNewRow({ ...newRow, tanggalBayarPolis: e.target.value })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
+                    Tanggal Terima Imbal Jasa
+                  </label>
+                  <input
+                    type="text"
+                    value={newRow.tanggalTerima}
+                    onChange={(e) => setNewRow({ ...newRow, tanggalTerima: e.target.value })}
+                    placeholder="Contoh: 15 Jul 2026 atau —"
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13 }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ background: COLORS.gray50, padding: 12, borderRadius: 8, fontSize: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span>Tarif Imbal Jasa:</span>
+                  <b>{activeTab === "tpb" ? tarifTPB : tarifTDS}%</b>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span>Estimasi Imbal Jasa:</span>
+                  <b>{fmt((Number(newRow.nominalPremi) || 0) * ((activeTab === "tpb" ? tarifTPB : tarifTDS) / 100))}</b>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
+                <Btn variant="outline" onClick={() => setTambahModal(false)}>
+                  Batal
+                </Btn>
+                <Btn variant="primary" onClick={handleSaveTambah}>
+                  Simpan Data Polis
+                </Btn>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header Bar */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
-          marginBottom: 20,
+          marginBottom: 16,
           flexWrap: "wrap",
           gap: 12,
         }}
       >
         <div>
-          <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 4 }}>
-            Pengelolaan &amp; penagihan imbal jasa (*management fee*) dari PT Asuransi Jiwa Taspen atas portofolio polis TPB &amp; TDS sesuai BRD Divisi Keuangan.
+          <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 2 }}>
+            Administrasi Penagihan Imbal Jasa Kemitraan Asuransi Jiwa Taspen Life (BRD Keuangan & Perpajakan V5)
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+            <Badge color="orange">Tarif TPB: {tarifTPB.toFixed(1)}%</Badge>
+            <Badge color="blue">Tarif TDS: {tarifTDS.toFixed(1)}%</Badge>
+            <Badge color="green">DPP Nilai Lain: 11/12 (91,67%)</Badge>
+            <Badge color="gray">PPN 12% • PPh 23: 2%</Badge>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Btn variant="ghost" onClick={() => setShowTarif(true)}>
-            <Settings size={14} style={{ marginRight: 4 }} /> Parameter Tarif &amp; Pajak
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <Btn variant="outline" onClick={() => setShowConfigModal(true)}>
+            <Sliders size={14} /> Atur Parameter Tarif
           </Btn>
-          <Btn
-            variant="outline"
-            onClick={() =>
-              setPreview({
-                title: "Laporan Tagihan Imbal Jasa Taspen Life",
-                subtitle: "Rekapitulasi Imbal Jasa, Pajak DPP/PPN/PPh 23 & Denda Periode 2026",
-                type: "table",
-                fileName: "Tagihan_ImbalJasa_TaspenLife.xlsx",
-                content: {
-                  columns: [
-                    "No Tagihan",
-                    "Program",
-                    "Periode",
-                    "Premi Bruto",
-                    "Imbal Jasa Bruto",
-                    "PPN 12%",
-                    "PPh 23",
-                    "Neto Diterima",
-                    "Denda",
-                    "Status",
-                  ],
-                  rows: allTagihan.map((t) => {
-                    const c = calcTax(t.premi, t.tarif, t.hariTerlambat);
-                    return [
-                      t.no,
-                      progShort(t.program),
-                      t.periode,
-                      fmt(t.premi),
-                      fmt(c.imbalJasaBruto),
-                      fmt(c.ppn),
-                      fmt(c.pph23),
-                      fmt(c.imbalJasaNeto),
-                      fmt(c.denda),
-                      t.status,
-                    ];
-                  }),
-                  totalRows: allTagihan.length,
-                },
-              })
-            }
-          >
-            <FileSpreadsheet size={14} style={{ marginRight: 4 }} /> Ekspor Excel
+          <Btn variant="outline" onClick={handleEksporExcel}>
+            <Download size={14} /> Ekspor Tabel (Excel)
           </Btn>
-          <Btn
-            onClick={() =>
-              setPreview({
-                title: "Surat Tagihan Imbal Jasa Resmi",
-                subtitle: "Kompilasi Tagihan Aktif Periode Berjalan • Format Surat Resmi ASABRI",
-                type: "surat",
-                fileName: "Surat_Tagihan_ImbalJasa_Kompilasi.pdf",
-                content: {
-                  noSurat: "ASABRI/KEU/TIJ/2026/07/045",
-                  tujuan: "PT Asuransi Jiwa Taspen (Taspen Life)",
-                  periode: "Juni 2026",
-                  cutoff: "10 Agustus 2026",
-                  tanggal: "20 Agustus 2026",
-                  items: allTagihan
-                    .filter((t) => t.periode === "Juni 2026" || t.status === "Menunggu Pembayaran")
-                    .map((t) => {
-                      const c = calcTax(t.premi, t.tarif, t.hariTerlambat);
-                      return {
-                        jenis: `${t.program} — Imbal Jasa ${t.tarif}% (SP: ${t.noSP})`,
-                        peserta: `${t.jmlPolis} Polis`,
-                        nominal: fmt(c.jumlahTagihan),
-                      };
-                    }),
-                },
-              })
-            }
-          >
-            <Receipt size={14} style={{ marginRight: 4 }} /> Terbitkan &amp; Kirim Surat Tagihan
+          <Btn variant="primary" onClick={() => setTambahModal(true)}>
+            <Plus size={15} /> Tambah Data Polis
           </Btn>
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+      {/* TAB NAVIGATION: HANYA 2 TAB (TPB & TDS) */}
+      <div
+        style={{
+          borderBottom: `2px solid ${COLORS.gray200}`,
+          marginBottom: 20,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+        }}
+      >
+        <div style={{ display: "flex", gap: 6, marginBottom: -2 }}>
+          {[
+            {
+              id: "tpb",
+              label: "Imbal Jasa TPB (Taspen Proteksi Beasiswa)",
+              tarif: `${tarifTPB}%`,
+              count: computedTpb.length,
+              badgeCol: "orange",
+            },
+            {
+              id: "tds",
+              label: "Imbal Jasa TDS (Taspen Dwiguna Sejahtera)",
+              tarif: `${tarifTDS}%`,
+              count: computedTds.length,
+              badgeCol: "blue",
+            },
+          ].map((t) => {
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "11px 20px",
+                  border: "none",
+                  borderRadius: "8px 8px 0 0",
+                  cursor: "pointer",
+                  fontSize: 13.5,
+                  fontWeight: isActive ? 800 : 600,
+                  background: isActive ? COLORS.white : "transparent",
+                  color: isActive ? COLORS.blue : COLORS.gray600,
+                  borderBottom: isActive ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+                  borderTop: isActive ? `1px solid ${COLORS.gray200}` : "1px solid transparent",
+                  borderLeft: isActive ? `1px solid ${COLORS.gray200}` : "1px solid transparent",
+                  borderRight: isActive ? `1px solid ${COLORS.gray200}` : "1px solid transparent",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span>{t.label}</span>
+                <span
+                  style={{
+                    background: isActive ? "#EFF6FF" : COLORS.gray100,
+                    color: isActive ? COLORS.blue : COLORS.gray600,
+                    padding: "2px 8px",
+                    borderRadius: 12,
+                    fontSize: 11,
+                    fontWeight: 700,
+                  }}
+                >
+                  Tarif {t.tarif} • {t.count} Polis
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ paddingBottom: 6, fontSize: 12, color: COLORS.gray500 }}>
+          Format Tabel 15 Kolom Resmi Sesuai Spesifikasi BRD Keuangan
+        </div>
+      </div>
+
+      {/* Stat Cards Tab Aktif */}
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
         <StatCard
           icon={<Banknote size={IC} />}
-          label="Total Imbal Jasa Bruto"
-          value={fmt(totalBruto)}
-          sub={`${allTagihan.length} tagihan terdata`}
-          color={COLORS.blue}
+          label={`Total Premi Bruto (${activeTab === "tpb" ? "TPB" : "TDS"})`}
+          value={fmt(agg.totalPremi)}
+          sub={`${activeComputedList.length} Polis Terdaftar`}
+          color={activeTab === "tpb" ? COLORS.orange : COLORS.blue}
         />
         <StatCard
-          icon={<TrendingUp size={IC} />}
-          label="Total Imbal Jasa Bersih (Neto)"
-          value={fmt(totalNeto)}
-          sub="Setelah PPN &amp; PPh 23"
-          color="#7C3AED"
+          icon={<Receipt size={IC} />}
+          label={`Imbal Jasa (Nominal × ${activeTab === "tpb" ? tarifTPB : tarifTDS}%)`}
+          value={fmt(agg.totalImbalJasa)}
+          sub={`DPP Nilai Lain (11/12): ${fmt(agg.totalDPP)}`}
+          color={COLORS.blueLight}
         />
         <StatCard
-          icon={<CheckCircle2 size={IC} />}
-          label="Tagihan Sudah Lunas"
-          value={`${lunasCount} Tagihan`}
-          sub={`Dari total ${allTagihan.length} tagihan`}
+          icon={<ShieldCheck size={IC} />}
+          label="Imbal Jasa Diterima (Neto / NAT)"
+          value={fmt(agg.totalDiterima)}
+          sub={`PPN: +${fmt(agg.totalPPN)} • PPh 23: -${fmt(agg.totalPPh23)}`}
           color={COLORS.green}
         />
         <StatCard
-          icon={<AlertTriangle size={IC} />}
-          label="Total Denda Keterlambatan"
-          value={fmt(totalDenda)}
-          sub={`${terlambatCount} tagihan terlambat (BI Rate ${biRate}%)`}
-          color={COLORS.red}
+          icon={<CheckCircle2 size={IC} />}
+          label="Realisasi Penerimaan Fee"
+          value={`${agg.countLunas} Lunas`}
+          sub={`${agg.countBelum} Belum Diterima`}
+          color={agg.countBelum > 0 ? COLORS.orange : COLORS.green}
         />
       </div>
 
-      {/* Tabs View: Tagihan SP vs Format BRD Rincian TPB & TDS */}
+      {/* Filter Bar Terpadu */}
       <div
         style={{
-          display: "flex",
-          gap: 0,
+          background: COLORS.white,
+          borderRadius: 10,
+          padding: "14px 18px",
+          border: `1px solid ${COLORS.gray200}`,
           marginBottom: 20,
-          borderBottom: `2px solid ${COLORS.gray200}`,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 12,
         }}
       >
-        {[
-          { id: "tagihan", l: "Daftar Tagihan Imbal Jasa & Denda Keterlambatan" },
-          { id: "rincian_brd", l: "Format BRD Rincian TPB & TDS (Line 271-273)" },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setSubTab(t.id)}
-            style={{
-              padding: "11px 20px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13.5,
-              fontWeight: 600,
-              background: "transparent",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              color: subTab === t.id ? COLORS.blue : COLORS.gray500,
-              borderBottom:
-                subTab === t.id
-                  ? `3px solid ${COLORS.blue}`
-                  : "3px solid transparent",
-              marginBottom: -2,
-            }}
-          >
-            {t.l}
-          </button>
-        ))}
+        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, color: COLORS.gray500, fontSize: 12, fontWeight: 700 }}>
+            <Filter size={14} /> Filter:
+          </div>
+          <Select
+            label="Bulan"
+            value={filterBulan}
+            onChange={setFilterBulan}
+            options={["Semua", "Juni 2026", "Juli 2026"]}
+            minW={140}
+          />
+          <Select
+            label="Status Penerimaan"
+            value={filterStatus}
+            onChange={setFilterStatus}
+            options={["Semua", "Diterima", "Belum Diterima"]}
+            minW={160}
+          />
+        </div>
+
+        <div style={{ minWidth: 260 }}>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Cari Peserta, KTPA, No. Polis..."
+          />
+        </div>
       </div>
 
-      {/* SUBTAB 1: DAFTAR TAGIHAN & DENDA */}
-      {subTab === "tagihan" && (
+      {/* TABEL LENGKAP 15 KOLOM SPESIFIKASI BRD UNTUK TPB & TDS */}
+      <div
+        style={{
+          background: COLORS.white,
+          borderRadius: 10,
+          padding: 20,
+          border: `1px solid ${COLORS.gray200}`,
+          boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
+        }}
+      >
         <div
           style={{
-            background: COLORS.white,
-            borderRadius: 10,
-            padding: 20,
-            border: `1px solid ${COLORS.gray200}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 14,
           }}
         >
-          <SectionTitle
-            action={
-              <span style={{ fontSize: 12, color: COLORS.gray500 }}>
-                Tarif aktif: TDS {tarifTDS}% • TPB {tarifTPB}% • BI Rate {biRate}%
-              </span>
-            }
-          >
-            Daftar Surat Tagihan Imbal Jasa Taspen Life
-          </SectionTitle>
-
-          <div
-            style={{
-              background: "#FFFBEB",
-              borderRadius: 8,
-              padding: "10px 14px",
-              marginBottom: 16,
-              fontSize: 12.5,
-              color: "#92400E",
-              display: "flex",
-              gap: 8,
-            }}
-          >
-            <AlertTriangle size={16} />
-            <span>
-              <strong>Aturan Bisnis (BR-TL-05):</strong> Surat tagihan imbal jasa hanya dapat diterbitkan secara otomatis setelah pembayaran premi kepada Taspen Life selesai diproses dan Berita Acara tervalidasi.
-            </span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              marginBottom: 16,
-              alignItems: "flex-end",
-              flexWrap: "wrap",
-            }}
-          >
-            <Select
-              label="Program"
-              value={filterProgram}
-              onChange={setFilterProgram}
-              options={[
-                "Semua",
-                "TDS (Taspen Dwiguna Sejahtera)",
-                "TPB - Proteksi Beasiswa JKK",
-                "TPB - Proteksi Beasiswa JKm",
-              ]}
-              minW={220}
-            />
-            <Select
-              label="Status"
-              value={filterStatus}
-              onChange={setFilterStatus}
-              options={["Semua", "Dibayar", "Terlambat", "Belum Dibayar", "Menunggu Pembayaran"]}
-              minW={170}
-            />
-            <div>
-              <label
-                style={{
-                  fontSize: 12,
-                  color: COLORS.gray500,
-                  display: "block",
-                  marginBottom: 4,
-                }}
-              >
-                Pencarian
-              </label>
-              <SearchInput
-                value={searchTagihan}
-                onChange={setSearchTagihan}
-                placeholder="Cari no. tagihan atau no. SP..."
-                minW={240}
-              />
+          <div>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
+              Tabel Rincian Imbal Jasa {activeTab === "tpb" ? "Taspen Proteksi Beasiswa (TPB)" : "Taspen Dwiguna Sejahtera (TDS)"}
+            </h3>
+            <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
+              Struktur 15 Kolom Data Lengkap Sesuai Dokumen BRD Keuangan (Line 271-273)
             </div>
           </div>
-
-          <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>
-            Menampilkan <strong>{filtered.length}</strong> dari <strong>{allTagihan.length}</strong> tagihan
-          </div>
-
-          {filtered.length === 0 ? (
-            <NoData />
-          ) : (
-            <div
+          <div style={{ display: "flex", gap: 8 }}>
+            <span
               style={{
-                overflowX: "auto",
-                borderRadius: 8,
-                border: `1px solid #CBD5E1`,
-                boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                background: "#F8FAFC",
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: `1px solid ${COLORS.gray200}`,
               }}
             >
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: 12.5,
-                }}
-              >
-                <thead>
-                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                    {[
-                      "No. Tagihan",
-                      "Program",
-                      "No. SP Premi",
-                      "Periode",
-                      "Premi Bruto",
-                      "Imbal Jasa (Bruto)",
-                      "Neto Diterima",
-                      "Jatuh Tempo",
-                      "Denda BI Rate",
-                      "Status",
-                      "Aksi",
-                    ].map((c, i) => (
-                      <th
-                        key={i}
-                        style={{
-                          padding: "11px 13px",
-                          textAlign: i === 4 || i === 5 || i === 6 || i === 8 ? "right" : "left",
-                          fontWeight: 800,
-                          color: "#64748B",
-                          borderBottom: `1px solid #E2E8F0`,
-                          borderRight: i < 10 ? "1px solid #E2E8F0" : "none",
-                          whiteSpace: "nowrap",
-                          fontSize: 11.5,
-                        }}
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((t, i) => {
-                    const c = calcTax(t.premi, t.tarif, t.hariTerlambat);
-                    return (
-                      <tr
-                        key={i}
-                        style={{
-                          borderBottom: `1px solid #E2E8F0`,
-                          background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "#F1F5F9")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background =
-                            i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")
-                        }
-                      >
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            fontFamily: "monospace",
-                            color: COLORS.blue,
-                            fontWeight: 700,
-                            borderRight: "1px solid #E2E8F0",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {t.no}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            borderRight: "1px solid #E2E8F0",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          <Badge color={progColor(t.program)}>
-                            {progShort(t.program)}
-                          </Badge>
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            fontFamily: "monospace",
-                            fontSize: 11.5,
-                            borderRight: "1px solid #E2E8F0",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {t.noSP}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            borderRight: "1px solid #E2E8F0",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {t.periode}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            textAlign: "right",
-                            fontFamily: "monospace",
-                            borderRight: "1px solid #E2E8F0",
-                          }}
-                        >
-                          {fmt(t.premi)}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            textAlign: "right",
-                            fontFamily: "monospace",
-                            fontWeight: 600,
-                            color: "#0F172A",
-                            borderRight: "1px solid #E2E8F0",
-                          }}
-                        >
-                          {fmt(c.imbalJasaBruto)}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            textAlign: "right",
-                            fontFamily: "monospace",
-                            fontWeight: 700,
-                            color: "#7C3AED",
-                            borderRight: "1px solid #E2E8F0",
-                          }}
-                        >
-                          {fmt(c.imbalJasaNeto)}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            color: "#0F172A",
-                            borderRight: "1px solid #E2E8F0",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {t.jatuhTempo}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            textAlign: "right",
-                            fontFamily: "monospace",
-                            fontWeight: 700,
-                            color: c.denda > 0 ? COLORS.red : COLORS.gray400,
-                            borderRight: "1px solid #E2E8F0",
-                          }}
-                        >
-                          {c.denda > 0 ? fmt(c.denda) : "—"}
-                        </td>
-                        <td
-                          style={{
-                            padding: "10px 13px",
-                            borderRight: "1px solid #E2E8F0",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          <Badge color={statusColor(t.status)}>{t.status}</Badge>
-                        </td>
-                        <td style={{ padding: "10px 13px", textAlign: "center" }}>
-                          <Btn
-                            size="xs"
-                            variant="outline"
-                            onClick={() => setDetailTagihan(t)}
-                          >
-                            Detail Tagihan
-                          </Btn>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* SUBTAB 2: FORMAT BRD RINCIAN TPB & TDS (Line 271-273) */}
-      {subTab === "rincian_brd" && (
-        <div
-          style={{
-            background: COLORS.white,
-            borderRadius: 10,
-            padding: 20,
-            border: `1px solid ${COLORS.gray200}`,
-          }}
-        >
-          <SectionTitle
-            action={
-              <Btn
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setPreview({
-                    title: "Format BRD Rincian Imbal Jasa TPB & TDS",
-                    subtitle: "Sesuai Format Kolom BRD V5 Line 271-273",
-                    type: "table",
-                    fileName: "Format_BRD_Rincian_ImbalJasa_TPB_TDS.xlsx",
-                    content: {
-                      columns: [
-                        "No",
-                        "Bulan",
-                        "Peserta",
-                        "KTPA",
-                        "Nominal",
-                        "No Polis",
-                        "Tgl Polis",
-                        "Tgl Bayar",
-                        "Imbal Jasa",
-                        "DPP 11/12",
-                        "PPN 12%",
-                        "PPh 23 (2%)",
-                        "Tagihan",
-                        "Diterima (Neto)",
-                        "Tgl Terima",
-                      ],
-                      rows: rincianBRD.map((r, idx) => {
-                        const c = calcTax(r.nominalPremi, r.tarif * 100);
-                        return [
-                          idx + 1,
-                          r.bulan,
-                          r.peserta,
-                          r.ktpa,
-                          fmt(r.nominalPremi),
-                          r.noPolis,
-                          r.tglPolis,
-                          r.tglBayarPolis,
-                          fmt(c.imbalJasaBruto),
-                          fmt(c.dpp),
-                          fmt(c.ppn),
-                          fmt(c.pph23),
-                          fmt(c.jumlahTagihan),
-                          fmt(c.imbalJasaNeto),
-                          r.tglTerima,
-                        ];
-                      }),
-                      totalRows: rincianBRD.length,
-                    },
-                  })
-                }
-              >
-                Ekspor Format BRD Excel
-              </Btn>
-            }
-          >
-            Tabel Rincian Imbal Jasa Per Peserta (Format Spesifikasi BRD V5)
-          </SectionTitle>
-
-          <div
-            style={{
-              padding: "10px 14px",
-              background: "#F8FAFC",
-              border: "1px solid #E2E8F0",
-              borderRadius: 8,
-              marginBottom: 16,
-              fontSize: 12,
-              color: COLORS.gray600,
-            }}
-          >
-            Format tabel di bawah menyajikan seluruh 15 kolom data resmi untuk <strong>Taspen Proteksi Beasiswa (TPB - 3%)</strong> dan <strong>Taspen Dwiguna Sejahtera (TDS - 2,5%)</strong> sebagaimana dispesifikasikan pada dokumen BRD Keuangan &amp; Perpajakan V5.
+              <Info size={13} color={COLORS.blue} />
+              Rumus: Imbal Jasa = Premi × {activeTab === "tpb" ? "3%" : "2,5%"} | DPP = 11/12 | PPN 12% | PPh 23 (2%) | Tagihan = Imbal Jasa + PPN | Diterima = Tagihan - PPh 23
+            </span>
           </div>
+        </div>
 
+        {activeComputedList.length === 0 ? (
+          <NoData message={`Tidak ada data polis ${activeTab.toUpperCase()} yang sesuai dengan filter.`} />
+        ) : (
           <div
             style={{
               overflowX: "auto",
               borderRadius: 8,
-              border: `1px solid #CBD5E1`,
-              boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
+              border: `1px solid ${COLORS.gray300}`,
+              maxHeight: "68vh",
             }}
           >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: 11.5,
-              }}
-            >
-              <thead>
-                <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                  {[
-                    "No",
-                    "Bulan",
-                    "Peserta",
-                    "KTPA",
-                    "Nominal Premi",
-                    "Nomor Polis",
-                    "Tgl Polis",
-                    "Tgl Bayar Polis",
-                    "Imbal Jasa (Tarif)",
-                    "DPP (11/12)",
-                    "PPN (12%×DPP)",
-                    "PPh 23 (2%)",
-                    "Jml Tagihan",
-                    "Imbal Jasa Diterima (Neto)",
-                    "Tgl Terima",
-                  ].map((h, i) => (
-                    <th
-                      key={i}
-                      style={{
-                        padding: "9px 10px",
-                        textAlign:
-                          i === 4 || (i >= 8 && i <= 13) ? "right" : "left",
-                        fontWeight: 800,
-                        borderBottom: `1px solid #E2E8F0`,
-                        borderRight: i < 14 ? "1px solid #E2E8F0" : "none",
-                        whiteSpace: "nowrap",
-                        fontSize: 11,
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, whiteSpace: "nowrap" }}>
+              <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "#F1F5F9" }}>
+                <tr style={{ borderBottom: `2px solid ${COLORS.gray300}` }}>
+                  {/* 1. No */}
+                  <th style={{ padding: "10px 12px", textAlign: "center", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray300}`, background: "#E2E8F0", position: "sticky", left: 0, zIndex: 11 }}>
+                    No.
+                  </th>
+                  {/* 2. Bulan */}
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Bulan
+                  </th>
+                  {/* 3. Peserta */}
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, color: COLORS.gray900, borderRight: `1px solid ${COLORS.gray300}`, background: "#E2E8F0", position: "sticky", left: 45, zIndex: 11 }}>
+                    Peserta
+                  </th>
+                  {/* 4. KTPA */}
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                    KTPA
+                  </th>
+                  {/* 5. Nominal (Premi) */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.gray900, background: "#EFF6FF", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Nominal
+                  </th>
+                  {/* 6. Nomor Polis */}
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.blue, borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Nomor Polis
+                  </th>
+                  {/* 7. Tanggal Polis */}
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Tanggal Polis
+                  </th>
+                  {/* 8. Tanggal Bayar Polis */}
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Tanggal Bayar Polis
+                  </th>
+                  {/* 9. Imbal Jasa (Tarif) */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.blue, background: "#EFF6FF", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Imbal Jasa (Nominal x {activeTab === "tpb" ? "3%" : "2,5%"})
+                  </th>
+                  {/* 10. DPP 11/12 (DPP x Imbal Jasa) */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.gray800, background: "#F8FAFC", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    DPP 11/12 (DPP x Imbal Jasa)
+                  </th>
+                  {/* 11. PPN (DPP X 12%) */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: "#4F46E5", background: "#EEF2FF", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    PPN (DPP X 12%)
+                  </th>
+                  {/* 12. PPH 23 (Imbal Jasa X 2%) */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.red, background: "#FFF1F2", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    PPH 23 (Imbal Jasa X 2%)
+                  </th>
+                  {/* 13. Jumlah Tagihan (Imbal Jasa + PPN) */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.gray900, background: "#F1F5F9", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Jumlah Tagihan (Imbal Jasa + PPN)
+                  </th>
+                  {/* 14. Imbal Jasa yang Diterima */}
+                  <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.green, background: "#ECFDF5", borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Imbal Jasa yang Diterima
+                  </th>
+                  {/* 15. Tanggal Terima Imbal Jasa */}
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                    Tanggal Terima Imbal Jasa
+                  </th>
+                  {/* Aksi */}
+                  <th style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, color: COLORS.gray700 }}>
+                    Aksi
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {rincianBRD.map((r, i) => {
-                  const c = calcTax(r.nominalPremi, r.tarif * 100);
+                {activeComputedList.map((row, idx) => {
+                  const isEven = idx % 2 === 1;
                   return (
                     <tr
-                      key={i}
+                      key={row.id}
                       style={{
-                        borderBottom: `1px solid #E2E8F0`,
-                        background: i % 2 === 1 ? "#F8FAFC" : "#FFFFFF",
+                        borderBottom: `1px solid ${COLORS.gray200}`,
+                        background:
+                          row.status === "Belum Diterima"
+                            ? "#FFFBEB"
+                            : isEven
+                            ? "#F8FAFC"
+                            : "#FFFFFF",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "#F1F5F9")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background =
-                          i % 2 === 1 ? "#F8FAFC" : "#FFFFFF")
-                      }
                     >
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "center",
-                          color: "#64748B",
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {i + 1}
+                      {/* 1. No */}
+                      <td style={{ padding: "10px 12px", textAlign: "center", fontWeight: 700, borderRight: `1px solid ${COLORS.gray300}`, background: isEven ? "#F1F5F9" : "#F8FAFC", position: "sticky", left: 0, zIndex: 2 }}>
+                        {row.no}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.bulan}
+                      {/* 2. Bulan */}
+                      <td style={{ padding: "10px 12px", borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {row.bulan}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          fontWeight: 700,
-                          color: "#0F172A",
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.peserta}
+                      {/* 3. Peserta */}
+                      <td style={{ padding: "10px 14px", fontWeight: 700, color: COLORS.gray900, borderRight: `1px solid ${COLORS.gray300}`, background: isEven ? "#F1F5F9" : "#F8FAFC", position: "sticky", left: 45, zIndex: 2 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <User size={13} color={COLORS.blue} />
+                          <span>{row.peserta}</span>
+                        </div>
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          fontFamily: "monospace",
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.ktpa}
+                      {/* 4. KTPA */}
+                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11.5, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {row.ktpa}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          fontWeight: 600,
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {fmt(r.nominalPremi)}
+                      {/* 5. Nominal */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {fmt(row.nominalPremi)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          fontFamily: "monospace",
-                          color: COLORS.blue,
-                          fontWeight: 600,
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.noPolis}
+                      {/* 6. Nomor Polis */}
+                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11.5, color: COLORS.blue, fontWeight: 700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {row.noPolis}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.tglPolis}
+                      {/* 7. Tanggal Polis */}
+                      <td style={{ padding: "10px 12px", borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {row.tanggalPolis}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.tglBayarPolis}
+                      {/* 8. Tanggal Bayar Polis */}
+                      <td style={{ padding: "10px 12px", borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {row.tanggalBayarPolis}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          fontWeight: 600,
-                          color: "#0F172A",
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {fmt(c.imbalJasaBruto)} ({(r.tarif * 100).toFixed(1)}%)
+                      {/* 9. Imbal Jasa */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 700, color: COLORS.blue, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {fmt(row.imbalJasa)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          color: COLORS.gray600,
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {fmt(c.dpp)}
+                      {/* 10. DPP */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 600, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {fmt(row.dpp)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          color: "#16A34A",
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        +{fmt(c.ppn)}
+                      {/* 11. PPN 12% */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 600, color: "#4F46E5", borderRight: `1px solid ${COLORS.gray200}` }}>
+                        +{fmt(row.ppn)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          color: COLORS.red,
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        −{fmt(c.pph23)}
+                      {/* 12. PPh 23 */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 600, color: COLORS.red, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        -{fmt(row.pph23)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          fontWeight: 600,
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {fmt(c.jumlahTagihan)}
+                      {/* 13. Jumlah Tagihan */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {fmt(row.jumlahTagihan)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          textAlign: "right",
-                          fontFamily: "monospace",
-                          fontWeight: 800,
-                          color: "#7C3AED",
-                          borderRight: "1px solid #E2E8F0",
-                        }}
-                      >
-                        {fmt(c.imbalJasaNeto)}
+                      {/* 14. Imbal Jasa yang Diterima */}
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.green, borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {fmt(row.imbalJasaDiterima)}
                       </td>
-                      <td
-                        style={{
-                          padding: "8px 10px",
-                          borderRight: "1px solid #E2E8F0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {r.tglTerima}
+                      {/* 15. Tanggal Terima Imbal Jasa */}
+                      <td style={{ padding: "10px 12px", borderRight: `1px solid ${COLORS.gray200}` }}>
+                        {row.tanggalTerima !== "—" ? (
+                          <span style={{ fontWeight: 600, color: COLORS.green }}>{row.tanggalTerima}</span>
+                        ) : (
+                          <span style={{ color: COLORS.orange, fontWeight: 700 }}>Menunggu Pembayaran</span>
+                        )}
+                      </td>
+                      {/* Aksi */}
+                      <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                        <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+                          <Btn
+                            size="xs"
+                            variant="outline"
+                            onClick={() => setDetailModal(row)}
+                          >
+                            <Eye size={12} /> Detail
+                          </Btn>
+                          <Btn
+                            size="xs"
+                            variant="outline"
+                            onClick={() => handleCetakTagihan(row)}
+                          >
+                            <FileText size={12} /> Cetak
+                          </Btn>
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
+              {/* FOOTER TOTAL TABLE */}
+              <tfoot style={{ background: "#F1F5F9", borderTop: `2px solid ${COLORS.gray300}` }}>
+                <tr style={{ fontWeight: 800 }}>
+                  <td colSpan={4} style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray700 }}>
+                    TOTAL REKAPITULASI {activeTab.toUpperCase()}:
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray900 }}>
+                    {fmt(agg.totalPremi)}
+                  </td>
+                  <td colSpan={3} style={{ padding: "12px 14px" }}></td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.blue }}>
+                    {fmt(agg.totalImbalJasa)}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray700 }}>
+                    {fmt(agg.totalDPP)}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: "#4F46E5" }}>
+                    {fmt(agg.totalPPN)}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.red }}>
+                    {fmt(agg.totalPPh23)}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray900 }}>
+                    {fmt(agg.totalTagihan)}
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.green, fontSize: 13 }}>
+                    {fmt(agg.totalDiterima)}
+                  </td>
+                  <td colSpan={2} style={{ padding: "12px 14px" }}></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

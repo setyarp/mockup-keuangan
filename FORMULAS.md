@@ -180,3 +180,57 @@ Sesuai **BRD Keuangan & Perpajakan V5 (PJK 01, Line 566 & 696)** dan **PMK No. 1
 
 ## 7. 🏷️ Penarikan Piutang & UDW Punah (`KreditPiutang`)
 * Penarikan kelebihan bayar **Uang Duka Wafat (UDW)** dan hak pensiun bagi penerima yang tercatat punah (meninggal dunia tanpa ada ahli waris sah yang berhak menerima tunjangan lanjutan).
+
+---
+
+## 8. 💳 Tagihan Imbal Jasa Mitra Bayar (`TagihanImbalJasa`)
+
+### A. Sub-Modul Imbal Jasa Flagging Kredit
+Imbal jasa yang diperoleh PT ASABRI (Persero) dari mitra bayar perbankan atas jasa penguncian (flagging) data pensiun debitur agar tidak beralih rekening sebelum kewajiban kredit lunas.
+
+#### Formula Perhitungan Kolom Data:
+1. **Imbal Jasa Flagging (Murni Sebelum PPN):**
+   $$\text{Imbal Jasa} = \frac{\text{Nominal Bruto}}{1{,}11}$$
+2. **DPP PPN Nilai Lain (11/12):**
+   $$\text{DPP PPN} = \frac{11}{12} \times \text{Imbal Jasa}$$
+3. **PPN 12%:**
+   $$\text{PPN} = 12\% \times \text{DPP PPN} = 11\% \times \text{Imbal Jasa}$$
+   *(Catatan: $\text{Imbal Jasa} + \text{PPN} = \text{Nominal Bruto}$)*
+4. **PPh Pasal 23 (2%):**
+   $$\text{PPh 23} = 2\% \times \text{Imbal Jasa}$$
+5. **Net After Tax (NAT):**
+   $$\text{NAT} = \text{Nominal Bruto} - \text{PPh 23} = (\text{Imbal Jasa} + \text{PPN}) - \text{PPh 23}$$
+6. **Jatuh Tempo Pembayaran:**
+   $$\text{Jatuh Tempo} = \text{Tanggal Surat Diterima Mitra} + 14\ \text{Hari Kerja}$$
+7. **Durasi Keterlambatan:**
+   $$\text{Hari Terlambat} = \max(0,\ \text{Tanggal Penerimaan} - \text{Jatuh Tempo})$$
+8. **Denda Keterlambatan Berbasis BI Rate:**
+   $$\text{Denda} = \text{Nominal Bruto} \times \text{BI RATE} \times \frac{\text{Hari Terlambat}}{365}$$
+9. **Nilai Pembulatan Denda:**
+   $$\text{Pembulatan Denda} = \text{Math.round}(\text{Denda})$$
+
+---
+
+### B. Sub-Modul Imbal Jasa Pemanfaatan Authentikasi Digital
+Imbal jasa yang ditagihkan kepada mitra bayar atas penyediaan data otentikasi biometrik digital penerima pensiun (Dapem Induk, Susulan, dan Pensiun Pertama).
+
+#### Formula Perhitungan Kolom Data:
+1. **Nominal Imbal Jasa:**
+   $$\text{Nominal Imbal Jasa} = \text{Tarif Imbal Jasa} \times \text{Jumlah Penerima (Induk + Susulan + PP)}$$
+2. **DPP PPN Nilai Lain (11/12):**
+   $$\text{DPP PPN} = \frac{11}{12} \times \text{Nominal Imbal Jasa}$$
+3. **PPN 12%:**
+   $$\text{PPN} = 12\% \times \text{DPP PPN} = 11\% \times \text{Nominal Imbal Jasa}$$
+4. **PPh Pasal 23 (2%):**
+   $$\text{PPh 23} = 2\% \times \text{Nominal Imbal Jasa}$$
+5. **Net After Tax (NAT):**
+   $$\text{NAT} = (\text{Nominal Imbal Jasa} + \text{PPN}) - \text{PPh 23}$$
+6. **Jatuh Tempo Pembayaran:**
+   $$\text{Jatuh Tempo} = \text{Tanggal Surat Diterima Mitra} + 14\ \text{Hari Kerja}$$
+7. **Durasi Keterlambatan:**
+   $$\text{Hari Terlambat} = \max(0,\ \text{Tanggal Penerimaan} - \text{Jatuh Tempo})$$
+8. **Denda Keterlambatan Berbasis BI Rate:**
+   $$\text{Denda} = (\text{Nominal Imbal Jasa} + \text{PPN}) \times \text{BI RATE} \times \frac{\text{Hari Terlambat}}{365}$$
+9. **Nilai Pembulatan Denda:**
+   $$\text{Pembulatan Denda} = \text{Math.round}(\text{Denda})$$
+

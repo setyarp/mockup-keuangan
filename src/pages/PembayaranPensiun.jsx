@@ -1,35 +1,88 @@
-import { useState } from "react";
-import { Users, Banknote, Receipt, Wallet, Download, ChevronDown, Filter, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Users,
+  Banknote,
+  Receipt,
+  Wallet,
+  Download,
+  ChevronDown,
+  Filter,
+  Shield,
+  Clock,
+  HeartHandshake,
+  Award,
+  Search,
+  FileText,
+  Building2,
+  CheckCircle2,
+  Eye,
+  Calendar,
+  Layers
+} from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import { StatCard, Btn, NoData, PreviewModal } from "../components/common";
 
-export const PembayaranPensiun = () => {
+export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
+  // 3 SUBTAB TERPADU ADMINISTRASI DAPEM DIVISI KEUANGAN:
+  // "induk"    : DAPEM Induk (Gaji Pensiun Rutin Bulanan)
+  // "susulan"  : DAPEM Susulan (Termin Susulan SK Terlambat & Rekening Pasif)
+  // "nondapem" : NON-DAPEM (Pembayaran Pertama / PP, Rapel UKP, & Uang Duka Wafat / UDW)
+  const [activeSubtab, setActiveSubtab] = useState(defaultTab);
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveSubtab(defaultTab);
+    }
+  }, [defaultTab]);
+
+  // State Periode Batch Bulanan
+  const [selectedBulan, setSelectedBulan] = useState("2026-07");
   const [filterKelompok, setFilterKelompok] = useState("Semua");
   const [filterJenisPensiun, setFilterJenisPensiun] = useState("Semua");
-  const [tglAwal, setTglAwal] = useState("2026-06-01");
-  const [tglAkhir, setTglAkhir] = useState("2026-06-30");
-  const filterPeriode = `${tglAwal} s.d. ${tglAkhir}`;
   const [filterPenyaluran, setFilterPenyaluran] = useState("Gabungan POS dan Bank");
   const [selectedDropdownDapem, setSelectedDropdownDapem] = useState("semua");
+
+  // State Modal BNBA (By Name By Address) & Preview
+  const [showBNBAModal, setShowBNBAModal] = useState(false);
+  const [selectedBNBAMAK, setSelectedBNBAMAK] = useState(null);
+  const [searchBNBA, setSearchBNBA] = useState("");
+  const [preview, setPreview] = useState(null);
+
+  // Expand / Collapse Accordion
   const [expandedDapem, setExpandedDapem] = useState({
-    "513113": false,
+    "513113": true,
     "513114": false,
     "513122": false,
     "513123": false,
     "total": false,
   });
-  const [preview, setPreview] = useState(null);
+
+  const toggleExpand = (kodeMAK) => {
+    setExpandedDapem((prev) => ({ ...prev, [kodeMAK]: !prev[kodeMAK] }));
+  };
+
+  const closeAllDetails = () => {
+    setExpandedDapem({
+      "513113": false,
+      "513114": false,
+      "513122": false,
+      "513123": false,
+      "total": false,
+    });
+  };
 
   const fmt = (n) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
   const fmtJiwa = (n) => (n || 0).toLocaleString("id-ID");
 
-  // Data Rekapitulasi III Lengkap (sesuai Sheet Ouput yang diharapkan & data aktual)
-  const dapemData = [
+  // =========================================================================
+  // DATASET 1: DAPEM INDUK (Rutin Bulanan — 4 MAK Resmi)
+  // =========================================================================
+  const dapemIndukData = [
     {
       no: 1,
       kodeMAK: "513113",
       namaKelompok: "PENS PNS KEMHAN (513113)",
-      singkatan: "PNS Kemenhan",
+      singkatan: "PNS Kemhan",
       kategori: "PNS KEMHAN",
       jenisList: [
         {
@@ -74,7 +127,7 @@ export const PembayaranPensiun = () => {
       no: 2,
       kodeMAK: "513114",
       namaKelompok: "PENS PNS POLRI (513114)",
-      singkatan: "PNS POLRI",
+      singkatan: "PNS Polri",
       kategori: "PNS POLRI",
       jenisList: [
         {
@@ -207,596 +260,1139 @@ export const PembayaranPensiun = () => {
     }
   ];
 
-  // Filter DAPEM
-  const filteredDapemList = dapemData.filter(d => {
+  // =========================================================================
+  // DATASET 2: DAPEM SUSULAN (Termin 2 / Susulan SK Terlambat)
+  // =========================================================================
+  const dapemSusulanData = [
+    {
+      no: 1,
+      kodeMAK: "513113",
+      namaKelompok: "PENS PNS KEMHAN (513113) — SUSULAN",
+      singkatan: "PNS Kemhan",
+      kategori: "PNS KEMHAN",
+      jenisList: [
+        {
+          id: "a",
+          nama: "a. Pensiun Sendiri (Susulan)",
+          jiwa: { penerima: 142, istriSuami: 40, anak: 28, cacat: 0, total: 210 },
+          bruto: { pensiunPokok: 612000000, tunjKeluarga: 24800000, tunjBeras: 18900000, cacatLain: 0, lainLain: 30100000, total: 685800000 },
+          potongan: { pph21: 30400000, askes: 3920000, tgr: 0, nonTgr: 2010000, lainLain: 0, total: 36330000 },
+          netto: 649470000
+        },
+        {
+          id: "b",
+          nama: "b. Pensiun Warakawuri/Janda/Duda (Susulan)",
+          jiwa: { penerima: 31, istriSuami: 4, anak: 3, cacat: 0, total: 38 },
+          bruto: { pensiunPokok: 124500000, tunjKeluarga: 3180000, tunjBeras: 3840000, cacatLain: 0, lainLain: 6120000, total: 137640000 },
+          potongan: { pph21: 5820000, askes: 752000, tgr: 0, nonTgr: 385000, lainLain: 0, total: 6957000 },
+          netto: 130683000
+        }
+      ],
+      totalJiwa: { penerima: 173, istriSuami: 44, anak: 31, cacat: 0, total: 248 },
+      totalBruto: { pensiunPokok: 736500000, tunjKeluarga: 27980000, tunjBeras: 22740000, cacatLain: 0, lainLain: 36220000, total: 823440000 },
+      totalPotongan: { pph21: 36220000, askes: 4672000, tgr: 0, nonTgr: 2395000, lainLain: 0, total: 43287000 },
+      totalNetto: 780153000
+    },
+    {
+      no: 2,
+      kodeMAK: "513114",
+      namaKelompok: "PENS PNS POLRI (513114) — SUSULAN",
+      singkatan: "PNS Polri",
+      kategori: "PNS POLRI",
+      jenisList: [
+        {
+          id: "a",
+          nama: "a. Pensiun Sendiri (Susulan)",
+          jiwa: { penerima: 28, istriSuami: 8, anak: 5, cacat: 0, total: 41 },
+          bruto: { pensiunPokok: 128000000, tunjKeluarga: 5200000, tunjBeras: 4100000, cacatLain: 0, lainLain: 6400000, total: 143700000 },
+          potongan: { pph21: 6150000, askes: 890000, tgr: 0, nonTgr: 510000, lainLain: 0, total: 7550000 },
+          netto: 136150000
+        }
+      ],
+      totalJiwa: { penerima: 28, istriSuami: 8, anak: 5, cacat: 0, total: 41 },
+      totalBruto: { pensiunPokok: 128000000, tunjKeluarga: 5200000, tunjBeras: 4100000, cacatLain: 0, lainLain: 6400000, total: 143700000 },
+      totalPotongan: { pph21: 6150000, askes: 890000, tgr: 0, nonTgr: 510000, lainLain: 0, total: 7550000 },
+      totalNetto: 136150000
+    },
+    {
+      no: 3,
+      kodeMAK: "513122",
+      namaKelompok: "PENS TNI (513122) — SUSULAN",
+      singkatan: "TNI",
+      kategori: "TNI",
+      jenisList: [
+        {
+          id: "a",
+          nama: "a. Pensiun Sendiri (Susulan)",
+          jiwa: { penerima: 485, istriSuami: 110, anak: 290, cacat: 0, total: 885 },
+          bruto: { pensiunPokok: 2180000000, tunjKeluarga: 104000000, tunjBeras: 81000000, cacatLain: 0, lainLain: 132000000, total: 2497000000 },
+          potongan: { pph21: 129000000, askes: 12900000, tgr: 0, nonTgr: 19800000, lainLain: 0, total: 161700000 },
+          netto: 2335300000
+        }
+      ],
+      totalJiwa: { penerima: 485, istriSuami: 110, anak: 290, cacat: 0, total: 885 },
+      totalBruto: { pensiunPokok: 2180000000, tunjKeluarga: 104000000, tunjBeras: 81000000, cacatLain: 0, lainLain: 132000000, total: 2497000000 },
+      totalPotongan: { pph21: 129000000, askes: 12900000, tgr: 0, nonTgr: 19800000, lainLain: 0, total: 161700000 },
+      totalNetto: 2335300000
+    },
+    {
+      no: 4,
+      kodeMAK: "513123",
+      namaKelompok: "PENS POLRI (513123) — SUSULAN",
+      singkatan: "POLRI",
+      kategori: "POLRI",
+      jenisList: [
+        {
+          id: "a",
+          nama: "a. Pensiun Sendiri (Susulan)",
+          jiwa: { penerima: 260, istriSuami: 65, anak: 175, cacat: 0, total: 500 },
+          bruto: { pensiunPokok: 1190000000, tunjKeluarga: 58000000, tunjBeras: 46000000, cacatLain: 0, lainLain: 74000000, total: 1368000000 },
+          potongan: { pph21: 64500000, askes: 6100000, tgr: 0, nonTgr: 8700000, lainLain: 0, total: 79300000 },
+          netto: 1288700000
+        }
+      ],
+      totalJiwa: { penerima: 260, istriSuami: 65, anak: 175, cacat: 0, total: 500 },
+      totalBruto: { pensiunPokok: 1190000000, tunjKeluarga: 58000000, tunjBeras: 46000000, cacatLain: 0, lainLain: 74000000, total: 1368000000 },
+      totalPotongan: { pph21: 64500000, askes: 6100000, tgr: 0, nonTgr: 8700000, lainLain: 0, total: 79300000 },
+      totalNetto: 1288700000
+    }
+  ];
+
+  // =========================================================================
+  // DATASET 3: NON-DAPEM (PP, UKP, & UDW)
+  // =========================================================================
+  const nonDapemData = [
+    {
+      no: 1,
+      kodeMAK: "513113",
+      namaKelompok: "PENS PNS KEMHAN (513113) — NON-DAPEM",
+      singkatan: "PNS Kemhan",
+      kategori: "PNS KEMHAN",
+      jenisList: [
+        {
+          id: "pp",
+          nama: "a. Pembayaran Pertama (PP) — Pensiun Terusan",
+          deskripsi: "Akumulasi Pembayaran Pertama Hak Pensiun Baru",
+          jiwa: { penerima: 45, istriSuami: 12, anak: 8, cacat: 0, total: 65 },
+          bruto: { pokok: 198000000, tunjKeluarga: 12400000, tunjBeras: 8900000, cacatLain: 0, lainLain: 15200000, total: 234500000 },
+          potongan: { pph21: 11200000, askes: 1450000, nonTgr: 780000, total: 13430000 },
+          netto: 221070000
+        },
+        {
+          id: "ukp",
+          nama: "b. Uang Kekurangan Pensiun (UKP) — Penyesuaian Hak / Rapel",
+          deskripsi: "Rapel Koreksi Golongan, Pangkat & Tunjangan",
+          jiwa: { penerima: 82, istriSuami: 18, anak: 14, cacat: 0, total: 114 },
+          bruto: { pokok: 142000000, tunjKeluarga: 6800000, tunjBeras: 5400000, cacatLain: 0, lainLain: 8200000, total: 162400000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 162400000
+        },
+        {
+          id: "udw",
+          nama: "c. Uang Duka Wafat (UDW) — Santunan Kematian (3x Gaji Pokok)",
+          deskripsi: "Santunan Asuransi Kematian bagi Ahli Waris Sah",
+          jiwa: { penerima: 18, istriSuami: 0, anak: 0, cacat: 0, total: 18 },
+          bruto: { pokok: 144000000, tunjKeluarga: 0, tunjBeras: 0, cacatLain: 0, lainLain: 0, total: 144000000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 144000000
+        }
+      ],
+      totalJiwa: { penerima: 145, istriSuami: 30, anak: 22, cacat: 0, total: 197 },
+      totalBruto: { pokok: 484000000, tunjKeluarga: 19200000, tunjBeras: 14300000, cacatLain: 0, lainLain: 23400000, total: 540900000 },
+      totalPotongan: { pph21: 11200000, askes: 1450000, nonTgr: 780000, total: 13430000 },
+      totalNetto: 527470000
+    },
+    {
+      no: 2,
+      kodeMAK: "513114",
+      namaKelompok: "PENS PNS POLRI (513114) — NON-DAPEM",
+      singkatan: "PNS Polri",
+      kategori: "PNS POLRI",
+      jenisList: [
+        {
+          id: "pp",
+          nama: "a. Pembayaran Pertama (PP) — Pensiun Terusan",
+          deskripsi: "Akumulasi Pembayaran Pertama Hak Pensiun Baru",
+          jiwa: { penerima: 16, istriSuami: 4, anak: 3, cacat: 0, total: 23 },
+          bruto: { pokok: 72000000, tunjKeluarga: 4100000, tunjBeras: 3100000, cacatLain: 0, lainLain: 5200000, total: 84400000 },
+          potongan: { pph21: 3950000, askes: 520000, nonTgr: 280000, total: 4750000 },
+          netto: 79650000
+        },
+        {
+          id: "ukp",
+          nama: "b. Uang Kekurangan Pensiun (UKP) — Penyesuaian Hak / Rapel",
+          deskripsi: "Rapel Koreksi Golongan, Pangkat & Tunjangan",
+          jiwa: { penerima: 31, istriSuami: 6, anak: 4, cacat: 0, total: 41 },
+          bruto: { pokok: 52000000, tunjKeluarga: 2400000, tunjBeras: 1800000, cacatLain: 0, lainLain: 3100000, total: 59300000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 59300000
+        },
+        {
+          id: "udw",
+          nama: "c. Uang Duka Wafat (UDW) — Santunan Kematian (3x Gaji Pokok)",
+          deskripsi: "Santunan Asuransi Kematian bagi Ahli Waris Sah",
+          jiwa: { penerima: 6, istriSuami: 0, anak: 0, cacat: 0, total: 6 },
+          bruto: { pokok: 48000000, tunjKeluarga: 0, tunjBeras: 0, cacatLain: 0, lainLain: 0, total: 48000000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 48000000
+        }
+      ],
+      totalJiwa: { penerima: 53, istriSuami: 10, anak: 7, cacat: 0, total: 70 },
+      totalBruto: { pokok: 172000000, tunjKeluarga: 6500000, tunjBeras: 4900000, cacatLain: 0, lainLain: 8300000, total: 191700000 },
+      totalPotongan: { pph21: 3950000, askes: 520000, nonTgr: 280000, total: 4750000 },
+      totalNetto: 186950000
+    },
+    {
+      no: 3,
+      kodeMAK: "513122",
+      namaKelompok: "PENS TNI (513122) — NON-DAPEM",
+      singkatan: "TNI",
+      kategori: "TNI",
+      jenisList: [
+        {
+          id: "pp",
+          nama: "a. Pembayaran Pertama (PP) — Pensiun Terusan",
+          deskripsi: "Akumulasi Pembayaran Pertama Hak Pensiun Baru",
+          jiwa: { penerima: 310, istriSuami: 78, anak: 190, cacat: 0, total: 578 },
+          bruto: { pokok: 980000000, tunjKeluarga: 54000000, tunjBeras: 42000000, cacatLain: 0, lainLain: 68000000, total: 1144000000 },
+          potongan: { pph21: 58400000, askes: 5840000, nonTgr: 8900000, total: 73140000 },
+          netto: 1070860000
+        },
+        {
+          id: "ukp",
+          nama: "b. Uang Kekurangan Pensiun (UKP) — Penyesuaian Hak / Rapel",
+          deskripsi: "Rapel Koreksi Golongan, Pangkat & Tunjangan",
+          jiwa: { penerima: 420, istriSuami: 95, anak: 140, cacat: 0, total: 655 },
+          bruto: { pokok: 840000000, tunjKeluarga: 41000000, tunjBeras: 31000000, cacatLain: 0, lainLain: 52000000, total: 964000000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 964000000
+        },
+        {
+          id: "udw",
+          nama: "c. Uang Duka Wafat (UDW) — Santunan Kematian (3x Gaji Pokok)",
+          deskripsi: "Santunan Asuransi Kematian bagi Ahli Waris Sah",
+          jiwa: { penerima: 85, istriSuami: 0, anak: 0, cacat: 0, total: 85 },
+          bruto: { pokok: 680000000, tunjKeluarga: 0, tunjBeras: 0, cacatLain: 0, lainLain: 0, total: 680000000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 680000000
+        }
+      ],
+      totalJiwa: { penerima: 815, istriSuami: 173, anak: 330, cacat: 0, total: 1318 },
+      totalBruto: { pokok: 2500000000, tunjKeluarga: 95000000, tunjBeras: 73000000, cacatLain: 0, lainLain: 120000000, total: 2788000000 },
+      totalPotongan: { pph21: 58400000, askes: 5840000, nonTgr: 8900000, total: 73140000 },
+      totalNetto: 2714860000
+    },
+    {
+      no: 4,
+      kodeMAK: "513123",
+      namaKelompok: "PENS POLRI (513123) — NON-DAPEM",
+      singkatan: "POLRI",
+      kategori: "POLRI",
+      jenisList: [
+        {
+          id: "pp",
+          nama: "a. Pembayaran Pertama (PP) — Pensiun Terusan",
+          deskripsi: "Akumulasi Pembayaran Pertama Hak Pensiun Baru",
+          jiwa: { penerima: 180, istriSuami: 45, anak: 110, cacat: 0, total: 335 },
+          bruto: { pokok: 620000000, tunjKeluarga: 34000000, tunjBeras: 27000000, cacatLain: 0, lainLain: 42000000, total: 723000000 },
+          potongan: { pph21: 34200000, askes: 3420000, nonTgr: 5100000, total: 42720000 },
+          netto: 680280000
+        },
+        {
+          id: "ukp",
+          nama: "b. Uang Kekurangan Pensiun (UKP) — Penyesuaian Hak / Rapel",
+          deskripsi: "Rapel Koreksi Golongan, Pangkat & Tunjangan",
+          jiwa: { penerima: 240, istriSuami: 52, anak: 80, cacat: 0, total: 372 },
+          bruto: { pokok: 490000000, tunjKeluarga: 24000000, tunjBeras: 19000000, cacatLain: 0, lainLain: 31000000, total: 564000000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 564000000
+        },
+        {
+          id: "udw",
+          nama: "c. Uang Duka Wafat (UDW) — Santunan Kematian (3x Gaji Pokok)",
+          deskripsi: "Santunan Asuransi Kematian bagi Ahli Waris Sah",
+          jiwa: { penerima: 42, istriSuami: 0, anak: 0, cacat: 0, total: 42 },
+          bruto: { pokok: 336000000, tunjKeluarga: 0, tunjBeras: 0, cacatLain: 0, lainLain: 0, total: 336000000 },
+          potongan: { pph21: 0, askes: 0, nonTgr: 0, total: 0 },
+          netto: 336000000
+        }
+      ],
+      totalJiwa: { penerima: 462, istriSuami: 97, anak: 190, cacat: 0, total: 749 },
+      totalBruto: { pokok: 1446000000, tunjKeluarga: 58000000, tunjBeras: 46000000, cacatLain: 0, lainLain: 73000000, total: 1623000000 },
+      totalPotongan: { pph21: 34200000, askes: 3420000, nonTgr: 5100000, total: 42720000 },
+      totalNetto: 1580280000
+    }
+  ];
+
+  // =========================================================================
+  // DATASET ALOKASI KAS KE BANK MITRA BAYAR & SURAT PERINTAH (SP)
+  // Menjawab fungsi utama Keuangan: Berapa uang kas yang mengalir ke mitra?
+  // =========================================================================
+  const mitraBayarData = {
+    induk: [
+      { id: "MTR-01", mitra: "PT Bank Rakyat Indonesia (Persero) Tbk", singkatan: "Bank BRI", penerima: 154200, alokasiNetto: 28420000000, noSP: "SP-202607-001/DAPEM/BRI", tglCair: "01 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-02", mitra: "PT Bank Mandiri (Persero) Tbk / Bank Mantap", singkatan: "Mandiri / Mantap", penerima: 142100, alokasiNetto: 24850000000, noSP: "SP-202607-002/DAPEM/MDR", tglCair: "01 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-03", mitra: "PT Bank Negara Indonesia (Persero) Tbk", singkatan: "Bank BNI", penerima: 68300, alokasiNetto: 11950000000, noSP: "SP-202607-003/DAPEM/BNI", tglCair: "01 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-04", mitra: "PT Pos Indonesia (Persero)", singkatan: "Pos Indonesia", penerima: 35400, alokasiNetto: 6180000000, noSP: "SP-202607-004/DAPEM/POS", tglCair: "01 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-05", mitra: "PT Bank Syariah Indonesia / Bank BTN", singkatan: "BSI & BTN", penerima: 27620, alokasiNetto: 4830000000, noSP: "SP-202607-005/DAPEM/BSI", tglCair: "01 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+    ],
+    susulan: [
+      { id: "MTR-SUS-01", mitra: "PT Bank Rakyat Indonesia (Persero) Tbk", singkatan: "Bank BRI", penerima: 480, alokasiNetto: 1980000000, noSP: "SP-202607-011/SUS/BRI", tglCair: "16 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-SUS-02", mitra: "PT Bank Mandiri (Persero) Tbk / Bank Mantap", singkatan: "Mandiri / Mantap", penerima: 390, alokasiNetto: 1620000000, noSP: "SP-202607-012/SUS/MDR", tglCair: "16 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-SUS-03", mitra: "PT Bank Negara Indonesia (Persero) Tbk", singkatan: "Bank BNI", penerima: 185, alokasiNetto: 780000000, noSP: "SP-202607-013/SUS/BNI", tglCair: "16 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-SUS-04", mitra: "PT Pos Indonesia (Persero)", singkatan: "Pos Indonesia", penerima: 95, alokasiNetto: 390000000, noSP: "SP-202607-014/SUS/POS", tglCair: "16 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-SUS-05", mitra: "PT Bank Syariah Indonesia / Bank BTN", singkatan: "BSI & BTN", penerima: 60, alokasiNetto: 250000000, noSP: "SP-202607-015/SUS/BSI", tglCair: "16 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+    ],
+    nondapem: [
+      { id: "MTR-NON-01", mitra: "PT Bank Rakyat Indonesia (Persero) Tbk", singkatan: "Bank BRI", penerima: 210, alokasiNetto: 1250000000, noSP: "SP-202607-021/NON/BRI", tglCair: "10 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-NON-02", mitra: "PT Bank Mandiri (Persero) Tbk / Bank Mantap", singkatan: "Mandiri / Mantap", penerima: 180, alokasiNetto: 1080000000, noSP: "SP-202607-022/NON/MDR", tglCair: "10 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-NON-03", mitra: "PT Bank Negara Indonesia (Persero) Tbk", singkatan: "Bank BNI", penerima: 90, alokasiNetto: 540000000, noSP: "SP-202607-023/NON/BNI", tglCair: "10 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-NON-04", mitra: "PT Pos Indonesia (Persero)", singkatan: "Pos Indonesia", penerima: 45, alokasiNetto: 270000000, noSP: "SP-202607-024/NON/POS", tglCair: "10 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+      { id: "MTR-NON-05", mitra: "PT Bank Syariah Indonesia / Bank BTN", singkatan: "BSI & BTN", penerima: 30, alokasiNetto: 180000000, noSP: "SP-202607-025/NON/BSI", tglCair: "10 Juli 2026", status: "Dana Tersedia (Disalurkan)" },
+    ]
+  };
+
+  // =========================================================================
+  // DATASET SAMPLE BNBA (By Name By Address / Rincian Peserta Pensiun)
+  // =========================================================================
+  const sampleBNBAList = [
+    { nopen: "2019482101", nrp: "39201948", nama: "KOLONEL (PURN) H. ACHMAD ROFIQ, S.IP", matra: "TNI AD", golongan: "Pamen (IV/b)", pokok: 4520000, tunjKeluarga: 452000, tunjBeras: 315000, pph21: 180000, askes: 45200, netto: 5061800, bank: "Bank BRI", noRek: "0210-01-098877-50-2", status: "Siap Bayar" },
+    { nopen: "2018374922", nrp: "50392811", nama: "MAYOR (PURN) SUHARTONO", matra: "TNI AL", golongan: "Pamen (IV/a)", pokok: 3980000, tunjKeluarga: 398000, tunjBeras: 315000, pph21: 145000, askes: 39800, netto: 4508200, bank: "Bank Mandiri", noRek: "124-00-0988112-3", status: "Siap Bayar" },
+    { nopen: "2021839201", nrp: "61203948", nama: "KAPTEN (PURN) BAMBANG IRAWAN", matra: "TNI AU", golongan: "Pama (III/d)", pokok: 3450000, tunjKeluarga: 345000, tunjBeras: 315000, pph21: 110000, askes: 34500, netto: 3965500, bank: "Bank BNI", noRek: "0198-88-223311-9", status: "Siap Bayar" },
+    { nopen: "2022948172", nrp: "72019283", nama: "KOMPOL (PURN) DRS. WAHYU HIDAYAT", matra: "POLRI", golongan: "Pamen (IV/a)", pokok: 4120000, tunjKeluarga: 412000, tunjBeras: 315000, pph21: 155000, askes: 41200, netto: 4650800, bank: "Bank BRI", noRek: "0012-01-443322-5", status: "Siap Bayar" },
+    { nopen: "2020391823", nrp: "196208151988031002", nama: "DRA. SRI MULYANI, M.SI", matra: "PNS Kemhan", golongan: "Pembina (IV/a)", pokok: 3680000, tunjKeluarga: 368000, tunjBeras: 315000, pph21: 125000, askes: 36800, netto: 4201200, bank: "PT Pos Indonesia", noRek: "Pos Giro 098-22-1199", status: "Siap Bayar" },
+    { nopen: "2023910293", nrp: "84029182", nama: "PELDA (PURN) AGUS SANTOSO", matra: "TNI AD", golongan: "Bintara (III/a)", pokok: 2850000, tunjKeluarga: 285000, tunjBeras: 315000, pph21: 65000, askes: 28500, netto: 3356500, bank: "Bank BSI", noRek: "7100-99-445566-1", status: "Siap Bayar" }
+  ];
+
+  // Pemilihan Dataset berdasarkan Subtab Aktif
+  const currentDataset =
+    activeSubtab === "susulan"
+      ? dapemSusulanData
+      : activeSubtab === "nondapem"
+      ? nonDapemData
+      : dapemIndukData;
+
+  const currentMitraList =
+    activeSubtab === "susulan"
+      ? mitraBayarData.susulan
+      : activeSubtab === "nondapem"
+      ? mitraBayarData.nondapem
+      : mitraBayarData.induk;
+
+  // Filter List MAK
+  const filteredMAKList = currentDataset.filter((d) => {
     if (filterKelompok !== "Semua" && d.namaKelompok !== filterKelompok) return false;
     if (selectedDropdownDapem !== "semua" && d.kodeMAK !== selectedDropdownDapem) return false;
     return true;
   });
 
-  // Grand Totals
+  // Grand Totals Dinamis
   const grandTotalJiwa = {
-    penerima: dapemData.reduce((a, d) => a + d.totalJiwa.penerima, 0),
-    istriSuami: dapemData.reduce((a, d) => a + d.totalJiwa.istriSuami, 0),
-    anak: dapemData.reduce((a, d) => a + d.totalJiwa.anak, 0),
-    cacat: dapemData.reduce((a, d) => a + d.totalJiwa.cacat, 0),
-    total: dapemData.reduce((a, d) => a + d.totalJiwa.total, 0),
+    penerima: currentDataset.reduce((a, d) => a + d.totalJiwa.penerima, 0),
+    istriSuami: currentDataset.reduce((a, d) => a + d.totalJiwa.istriSuami, 0),
+    anak: currentDataset.reduce((a, d) => a + d.totalJiwa.anak, 0),
+    cacat: currentDataset.reduce((a, d) => a + (d.totalJiwa.cacat || 0), 0),
+    total: currentDataset.reduce((a, d) => a + d.totalJiwa.total, 0),
   };
 
-  const grandTotalBruto = {
-    pensiunPokok: dapemData.reduce((a, d) => a + d.totalBruto.pensiunPokok, 0),
-    tunjKeluarga: dapemData.reduce((a, d) => a + d.totalBruto.tunjKeluarga, 0),
-    tunjBeras: dapemData.reduce((a, d) => a + d.totalBruto.tunjBeras, 0),
-    cacatLain: dapemData.reduce((a, d) => a + d.totalBruto.cacatLain, 0),
-    lainLain: dapemData.reduce((a, d) => a + d.totalBruto.lainLain, 0),
-    total: dapemData.reduce((a, d) => a + d.totalBruto.total, 0),
-  };
+  const grandTotalBruto = currentDataset.reduce((a, d) => a + d.totalBruto.total, 0);
+  const grandTotalPotongan = currentDataset.reduce((a, d) => a + d.totalPotongan.total, 0);
+  const grandTotalNetto = currentDataset.reduce((a, d) => a + d.totalNetto, 0);
 
-  const grandTotalPotongan = {
-    pph21: dapemData.reduce((a, d) => a + d.totalPotongan.pph21, 0),
-    askes: dapemData.reduce((a, d) => a + d.totalPotongan.askes, 0),
-    tgr: dapemData.reduce((a, d) => a + d.totalPotongan.tgr, 0),
-    nonTgr: dapemData.reduce((a, d) => a + d.totalPotongan.nonTgr, 0),
-    lainLain: dapemData.reduce((a, d) => a + d.totalPotongan.lainLain, 0),
-    total: dapemData.reduce((a, d) => a + d.totalPotongan.total, 0),
-  };
+  // Helper Preview Surat Perintah (SP) Penyaluran ke Bank Mitra
+  const handleOpenSPPreview = (item) => {
+    const progLabel =
+      activeSubtab === "susulan"
+        ? "DAPEM SUSULAN"
+        : activeSubtab === "nondapem"
+        ? "MANFAAT NON-DAPEM (PP, UKP, UDW)"
+        : "DAPEM INDUK REGULER";
 
-  const grandTotalNetto = dapemData.reduce((a, d) => a + d.totalNetto, 0);
-
-  // Grand total per jenis pensiun
-  const jenisKeys = ["a", "b", "c", "d"];
-  const grandTotalJenisList = jenisKeys.map(k => {
-    const matching = dapemData.map(d => d.jenisList.find(j => j.id === k)).filter(Boolean);
-    const nama = matching[0]?.nama || "";
-    return {
-      id: k,
-      nama,
-      jiwa: {
-        penerima: matching.reduce((a, m) => a + m.jiwa.penerima, 0),
-        istriSuami: matching.reduce((a, m) => a + m.jiwa.istriSuami, 0),
-        anak: matching.reduce((a, m) => a + m.jiwa.anak, 0),
-        cacat: matching.reduce((a, m) => a + m.jiwa.cacat, 0),
-        total: matching.reduce((a, m) => a + m.jiwa.total, 0),
-      },
-      bruto: {
-        pensiunPokok: matching.reduce((a, m) => a + m.bruto.pensiunPokok, 0),
-        tunjKeluarga: matching.reduce((a, m) => a + m.bruto.tunjKeluarga, 0),
-        tunjBeras: matching.reduce((a, m) => a + m.bruto.tunjBeras, 0),
-        cacatLain: matching.reduce((a, m) => a + m.bruto.cacatLain, 0),
-        lainLain: matching.reduce((a, m) => a + m.bruto.lainLain, 0),
-        total: matching.reduce((a, m) => a + m.bruto.total, 0),
-      },
-      potongan: {
-        pph21: matching.reduce((a, m) => a + m.potongan.pph21, 0),
-        askes: matching.reduce((a, m) => a + m.potongan.askes, 0),
-        tgr: matching.reduce((a, m) => a + m.potongan.tgr, 0),
-        nonTgr: matching.reduce((a, m) => a + m.potongan.nonTgr, 0),
-        lainLain: matching.reduce((a, m) => a + m.potongan.lainLain, 0),
-        total: matching.reduce((a, m) => a + m.potongan.total, 0),
-      },
-      netto: matching.reduce((a, m) => a + m.netto, 0),
-    };
-  });
-
-  const toggleExpand = (kode) => {
-    setExpandedDapem(prev => ({ ...prev, [kode]: !prev[kode] }));
-  };
-
-  const renderJenisRows = (jenis, index, isSubtotal = false, customLabel = null) => {
-    const isFilteredOut = filterJenisPensiun !== "Semua" && jenis.nama !== filterJenisPensiun && !isSubtotal;
-    if (isFilteredOut) return null;
-
-    const rowBg = isSubtotal ? "#E2E8F0" : index % 2 === 0 ? COLORS.white : "#F8FAFC";
-    const textWeight = isSubtotal ? 800 : 500;
-    const labelColor = isSubtotal ? "#0F172A" : "#1E293B";
-
-    return (
-      <tr key={jenis.id || "subtotal"} style={{ borderBottom: `1px solid ${isSubtotal ? "#94A3B8" : "#E2E8F0"}`, background: rowBg }}>
-        {/* Kolom Jenis Pensiun */}
-        <td style={{ padding: "9px 12px", fontWeight: textWeight, color: labelColor, verticalAlign: "top", borderRight: `1px solid #E2E8F0` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {isSubtotal ? <strong style={{ color: "#0F172A" }}>{customLabel || "TOTAL / SUBTOTAL"}</strong> : <span>{jenis.nama}</span>}
-          </div>
-        </td>
-
-        {/* Kolom Jumlah Jiwa (A, B, C, D, TOTAL) */}
-        <td style={{ padding: "7px 10px", fontSize: 11.5, verticalAlign: "top", borderRight: `1px solid #E2E8F0`, whiteSpace: "nowrap" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>A. Penerima:</span> <strong style={{ fontFamily: "monospace", color: "#0F172A" }}>{fmtJiwa(jenis.jiwa.penerima)}</strong></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>B. Istri/Suami:</span> <strong style={{ fontFamily: "monospace", color: "#0F172A" }}>{fmtJiwa(jenis.jiwa.istriSuami)}</strong></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>C. Anak:</span> <strong style={{ fontFamily: "monospace", color: "#0F172A" }}>{fmtJiwa(jenis.jiwa.anak)}</strong></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>D. Cacat:</span> <strong style={{ fontFamily: "monospace", color: "#0F172A" }}>{fmtJiwa(jenis.jiwa.cacat)}</strong></div>
-            <div style={{ borderTop: `1px dashed #CBD5E1`, paddingTop: 2, marginTop: 2, display: "flex", justifyContent: "space-between", gap: 8, fontWeight: 800, color: "#0F172A" }}>
-              <span>Total Jiwa:</span> <span style={{ fontFamily: "monospace" }}>{fmtJiwa(jenis.jiwa.total)}</span>
-            </div>
-          </div>
-        </td>
-
-        {/* Kolom Jumlah Bruto (A, B, C, D, E, TOTAL) */}
-        <td style={{ padding: "7px 10px", fontSize: 11.5, verticalAlign: "top", borderRight: `1px solid #E2E8F0`, whiteSpace: "nowrap" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>A. Pokok:</span> <span style={{ fontFamily: "monospace", color: "#1E293B" }}>{fmt(jenis.bruto.pensiunPokok)}</span></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>B. T.Keluarga:</span> <span style={{ fontFamily: "monospace", color: "#1E293B" }}>{fmt(jenis.bruto.tunjKeluarga)}</span></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>C. T.Beras:</span> <span style={{ fontFamily: "monospace", color: "#1E293B" }}>{fmt(jenis.bruto.tunjBeras)}</span></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>D. Cacat:</span> <span style={{ fontFamily: "monospace", color: "#1E293B" }}>{fmt(jenis.bruto.cacatLain)}</span></div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span style={{ color: "#64748B" }}>E. Lain-lain:</span> <span style={{ fontFamily: "monospace", color: "#1E293B" }}>{fmt(jenis.bruto.lainLain)}</span></div>
-            <div style={{ borderTop: `1px dashed #CBD5E1`, paddingTop: 2, marginTop: 2, display: "flex", justifyContent: "space-between", gap: 8, fontWeight: 800, color: "#15803D" }}>
-              <span>Total Bruto:</span> <span style={{ fontFamily: "monospace" }}>{fmt(jenis.bruto.total)}</span>
-            </div>
-          </div>
-        </td>
-
-        {/* Kolom Potongan PPH 21 */}
-        <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontSize: 12, verticalAlign: "middle", borderRight: `1px solid #E2E8F0`, color: "#1E293B" }}>
-          {fmt(jenis.potongan.pph21)}
-        </td>
-
-        {/* Kolom Potongan ASKES */}
-        <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontSize: 12, verticalAlign: "middle", borderRight: `1px solid #E2E8F0`, color: "#1E293B" }}>
-          {fmt(jenis.potongan.askes)}
-        </td>
-
-        {/* Kolom Potongan TGR */}
-        <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontSize: 12, verticalAlign: "middle", borderRight: `1px solid #E2E8F0`, color: jenis.potongan.tgr > 0 ? "#DC2626" : "#94A3B8" }}>
-          {fmt(jenis.potongan.tgr)}
-        </td>
-
-        {/* Kolom Potongan Non TGR */}
-        <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontSize: 12, verticalAlign: "middle", borderRight: `1px solid #E2E8F0`, color: "#1E293B" }}>
-          {fmt(jenis.potongan.nonTgr)}
-        </td>
-
-        {/* Kolom Potongan Lain-lain */}
-        <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontSize: 12, verticalAlign: "middle", borderRight: `1px solid #E2E8F0`, color: jenis.potongan.lainLain > 0 ? "#D97706" : "#94A3B8" }}>
-          {fmt(jenis.potongan.lainLain)}
-        </td>
-
-        {/* Kolom Jumlah Potongan */}
-        <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontSize: 12, fontWeight: 700, verticalAlign: "middle", borderRight: `1px solid #E2E8F0`, color: "#DC2626", background: isSubtotal ? "#FEE2E2" : "#FEF2F2" }}>
-          {fmt(jenis.potongan.total)}
-        </td>
-
-        {/* Kolom Jumlah Netto */}
-        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontSize: 12.5, fontWeight: 800, verticalAlign: "middle", color: "#0F172A", background: isSubtotal ? "#E0F2FE" : "#F0F9FF" }}>
-          {fmt(jenis.netto)}
-        </td>
-      </tr>
-    );
-  };
-
-  const closeAllDetails = () => {
-    setExpandedDapem({
-      "513113": false,
-      "513114": false,
-      "513122": false,
-      "513123": false,
-      "total": false,
+    setPreview({
+      title: `Surat Perintah (SP) Penyaluran Pensiun — ${item.singkatan}`,
+      subtitle: `Nomor: ${item.noSP} • Periode Bulan ${selectedBulan}`,
+      type: "surat",
+      fileName: `${item.noSP.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
+      content: {
+        noSurat: item.noSP,
+        tanggal: item.tglCair,
+        perihal: `Penyaluran Dana ${progLabel} Melalui Rekening Mitra Bayar ${item.singkatan}`,
+        items: [
+          { jenis: `Penyaluran Dana ${progLabel}`, peserta: `${fmtJiwa(item.penerima)} Jiwa Pensiunan`, nominal: fmt(item.alokasiNetto) }
+        ],
+        totalNominal: fmt(item.alokasiNetto),
+        bankTujuan: item.mitra
+      }
     });
   };
 
   return (
-    <div>
-      <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* PREVIEW MODAL */}
+      {preview && <PreviewModal preview={preview} onClose={() => setPreview(null)} />}
 
-      {/* Stat Cards Ringkasan */}
-      <div style={{ display: "flex", gap: 16, marginBottom: 20, flexWrap: "wrap" }}>
-        <StatCard
-          icon={<Users size={IC} />}
-          label="Total Jiwa & Penerima"
-          value={`${fmtJiwa(grandTotalJiwa.total)} Jiwa`}
-          sub={`${fmtJiwa(grandTotalJiwa.penerima)} Penerima • ${fmtJiwa(grandTotalJiwa.istriSuami)} Pasangan • ${fmtJiwa(grandTotalJiwa.anak)} Anak`}
-          color={COLORS.blue}
-        />
-        <StatCard
-          icon={<Banknote size={IC} />}
-          label="Total Jumlah Bruto"
-          value={fmt(grandTotalBruto.total)}
-          sub={`Pokok ${fmt(grandTotalBruto.pensiunPokok)} + Tunjangan`}
-          color={COLORS.green}
-        />
-        <StatCard
-          icon={<Receipt size={IC} />}
-          label="Total Potongan"
-          value={fmt(grandTotalPotongan.total)}
-          sub={`PPh21 ${fmt(grandTotalPotongan.pph21)} • Askes ${fmt(grandTotalPotongan.askes)}`}
-          color={COLORS.red}
-        />
-        <StatCard
-          icon={<Wallet size={IC} />}
-          label="Total Netto Disalurkan"
-          value={fmt(grandTotalNetto)}
-          sub="Realisasi Bersih Pembayaran Pensiun"
-          color={COLORS.blueDark}
-        />
-      </div>
-
-      {/* CARD TUNGGAL: DAFTAR DAPEM + FILTER TERINTEGRASI */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: "20px 22px", border: `1px solid #CBD5E1`, marginBottom: 24, boxShadow: "0 2px 8px rgba(15,23,42,0.05)" }}>
-        
-        {/* CORPORATE UNIFIED CONTROL TOOLBAR */}
-        <div style={{
-          background: "#F8FAFC",
-          borderRadius: 8,
-          border: "1px solid #CBD5E1",
-          padding: "12px 16px",
-          marginBottom: 18,
-          display: "flex",
-          flexDirection: "column",
-          gap: 12
-        }}>
-          {/* Baris 1: Segmented Control Kelompok DAPEM (Kiri) & Action Buttons (Kanan) */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, borderBottom: "1px solid #E2E8F0", paddingBottom: 11 }}>
-            {/* Segmented Controller Tab */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#334155", whiteSpace: "nowrap" }}>
-                Kelompok DAPEM:
-              </span>
-              <div style={{ display: "inline-flex", background: "#E2E8F0", padding: 3, borderRadius: 7, gap: 3 }}>
-                {[
-                  { id: "semua", label: "Semua (4 DAPEM)" },
-                  { id: "513113", label: "PNS KEMHAN (513113)" },
-                  { id: "513114", label: "PNS POLRI (513114)" },
-                  { id: "513122", label: "TNI (513122)" },
-                  { id: "513123", label: "POLRI (513123)" },
-                ].map((item) => {
-                  const isSelected = selectedDropdownDapem === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setSelectedDropdownDapem(item.id);
-                        if (item.id !== "semua") {
-                          setExpandedDapem(prev => ({ ...prev, [item.id]: true }));
-                        }
-                      }}
-                      style={{
-                        padding: "5px 12px",
-                        borderRadius: 5,
-                        fontSize: 12,
-                        fontWeight: isSelected ? 700 : 500,
-                        border: "none",
-                        background: isSelected ? "#FFFFFF" : "transparent",
-                        color: isSelected ? "#0F172A" : "#475569",
-                        boxShadow: isSelected ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                        transition: "all 0.15s ease"
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
+      {/* MODAL BNBA (By Name By Address / Rincian Peserta) */}
+      {showBNBAModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            zIndex: 1300,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+            backdropFilter: "blur(3px)"
+          }}
+          onClick={() => setShowBNBAModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: COLORS.white,
+              borderRadius: 12,
+              width: "100%",
+              maxWidth: 1060,
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3)",
+              overflow: "hidden"
+            }}
+          >
+            {/* Header Modal */}
+            <div
+              style={{
+                padding: "16px 22px",
+                borderBottom: `1px solid ${COLORS.gray200}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "#F8FAFC"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    background: "#EFF6FF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: COLORS.blue
+                  }}
+                >
+                  <Users size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
+                    Rincian Peserta Pensiun By Name By Address (BNBA)
+                  </div>
+                  <div style={{ fontSize: 11.5, color: COLORS.gray500 }}>
+                    {selectedBNBAMAK ? selectedBNBAMAK : "Seluruh Kelompok MAK Pensiun"} • Periode Bulan {selectedBulan}
+                  </div>
+                </div>
               </div>
+              <button
+                onClick={() => setShowBNBAModal(false)}
+                style={{ border: "none", background: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}
+              >
+                ✕
+              </button>
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-              <button
-                onClick={closeAllDetails}
-                style={{
-                  background: "#FFFFFF",
-                  border: `1px solid #CBD5E1`,
-                  borderRadius: 6,
-                  padding: "6px 12px",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#334155",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
-                  transition: "all 0.18s ease"
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = "#F1F5F9"}
-                onMouseLeave={e => e.currentTarget.style.background = "#FFFFFF"}
-                title="Tutup seluruh rincian sub-detail DAPEM"
-              >
-                <ChevronDown size={14} color="#475569" style={{ transform: "rotate(180deg)" }} />
-                <span>Tutup Semua Detail</span>
-              </button>
+            {/* Toolbar Filter Modal */}
+            <div style={{ padding: "12px 22px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+              <div style={{ position: "relative", width: 300 }}>
+                <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 9 }} />
+                <input
+                  type="text"
+                  placeholder="Cari Nopen / NRP / Nama Pensiunan..."
+                  value={searchBNBA}
+                  onChange={(e) => setSearchBNBA(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "6px 10px 6px 30px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12,
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
 
               <Btn
-                variant="primary"
                 size="sm"
+                variant="outline"
                 onClick={() => {
                   setPreview({
-                    title: "Daftar Rekapitulasi III DAPEM & Non DAPEM",
-                    subtitle: `${filterPeriode} • ${filterPenyaluran} — Rekapitulasi Pembayaran Pensiun Resmi`,
+                    title: "Ekspor Data BNBA Pensiunan",
+                    subtitle: `Periode ${selectedBulan}`,
                     type: "table",
-                    fileName: `Daftar_Rekapitulasi_III_DAPEM_${filterPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
+                    fileName: `BNBA_Pensiun_${selectedBulan}.xlsx`,
                     content: {
-                      columns: ["No", "Kelompok Pensiun (MAK)", "Jenis Pensiun", "Total Jiwa", "Pensiun Pokok", "Total Bruto", "PPh 21", "ASKES", "Non TGR", "Total Potongan", "Jumlah Netto"],
-                      rows: dapemData.flatMap(d => [
-                        ...d.jenisList.map(j => [d.no, d.namaKelompok, j.nama, j.jiwa.total.toLocaleString(), fmt(j.bruto.pensiunPokok), fmt(j.bruto.total), fmt(j.potongan.pph21), fmt(j.potongan.askes), fmt(j.potongan.nonTgr), fmt(j.potongan.total), fmt(j.netto)]),
-                        ["", `SUBTOTAL ${d.singkatan}`, "TOTAL", d.totalJiwa.total.toLocaleString(), fmt(d.totalBruto.pensiunPokok), fmt(d.totalBruto.total), fmt(d.totalPotongan.pph21), fmt(d.totalPotongan.askes), fmt(d.totalPotongan.nonTgr), fmt(d.totalPotongan.total), fmt(d.totalNetto)],
+                      columns: ["No", "Nopen", "NRP / NIP", "Nama Lengkap", "Matra", "Pangkat / Gol", "Pensiun Pokok", "Tunj. Keluarga", "Tunj. Beras", "PPh 21", "Askes / BPJS", "Netto Ditransfer", "Mitra Bayar", "No. Rekening"],
+                      rows: sampleBNBAList.map((p, idx) => [
+                        idx + 1,
+                        p.nopen,
+                        p.nrp,
+                        p.nama,
+                        p.matra,
+                        p.golongan,
+                        fmt(p.pokok),
+                        fmt(p.tunjKeluarga),
+                        fmt(p.tunjBeras),
+                        fmt(p.pph21),
+                        fmt(p.askes),
+                        fmt(p.netto),
+                        p.bank,
+                        p.noRek
                       ]),
-                      totalRows: dapemData.length * 5,
+                      totalRows: sampleBNBAList.length
                     }
                   });
                 }}
               >
-                <Download size={14} /> Ekspor Data
+                <Download size={13} style={{ marginRight: 4 }} />
+                Ekspor Excel BNBA
               </Btn>
             </div>
+
+            {/* Table Content Modal */}
+            <div style={{ padding: "16px 22px", overflowY: "auto", flex: 1 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}` }}>Nopen / NRP</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}` }}>Nama Pensiunan</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}` }}>Matra / Gol</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}`, textAlign: "right" }}>Pensiun Pokok</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}`, textAlign: "right" }}>Tunjangan</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}`, textAlign: "right" }}>Potongan</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}`, textAlign: "right" }}>Netto Kas</th>
+                    <th style={{ padding: "8px 10px", borderBottom: `1px solid ${COLORS.gray300}` }}>Mitra & Rekening</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sampleBNBAList
+                    .filter((p) => {
+                      if (!searchBNBA) return true;
+                      const q = searchBNBA.toLowerCase();
+                      return p.nama.toLowerCase().includes(q) || p.nopen.includes(q) || p.nrp.includes(q);
+                    })
+                    .map((p, idx) => (
+                      <tr key={idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "10px 10px", fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
+                          {p.nopen}
+                          <div style={{ fontSize: 11, color: COLORS.gray500 }}>NRP: {p.nrp}</div>
+                        </td>
+                        <td style={{ padding: "10px 10px", fontWeight: 700, color: COLORS.gray900 }}>
+                          {p.nama}
+                          <div style={{ fontSize: 11, color: COLORS.blueDark, fontWeight: 600 }}>Status: {p.status}</div>
+                        </td>
+                        <td style={{ padding: "10px 10px", color: COLORS.gray700 }}>
+                          {p.matra}
+                          <div style={{ fontSize: 11, color: COLORS.gray500 }}>{p.golongan}</div>
+                        </td>
+                        <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "monospace" }}>{fmt(p.pokok)}</td>
+                        <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "monospace", color: "#059669" }}>
+                          +{fmt(p.tunjKeluarga + p.tunjBeras)}
+                        </td>
+                        <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "monospace", color: "#DC2626" }}>
+                          -{fmt(p.pph21 + p.askes)}
+                        </td>
+                        <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 13 }}>
+                          {fmt(p.netto)}
+                        </td>
+                        <td style={{ padding: "10px 10px" }}>
+                          <div style={{ fontWeight: 600 }}>{p.bank}</div>
+                          <div style={{ fontSize: 11, color: COLORS.gray500, fontFamily: "monospace" }}>{p.noRek}</div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer Modal */}
+            <div style={{ padding: "12px 22px", borderTop: `1px solid ${COLORS.gray200}`, background: "#F8FAFC", display: "flex", justifyContent: "flex-end" }}>
+              <Btn size="sm" variant="ghost" onClick={() => setShowBNBAModal(false)}>Tutup</Btn>
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Baris 2: Parameter Filter Dropdown Rinci */}
-          <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#475569" }}>
-              <Filter size={13} color="#64748B" />
-              <span style={{ fontWeight: 600 }}>Filter Rincian:</span>
+      {/* =========================================================================
+          1. HEADER & PERIODE BATCH CONTROL BAR
+         ========================================================================= */}
+      <div
+        style={{
+          background: COLORS.white,
+          borderRadius: 12,
+          padding: "16px 20px",
+          border: `1px solid ${COLORS.gray200}`,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 14
+        }}
+      >
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 8,
+                background: "#EFF6FF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: COLORS.blue
+              }}
+            >
+              <Wallet size={20} />
             </div>
-
-            {/* Filter Jenis Pensiun */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#64748B" }}>Jenis:</span>
-              <select
-                value={filterJenisPensiun}
-                onChange={e => setFilterJenisPensiun(e.target.value)}
-                style={{ padding: "5px 10px", borderRadius: 5, border: "1px solid #CBD5E1", fontSize: 12, color: "#0F172A", background: "#FFFFFF", fontWeight: 600 }}
-              >
-                <option value="Semua">Semua Jenis Pensiun</option>
-                <option value="a. Pensiun Sendiri">a. Pensiun Sendiri</option>
-                <option value="b. Pensiun Warakawuri/Janda/Duda">b. Pensiun Warakawuri/Janda/Duda</option>
-                <option value="c. Tunjangan Yatim Piatu">c. Tunjangan Yatim Piatu</option>
-                <option value="d. Tunjangan Orang Tua">d. Tunjangan Orang Tua</option>
-              </select>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: COLORS.gray900 }}>
+                Administrasi & Monitoring Pembayaran Pensiun (DAPEM)
+              </h2>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: COLORS.gray500 }}>
+                Perhitungan dinamis hak pensiun bulanan, pemotongan pajak/BPJS, dan penyaluran kas ke Bank Mitra Bayar.
+              </p>
             </div>
-
-            {/* Filter Tanggal / Periode SP */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#64748B" }}>Tgl Awal:</span>
-              <input
-                type="date"
-                value={tglAwal}
-                onChange={e => setTglAwal(e.target.value)}
-                style={{ padding: "4px 8px", borderRadius: 5, border: "1px solid #CBD5E1", fontSize: 12, color: "#0F172A", background: "#FFFFFF", fontWeight: 600 }}
-              />
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#64748B" }}>Tgl Akhir:</span>
-              <input
-                type="date"
-                value={tglAkhir}
-                onChange={e => setTglAkhir(e.target.value)}
-                style={{ padding: "4px 8px", borderRadius: 5, border: "1px solid #CBD5E1", fontSize: 12, color: "#0F172A", background: "#FFFFFF", fontWeight: 600 }}
-              />
-            </div>
-
-            {/* Filter Metode Penyaluran */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#64748B" }}>Penyaluran:</span>
-              <select
-                value={filterPenyaluran}
-                onChange={e => setFilterPenyaluran(e.target.value)}
-                style={{ padding: "5px 10px", borderRadius: 5, border: "1px solid #CBD5E1", fontSize: 12, color: "#0F172A", background: "#FFFFFF", fontWeight: 600 }}
-              >
-                <option value="Gabungan POS dan Bank">Gabungan POS dan Bank</option>
-                <option value="Bank Mandiri / BSI">Bank Mandiri / BSI</option>
-                <option value="BRI / BNI">BRI / BNI</option>
-                <option value="PT POS Indonesia">PT POS Indonesia</option>
-              </select>
-            </div>
-
-            {/* Reset Filter Button */}
-            {(selectedDropdownDapem !== "semua" || filterJenisPensiun !== "Semua") && (
-              <button
-                onClick={() => {
-                  setSelectedDropdownDapem("semua");
-                  setFilterJenisPensiun("Semua");
-                }}
-                style={{
-                  background: "#FEE2E2",
-                  border: "1px solid #FCA5A5",
-                  color: "#B91C1C",
-                  padding: "4px 10px",
-                  borderRadius: 4,
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  marginLeft: "auto"
-                }}
-              >
-                ✕ Reset Filter
-              </button>
-            )}
           </div>
         </div>
 
-        {/* TABEL LIST REKAPITULASI III (NETRAL SERAGAM & KONTRAS TINGGI) */}
-        {filteredDapemList.length === 0 ? (
-          <NoData />
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {filteredDapemList.map((dapem) => {
-              const isOpen = !!expandedDapem[dapem.kodeMAK];
+        {/* BATCH SELECTOR & STATUS */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Periode Bulan:</span>
+            <select
+              value={selectedBulan}
+              onChange={(e) => setSelectedBulan(e.target.value)}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: `1px solid ${COLORS.gray300}`,
+                fontSize: 12.5,
+                fontWeight: 700,
+                color: COLORS.blueDark,
+                background: COLORS.white
+              }}
+            >
+              <option value="2026-07">Juli 2026 (Batch Aktif / Siap Salur)</option>
+              <option value="2026-06">Juni 2026 (Tuntas / Terarsip)</option>
+              <option value="2026-05">Mei 2026 (Tuntas / Terarsip)</option>
+            </select>
+          </div>
 
-              return (
-                <div key={dapem.kodeMAK} style={{ borderRadius: 8, border: `1px solid #CBD5E1`, overflow: "hidden", background: COLORS.white, boxShadow: "0 1px 4px rgba(15,23,42,0.04)" }}>
-                  {/* DAPEM Card Header Netral & Seragam (Clickable Accordion) */}
-                  <div
-                    onClick={() => toggleExpand(dapem.kodeMAK)}
-                    style={{
-                      padding: "12px 18px",
-                      background: "#F8FAFC",
-                      color: "#0F172A",
-                      borderBottom: isOpen ? `1px solid #CBD5E1` : "none",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                      userSelect: "none"
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <div style={{ width: 26, height: 26, borderRadius: 4, background: "#334155", color: COLORS.white, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13 }}>
-                        {dapem.no}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: 14, color: "#0F172A" }}>
-                          {dapem.namaKelompok}
-                        </div>
-                        <div style={{ fontSize: 12, color: "#64748B", marginTop: 1 }}>
-                          MAK: <strong style={{ color: "#334155" }}>{dapem.kodeMAK}</strong> • {fmtJiwa(dapem.totalJiwa.total)} Jiwa ({fmtJiwa(dapem.totalJiwa.penerima)} Penerima)
-                        </div>
-                      </div>
-                    </div>
+          <span
+            style={{
+              fontSize: 11.5,
+              padding: "5px 12px",
+              borderRadius: 20,
+              background: "#ECFDF5",
+              color: "#065F46",
+              fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              border: "1px solid #A7F3D0"
+            }}
+          >
+            <CheckCircle2 size={13} color="#059669" />
+            Batch Terkunci (Cut-Off: 20 Juni 2026)
+          </span>
+        </div>
+      </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ fontSize: 10.5, textTransform: "uppercase", color: "#64748B", fontWeight: 600 }}>Total Bruto</div>
-                        <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace", color: "#0F172A" }}>{fmt(dapem.totalBruto.total)}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ fontSize: 10.5, textTransform: "uppercase", color: "#64748B", fontWeight: 600 }}>Total Potongan</div>
-                        <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace", color: "#DC2626" }}>{fmt(dapem.totalPotongan.total)}</div>
-                      </div>
-                      <div style={{ textAlign: "right", background: "#FFFFFF", border: `1.5px solid #0F172A`, padding: "4px 12px", borderRadius: 6 }}>
-                        <div style={{ fontSize: 10, textTransform: "uppercase", color: "#475569", fontWeight: 700 }}>Jumlah Netto</div>
-                        <div style={{ fontWeight: 800, fontSize: 14.5, fontFamily: "monospace", color: "#0F172A" }}>{fmt(dapem.totalNetto)}</div>
-                      </div>
-                      <div style={{ fontSize: 14, color: "#475569", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
-                        ▼
-                      </div>
-                    </div>
-                  </div>
+      {/* =========================================================================
+          2. NAVIGASI 3 SUBTAB TERPADU: INDUK | SUSULAN | NON-DAPEM
+         ========================================================================= */}
+      <div
+        style={{
+          display: "flex",
+          borderBottom: `2px solid ${COLORS.gray200}`,
+          gap: 6
+        }}
+      >
+        <button
+          onClick={() => setActiveSubtab("induk")}
+          style={{
+            padding: "10px 20px",
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: activeSubtab === "induk" ? 800 : 600,
+            color: activeSubtab === "induk" ? COLORS.blue : COLORS.gray600,
+            borderBottom: activeSubtab === "induk" ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            transition: "all 0.15s ease"
+          }}
+        >
+          <Banknote size={16} />
+          <span>DAPEM Induk (Rutin Bulanan)</span>
+          <span
+            style={{
+              fontSize: 11,
+              padding: "2px 8px",
+              borderRadius: 10,
+              background: activeSubtab === "induk" ? "#DBEAFE" : "#F1F5F9",
+              color: activeSubtab === "induk" ? "#1E40AF" : COLORS.gray600,
+              fontWeight: 700
+            }}
+          >
+            {fmtJiwa(dapemIndukData.reduce((a, d) => a + d.totalJiwa.penerima, 0))} Jiwa
+          </span>
+        </button>
 
-                  {/* Body: Detail Matrix Table per DAPEM */}
-                  {isOpen && (
-                    <div style={{ overflowX: "auto" }}>
-                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                        <thead>
-                          <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                            <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 220, borderRight: `1px solid #E2E8F0` }}>JENIS PENSIUN</th>
-                            <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 170, borderRight: `1px solid #E2E8F0` }}>JUMLAH JIWA</th>
-                            <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 210, borderRight: `1px solid #E2E8F0` }}>JUMLAH BRUTO</th>
-                            <th colSpan={6} style={{ padding: "8px 10px", textAlign: "center", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: `1px solid #E2E8F0` }}>POTONGAN</th>
-                            <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#1D4ED8", width: 160 }}>JUMLAH NETTO</th>
-                          </tr>
-                          <tr style={{ background: "#F1F5F9", color: "#475569", fontSize: 11 }}>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>PPh 21</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>ASKES</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>TGR</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>NON TGR</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>Lain-Lain</th>
-                            <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 800, color: "#BE123C", borderRight: `1px solid #CBD5E1` }}>Jumlah</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dapem.jenisList.map((jenis, jIdx) => renderJenisRows(jenis, jIdx))}
-                          {renderJenisRows(
-                            {
-                              id: "subtotal",
-                              nama: `TOTAL / SUBTOTAL ${dapem.namaKelompok}`,
-                              jiwa: dapem.totalJiwa,
-                              bruto: dapem.totalBruto,
-                              potongan: dapem.totalPotongan,
-                              netto: dapem.totalNetto
-                            },
-                            999,
-                            true,
-                            `TOTAL SUBTOTAL (${dapem.singkatan})`
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+        <button
+          onClick={() => setActiveSubtab("susulan")}
+          style={{
+            padding: "10px 20px",
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: activeSubtab === "susulan" ? 800 : 600,
+            color: activeSubtab === "susulan" ? "#047857" : COLORS.gray600,
+            borderBottom: activeSubtab === "susulan" ? `3px solid #047857` : "3px solid transparent",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            transition: "all 0.15s ease"
+          }}
+        >
+          <Clock size={16} />
+          <span>DAPEM Susulan (Termin Susulan)</span>
+          <span
+            style={{
+              fontSize: 11,
+              padding: "2px 8px",
+              borderRadius: 10,
+              background: activeSubtab === "susulan" ? "#D1FAE5" : "#F1F5F9",
+              color: activeSubtab === "susulan" ? "#065F46" : COLORS.gray600,
+              fontWeight: 700
+            }}
+          >
+            {fmtJiwa(dapemSusulanData.reduce((a, d) => a + d.totalJiwa.penerima, 0))} Jiwa
+          </span>
+        </button>
 
-            {/* GRAND TOTAL SUMMARY CARD (SESUAI SHEET EXCEL) */}
-            <div style={{ borderRadius: 8, border: `1.5px solid #0F172A`, overflow: "hidden", background: COLORS.white, marginTop: 6 }}>
-              <div
-                onClick={() => toggleExpand("total")}
-                style={{
-                  padding: "13px 18px",
-                  background: "#0F172A",
-                  color: COLORS.white,
-                  borderBottom: expandedDapem["total"] ? `1px solid #334155` : "none",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  userSelect: "none"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Shield size={20} color="#F59E0B" />
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: 14.5, color: COLORS.white, letterSpacing: 0.3 }}>
-                      JUMLAH GRAND TOTAL (SELURUH KELOMPOK PENSIUN DAPEM)
-                    </div>
-                    <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 1 }}>
-                      4 Kelompok Pensiun • {fmtJiwa(grandTotalJiwa.total)} Total Jiwa • {fmtJiwa(grandTotalJiwa.penerima)} Penerima Manfaat
-                    </div>
-                  </div>
-                </div>
+        <button
+          onClick={() => setActiveSubtab("nondapem")}
+          style={{
+            padding: "10px 20px",
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: activeSubtab === "nondapem" ? 800 : 600,
+            color: activeSubtab === "nondapem" ? "#7C3AED" : COLORS.gray600,
+            borderBottom: activeSubtab === "nondapem" ? `3px solid #7C3AED` : "3px solid transparent",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            transition: "all 0.15s ease"
+          }}
+        >
+          <HeartHandshake size={16} />
+          <span>NON-DAPEM (PP, UKP, UDW)</span>
+          <span
+            style={{
+              fontSize: 11,
+              padding: "2px 8px",
+              borderRadius: 10,
+              background: activeSubtab === "nondapem" ? "#EDE9FE" : "#F1F5F9",
+              color: activeSubtab === "nondapem" ? "#6D28D9" : COLORS.gray600,
+              fontWeight: 700
+            }}
+          >
+            PP • UKP • UDW
+          </span>
+        </button>
+      </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 10.5, textTransform: "uppercase", color: "#94A3B8" }}>Total Bruto</div>
-                    <div style={{ fontWeight: 800, fontSize: 14, fontFamily: "monospace", color: COLORS.white }}>{fmt(grandTotalBruto.total)}</div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: 10.5, textTransform: "uppercase", color: "#94A3B8" }}>Total Potongan</div>
-                    <div style={{ fontWeight: 800, fontSize: 14, fontFamily: "monospace", color: "#FCA5A5" }}>{fmt(grandTotalPotongan.total)}</div>
-                  </div>
-                  <div style={{ textAlign: "right", background: "#F59E0B", color: "#0F172A", padding: "5px 14px", borderRadius: 6 }}>
-                    <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase" }}>Grand Total Netto</div>
-                    <div style={{ fontWeight: 900, fontSize: 16, fontFamily: "monospace" }}>{fmt(grandTotalNetto)}</div>
-                  </div>
-                  <div style={{ fontSize: 14, color: "#94A3B8", transform: expandedDapem["total"] ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
-                    ▼
-                  </div>
-                </div>
+      {/* PENJELASAN OPERASIONAL DIVISI KEUANGAN */}
+      <div
+        style={{
+          background: "#F8FAFC",
+          borderRadius: 8,
+          padding: "10px 16px",
+          border: `1px solid ${COLORS.gray200}`,
+          fontSize: 12,
+          color: COLORS.gray700,
+          display: "flex",
+          alignItems: "center",
+          gap: 10
+        }}
+      >
+        <span style={{ fontSize: 16 }}>💡</span>
+        <div>
+          <b>Panduan Divisi Keuangan:</b> Data dihitung ulang setiap bulan berdasarkan cut-off tanggal 20 dari Divisi Pelayanan/Kepesertaan. Divisi Keuangan fokus memastikan <b>ketersediaan likuiditas kas netto</b>, memonitor <b>potongan pajak PPh 21 & iuran BPJS</b>, serta menerbitkan <b>Surat Perintah (SP) Penyaluran Dana ke Bank Mitra Bayar</b>.
+        </div>
+      </div>
+
+      {/* =========================================================================
+          3. STATCARDS: RINGKASAN KEBUTUHAN KAS KEUANGAN
+         ========================================================================= */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+        <StatCard
+          icon={<Users size={IC} />}
+          label="Total Jiwa Penerima"
+          value={`${fmtJiwa(grandTotalJiwa.total)} Jiwa`}
+          sub={`${fmtJiwa(grandTotalJiwa.penerima)} Penerima • ${fmtJiwa(grandTotalJiwa.istriSuami + grandTotalJiwa.anak)} Keluarga`}
+          color={COLORS.blue}
+        />
+        <StatCard
+          icon={<Banknote size={IC} />}
+          label="Beban Bruto Hak Pensiun"
+          value={fmt(grandTotalBruto)}
+          sub="Akumulasi Hak Pensiun Bruto"
+          color={COLORS.green}
+        />
+        <StatCard
+          icon={<Receipt size={IC} />}
+          label="Total Potongan Resmi"
+          value={fmt(grandTotalPotongan)}
+          sub="PPh 21 Pensiun, Iuran BPJS & Non-TGR"
+          color={COLORS.red}
+        />
+        <StatCard
+          icon={<Wallet size={IC} />}
+          label="Total Netto Kas Disalurkan"
+          value={fmt(grandTotalNetto)}
+          sub="Kas Keluar Bersih via Bank Mitra"
+          color={COLORS.blueDark}
+        />
+      </div>
+
+      {/* =========================================================================
+          4. MATRIKS ALOKASI KAS KE BANK MITRA BAYAR & SURAT PERINTAH (SP)
+          Menjawab fungsi utama Keuangan: Ke mana uang kas tersebut disalurkan?
+         ========================================================================= */}
+      <div
+        style={{
+          background: COLORS.white,
+          borderRadius: 10,
+          border: `1px solid ${COLORS.gray200}`,
+          overflow: "hidden"
+        }}
+      >
+        <div
+          style={{
+            padding: "14px 18px",
+            borderBottom: `1px solid ${COLORS.gray200}`,
+            background: "#F8FAFC",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Building2 size={18} color={COLORS.blue} />
+            <div>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: COLORS.gray900 }}>
+                Alokasi Kebutuhan Kas Penyaluran ke Bank Mitra Bayar ({selectedBulan})
               </div>
-
-              {expandedDapem["total"] && (
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                    <thead>
-                      <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                        <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 220, borderRight: `1px solid #E2E8F0` }}>REKAP PER JENIS PENSIUN</th>
-                        <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 170, borderRight: `1px solid #E2E8F0` }}>JUMLAH JIWA</th>
-                        <th rowSpan={2} style={{ padding: "10px 10px", textAlign: "left", fontWeight: 800, color: "#64748B", width: 210, borderRight: `1px solid #E2E8F0` }}>JUMLAH BRUTO</th>
-                        <th colSpan={6} style={{ padding: "8px 10px", textAlign: "center", fontWeight: 800, color: "#64748B", borderBottom: `1px solid #E2E8F0`, borderRight: `1px solid #E2E8F0` }}>TOTAL POTONGAN GABUNGAN</th>
-                        <th rowSpan={2} style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#1D4ED8", width: 160 }}>JUMLAH NETTO</th>
-                      </tr>
-                      <tr style={{ background: "#F1F5F9", color: "#475569", fontSize: 11 }}>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>PPh 21</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>ASKES</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>TGR</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>NON TGR</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600, color: "#475569", borderRight: `1px solid #CBD5E1` }}>Lain-Lain</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", fontWeight: 800, color: "#BE123C", borderRight: `1px solid #CBD5E1` }}>Jumlah</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {grandTotalJenisList.map((jenis, jIdx) => renderJenisRows(jenis, jIdx))}
-                      {renderJenisRows(
-                        {
-                          id: "grandtotal",
-                          nama: "GRAND TOTAL SELURUHNYA",
-                          jiwa: grandTotalJiwa,
-                          bruto: grandTotalBruto,
-                          potongan: grandTotalPotongan,
-                          netto: grandTotalNetto
-                        },
-                        999,
-                        true,
-                        "GRAND TOTAL REKAPITULASI III"
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>
+                Dasar penerbitan Surat Perintah (SP) pemindahbukuan dana pensiun dari giro ASABRI ke rekening mitra bayar.
+              </div>
             </div>
           </div>
-        )}
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <Btn
+              size="xs"
+              variant="outline"
+              onClick={() => {
+                setPreview({
+                  title: `Rekapitulasi Penyaluran Kas Mitra Bayar — ${selectedBulan}`,
+                  subtitle: `Kebutuhan Kas Penyaluran Pensiun via Bank Mitra`,
+                  type: "table",
+                  fileName: `Alokasi_Mitra_DAPEM_${selectedBulan}.xlsx`,
+                  content: {
+                    columns: ["No", "Mitra Bayar", "Jumlah Penerima", "Alokasi Netto Kas (Rp)", "Nomor Surat Perintah (SP)", "Tanggal Salur", "Status"],
+                    rows: currentMitraList.map((m, idx) => [
+                      idx + 1,
+                      m.mitra,
+                      `${fmtJiwa(m.penerima)} Jiwa`,
+                      fmt(m.alokasiNetto),
+                      m.noSP,
+                      m.tglCair,
+                      m.status
+                    ]),
+                    totalRows: currentMitraList.length
+                  }
+                });
+              }}
+            >
+              <Download size={12} style={{ marginRight: 4 }} />
+              Ekspor Daftar SP
+            </Btn>
+          </div>
+        </div>
+
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
+                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Mitra Bayar / Perbankan</th>
+                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Jumlah Penerima</th>
+                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Alokasi Kas Netto (Rp)</th>
+                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Perintah (SP)</th>
+                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Likuiditas</th>
+                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi Dokumen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentMitraList.map((m) => (
+                <tr key={m.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                  <td style={{ padding: "12px 14px" }}>
+                    <div style={{ fontWeight: 800, color: COLORS.gray900 }}>{m.mitra}</div>
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>{m.singkatan} • Rekening Giro Khusus Pensiun</div>
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
+                    {fmtJiwa(m.penerima)} Jiwa
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 13 }}>
+                    {fmt(m.alokasiNetto)}
+                  </td>
+                  <td style={{ padding: "12px 14px" }}>
+                    <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>{m.noSP}</div>
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>Tgl Salur: {m.tglCair}</div>
+                  </td>
+                  <td style={{ padding: "12px 14px" }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        background: "#ECFDF5",
+                        color: "#065F46",
+                        fontWeight: 700,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <CheckCircle2 size={12} color="#059669" />
+                      {m.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                    <Btn
+                      size="xs"
+                      variant="outline"
+                      onClick={() => handleOpenSPPreview(m)}
+                    >
+                      <FileText size={12} style={{ marginRight: 4 }} />
+                      Lihat SP Mitra
+                    </Btn>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
+                <td style={{ padding: "12px 14px" }}>TOTAL PENYALURAN KAS KE SELURUH MITRA:</td>
+                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                  {fmtJiwa(currentMitraList.reduce((a, b) => a + b.penerima, 0))} Jiwa
+                </td>
+                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13.5 }}>
+                  {fmt(currentMitraList.reduce((a, b) => a + b.alokasiNetto, 0))}
+                </td>
+                <td colSpan={3} style={{ padding: "12px 14px", color: "#065F46", fontSize: 11.5 }}>
+                  ✅ Likuiditas Giro Mandiri & BNI Siap Dibukukan
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          5. TABEL REKAPITULASI III RESMI PEMERINTAH (BERDASARKAN 4 MAK RESMI)
+         ========================================================================= */}
+      <div style={{ background: COLORS.white, borderRadius: 10, padding: "20px 22px", border: `1px solid ${COLORS.gray200}` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
+              Rekapitulasi III Pertanggungjawaban Anggaran Pensiun (4 MAK Kemenkeu)
+            </div>
+            <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
+              Alokasi beban belanja pensiun menurut Bagan Akun Standar (BAS) Kementerian Keuangan RI.
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <Btn
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSelectedBNBAMAK(null);
+                setShowBNBAModal(true);
+              }}
+            >
+              <Users size={13} style={{ marginRight: 4 }} />
+              Lihat Rincian Peserta (BNBA)
+            </Btn>
+            <Btn
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                setPreview({
+                  title: `Rekapitulasi III Pembayaran Pensiun — ${selectedBulan}`,
+                  subtitle: `Format Resmi Laporan Keuangan Ditjen Perbendaharaan`,
+                  type: "table",
+                  fileName: `Rekap_III_${activeSubtab}_${selectedBulan}.xlsx`,
+                  content: {
+                    columns: ["No", "Kode MAK", "Kelompok Pensiun", "Total Jiwa", "Penerima Pokok", "Jumlah Bruto (Rp)", "Total Potongan (Rp)", "Jumlah Netto (Rp)"],
+                    rows: currentDataset.map((d) => [
+                      d.no,
+                      d.kodeMAK,
+                      d.namaKelompok,
+                      `${fmtJiwa(d.totalJiwa.total)} Jiwa`,
+                      `${fmtJiwa(d.totalJiwa.penerima)} Jiwa`,
+                      fmt(d.totalBruto.total),
+                      fmt(d.totalPotongan.total),
+                      fmt(d.totalNetto)
+                    ]),
+                    totalRows: currentDataset.length
+                  }
+                });
+              }}
+            >
+              <Download size={13} style={{ marginRight: 4 }} />
+              Ekspor Rekap III
+            </Btn>
+          </div>
+        </div>
+
+        {/* ACCORDION PER MAK */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {filteredMAKList.map((dapem) => {
+            const isOpen = !!expandedDapem[dapem.kodeMAK];
+
+            return (
+              <div key={dapem.kodeMAK} style={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
+                {/* Header Card MAK */}
+                <div
+                  onClick={() => toggleExpand(dapem.kodeMAK)}
+                  style={{
+                    padding: "12px 18px",
+                    background: "#F8FAFC",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    userSelect: "none"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 6, background: COLORS.blueDark, color: COLORS.white, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>
+                      {dapem.no}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 13.5, color: COLORS.gray900 }}>
+                        {dapem.namaKelompok}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 1 }}>
+                        MAK: <b>{dapem.kodeMAK}</b> • {fmtJiwa(dapem.totalJiwa.total)} Total Jiwa ({fmtJiwa(dapem.totalJiwa.penerima)} Penerima Manfaat)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 10, textTransform: "uppercase", color: COLORS.gray500, fontWeight: 700 }}>Total Bruto</div>
+                      <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace" }}>{fmt(dapem.totalBruto.total)}</div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 10, textTransform: "uppercase", color: COLORS.gray500, fontWeight: 700 }}>Potongan</div>
+                      <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace", color: "#DC2626" }}>{fmt(dapem.totalPotongan.total)}</div>
+                    </div>
+                    <div style={{ textAlign: "right", background: COLORS.white, border: `1.5px solid ${COLORS.blueDark}`, padding: "4px 12px", borderRadius: 6 }}>
+                      <div style={{ fontSize: 9.5, textTransform: "uppercase", color: COLORS.gray600, fontWeight: 800 }}>Jumlah Netto</div>
+                      <div style={{ fontWeight: 800, fontSize: 14, fontFamily: "monospace", color: COLORS.blueDark }}>{fmt(dapem.totalNetto)}</div>
+                    </div>
+                    <div style={{ fontSize: 13, color: COLORS.gray500, transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+                      ▼
+                    </div>
+                  </div>
+                </div>
+
+                {/* Body Table MAK */}
+                {isOpen && (
+                  <div style={{ overflowX: "auto", borderTop: `1px solid ${COLORS.gray200}` }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ background: "#F1F5F9", color: COLORS.gray700 }}>
+                          <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700 }}>Jenis Pensiun / Hak</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Total Jiwa</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Penerima</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Beban Bruto (Rp)</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "#DC2626" }}>Potongan (Rp)</th>
+                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 800, color: COLORS.blueDark }}>Netto Disalurkan (Rp)</th>
+                          <th style={{ padding: "8px 12px", textAlign: "center", fontWeight: 700 }}>Rincian BNBA</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dapem.jenisList.map((jenis, jIdx) => (
+                          <tr key={jIdx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                            <td style={{ padding: "10px 12px", fontWeight: 700, color: COLORS.gray900 }}>
+                              {jenis.nama}
+                              {jenis.deskripsi && (
+                                <div style={{ fontSize: 10.5, color: COLORS.gray500, fontWeight: 400 }}>{jenis.deskripsi}</div>
+                              )}
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                              {fmtJiwa(jenis.jiwa.total)} Jiwa
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                              {fmtJiwa(jenis.jiwa.penerima)} Jiwa
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                              {fmt(jenis.bruto.total)}
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#DC2626" }}>
+                              {fmt(jenis.potongan.total)}
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 12.5 }}>
+                              {fmt(jenis.netto)}
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                              <Btn
+                                size="xs"
+                                variant="ghost"
+                                onClick={() => {
+                                  setSelectedBNBAMAK(`${dapem.namaKelompok} — ${jenis.nama}`);
+                                  setShowBNBAModal(true);
+                                }}
+                              >
+                                <Eye size={11} style={{ marginRight: 3 }} />
+                                Detail Peserta
+                              </Btn>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

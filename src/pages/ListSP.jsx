@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Filter,
   Search,
@@ -20,6 +20,8 @@ import {
   Receipt,
   Info,
   CheckSquare,
+  Home,
+  HeartPulse,
 } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import {
@@ -30,8 +32,19 @@ import {
   NoData,
   PreviewModal,
 } from "../components/common";
+import { HutangPUMKPR } from "./HutangPUMKPR";
+import { JKKPerawatan } from "./JKKPerawatan";
 
-export const ListSP = () => {
+export const ListSP = ({ defaultTab = "listsp" }) => {
+  // Tab Navigation State: "listsp" | "jkk" | "pum"
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
+
   // State: Apakah data sudah dieksekusi / ditampilkan
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -731,6 +744,95 @@ export const ListSP = () => {
     <div>
       {/* PREVIEW EXPORT MODAL */}
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* SUB-MENU TAB NAVIGATOR */}
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          marginBottom: 20,
+          borderBottom: `2px solid ${COLORS.gray200}`,
+          paddingBottom: 2,
+        }}
+      >
+        <button
+          onClick={() => setActiveTab("listsp")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 18px",
+            border: "none",
+            borderBottom: activeTab === "listsp" ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+            background: activeTab === "listsp" ? COLORS.white : "transparent",
+            color: activeTab === "listsp" ? COLORS.blueDark : COLORS.gray600,
+            fontWeight: activeTab === "listsp" ? 700 : 600,
+            fontSize: 13,
+            cursor: "pointer",
+            borderRadius: "8px 8px 0 0",
+            transition: "all 0.15s ease",
+            marginBottom: -2,
+            boxShadow: activeTab === "listsp" ? "0 -2px 6px rgba(0,0,0,0.03)" : "none",
+          }}
+        >
+          <FileText size={16} color={activeTab === "listsp" ? COLORS.blue : COLORS.gray400} />
+          <span>List SP (Surat Perintah)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("jkk")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 18px",
+            border: "none",
+            borderBottom: activeTab === "jkk" ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+            background: activeTab === "jkk" ? COLORS.white : "transparent",
+            color: activeTab === "jkk" ? COLORS.blueDark : COLORS.gray600,
+            fontWeight: activeTab === "jkk" ? 700 : 600,
+            fontSize: 13,
+            cursor: "pointer",
+            borderRadius: "8px 8px 0 0",
+            transition: "all 0.15s ease",
+            marginBottom: -2,
+            boxShadow: activeTab === "jkk" ? "0 -2px 6px rgba(0,0,0,0.03)" : "none",
+          }}
+        >
+          <HeartPulse size={16} color={activeTab === "jkk" ? COLORS.blue : COLORS.gray400} />
+          <span>JKK Perawatan</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("pum")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 18px",
+            border: "none",
+            borderBottom: activeTab === "pum" ? `3px solid ${COLORS.blue}` : "3px solid transparent",
+            background: activeTab === "pum" ? COLORS.white : "transparent",
+            color: activeTab === "pum" ? COLORS.blueDark : COLORS.gray600,
+            fontWeight: activeTab === "pum" ? 700 : 600,
+            fontSize: 13,
+            cursor: "pointer",
+            borderRadius: "8px 8px 0 0",
+            transition: "all 0.15s ease",
+            marginBottom: -2,
+            boxShadow: activeTab === "pum" ? "0 -2px 6px rgba(0,0,0,0.03)" : "none",
+          }}
+        >
+          <Home size={16} color={activeTab === "pum" ? COLORS.blue : COLORS.gray400} />
+          <span>Hutang PUM KPR</span>
+        </button>
+      </div>
+
+      {activeTab === "pum" && <HutangPUMKPR />}
+      {activeTab === "jkk" && <JKKPerawatan />}
+
+      {activeTab === "listsp" && (
+        <div>
 
       {/* DEDICATED DETAIL MODAL: HAK & POTONGAN */}
       {selectedSPDetail && (
@@ -2022,6 +2124,8 @@ export const ListSP = () => {
             </div>
           )}
         </>
+      )}
+        </div>
       )}
     </div>
   );
