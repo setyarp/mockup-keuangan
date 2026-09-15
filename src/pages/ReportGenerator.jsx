@@ -56,12 +56,14 @@ export const ReportGenerator = () => {
       desc: "Daftar penerbitan surat tagihan resmi iuran per batch (Batch 1 THT/Pensiun Gaji Induk, Batch 2 Gaji Susulan, dan Bulanan JKK/JKm) ke Ditjen Anggaran Kemenkeu.",
       columns: ["No. Surat Tagihan", "Periode", "Batch Tagihan", "Dasar SKP / Nota Dinas", "Tgl Terbit", "Nominal Tagihan TNI", "Nominal Tagihan POLRI", "Total Tagihan", "Status Dokumen"],
       rows: [
-        ["001/ASABRI/TGH-THT-PEN-B1/VII/2026", "Juli 2026", "Batch 1 (Gaji Induk)", "SKP-PFK/001/VII/2026", "02 Jul 2026", "Rp 42.840.000.000", "Rp 27.568.000.000", "Rp 70.408.000.000", "Sudah di-TTD"],
-        ["002/ASABRI/TGH-THT-PEN-B2/VII/2026", "Juli 2026", "Batch 2 (Gaji Susulan)", "SKP-PFK/002/VII/2026", "16 Jul 2026", "Rp 10.710.000.000", "Rp 6.892.000.000", "Rp 17.602.000.000", "Siap Download"],
-        ["003/ASABRI/TGH-JKK/VII/2026", "Juli 2026", "Bulanan (0,24% GP)", "ND-JKK/ASABRI/VII/2026", "05 Jul 2026", "Rp 1.580.000.000", "Rp 1.050.000.000", "Rp 2.630.000.000", "Siap Download"],
-        ["004/ASABRI/TGH-JKM/VII/2026", "Juli 2026", "Bulanan (0,20% GP)", "ND-JKM/ASABRI/VII/2026", "05 Jul 2026", "Rp 1.320.000.000", "Rp 890.000.000", "Rp 2.210.000.000", "Draft Otomatis"]
+        ["1190/KU.06.06/KMR.N/IX/2026", "September 2026", "THT TNI (3,25%)", "S-184/PB.2/2026", "15 Sep 2026", "Rp 28.540.000.000", "-", "Rp 28.540.000.000", "Sudah di-TTD"],
+        ["1191/KU.06.06/KMR.N/IX/2026", "September 2026", "THT POLRI (3,25%)", "S-184/PB.2/2026", "15 Sep 2026", "-", "Rp 14.225.000.000", "Rp 14.225.000.000", "Sudah di-TTD"],
+        ["1192/KU.06.06/KMR.N/IX/2026", "September 2026", "Pensiun TNI (4,75%)", "S-184/PB.2/2026", "15 Sep 2026", "Rp 41.710.000.000", "-", "Rp 41.710.000.000", "Sudah di-TTD"],
+        ["1193/KU.06.06/KMR.N/IX/2026", "September 2026", "Pensiun POLRI (4,75%)", "S-184/PB.2/2026", "15 Sep 2026", "-", "Rp 20.805.000.000", "Rp 20.805.000.000", "Sudah di-TTD"],
+        ["1194/ASABRI/TGH-JKK/IX/2026", "September 2026", "Bulanan JKK (0,24%)", "ND-342/KPS/IX/2026", "15 Sep 2026", "Rp 1.580.000.000", "Rp 1.050.000.000", "Rp 2.630.000.000", "Siap Download"],
+        ["1195/ASABRI/TGH-JKM/IX/2026", "September 2026", "Bulanan JKM (0,20%)", "ND-343/KPS/IX/2026", "15 Sep 2026", "Rp 1.320.000.000", "Rp 890.000.000", "Rp 2.210.000.000", "Draft Otomatis"]
       ],
-      totalRows: 4
+      totalRows: 6
     },
 
     // --- KATEGORI 2: Pembayaran Manfaat & Klaim Asuransi ---

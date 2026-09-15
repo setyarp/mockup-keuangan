@@ -214,42 +214,62 @@ export const DashboardKeuangan = () => {
             <tbody>
               {[
                 {
-                  no: "001/ASABRI/TGH-THT-PEN-B1/VII/2026",
-                  jenis: "THT & Pensiun",
-                  batch: "Batch 1",
-                  acuan: "SKP-PFK (Gaji Induk)",
-                  nominal: "Rp 70.408.000.000",
-                  cutoff: "15 Jul 2026",
+                  no: "1190/KU.06.06/KMR.N/IX/2026",
+                  jenis: "THT TNI (3,25%)",
+                  batch: "Gaji Induk",
+                  acuan: "SKP-PFK S-184/PB.2/2026",
+                  nominal: "Rp 28.540.000.000",
+                  cutoff: "15 Sep 2026",
                   status: "Dokumen di-TTD",
                   color: "green"
                 },
                 {
-                  no: "002/ASABRI/TGH-THT-PEN-B2/VII/2026",
-                  jenis: "THT & Pensiun",
-                  batch: "Batch 2",
-                  acuan: "SKP-PFK (Gaji Susulan)",
-                  nominal: "Rp 17.602.000.000",
-                  cutoff: "25 Jul 2026",
-                  status: "Siap Download",
-                  color: "blue"
+                  no: "1191/KU.06.06/KMR.N/IX/2026",
+                  jenis: "THT POLRI (3,25%)",
+                  batch: "Gaji Induk",
+                  acuan: "SKP-PFK S-184/PB.2/2026",
+                  nominal: "Rp 14.225.000.000",
+                  cutoff: "15 Sep 2026",
+                  status: "Dokumen di-TTD",
+                  color: "green"
                 },
                 {
-                  no: "003/ASABRI/TGH-JKK/VII/2026",
+                  no: "1192/KU.06.06/KMR.N/IX/2026",
+                  jenis: "Pensiun TNI (4,75%)",
+                  batch: "Gaji Induk",
+                  acuan: "SKP-PFK S-184/PB.2/2026",
+                  nominal: "Rp 41.710.000.000",
+                  cutoff: "15 Sep 2026",
+                  status: "Dokumen di-TTD",
+                  color: "green"
+                },
+                {
+                  no: "1193/KU.06.06/KMR.N/IX/2026",
+                  jenis: "Pensiun POLRI (4,75%)",
+                  batch: "Gaji Induk",
+                  acuan: "SKP-PFK S-184/PB.2/2026",
+                  nominal: "Rp 20.805.000.000",
+                  cutoff: "15 Sep 2026",
+                  status: "Dokumen di-TTD",
+                  color: "green"
+                },
+                {
+                  no: "1194/ASABRI/TGH-JKK/IX/2026",
                   jenis: "JKK",
                   batch: "Bulanan",
-                  acuan: "Data Klaim & Gaji Pokok",
+                  acuan: "ND Kepesertaan 0,24%",
                   nominal: "Rp 2.630.000.000",
-                  cutoff: "25 Jul 2026",
+                  cutoff: "25 Sep 2026",
                   status: "Siap Download",
                   color: "blue"
                 },
                 {
-                  no: "004/ASABRI/TGH-JKM/VII/2026",
-                  jenis: "JKm",
+                  no: "1195/ASABRI/TGH-JKM/IX/2026",
+                  jenis: "JKM",
                   batch: "Bulanan",
-                  acuan: "Data Klaim & Gaji Pokok",
+                  acuan: "ND Kepesertaan 0,20%",
                   nominal: "Rp 2.210.000.000",
-                  cutoff: "25 Jul 2026",
+                  cutoff: "25 Sep 2026",
                   status: "Draft Otomatis",
                   color: "yellow"
                 },

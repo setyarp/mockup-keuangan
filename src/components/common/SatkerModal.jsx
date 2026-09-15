@@ -8,10 +8,11 @@ export const SatkerModal = ({ data, onClose }) => {
   if (!data) return null;
 
   const {
-    noSurat = "001/ASABRI/TGH-THT-PEN/VII/2026",
+    noSurat = "1190/KU.06.06/KMR.N/IX/2026",
     noSKP = "S-184/PB.2/2026",
-    periode = "Juli 2026",
-    program = "THT & Pensiun (1 Tagihan)",
+    periode = "September 2026",
+    program = "THT TNI",
+    danaType,
     satkerList = []
   } = data;
 
@@ -20,6 +21,11 @@ export const SatkerModal = ({ data, onClose }) => {
 
   const fmtB = (n) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
   const fmtNum = (n) => Number(n || 0).toLocaleString("id-ID");
+
+  const isTHTOnly = danaType === "THT_TNI" || danaType === "THT_POLRI" || (program?.includes("THT") && !program?.includes("Pensiun"));
+  const isPensiunOnly = danaType === "PENSIUN_TNI" || danaType === "PENSIUN_POLRI" || (program?.includes("Pensiun") && !program?.includes("THT"));
+  const isSpecificDana = isTHTOnly || isPensiunOnly;
+  const activeTarif = isTHTOnly ? "3,25%" : isPensiunOnly ? "4,75%" : "8,00%";
 
   // Matra options
   const matraOptions = useMemo(() => {
@@ -47,12 +53,12 @@ export const SatkerModal = ({ data, onClose }) => {
         acc.gajiPokok += Number(s.gajiPokok || 0);
         acc.danaTHT += Number(s.danaTHT || 0);
         acc.danaPensiun += Number(s.danaPensiun || 0);
-        acc.total += Number(s.total || 0);
+        acc.total += Number(s.total || (isTHTOnly ? s.danaTHT : isPensiunOnly ? s.danaPensiun : 0) || 0);
         return acc;
       },
       { peserta: 0, gajiPokok: 0, danaTHT: 0, danaPensiun: 0, total: 0 }
     );
-  }, [filteredList]);
+  }, [filteredList, isTHTOnly, isPensiunOnly]);
 
   const handleExport = () => {
     alert(`Mengunduh berkas Excel Rincian Satker (${noSurat}) format XLSX...`);
@@ -119,7 +125,9 @@ export const SatkerModal = ({ data, onClose }) => {
             </div>
             <div>
               <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
-                Rincian Alokasi Dana THT & Pensiun Per-Satuan Kerja (Satker)
+                {isSpecificDana
+                  ? `Rincian Alokasi ${program || (isTHTOnly ? "Dana THT (3,25%)" : "Dana Pensiun (4,75%)")} Per-Satuan Kerja`
+                  : "Rincian Alokasi Dana THT & Pensiun Per-Satuan Kerja (Satker)"}
               </div>
               <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2, display: "flex", gap: 8, alignItems: "center" }}>
                 <span>No. Tagihan: <strong style={{ fontFamily: "monospace", color: COLORS.blueDark }}>{noSurat}</strong></span>
@@ -150,8 +158,12 @@ export const SatkerModal = ({ data, onClose }) => {
           {/* Banner Penjelasan Bisnis */}
           <div
             style={{
-              background: "linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)",
-              border: "1px solid #BFDBFE",
+              background: isSpecificDana
+                ? isTHTOnly
+                  ? "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)"
+                  : "linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)"
+                : "linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)",
+              border: `1px solid ${isSpecificDana ? (isTHTOnly ? "#BFDBFE" : "#A7F3D0") : "#BFDBFE"}`,
               borderRadius: 10,
               padding: "12px 16px",
               marginBottom: 18,
@@ -163,22 +175,30 @@ export const SatkerModal = ({ data, onClose }) => {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 20 }}>📌</span>
-              <div style={{ fontSize: 12.5, color: "#1E3A8A", lineHeight: 1.5 }}>
-                <strong>Surat Tagihan Terpadu (1 Tagihan Bersama):</strong> Iuran <strong>THT (3,25%)</strong> dan <strong>Pensiun (4,75%)</strong> ditagihkan secara simultan dalam 1 Surat Tagihan resmi ke Kemenkeu RI, dengan rincian alokasi per Satuan Kerja (Satker) kedinasan di bawah ini.
+              <div style={{ fontSize: 12.5, color: isTHTOnly ? "#1E3A8A" : "#065F46", lineHeight: 1.5 }}>
+                {isSpecificDana ? (
+                  <span>
+                    <strong>Surat Tagihan Terpisah Per-Dana ({program}):</strong> Iuran <strong>{isTHTOnly ? "THT (3,25%)" : "Pensiun (4,75%)"}</strong> ditagihkan tersendiri melalui nomor surat resmi ke Ditjen Perbendaharaan Kemenkeu RI, dengan rincian alokasi per Satker kedinasan di bawah ini.
+                  </span>
+                ) : (
+                  <span>
+                    <strong>Surat Tagihan Terpadu (1 Tagihan Bersama):</strong> Iuran <strong>THT (3,25%)</strong> dan <strong>Pensiun (4,75%)</strong> ditagihkan secara simultan dalam 1 Surat Tagihan resmi ke Kemenkeu RI, dengan rincian alokasi per Satuan Kerja (Satker) kedinasan di bawah ini.
+                  </span>
+                )}
               </div>
             </div>
             <span
               style={{
                 fontSize: 11.5,
                 fontWeight: 700,
-                background: "#DBEAFE",
-                color: "#1E40AF",
+                background: isTHTOnly ? "#DBEAFE" : "#D1FAE5",
+                color: isTHTOnly ? "#1E40AF" : "#065F46",
                 padding: "4px 10px",
                 borderRadius: 20,
                 whiteSpace: "nowrap"
               }}
             >
-              Total Potongan: 8,00% Gaji Pokok
+              Tarif Potongan: {activeTarif} Gaji Pokok
             </span>
           </div>
 
@@ -201,55 +221,59 @@ export const SatkerModal = ({ data, onClose }) => {
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.gray500, textTransform: "uppercase" }}>
-                Total 1 Tagihan Terpadu
+                Total Nominal Surat Tagihan
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: COLORS.blueDark, fontFamily: "monospace", marginTop: 4 }}>
-                {fmtB(totals.total)}
+              <div style={{ fontSize: 18, fontWeight: 800, color: isTHTOnly ? "#1D4ED8" : isPensiunOnly ? "#15803D" : COLORS.blueDark, fontFamily: "monospace", marginTop: 4 }}>
+                {fmtB(isTHTOnly ? (totals.danaTHT || totals.total) : isPensiunOnly ? (totals.danaPensiun || totals.total) : totals.total)}
               </div>
               <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                Gabungan THT & Pensiun
+                {isSpecificDana ? `Tarif ${activeTarif} Gaji Pokok` : "Gabungan THT & Pensiun"}
               </div>
             </div>
 
-            <div
-              style={{
-                background: COLORS.white,
-                border: `1px solid #BFDBFE`,
-                borderRadius: 10,
-                padding: "12px 16px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#1E40AF", textTransform: "uppercase" }}>
-                Alokasi Dana THT (3,25%)
+            {(!isSpecificDana || isTHTOnly) && (
+              <div
+                style={{
+                  background: COLORS.white,
+                  border: `1px solid #BFDBFE`,
+                  borderRadius: 10,
+                  padding: "12px 16px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#1E40AF", textTransform: "uppercase" }}>
+                  Alokasi Dana THT (3,25%)
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#1D4ED8", fontFamily: "monospace", marginTop: 4 }}>
+                  {fmtB(totals.danaTHT || totals.total)}
+                </div>
+                <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                  Porsi Tabungan Hari Tua
+                </div>
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#1D4ED8", fontFamily: "monospace", marginTop: 4 }}>
-                {fmtB(totals.danaTHT)}
-              </div>
-              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                Porsi Tabungan Hari Tua
-              </div>
-            </div>
+            )}
 
-            <div
-              style={{
-                background: COLORS.white,
-                border: `1px solid #BBF7D0`,
-                borderRadius: 10,
-                padding: "12px 16px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", textTransform: "uppercase" }}>
-                Alokasi Dana Pensiun (4,75%)
+            {(!isSpecificDana || isPensiunOnly) && (
+              <div
+                style={{
+                  background: COLORS.white,
+                  border: `1px solid #BBF7D0`,
+                  borderRadius: 10,
+                  padding: "12px 16px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#166534", textTransform: "uppercase" }}>
+                  Alokasi Dana Pensiun (4,75%)
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", fontFamily: "monospace", marginTop: 4 }}>
+                  {fmtB(totals.danaPensiun || totals.total)}
+                </div>
+                <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                  Porsi Dana Pensiun (DAPEN)
+                </div>
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#15803D", fontFamily: "monospace", marginTop: 4 }}>
-                {fmtB(totals.danaPensiun)}
-              </div>
-              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                Porsi Dana Pensiun (DAPEN)
-              </div>
-            </div>
+            )}
 
             <div
               style={{
@@ -371,8 +395,12 @@ export const SatkerModal = ({ data, onClose }) => {
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Kode & Satker Kedinasan</th>
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra</th>
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Personel</th>
-                    <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Dana THT (3,25%)</th>
-                    <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Dana Pensiun (4,75%)</th>
+                    {(!isSpecificDana || isTHTOnly) && (
+                      <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Dana THT (3,25%)</th>
+                    )}
+                    {(!isSpecificDana || isPensiunOnly) && (
+                      <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Dana Pensiun (4,75%)</th>
+                    )}
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Total Satker (Rp)</th>
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Status</th>
                   </tr>
@@ -380,56 +408,63 @@ export const SatkerModal = ({ data, onClose }) => {
                 <tbody>
                   {filteredList.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
+                      <td colSpan={isSpecificDana ? 7 : 8} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
                         Tidak ditemukan data Satker pada filter ini.
                       </td>
                     </tr>
                   ) : (
-                    filteredList.map((s, idx) => (
-                      <tr key={s.kode || idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                        <td style={{ padding: "9px 12px", color: COLORS.gray500, fontFamily: "monospace" }}>
-                          {idx + 1}
-                        </td>
-                        <td style={{ padding: "9px 12px" }}>
-                          <div style={{ fontWeight: 700, color: COLORS.gray900 }}>{s.satker}</div>
-                          <div style={{ fontSize: 11, color: COLORS.gray500, fontFamily: "monospace" }}>
-                            Kode Satker: {s.kode}
-                          </div>
-                        </td>
-                        <td style={{ padding: "9px 12px" }}>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 600,
-                              background: "#F1F5F9",
-                              color: COLORS.gray700,
-                              padding: "2px 8px",
-                              borderRadius: 4
-                            }}
-                          >
-                            {s.matra}
-                          </span>
-                        </td>
-                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.gray800 }}>
-                          {fmtNum(s.peserta)}
-                        </td>
-                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1D4ED8" }}>
-                          {fmtB(s.danaTHT)}
-                        </td>
-                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#15803D" }}>
-                          {fmtB(s.danaPensiun)}
-                        </td>
-                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, background: "#F8FAFC" }}>
-                          {fmtB(s.total)}
-                        </td>
-                        <td style={{ padding: "9px 12px", textAlign: "center" }}>
-                          <Badge variant="success">
-                            <CheckCircle2 size={11} style={{ marginRight: 3, verticalAlign: "middle" }} />
-                            Match
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))
+                    filteredList.map((s, idx) => {
+                      const satkerNominal = isTHTOnly ? (s.danaTHT || s.total) : isPensiunOnly ? (s.danaPensiun || s.total) : s.total;
+                      return (
+                        <tr key={s.kode || idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                          <td style={{ padding: "9px 12px", color: COLORS.gray500, fontFamily: "monospace" }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ padding: "9px 12px" }}>
+                            <div style={{ fontWeight: 700, color: COLORS.gray900 }}>{s.satker}</div>
+                            <div style={{ fontSize: 11, color: COLORS.gray500, fontFamily: "monospace" }}>
+                              Kode Satker: {s.kode}
+                            </div>
+                          </td>
+                          <td style={{ padding: "9px 12px" }}>
+                            <span
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                background: "#F1F5F9",
+                                color: COLORS.gray700,
+                                padding: "2px 8px",
+                                borderRadius: 4
+                              }}
+                            >
+                              {s.matra}
+                            </span>
+                          </td>
+                          <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.gray800 }}>
+                            {fmtNum(s.peserta)}
+                          </td>
+                          {(!isSpecificDana || isTHTOnly) && (
+                            <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1D4ED8" }}>
+                              {fmtB(s.danaTHT || (isTHTOnly ? s.total : 0))}
+                            </td>
+                          )}
+                          {(!isSpecificDana || isPensiunOnly) && (
+                            <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#15803D" }}>
+                              {fmtB(s.danaPensiun || (isPensiunOnly ? s.total : 0))}
+                            </td>
+                          )}
+                          <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, background: "#F8FAFC" }}>
+                            {fmtB(satkerNominal)}
+                          </td>
+                          <td style={{ padding: "9px 12px", textAlign: "center" }}>
+                            <Badge variant="success">
+                              <CheckCircle2 size={11} style={{ marginRight: 3, verticalAlign: "middle" }} />
+                              Match
+                            </Badge>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
                 <tfoot>
@@ -440,12 +475,16 @@ export const SatkerModal = ({ data, onClose }) => {
                     <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.gray900 }}>
                       {fmtNum(totals.peserta)}
                     </td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#1D4ED8" }}>
-                      {fmtB(totals.danaTHT)}
-                    </td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#15803D" }}>
-                      {fmtB(totals.danaPensiun)}
-                    </td>
+                    {(!isSpecificDana || isTHTOnly) && (
+                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#1D4ED8" }}>
+                        {fmtB(totals.danaTHT || totals.total)}
+                      </td>
+                    )}
+                    {(!isSpecificDana || isPensiunOnly) && (
+                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#15803D" }}>
+                        {fmtB(totals.danaPensiun || totals.total)}
+                      </td>
+                    )}
                     <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, background: "#E2E8F0" }}>
                       {fmtB(totals.total)}
                     </td>

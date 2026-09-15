@@ -164,7 +164,7 @@ export const KalkulatorIuran = () => {
                   type: "surat",
                   fileName: `Surat_Tagihan_THT_Pensiun_Batch1_${filterPeriode.replace(" ", "_")}.pdf`,
                   content: {
-                    noSurat: `001/ASABRI/TGH-THT-PEN-B1/${filterPeriode.replace(" ", "/")}`,
+                    noSurat: `1190/KU.06.06/KMR.N/IX/2026`,
                     periode: filterPeriode,
                     cutoff: "15 Juli 2026",
                     batchInfo: "Batch 1 (Tanggal 15) — Gaji Induk / Termin 1",
@@ -187,7 +187,7 @@ export const KalkulatorIuran = () => {
                   type: "surat",
                   fileName: `Surat_Tagihan_THT_Pensiun_Batch2_${filterPeriode.replace(" ", "_")}.pdf`,
                   content: {
-                    noSurat: `002/ASABRI/TGH-THT-PEN-B2/${filterPeriode.replace(" ", "/")}`,
+                    noSurat: `1191/KU.06.06/KMR.N/IX/2026`,
                     periode: filterPeriode,
                     cutoff: "25 Juli 2026",
                     batchInfo: "Batch 2 (Tanggal 25) — Gaji Susulan & Rekonsiliasi",

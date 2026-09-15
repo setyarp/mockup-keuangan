@@ -69,39 +69,56 @@ export const PreviewModal = ({ preview, onClose }) => {
                     </tbody>
                   </table>
 
-                  {content?.satkerList && content.satkerList.length > 0 && (
-                    <div style={{ margin: "18px 0" }}>
-                      <div style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray900, marginBottom: 6 }}>
-                        Lampiran: Rincian Alokasi Dana THT dan Pensiun Per-Satuan Kerja (Satker)
-                      </div>
-                      <div style={{ overflowX: "auto" }}>
-                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                          <thead>
-                            <tr style={{ background: "#F1F5F9", color: COLORS.gray700 }}>
-                              <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "left" }}>Satker Kedinasan</th>
-                              <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "left" }}>Matra</th>
-                              <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Peserta</th>
-                              <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Dana THT (3,25%)</th>
-                              <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Dana Pensiun (4,75%)</th>
-                              <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Total Satker</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {content.satkerList.map((s, idx) => (
-                              <tr key={idx}>
-                                <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", fontWeight: 600 }}>{s.satker}</td>
-                                <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px" }}>{s.matra}</td>
-                                <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>{Number(s.peserta).toLocaleString("id-ID")}</td>
-                                <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right", color: "#1E3A8A" }}>Rp {Number(s.danaTHT).toLocaleString("id-ID")}</td>
-                                <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right", color: "#065F46" }}>Rp {Number(s.danaPensiun).toLocaleString("id-ID")}</td>
-                                <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right", fontWeight: 700, color: COLORS.blueDark }}>Rp {Number(s.total).toLocaleString("id-ID")}</td>
+                  {content?.satkerList && content.satkerList.length > 0 && (() => {
+                    const isTHTOnly = content.items?.length === 1 && content.items[0].jenis?.includes("THT");
+                    const isPensiunOnly = content.items?.length === 1 && content.items[0].jenis?.includes("Pensiun");
+                    const isSingle = isTHTOnly || isPensiunOnly;
+
+                    return (
+                      <div style={{ margin: "18px 0" }}>
+                        <div style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray900, marginBottom: 6 }}>
+                          Lampiran: Rincian Alokasi {isSingle ? (isTHTOnly ? "Dana THT (3,25%)" : "Dana Pensiun (4,75%)") : "Dana THT dan Pensiun"} Per-Satuan Kerja (Satker)
+                        </div>
+                        <div style={{ overflowX: "auto" }}>
+                          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                            <thead>
+                              <tr style={{ background: "#F1F5F9", color: COLORS.gray700 }}>
+                                <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "left" }}>Satker Kedinasan</th>
+                                <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "left" }}>Matra</th>
+                                <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Peserta</th>
+                                {(!isSingle || isTHTOnly) && (
+                                  <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Dana THT (3,25%)</th>
+                                )}
+                                {(!isSingle || isPensiunOnly) && (
+                                  <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Dana Pensiun (4,75%)</th>
+                                )}
+                                <th style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>Total Satker</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {content.satkerList.map((s, idx) => {
+                                const satkerVal = isTHTOnly ? (s.danaTHT || s.total) : isPensiunOnly ? (s.danaPensiun || s.total) : s.total;
+                                return (
+                                  <tr key={idx}>
+                                    <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", fontWeight: 600 }}>{s.satker}</td>
+                                    <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px" }}>{s.matra}</td>
+                                    <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right" }}>{Number(s.peserta).toLocaleString("id-ID")}</td>
+                                    {(!isSingle || isTHTOnly) && (
+                                      <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right", color: "#1E3A8A" }}>Rp {Number(s.danaTHT || (isTHTOnly ? s.total : 0)).toLocaleString("id-ID")}</td>
+                                    )}
+                                    {(!isSingle || isPensiunOnly) && (
+                                      <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right", color: "#065F46" }}>Rp {Number(s.danaPensiun || (isPensiunOnly ? s.total : 0)).toLocaleString("id-ID")}</td>
+                                    )}
+                                    <td style={{ border: `1px solid ${COLORS.gray300}`, padding: "5px 6px", textAlign: "right", fontWeight: 700, color: COLORS.blueDark }}>Rp {Number(satkerVal).toLocaleString("id-ID")}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   <p>Demikian surat tagihan ini kami sampaikan untuk dapat diproses penyalurannya sesuai ketentuan yang berlaku. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
                   

@@ -116,19 +116,69 @@ export const SATKER_THT_PENSIUN_POLRI = SATKER_THT_PENSIUN_ALL.filter(
   (s) => s.matra === "POLRI"
 );
 
+// Satker Spesifik Per-Dana:
+// 1. THT TNI (Tarif 3,25%)
+export const SATKER_THT_TNI = SATKER_THT_PENSIUN_TNI.map((s) => ({
+  ...s,
+  nominal: s.danaTHT,
+  tarif: "3,25%",
+  jenisDana: "THT TNI"
+}));
+
+// 2. THT POLRI (Tarif 3,25%)
+export const SATKER_THT_POLRI = SATKER_THT_PENSIUN_POLRI.map((s) => ({
+  ...s,
+  nominal: s.danaTHT,
+  tarif: "3,25%",
+  jenisDana: "THT POLRI"
+}));
+
+// 3. Pensiun TNI (Tarif 4,75%)
+export const SATKER_PENSIUN_TNI = SATKER_THT_PENSIUN_TNI.map((s) => ({
+  ...s,
+  nominal: s.danaPensiun,
+  tarif: "4,75%",
+  jenisDana: "Pensiun TNI"
+}));
+
+// 4. Pensiun POLRI (Tarif 4,75%)
+export const SATKER_PENSIUN_POLRI = SATKER_THT_PENSIUN_POLRI.map((s) => ({
+  ...s,
+  nominal: s.danaPensiun,
+  tarif: "4,75%",
+  jenisDana: "Pensiun POLRI"
+}));
+
+// Helper konversi bulan ke Romawi
+export const ROMAWI_BULAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+
+export const getBulanRomawi = (date = new Date()) => {
+  const m = typeof date === "number" ? date : date.getMonth();
+  return ROMAWI_BULAN[m] || "IX";
+};
+
+// Helper generator Nomor Surat Resmi PFK sesuai ketentuan:
+// NoUrut(incremental)/KU.06.06(kode untuk Dana PFK)/KMR.N(unit divisi pembuat)/Bulan(Romawi)/Tahun
+export const formatNomorSuratPFK = (noUrut = 1190, bulanRomawi = "IX", tahun = 2026) => {
+  return `${noUrut}/KU.06.06/KMR.N/${bulanRomawi}/${tahun}`;
+};
+
 // Helper hitung alokasi satker secara proporsional jika ada nilai nominal kustom
 export const generateProportionalSatkerList = (totalNominal, baseList = SATKER_THT_PENSIUN_TNI) => {
-  const currentTotal = baseList.reduce((sum, s) => sum + s.total, 0);
+  const currentTotal = baseList.reduce((sum, s) => sum + (s.total || s.nominal || 0), 0);
   const ratio = totalNominal / (currentTotal || 1);
 
   return baseList.map((s) => {
-    const danaTHT = Math.round(s.danaTHT * ratio);
-    const danaPensiun = Math.round(s.danaPensiun * ratio);
+    const danaTHT = s.danaTHT ? Math.round(s.danaTHT * ratio) : undefined;
+    const danaPensiun = s.danaPensiun ? Math.round(s.danaPensiun * ratio) : undefined;
+    const nominal = s.nominal ? Math.round(s.nominal * ratio) : (danaTHT && danaPensiun ? danaTHT + danaPensiun : (danaTHT || danaPensiun));
     return {
       ...s,
       danaTHT,
       danaPensiun,
-      total: danaTHT + danaPensiun
+      nominal,
+      total: (danaTHT || 0) + (danaPensiun || 0) || nominal
     };
   });
 };
+

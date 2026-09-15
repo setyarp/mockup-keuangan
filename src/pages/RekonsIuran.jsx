@@ -22,12 +22,17 @@ import { COLORS } from "../constants/colors";
 import { Table, Badge, Btn, PreviewModal, SatkerModal } from "../components/common";
 import {
   SATKER_THT_PENSIUN_ALL,
-  generateProportionalSatkerList
+  SATKER_THT_TNI,
+  SATKER_THT_POLRI,
+  SATKER_PENSIUN_TNI,
+  SATKER_PENSIUN_POLRI,
+  generateProportionalSatkerList,
+  formatNomorSuratPFK
 } from "../constants/satkerData";
 
 export const RekonsIuran = () => {
   // 3 TAB PROGRAM UTAMA:
-  // "THT_PENSIUN" : THT & Pensiun (SKP-PFK 8,00%) - Tagihan Tunggal Resmi
+  // "THT_PENSIUN" : THT & Pensiun (SKP-PFK 8,00%) - Tagihan Dipisah Per Dana
   // "JKK"         : Jaminan Kecelakaan Kerja (0,24%)
   // "JKM"         : Jaminan Kematian (0,20%)
   const [activeProgram, setActiveProgram] = useState("THT_PENSIUN");
@@ -44,9 +49,10 @@ export const RekonsIuran = () => {
 
   // State Filter & Search
   const [filterMatra, setFilterMatra] = useState("Semua");
+  const [filterDanaPFK, setFilterDanaPFK] = useState("Semua");
   const [searchTerm, setSearchTerm] = useState("");
   const [tglAwal, setTglAwal] = useState("2026-07-01");
-  const [tglAkhir, setTglAkhir] = useState("2026-07-31");
+  const [tglAkhir, setTglAkhir] = useState("2026-09-30");
   const filterPeriode = `${tglAwal} s.d. ${tglAkhir}`;
 
   // Preview Modal, Drilldown & Toast
@@ -64,15 +70,17 @@ export const RekonsIuran = () => {
   const [showInputModal, setShowInputModal] = useState(false);
   const [inputError, setInputError] = useState("");
   const [inputForm, setInputForm] = useState({
-    noSuratTagihan: "",
-    tglSuratTagihan: "",
-    noSKP: "",
-    tglSKP: "",
-    jenisIuran: "Tagihan Iuran THT & Pensiun Susulan (Batch 2)",
-    tglTerimaDana: "",
-    noSP2D: "",
+    danaType: "THT_TNI",
+    noSuratTagihan: "1194/KU.06.06/KMR.N/IX/2026",
+    tglSuratTagihan: "15 September 2026",
+    noSKP: "S-184/PB.2/2026",
+    tglSKP: "14 September 2026",
+    jenisIuran: "Iuran THT Prajurit TNI & ASN Kemhan",
+    tglTerimaDana: "18 September 2026",
+    noSP2D: "SP2D-260918-009412",
     bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
-    nominalDanaSKP: ""
+    nominalDanaSKP: "28540000000",
+    peserta: "266150"
   });
 
   // Modal Input Realisasi Tagihan JKK & JKM
@@ -124,80 +132,225 @@ export const RekonsIuran = () => {
 
   // =========================================================================
   // DATASET 1: MONITORING & HISTORY PENERIMAAN DANA SKP-PFK (THT & PENSIUN)
-  // Aturan: Hanya yang lengkap seluruh komponen fieldnya yang masuk list
+  // Dipisah per Dana: THT TNI, THT POLRI, Pensiun TNI, Pensiun POLRI
+  // Format Nomor Surat: {NoUrut}/KU.06.06/KMR.N/{BulanRomawi}/{Tahun}
+  // Total 4 Surat = Rp 105.280.000.000 (Sesuai SKP-PFK No. S-184/PB.2/2026)
   // =========================================================================
   const [monitoringSKPList, setMonitoringSKPList] = useState([
     {
-      id: "SKP-002",
-      jenisIuran: "Tagihan Iuran THT & Pensiun Susulan (Batch 2)",
-      kodeTarif: "8,00% Terpadu (THT 3,25% + Pensiun 4,75%)",
-      matraUtama: "TNI, Kemhan & POLRI (Susulan Mutasi Koarmada II)",
-      noSuratTagihan: "002/ASABRI/TGH-THT-PEN-SUS/VII/2026",
-      tglSuratTagihan: "18 Juli 2026",
+      id: "SKP-PFK-THT-TNI",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      jenisIuran: "Iuran Tabungan Hari Tua (THT) TNI & ASN Kemhan",
+      kodeTarif: "3,25% Gaji Pokok",
+      tarif: "3,25%",
+      peserta: 266150,
+      matraUtama: "TNI & ASN Kemhan",
+      noSuratTagihan: "1190/KU.06.06/KMR.N/IX/2026",
+      tglSuratTagihan: "15 September 2026",
       statusSuratTagihan: "Terbit (Tergenerate)",
-      noSKP: "S-190/PB.2/2026",
-      tglSKP: "17 Juli 2026",
-      tglTerimaDana: "21 Juli 2026",
+      noSKP: "S-184/PB.2/2026",
+      tglSKP: "14 September 2026",
+      tglTerimaDana: "18 September 2026",
       bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
-      noSP2D: "SP2D-260721-009412",
-      nominalDanaSKP: 3120000000,
-      danaTHT: 1267500000,
-      danaPensiun: 1852500000,
-      nominalDiterima: 3120000000,
+      noSP2D: "SP2D-260918-008921",
+      nominalDanaSKP: 28540000000,
+      danaTHT: 28540000000,
+      danaPensiun: 0,
+      nominalDiterima: 28540000000,
       statusDana: "Dana Masuk (Lunas)",
       statusProses: "Dalam Monitoring",
-      satkerList: generateProportionalSatkerList(3120000000, SATKER_THT_PENSIUN_ALL)
+      satkerList: SATKER_THT_TNI
+    },
+    {
+      id: "SKP-PFK-THT-POLRI",
+      danaType: "THT_POLRI",
+      namaDana: "THT POLRI",
+      jenisIuran: "Iuran Tabungan Hari Tua (THT) Anggota POLRI & PNS Polri",
+      kodeTarif: "3,25% Gaji Pokok",
+      tarif: "3,25%",
+      peserta: 142200,
+      matraUtama: "POLRI & PNS Polri",
+      noSuratTagihan: "1191/KU.06.06/KMR.N/IX/2026",
+      tglSuratTagihan: "15 September 2026",
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: "S-184/PB.2/2026",
+      tglSKP: "14 September 2026",
+      tglTerimaDana: "18 September 2026",
+      bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260918-008922",
+      nominalDanaSKP: 14225000000,
+      danaTHT: 14225000000,
+      danaPensiun: 0,
+      nominalDiterima: 14225000000,
+      statusDana: "Dana Masuk (Lunas)",
+      statusProses: "Dalam Monitoring",
+      satkerList: SATKER_THT_POLRI
+    },
+    {
+      id: "SKP-PFK-PEN-TNI",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      jenisIuran: "Iuran Pensiun Prajurit TNI & ASN Kemhan",
+      kodeTarif: "4,75% Gaji Pokok",
+      tarif: "4,75%",
+      peserta: 266150,
+      matraUtama: "TNI & ASN Kemhan",
+      noSuratTagihan: "1192/KU.06.06/KMR.N/IX/2026",
+      tglSuratTagihan: "15 September 2026",
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: "S-184/PB.2/2026",
+      tglSKP: "14 September 2026",
+      tglTerimaDana: "18 September 2026",
+      bankTujuan: "Bank BNI - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260918-008923",
+      nominalDanaSKP: 41710000000,
+      danaTHT: 0,
+      danaPensiun: 41710000000,
+      nominalDiterima: 41710000000,
+      statusDana: "Dana Masuk (Lunas)",
+      statusProses: "Dalam Monitoring",
+      satkerList: SATKER_PENSIUN_TNI
+    },
+    {
+      id: "SKP-PFK-PEN-POLRI",
+      danaType: "PENSIUN_POLRI",
+      namaDana: "Pensiun POLRI",
+      jenisIuran: "Iuran Pensiun Anggota POLRI & PNS Polri",
+      kodeTarif: "4,75% Gaji Pokok",
+      tarif: "4,75%",
+      peserta: 142200,
+      matraUtama: "POLRI & PNS Polri",
+      noSuratTagihan: "1193/KU.06.06/KMR.N/IX/2026",
+      tglSuratTagihan: "15 September 2026",
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: "S-184/PB.2/2026",
+      tglSKP: "14 September 2026",
+      tglTerimaDana: "18 September 2026",
+      bankTujuan: "Bank BNI - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260918-008924",
+      nominalDanaSKP: 20805000000,
+      danaTHT: 0,
+      danaPensiun: 20805000000,
+      nominalDiterima: 20805000000,
+      statusDana: "Dana Masuk (Lunas)",
+      statusProses: "Dalam Monitoring",
+      satkerList: SATKER_PENSIUN_POLRI
     }
   ]);
 
   const [historySKPList, setHistorySKPList] = useState([
     {
-      id: "HIST-SKP-001",
-      jenisIuran: "Tagihan Iuran THT & Pensiun (Gaji Induk)",
-      kodeTarif: "8,00% Terpadu (THT 3,25% + Pensiun 4,75%)",
-      matraUtama: "TNI, Kemhan & POLRI (Keseluruhan SKP-PFK)",
-      noSuratTagihan: "001/ASABRI/TGH-THT-PEN/VII/2026",
-      tglSuratTagihan: "15 Juli 2026",
-      statusSuratTagihan: "Terbit (Tergenerate)",
-      noSKP: "S-184/PB.2/2026",
-      tglSKP: "14 Juli 2026",
-      tglTerimaDana: "18 Juli 2026",
-      bankTujuan: "Bank Mandiri & BNI - Rek. Giro Penampungan Iuran Kemenkeu",
-      noSP2D: "SP2D-260718-008921",
-      nominalDanaSKP: 105280000000,
-      danaTHT: 42765000000,
-      danaPensiun: 62515000000,
-      nominalDiterima: 105280000000,
-      statusDana: "Dana Masuk (Lunas)",
-      statusProses: "Selesai (Completed)",
-      tglSelesai: "31 Juli 2026",
-      noBAR: "BAR-01/REKON-THT-PEN/VII/2026",
-      keterangan: "Proses rekonsiliasi tuntas 100%. Komparasi data kepesertaan 5 matra cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit.",
-      satkerList: SATKER_THT_PENSIUN_ALL
-    },
-    {
-      id: "HIST-SKP-002",
-      jenisIuran: "Tagihan Iuran THT & Pensiun (Gaji Induk Juni 2026)",
-      kodeTarif: "8,00% Terpadu (THT 3,25% + Pensiun 4,75%)",
-      matraUtama: "TNI, Kemhan & POLRI (Keseluruhan SKP-PFK)",
-      noSuratTagihan: "098/ASABRI/TGH-THT-PEN/VI/2026",
+      id: "HIST-SKP-1080",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      jenisIuran: "Tagihan Iuran THT Prajurit TNI & ASN Kemhan (Gaji Induk Juni 2026)",
+      kodeTarif: "3,25% Gaji Pokok",
+      tarif: "3,25%",
+      peserta: 265800,
+      matraUtama: "TNI & ASN Kemhan",
+      noSuratTagihan: "1080/KU.06.06/KMR.N/VI/2026",
       tglSuratTagihan: "15 Juni 2026",
       statusSuratTagihan: "Terbit (Tergenerate)",
       noSKP: "S-142/PB.2/2026",
       tglSKP: "14 Juni 2026",
       tglTerimaDana: "18 Juni 2026",
-      bankTujuan: "Bank Mandiri & BNI - Rek. Giro Penampungan Iuran Kemenkeu",
-      noSP2D: "SP2D-260618-007142",
-      nominalDanaSKP: 104850000000,
-      danaTHT: 42591000000,
-      danaPensiun: 62259000000,
-      nominalDiterima: 104850000000,
+      bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260618-007140",
+      nominalDanaSKP: 28420000000,
+      danaTHT: 28420000000,
+      danaPensiun: 0,
+      nominalDiterima: 28420000000,
       statusDana: "Dana Masuk (Lunas)",
       statusProses: "Selesai (Completed)",
       tglSelesai: "30 Juni 2026",
-      noBAR: "BAR-06/REKON-THT-PEN/VI/2026",
-      keterangan: "Proses rekonsiliasi tuntas 100%. Komparasi data kepesertaan 5 matra cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit.",
-      satkerList: SATKER_THT_PENSIUN_ALL
+      noBAR: "BAR-06A/REKON-THT-TNI/VI/2026",
+      keterangan: "Proses rekonsiliasi tuntas 100%. Komparasi data kepesertaan cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit.",
+      satkerList: SATKER_THT_TNI
+    },
+    {
+      id: "HIST-SKP-1081",
+      danaType: "THT_POLRI",
+      namaDana: "THT POLRI",
+      jenisIuran: "Tagihan Iuran THT Anggota POLRI & PNS Polri (Gaji Induk Juni 2026)",
+      kodeTarif: "3,25% Gaji Pokok",
+      tarif: "3,25%",
+      peserta: 141900,
+      matraUtama: "POLRI & PNS Polri",
+      noSuratTagihan: "1081/KU.06.06/KMR.N/VI/2026",
+      tglSuratTagihan: "15 Juni 2026",
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: "S-142/PB.2/2026",
+      tglSKP: "14 Juni 2026",
+      tglTerimaDana: "18 Juni 2026",
+      bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260618-007141",
+      nominalDanaSKP: 14171000000,
+      danaTHT: 14171000000,
+      danaPensiun: 0,
+      nominalDiterima: 14171000000,
+      statusDana: "Dana Masuk (Lunas)",
+      statusProses: "Selesai (Completed)",
+      tglSelesai: "30 Juni 2026",
+      noBAR: "BAR-06B/REKON-THT-POLRI/VI/2026",
+      keterangan: "Proses rekonsiliasi tuntas 100%. Komparasi data kepesertaan cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit.",
+      satkerList: SATKER_THT_POLRI
+    },
+    {
+      id: "HIST-SKP-1082",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      jenisIuran: "Tagihan Iuran Pensiun Prajurit TNI & ASN Kemhan (Gaji Induk Juni 2026)",
+      kodeTarif: "4,75% Gaji Pokok",
+      tarif: "4,75%",
+      peserta: 265800,
+      matraUtama: "TNI & ASN Kemhan",
+      noSuratTagihan: "1082/KU.06.06/KMR.N/VI/2026",
+      tglSuratTagihan: "15 Juni 2026",
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: "S-142/PB.2/2026",
+      tglSKP: "14 Juni 2026",
+      tglTerimaDana: "18 Juni 2026",
+      bankTujuan: "Bank BNI - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260618-007142",
+      nominalDanaSKP: 41537000000,
+      danaTHT: 0,
+      danaPensiun: 41537000000,
+      nominalDiterima: 41537000000,
+      statusDana: "Dana Masuk (Lunas)",
+      statusProses: "Selesai (Completed)",
+      tglSelesai: "30 Juni 2026",
+      noBAR: "BAR-06C/REKON-PEN-TNI/VI/2026",
+      keterangan: "Proses rekonsiliasi tuntas 100%. Komparasi data kepesertaan cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit.",
+      satkerList: SATKER_PENSIUN_TNI
+    },
+    {
+      id: "HIST-SKP-1083",
+      danaType: "PENSIUN_POLRI",
+      namaDana: "Pensiun POLRI",
+      jenisIuran: "Tagihan Iuran Pensiun Anggota POLRI & PNS Polri (Gaji Induk Juni 2026)",
+      kodeTarif: "4,75% Gaji Pokok",
+      tarif: "4,75%",
+      peserta: 141900,
+      matraUtama: "POLRI & PNS Polri",
+      noSuratTagihan: "1083/KU.06.06/KMR.N/VI/2026",
+      tglSuratTagihan: "15 Juni 2026",
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: "S-142/PB.2/2026",
+      tglSKP: "14 Juni 2026",
+      tglTerimaDana: "18 Juni 2026",
+      bankTujuan: "Bank BNI - Rek. Giro Penampungan Iuran Kemenkeu",
+      noSP2D: "SP2D-260618-007143",
+      nominalDanaSKP: 20722000000,
+      danaTHT: 0,
+      danaPensiun: 20722000000,
+      nominalDiterima: 20722000000,
+      statusDana: "Dana Masuk (Lunas)",
+      statusProses: "Selesai (Completed)",
+      tglSelesai: "30 Juni 2026",
+      noBAR: "BAR-06D/REKON-PEN-POLRI/VI/2026",
+      keterangan: "Proses rekonsiliasi tuntas 100%. Komparasi data kepesertaan cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit.",
+      satkerList: SATKER_PENSIUN_POLRI
     }
   ]);
 
@@ -219,14 +372,30 @@ export const RekonsIuran = () => {
     }
 
     const nom = Number(inputForm.nominalDanaSKP);
-    const nomTHT = Math.round(nom * (3.25 / 8.0));
-    const nomPensiun = nom - nomTHT;
+    const dType = inputForm.danaType || "THT_TNI";
+    const isTHT = dType.startsWith("THT");
+    const tarif = isTHT ? "3,25%" : "4,75%";
+    const namaDana =
+      dType === "THT_TNI" ? "THT TNI" :
+      dType === "THT_POLRI" ? "THT POLRI" :
+      dType === "PENSIUN_TNI" ? "Pensiun TNI" :
+      "Pensiun POLRI";
+
+    const baseSatker =
+      dType === "THT_TNI" ? SATKER_THT_TNI :
+      dType === "THT_POLRI" ? SATKER_THT_POLRI :
+      dType === "PENSIUN_TNI" ? SATKER_PENSIUN_TNI :
+      SATKER_PENSIUN_POLRI;
 
     const newRecord = {
       id: `SKP-${Date.now().toString().slice(-4)}`,
+      danaType: dType,
+      namaDana,
       jenisIuran: inputForm.jenisIuran,
-      kodeTarif: "8,00% Terpadu (THT 3,25% + Pensiun 4,75%)",
-      matraUtama: "TNI, Kemhan & POLRI (Keseluruhan SKP-PFK)",
+      kodeTarif: `${tarif} Gaji Pokok`,
+      tarif,
+      peserta: Number(inputForm.peserta || (dType.includes("TNI") ? 266150 : 142200)),
+      matraUtama: dType.includes("TNI") ? "TNI & ASN Kemhan" : "POLRI & PNS Polri",
       noSuratTagihan: inputForm.noSuratTagihan.trim(),
       tglSuratTagihan: inputForm.tglSuratTagihan.trim(),
       statusSuratTagihan: "Terbit (Tergenerate)",
@@ -236,29 +405,31 @@ export const RekonsIuran = () => {
       bankTujuan: inputForm.bankTujuan,
       noSP2D: inputForm.noSP2D.trim(),
       nominalDanaSKP: nom,
-      danaTHT: nomTHT,
-      danaPensiun: nomPensiun,
+      danaTHT: isTHT ? nom : 0,
+      danaPensiun: isTHT ? 0 : nom,
       nominalDiterima: nom,
       statusDana: "Dana Masuk (Lunas)",
       statusProses: "Dalam Monitoring",
-      satkerList: generateProportionalSatkerList(nom, SATKER_THT_PENSIUN_ALL)
+      satkerList: generateProportionalSatkerList(nom, baseSatker, dType)
     };
 
     setMonitoringSKPList((prev) => [...prev, newRecord]);
     setShowInputModal(false);
     setInputError("");
     setInputForm({
-      noSuratTagihan: "",
-      tglSuratTagihan: "",
-      noSKP: "",
-      tglSKP: "",
-      jenisIuran: "Tagihan Iuran THT & Pensiun Susulan (Batch 2)",
-      tglTerimaDana: "",
-      noSP2D: "",
+      danaType: "THT_TNI",
+      noSuratTagihan: "1194/KU.06.06/KMR.N/IX/2026",
+      tglSuratTagihan: "15 September 2026",
+      noSKP: "S-184/PB.2/2026",
+      tglSKP: "14 September 2026",
+      jenisIuran: "Iuran THT Prajurit TNI & ASN Kemhan",
+      tglTerimaDana: "18 September 2026",
+      noSP2D: "SP2D-260918-009412",
       bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
-      nominalDanaSKP: ""
+      nominalDanaSKP: "28540000000",
+      peserta: "266150"
     });
-    setNotice(`Data penerimaan dana ${newRecord.noSuratTagihan} berhasil dimasukkan ke dalam daftar monitoring!`);
+    setNotice(`Data penerimaan dana ${newRecord.noSuratTagihan} (${namaDana}) berhasil dimasukkan ke dalam daftar monitoring!`);
     setTimeout(() => setNotice(null), 5000);
   };
 
@@ -424,9 +595,10 @@ export const RekonsIuran = () => {
 
   // Handler Selesaikan Monitoring & Pindahkan ke Tab History
   const handleCompleteMonitoring = (item) => {
-    const tglHariIni = "14 September 2026";
-    const kodeProg = activeProgram === "THT_PENSIUN" ? "THT-PEN" : activeProgram;
-    const noBARBaru = `BAR-0${Math.floor(Math.random() * 8) + 2}/REKON-${kodeProg}/VII/2026`;
+    const tglHariIni = "15 September 2026";
+    const kodeProg = item.danaType ? item.danaType.replace("_", "-") : (activeProgram === "THT_PENSIUN" ? "PFK" : activeProgram);
+    const noUrutBar = Math.floor(Math.random() * 80) + 10;
+    const noBARBaru = `BAR-${noUrutBar}/REKON-${kodeProg}/IX/2026`;
 
     if (activeProgram === "THT_PENSIUN") {
       setMonitoringSKPList((prev) => prev.filter((x) => x.id !== item.id));
@@ -436,7 +608,7 @@ export const RekonsIuran = () => {
           statusProses: "Selesai (Completed)",
           tglSelesai: tglHariIni,
           noBAR: noBARBaru,
-          keterangan: "Proses rekonsiliasi dan monitoring telah rampung 100%. Komparasi data kepesertaan cocok dan Berita Acara Rekonsiliasi (BAR) telah terbit."
+          keterangan: `Proses rekonsiliasi dan monitoring surat tagihan ${item.namaDana || "Dana PFK"} tuntas 100%. Komparasi data kepesertaan cocok dan Berita Acara Rekonsiliasi (BAR) telah diterbitkan bersama DJPb Kemenkeu RI.`
         },
         ...prev
       ]);
@@ -467,30 +639,51 @@ export const RekonsIuran = () => {
     }
 
     setConfirmCompleteItem(null);
-    setNotice(`Proses monitoring ${item.noSuratTagihan} berhasil diselesaikan! Dokumen tersimpan di Tab History dengan nomor Berita Acara: ${noBARBaru}.`);
+    setNotice(`Proses monitoring ${item.noSuratTagihan} (${item.namaDana || activeProgram}) berhasil diselesaikan! Dokumen tersimpan di Tab History dengan Berita Acara: ${noBARBaru}.`);
     setTimeout(() => setNotice(null), 6000);
   };
 
   // Helper Preview Surat Tagihan
   const openSuratTagihanPreview = (item) => {
     if (activeProgram === "THT_PENSIUN") {
+      const isTHT = item.danaType === "THT_TNI" || item.danaType === "THT_POLRI";
+      const isPensiun = item.danaType === "PENSIUN_TNI" || item.danaType === "PENSIUN_POLRI";
+
+      let items = [];
+      if (isTHT) {
+        items = [
+          { jenis: `Iuran Tabungan Hari Tua (${item.tarif || "3,25%"})`, peserta: `${fmtNum(item.peserta || 266150)} Personel`, nominal: fmtB(item.nominalDanaSKP || item.danaTHT) }
+        ];
+      } else if (isPensiun) {
+        items = [
+          { jenis: `Iuran Pensiun (${item.tarif || "4,75%"})`, peserta: `${fmtNum(item.peserta || 266150)} Personel`, nominal: fmtB(item.nominalDanaSKP || item.danaPensiun) }
+        ];
+      } else {
+        items = [
+          { jenis: "Iuran THT (3,25%)", peserta: `${fmtNum(item.peserta || 427620)} Personel`, nominal: fmtB(item.danaTHT) },
+          { jenis: "Iuran Pensiun (4,75%)", peserta: `${fmtNum(item.peserta || 427620)} Personel`, nominal: fmtB(item.danaPensiun) }
+        ];
+      }
+
+      const namaDana = item.namaDana || (isTHT ? "THT" : isPensiun ? "Pensiun" : "THT & Pensiun");
+
       setPreview({
-        title: `Surat Tagihan Terpadu — ${item.noSuratTagihan}`,
-        subtitle: `Kemenkeu RI / KPPN Khusus Jakarta II • Periode Juli 2026`,
+        title: `Surat Tagihan Iuran ${namaDana} — ${item.noSuratTagihan}`,
+        subtitle: `Kemenkeu RI / Ditjen Perbendaharaan • Periode September 2026`,
         type: "surat",
-        fileName: `Surat_Tagihan_${item.noSuratTagihan.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
+        fileName: `Surat_Tagihan_${namaDana.replace(/[^a-zA-Z0-9]/g, "_")}_${item.noSuratTagihan.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
         content: {
+          judulSurat: `SURAT TAGIHAN IURAN ${namaDana.toUpperCase()}`,
           noSurat: item.noSuratTagihan,
           tanggal: item.tglSuratTagihan,
+          periode: "September 2026",
+          batchInfo: `Program: ${namaDana} • Tarif ${item.tarif || (isTHT ? "3,25%" : "4,75%")}`,
           dasarSKP: {
             noSurat: item.noSKP,
             tglSurat: item.tglSKP
           },
-          items: [
-            { jenis: "Iuran THT (3,25%)", peserta: "427.620", nominal: fmtB(item.danaTHT) },
-            { jenis: "Iuran Pensiun (4,75%)", peserta: "427.620", nominal: fmtB(item.danaPensiun) }
-          ],
-          totalNominal: fmtB(item.nominalDanaSKP),
+          items,
+          totalNominal: fmtB(item.nominalDanaSKP || item.nominalDiterima),
           satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL
         }
       });
@@ -524,6 +717,8 @@ export const RekonsIuran = () => {
         ? "Jaminan Kecelakaan Kerja (JKK 0,24%)"
         : activeProgram === "JKM"
         ? "Jaminan Kematian (JKM 0,20%)"
+        : item.namaDana
+        ? `Iuran ${item.namaDana} (SKP-PFK Kemenkeu)`
         : "THT dan Pensiun (SKP-PFK 8,00%)";
 
     const dokDasar =
@@ -538,9 +733,9 @@ export const RekonsIuran = () => {
       fileName: `BAR_${(item.noBAR || "BAR-01").replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
       content: {
         noBAR: item.noBAR || "BAR-01/REKON-IURAN/2026",
-        hariTanggal: item.tglSelesai ? `Jumat, ${item.tglSelesai}` : "Jumat, 31 Juli 2026",
+        hariTanggal: item.tglSelesai ? `Selasa, ${item.tglSelesai}` : "Selasa, 15 September 2026",
         programJudul: progTitle.toUpperCase(),
-        periode: "Juli 2026",
+        periode: "September 2026",
         noSuratTagihan: item.noSuratTagihan,
         dokumenDasar: dokDasar,
         noSP2D: item.noSP2D,
@@ -556,8 +751,8 @@ export const RekonsIuran = () => {
   // =========================================================================
   const rekapSKPData = [
     {
-      pilar: "Surat Tagihan THT & Pensiun (Gaji Induk)",
-      deskripsi: "1 Surat Tagihan Resmi (No. 001/ASABRI/TGH-THT-PEN/VII/2026) — TNI, Kemhan & POLRI",
+      pilar: "Surat Tagihan Dana PFK (THT & Pensiun)",
+      deskripsi: "4 Surat Tagihan Resmi (1190 s.d. 1193/KU.06.06/KMR.N/IX/2026) — THT TNI, THT POLRI, Pensiun TNI, Pensiun POLRI",
       tarif: "8,00% (THT 3,25% + PEN 4,75%)",
       pesertaSistem: 427620,
       nominalSistem: 105230000000,
@@ -565,7 +760,7 @@ export const RekonsIuran = () => {
       nominalSKP: 105280000000,
       selisihNominal: -50000000,
       persenSelisih: -0.05,
-      analisis: "Selisih 80 personel TNI AL mutasi Koarmada II. Seluruh komponen field telah tervalidasi dan tercatat dalam daftar tagihan resmi.",
+      analisis: "Selisih 80 personel TNI AL mutasi Koarmada II. Seluruh 4 surat tagihan per Dana telah diterbitkan resmi dan tercatat dalam monitoring.",
       statusRekap: "Terverifikasi Lengkap"
     }
   ];
@@ -673,7 +868,15 @@ export const RekonsIuran = () => {
 
   // Filtering Monitoring per Program
   const filteredMonitoringSKP = monitoringSKPList.filter((item) => {
-    if (searchTerm && !item.noSuratTagihan.toLowerCase().includes(searchTerm.toLowerCase()) && !item.noSKP.toLowerCase().includes(searchTerm.toLowerCase()) && !item.jenisIuran.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filterDanaPFK !== "Semua" && item.danaType !== filterDanaPFK) return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const matchSurat = item.noSuratTagihan.toLowerCase().includes(q);
+      const matchSKP = item.noSKP.toLowerCase().includes(q);
+      const matchJenis = item.jenisIuran.toLowerCase().includes(q);
+      const matchNama = item.namaDana?.toLowerCase().includes(q);
+      if (!matchSurat && !matchSKP && !matchJenis && !matchNama) return false;
+    }
     return true;
   });
 
@@ -689,7 +892,15 @@ export const RekonsIuran = () => {
 
   // Filtering History per Program
   const filteredHistorySKP = historySKPList.filter((item) => {
-    if (searchTerm && !item.noSuratTagihan.toLowerCase().includes(searchTerm.toLowerCase()) && !item.noSKP.toLowerCase().includes(searchTerm.toLowerCase()) && !item.noBAR?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filterDanaPFK !== "Semua" && item.danaType !== filterDanaPFK) return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const matchSurat = item.noSuratTagihan.toLowerCase().includes(q);
+      const matchSKP = item.noSKP.toLowerCase().includes(q);
+      const matchBAR = item.noBAR?.toLowerCase().includes(q);
+      const matchNama = item.namaDana?.toLowerCase().includes(q);
+      if (!matchSurat && !matchSKP && !matchBAR && !matchNama) return false;
+    }
     return true;
   });
 
@@ -1330,18 +1541,56 @@ export const RekonsIuran = () => {
               )}
 
               <form onSubmit={handleSaveNewSKP}>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                    Pilihan Program / Dana PFK <span style={{ color: "#DC2626" }}>*</span>
+                  </label>
+                  <select
+                    value={inputForm.danaType || "THT_TNI"}
+                    onChange={(e) => {
+                      const dt = e.target.value;
+                      const nextNo = `119${Math.floor(Math.random() * 6) + 4}/KU.06.06/KMR.N/IX/2026`;
+                      setInputForm({
+                        ...inputForm,
+                        danaType: dt,
+                        noSuratTagihan: nextNo,
+                        jenisIuran:
+                          dt === "THT_TNI" ? "Iuran Tabungan Hari Tua (THT) TNI & ASN Kemhan" :
+                          dt === "THT_POLRI" ? "Iuran Tabungan Hari Tua (THT) Anggota POLRI & PNS Polri" :
+                          dt === "PENSIUN_TNI" ? "Iuran Pensiun Prajurit TNI & ASN Kemhan" :
+                          "Iuran Pensiun Anggota POLRI & PNS Polri",
+                        peserta: dt.includes("TNI") ? "266150" : "142200",
+                        nominalDanaSKP:
+                          dt === "THT_TNI" ? "28540000000" :
+                          dt === "THT_POLRI" ? "14225000000" :
+                          dt === "PENSIUN_TNI" ? "41710000000" :
+                          "20805000000"
+                      });
+                    }}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box", fontWeight: 700 }}
+                  >
+                    <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan — Tarif 3,25%)</option>
+                    <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri — Tarif 3,25%)</option>
+                    <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan — Tarif 4,75%)</option>
+                    <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri — Tarif 4,75%)</option>
+                  </select>
+                </div>
+
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                   <div>
                     <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor Surat Tagihan Resmi <span style={{ color: "#DC2626" }}>*</span>
+                      Nomor Surat Tagihan Resmi (Format Resmi) <span style={{ color: "#DC2626" }}>*</span>
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: 002/ASABRI/TGH-THT-PEN-SUS/VII/2026"
+                      placeholder="Contoh: 1190/KU.06.06/KMR.N/IX/2026"
                       value={inputForm.noSuratTagihan}
                       onChange={(e) => setInputForm({ ...inputForm, noSuratTagihan: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box", fontFamily: "monospace", fontWeight: 700 }}
                     />
+                    <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 3 }}>
+                      Pola: NoUrut/KU.06.06/KMR.N/Bulan(Romawi)/Tahun
+                    </div>
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
@@ -1349,7 +1598,7 @@ export const RekonsIuran = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: 16 Juli 2026"
+                      placeholder="Contoh: 15 September 2026"
                       value={inputForm.tglSuratTagihan}
                       onChange={(e) => setInputForm({ ...inputForm, tglSuratTagihan: e.target.value })}
                       style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
@@ -1364,7 +1613,7 @@ export const RekonsIuran = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: S-185/PB.2/2026"
+                      placeholder="Contoh: S-184/PB.2/2026"
                       value={inputForm.noSKP}
                       onChange={(e) => setInputForm({ ...inputForm, noSKP: e.target.value })}
                       style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
@@ -1376,27 +1625,12 @@ export const RekonsIuran = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: 15 Juli 2026"
+                      placeholder="Contoh: 14 September 2026"
                       value={inputForm.tglSKP}
                       onChange={(e) => setInputForm({ ...inputForm, tglSKP: e.target.value })}
                       style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
-                </div>
-
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Jenis Iuran <span style={{ color: "#DC2626" }}>*</span>
-                  </label>
-                  <select
-                    value={inputForm.jenisIuran}
-                    onChange={(e) => setInputForm({ ...inputForm, jenisIuran: e.target.value })}
-                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                  >
-                    <option value="Tagihan Iuran THT & Pensiun (Gaji Induk)">Tagihan Iuran THT & Pensiun (Gaji Induk)</option>
-                    <option value="Tagihan Iuran THT & Pensiun Susulan (Batch 2)">Tagihan Iuran THT & Pensiun Susulan (Batch 2)</option>
-                    <option value="Tagihan Iuran THT & Pensiun Selisih Kenaikan Gaji">Tagihan Iuran THT & Pensiun Selisih Kenaikan Gaji</option>
-                  </select>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
@@ -1406,7 +1640,7 @@ export const RekonsIuran = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: 20 Juli 2026"
+                      placeholder="Contoh: 18 September 2026"
                       value={inputForm.tglTerimaDana}
                       onChange={(e) => setInputForm({ ...inputForm, tglTerimaDana: e.target.value })}
                       style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
@@ -1418,7 +1652,7 @@ export const RekonsIuran = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Contoh: SP2D-260720-009104"
+                      placeholder="Contoh: SP2D-260918-009412"
                       value={inputForm.noSP2D}
                       onChange={(e) => setInputForm({ ...inputForm, noSP2D: e.target.value })}
                       style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
@@ -1426,32 +1660,45 @@ export const RekonsIuran = () => {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Bank Rekening Giro Penampungan <span style={{ color: "#DC2626" }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={inputForm.bankTujuan}
-                    onChange={(e) => setInputForm({ ...inputForm, bankTujuan: e.target.value })}
-                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                  />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                      Bank Rekening Giro Penampungan <span style={{ color: "#DC2626" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={inputForm.bankTujuan}
+                      onChange={(e) => setInputForm({ ...inputForm, bankTujuan: e.target.value })}
+                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                      Jumlah Peserta (Jiwa)
+                    </label>
+                    <input
+                      type="number"
+                      value={inputForm.peserta || ""}
+                      onChange={(e) => setInputForm({ ...inputForm, peserta: e.target.value })}
+                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: 18 }}>
                   <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Nominal Dana dari SKP-PFK (Rp) <span style={{ color: "#DC2626" }}>*</span>
+                    Nominal Tagihan Surat Ini (Rp) <span style={{ color: "#DC2626" }}>*</span>
                   </label>
                   <input
                     type="number"
-                    placeholder="Contoh: 3120000000"
+                    placeholder="Contoh: 28540000000"
                     value={inputForm.nominalDanaSKP}
                     onChange={(e) => setInputForm({ ...inputForm, nominalDanaSKP: e.target.value })}
                     style={{ width: "100%", padding: "9px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontWeight: 700, fontFamily: "monospace", outline: "none", boxSizing: "border-box" }}
                   />
                   {inputForm.nominalDanaSKP && Number(inputForm.nominalDanaSKP) > 0 && (
                     <div style={{ fontSize: 11, color: COLORS.blue, marginTop: 4 }}>
-                      Alokasi: THT (3,25%) = {fmtB(Math.round(Number(inputForm.nominalDanaSKP) * 3.25 / 8.0))} • Pensiun (4,75%) = {fmtB(Number(inputForm.nominalDanaSKP) - Math.round(Number(inputForm.nominalDanaSKP) * 3.25 / 8.0))}
+                      Nominal: {fmtB(inputForm.nominalDanaSKP)} • Tarif: {(inputForm.danaType || "THT_TNI").startsWith("THT") ? "3,25% (THT)" : "4,75% (Pensiun)"}
                     </div>
                   )}
                 </div>
@@ -2159,6 +2406,31 @@ export const RekonsIuran = () => {
                 />
               </div>
 
+              {activeProgram === "THT_PENSIUN" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Filter Dana:</span>
+                  <select
+                    value={filterDanaPFK}
+                    onChange={(e) => setFilterDanaPFK(e.target.value)}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      fontSize: 12,
+                      background: COLORS.white,
+                      fontWeight: 700,
+                      color: COLORS.gray800
+                    }}
+                  >
+                    <option value="Semua">Semua Surat Dana PFK (4 Surat)</option>
+                    <option value="THT_TNI">THT TNI (Prajurit TNI & Kemhan)</option>
+                    <option value="THT_POLRI">THT POLRI (Anggota & PNS Polri)</option>
+                    <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & Kemhan)</option>
+                    <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota & PNS Polri)</option>
+                  </select>
+                </div>
+              )}
+
               <div style={{ position: "relative", width: 240 }}>
                 <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 9 }} />
                 <input
@@ -2209,16 +2481,16 @@ export const RekonsIuran = () => {
 
           {/* TABEL MONITORING SESUAI PROGRAM AKTIF */}
           {activeProgram === "THT_PENSIUN" ? (
-            /* TABEL THT & PENSIUN */
+            /* TABEL THT & PENSIUN - DIPISAH PER DANA */
             <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat SKP-PFK Kemenkeu</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan & Program Dana</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Dasar SKP-PFK Kemenkeu</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Nominal SKP (Rp)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan (Rp)</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Kas</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
@@ -2231,100 +2503,128 @@ export const RekonsIuran = () => {
                         </td>
                       </tr>
                     ) : (
-                      filteredMonitoringSKP.map((item) => (
-                        <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.noSuratTagihan}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl Surat: {item.tglSuratTagihan}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
-                              {item.noSKP}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl SKP: {item.tglSKP}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.tglTerimaDana}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                              SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: COLORS.blue }}>
-                              {fmtB(item.nominalDanaSKP)}
-                            </div>
-                            <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
-                              THT: {fmtB(item.danaTHT)} • PEN: {fmtB(item.danaPensiun)}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <span
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                padding: "3px 8px",
-                                borderRadius: 4,
-                                background: "#ECFDF5",
-                                color: "#065F46",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4
-                              }}
-                            >
-                              <CheckCircle2 size={12} />
-                              {item.statusDana}
-                            </span>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                            <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
-                              <Btn
-                                size="xs"
-                                variant="outline"
-                                onClick={() => openSuratTagihanPreview(item)}
+                      filteredMonitoringSKP.map((item) => {
+                        const isTHT = item.danaType?.startsWith("THT");
+                        const badgeColor =
+                          item.danaType === "THT_TNI" ? { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" } :
+                          item.danaType === "THT_POLRI" ? { bg: "#EEF2FF", text: "#4338CA", border: "#C7D2FE" } :
+                          item.danaType === "PENSIUN_TNI" ? { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" } :
+                          { bg: "#F0FDFA", text: "#0F766E", border: "#99F6E4" };
+
+                        return (
+                          <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                <span
+                                  style={{
+                                    fontSize: 10.5,
+                                    fontWeight: 800,
+                                    padding: "2px 7px",
+                                    borderRadius: 4,
+                                    background: badgeColor.bg,
+                                    color: badgeColor.text,
+                                    border: `1px solid ${badgeColor.border}`
+                                  }}
+                                >
+                                  {item.namaDana || "Dana PFK"} • {item.tarif || (isTHT ? "3,25%" : "4,75%")}
+                                </span>
+                              </div>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 12.5, color: COLORS.gray900 }}>
+                                {item.noSuratTagihan}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tgl Surat: {item.tglSuratTagihan} • {item.matraUtama}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
+                                {item.noSKP}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tgl SKP: {item.tglSKP}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
+                                {item.tglTerimaDana}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
+                                SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "right" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: badgeColor.text }}>
+                                {fmtB(item.nominalDanaSKP)}
+                              </div>
+                              <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
+                                {fmtNum(item.peserta)} Personel • Tarif {item.tarif || (isTHT ? "3,25%" : "4,75%")}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  padding: "3px 8px",
+                                  borderRadius: 4,
+                                  background: "#ECFDF5",
+                                  color: "#065F46",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4
+                                }}
                               >
-                                <FileText size={12} style={{ marginRight: 3 }} />
-                                Surat Tagihan
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="ghost"
-                                onClick={() =>
-                                  setSatkerModalData({
-                                    satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL,
-                                    suratRef: item.noSuratTagihan
-                                  })
-                                }
-                              >
-                                <Building2 size={12} style={{ marginRight: 3 }} />
-                                Rincian Satker
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="primary"
-                                style={{ background: "#059669", color: COLORS.white, fontWeight: 700 }}
-                                onClick={() => setConfirmCompleteItem(item)}
-                              >
-                                <CheckCircle2 size={12} style={{ marginRight: 3 }} />
-                                Selesaikan Proses
-                              </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                                <CheckCircle2 size={12} />
+                                {item.statusDana}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                              <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
+                                <Btn
+                                  size="xs"
+                                  variant="outline"
+                                  onClick={() => openSuratTagihanPreview(item)}
+                                >
+                                  <FileText size={12} style={{ marginRight: 3 }} />
+                                  Surat Tagihan
+                                </Btn>
+                                <Btn
+                                  size="xs"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    setSatkerModalData({
+                                      noSurat: item.noSuratTagihan,
+                                      noSKP: item.noSKP,
+                                      program: item.namaDana,
+                                      danaType: item.danaType,
+                                      satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL,
+                                      periode: "September 2026"
+                                    })
+                                  }
+                                >
+                                  <Building2 size={12} style={{ marginRight: 3 }} />
+                                  Rincian Satker
+                                </Btn>
+                                <Btn
+                                  size="xs"
+                                  variant="primary"
+                                  style={{ background: "#059669", color: COLORS.white, fontWeight: 700 }}
+                                  onClick={() => setConfirmCompleteItem(item)}
+                                >
+                                  <CheckCircle2 size={12} style={{ marginRight: 3 }} />
+                                  Selesaikan Proses
+                                </Btn>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                   <tfoot>
                     <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
                       <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
-                        Total Realisasi Dana SKP-PFK:
+                        Total Realisasi Dana SKP-PFK ({filteredMonitoringSKP.length} Surat Tagihan):
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blue, fontSize: 13 }}>
                         {fmtB(filteredMonitoringSKP.reduce((acc, it) => acc + (it.nominalDanaSKP || 0), 0))}
@@ -2988,6 +3288,31 @@ export const RekonsIuran = () => {
                 />
               </div>
 
+              {activeProgram === "THT_PENSIUN" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Filter Dana:</span>
+                  <select
+                    value={filterDanaPFK}
+                    onChange={(e) => setFilterDanaPFK(e.target.value)}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      fontSize: 12,
+                      background: COLORS.white,
+                      fontWeight: 700,
+                      color: COLORS.gray800
+                    }}
+                  >
+                    <option value="Semua">Semua Surat Dana PFK</option>
+                    <option value="THT_TNI">THT TNI</option>
+                    <option value="THT_POLRI">THT POLRI</option>
+                    <option value="PENSIUN_TNI">Pensiun TNI</option>
+                    <option value="PENSIUN_POLRI">Pensiun POLRI</option>
+                  </select>
+                </div>
+              )}
+
               <div style={{ position: "relative", width: 260 }}>
                 <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 9 }} />
                 <input
@@ -3035,13 +3360,13 @@ export const RekonsIuran = () => {
 
           {/* TABEL HISTORY SESUAI PROGRAM AKTIF */}
           {activeProgram === "THT_PENSIUN" ? (
-            /* TABEL HISTORY THT & PENSIUN */
+            /* TABEL HISTORY THT & PENSIUN - DIPISAH PER DANA */
             <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan & Program Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat SKP-PFK Kemenkeu</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tuntas (Rp)</th>
@@ -3062,117 +3387,145 @@ export const RekonsIuran = () => {
                         </td>
                       </tr>
                     ) : (
-                      filteredHistorySKP.map((item) => (
-                        <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.noSuratTagihan}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl Surat: {item.tglSuratTagihan}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
-                              {item.noSKP}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl SKP: {item.tglSKP}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.tglTerimaDana}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                              SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: COLORS.blueDark }}>
-                              {fmtB(item.nominalDanaSKP)}
-                            </div>
-                            <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
-                              THT: {fmtB(item.danaTHT)} • Pens: {fmtB(item.danaPensiun)}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: "#065F46" }}>
-                              {item.noBAR}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Selesai: {item.tglSelesai}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <span
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                padding: "3px 8px",
-                                borderRadius: 4,
-                                background: "#ECFDF5",
-                                color: "#065F46",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4
-                              }}
-                            >
-                              <CheckCircle2 size={12} color="#059669" />
-                              {item.statusProses}
-                            </span>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                            <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
-                              <Btn
-                                size="xs"
-                                variant="primary"
-                                style={{ background: "#3B82F6", fontWeight: 700 }}
-                                onClick={() => setSelectedCompleteProcess(item)}
+                      filteredHistorySKP.map((item) => {
+                        const isTHT = item.danaType?.startsWith("THT");
+                        const badgeColor =
+                          item.danaType === "THT_TNI" ? { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" } :
+                          item.danaType === "THT_POLRI" ? { bg: "#EEF2FF", text: "#4338CA", border: "#C7D2FE" } :
+                          item.danaType === "PENSIUN_TNI" ? { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" } :
+                          { bg: "#F0FDFA", text: "#0F766E", border: "#99F6E4" };
+
+                        return (
+                          <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                <span
+                                  style={{
+                                    fontSize: 10.5,
+                                    fontWeight: 800,
+                                    padding: "2px 7px",
+                                    borderRadius: 4,
+                                    background: badgeColor.bg,
+                                    color: badgeColor.text,
+                                    border: `1px solid ${badgeColor.border}`
+                                  }}
+                                >
+                                  {item.namaDana || "Dana PFK"} • {item.tarif || (isTHT ? "3,25%" : "4,75%")}
+                                </span>
+                              </div>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 12.5, color: COLORS.gray900 }}>
+                                {item.noSuratTagihan}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tgl Surat: {item.tglSuratTagihan}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
+                                {item.noSKP}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tgl SKP: {item.tglSKP}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
+                                {item.tglTerimaDana}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
+                                SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "right" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: COLORS.blueDark }}>
+                                {fmtB(item.nominalDanaSKP)}
+                              </div>
+                              <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
+                                {fmtNum(item.peserta)} Personel • Tarif {item.tarif || (isTHT ? "3,25%" : "4,75%")}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, color: "#065F46" }}>
+                                {item.noBAR}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Selesai: {item.tglSelesai}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  padding: "3px 8px",
+                                  borderRadius: 4,
+                                  background: "#ECFDF5",
+                                  color: "#065F46",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4
+                                }}
                               >
-                                <History size={12} style={{ marginRight: 3 }} />
-                                Complete Process
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="outline"
-                                style={{ borderColor: "#10B981", color: "#065F46", fontWeight: 700 }}
-                                onClick={() => openBARPreview(item)}
-                              >
-                                <FileCheck size={12} style={{ marginRight: 3 }} />
-                                Cetak BAR
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="outline"
-                                onClick={() => openSuratTagihanPreview(item)}
-                              >
-                                <FileText size={12} style={{ marginRight: 3 }} />
-                                Surat Tagihan
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="ghost"
-                                onClick={() =>
-                                  setSatkerModalData({
-                                    noSuratTagihan: item.noSuratTagihan,
-                                    satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL
-                                  })
-                                }
-                              >
-                                <Building2 size={12} style={{ marginRight: 3 }} />
-                                Rincian Satker
-                              </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                                <CheckCircle2 size={12} color="#059669" />
+                                {item.statusProses}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                              <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
+                                <Btn
+                                  size="xs"
+                                  variant="primary"
+                                  style={{ background: "#3B82F6", fontWeight: 700 }}
+                                  onClick={() => setSelectedCompleteProcess(item)}
+                                >
+                                  <History size={12} style={{ marginRight: 3 }} />
+                                  Complete Process
+                                </Btn>
+                                <Btn
+                                  size="xs"
+                                  variant="outline"
+                                  style={{ borderColor: "#10B981", color: "#065F46", fontWeight: 700 }}
+                                  onClick={() => openBARPreview(item)}
+                                >
+                                  <FileCheck size={12} style={{ marginRight: 3 }} />
+                                  Cetak BAR
+                                </Btn>
+                                <Btn
+                                  size="xs"
+                                  variant="outline"
+                                  onClick={() => openSuratTagihanPreview(item)}
+                                >
+                                  <FileText size={12} style={{ marginRight: 3 }} />
+                                  Surat Tagihan
+                                </Btn>
+                                <Btn
+                                  size="xs"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    setSatkerModalData({
+                                      noSurat: item.noSuratTagihan,
+                                      noSKP: item.noSKP,
+                                      program: item.namaDana,
+                                      danaType: item.danaType,
+                                      satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL,
+                                      periode: "Juni 2026"
+                                    })
+                                  }
+                                >
+                                  <Building2 size={12} style={{ marginRight: 3 }} />
+                                  Rincian Satker
+                                </Btn>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                   <tfoot>
                     <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
                       <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
-                        TOTAL DANA TUNTAS TEREPOSITORI (THT & PENSIUN):
+                        TOTAL DANA TUNTAS TEREPOSITORI ({filteredHistorySKP.length} Surat Tagihan):
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
                         {fmtB(filteredHistorySKP.reduce((acc, it) => acc + (it.nominalDanaSKP || 0), 0))}
