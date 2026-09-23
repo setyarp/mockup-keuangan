@@ -52,7 +52,7 @@ export const Sidebar = ({
           {section.items.map((item, ii) => {
             // Standalone item (no children)
             if (!item.children) {
-              const isActive = activePage === item.id;
+              const isActive = activePage === item.id || (item.id === "dipa" && activePage === "dashboard");
               return (
                 <button
                   key={ii}

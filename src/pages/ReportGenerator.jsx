@@ -24,7 +24,7 @@ export const ReportGenerator = () => {
   const [selectedReportId, setSelectedReportId] = useState("BRD-4.5.01");
   const [tglAwal, setTglAwal] = useState("2026-07-01");
   const [tglAkhir, setTglAkhir] = useState("2026-07-31");
-  const [filterSatker, setFilterSatker] = useState("Semua Instansi");
+  const [filterSatker, setFilterSatker] = useState("Semua Satker");
   const [preview, setPreview] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -564,7 +564,7 @@ export const ReportGenerator = () => {
             label="Satker / Instansi"
             value={filterSatker}
             onChange={setFilterSatker}
-            options={["Semua Instansi", "TNI AD", "TNI AL", "TNI AU", "Mabes TNI", "POLRI", "Kemenhan (PNS/PPPK)"]}
+            options={["Semua Satker", "TNI", "POLRI", "TNI AD", "TNI AL", "TNI AU", "Mabes TNI", "PNS Kemhan", "PPPK Kemhan"]}
             minW={160}
           />
         </div>

@@ -23,6 +23,7 @@ import {
   Building2,
   User,
   Calendar,
+  RotateCcw,
 } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import {
@@ -34,6 +35,7 @@ import {
   Badge,
   NoData,
   PreviewModal,
+  Tooltip,
 } from "../components/common";
 
 export const TaspenImbalJasa = () => {
@@ -44,6 +46,17 @@ export const TaspenImbalJasa = () => {
   const [filterBulan, setFilterBulan] = useState("Semua");
   const [filterStatus, setFilterStatus] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const isFilterActive =
+    filterBulan !== "Semua" ||
+    filterStatus !== "Semua" ||
+    searchQuery.trim() !== "";
+
+  const handleResetFilter = () => {
+    setFilterBulan("Semua");
+    setFilterStatus("Semua");
+    setSearchQuery("");
+  };
 
   // Parameter Rates
   const [tarifTPB, setTarifTPB] = useState(3.0); // 3.0% untuk TPB
@@ -957,12 +970,6 @@ export const TaspenImbalJasa = () => {
           <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 2 }}>
             Administrasi Penagihan Imbal Jasa Kemitraan Asuransi Jiwa Taspen Life (BRD Keuangan & Perpajakan V5)
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-            <Badge color="orange">Tarif TPB: {tarifTPB.toFixed(1)}%</Badge>
-            <Badge color="blue">Tarif TDS: {tarifTDS.toFixed(1)}%</Badge>
-            <Badge color="green">DPP Nilai Lain: 11/12 (91,67%)</Badge>
-            <Badge color="gray">PPN 12% • PPh 23: 2%</Badge>
-          </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Btn variant="outline" onClick={() => setShowConfigModal(true)}>
@@ -1045,14 +1052,10 @@ export const TaspenImbalJasa = () => {
             );
           })}
         </div>
-
-        <div style={{ paddingBottom: 6, fontSize: 12, color: COLORS.gray500 }}>
-          Format Tabel 15 Kolom Resmi Sesuai Spesifikasi BRD Keuangan
-        </div>
       </div>
 
       {/* Stat Cards Tab Aktif */}
-      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 16 }}>
         <StatCard
           icon={<Banknote size={IC} />}
           label={`Total Premi Bruto (${activeTab === "tpb" ? "TPB" : "TDS"})`}
@@ -1083,47 +1086,150 @@ export const TaspenImbalJasa = () => {
         />
       </div>
 
-      {/* Filter Bar Terpadu */}
+      {/* Filter Bar User-Friendly Di Bawah Card */}
       <div
         style={{
           background: COLORS.white,
           borderRadius: 10,
-          padding: "14px 18px",
+          padding: "12px 16px",
           border: `1px solid ${COLORS.gray200}`,
-          marginBottom: 20,
+          marginBottom: 16,
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-end",
           flexWrap: "wrap",
           gap: 12,
+          boxShadow: "0 1px 2px rgba(15,23,42,0.03)",
         }}
       >
-        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, color: COLORS.gray500, fontSize: 12, fontWeight: 700 }}>
-            <Filter size={14} /> Filter:
+        {/* Sisi Kiri: Filter Dropdowns */}
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+          <div style={{ minWidth: 140 }}>
+            <Select
+              label="Bulan Periode"
+              value={filterBulan}
+              onChange={setFilterBulan}
+              options={["Semua", "Juni 2026", "Juli 2026"]}
+            />
           </div>
-          <Select
-            label="Bulan"
-            value={filterBulan}
-            onChange={setFilterBulan}
-            options={["Semua", "Juni 2026", "Juli 2026"]}
-            minW={140}
-          />
-          <Select
-            label="Status Penerimaan"
-            value={filterStatus}
-            onChange={setFilterStatus}
-            options={["Semua", "Diterima", "Belum Diterima"]}
-            minW={160}
-          />
+          <div style={{ minWidth: 165 }}>
+            <Select
+              label="Status Penerimaan"
+              value={filterStatus}
+              onChange={setFilterStatus}
+              options={["Semua", "Diterima", "Belum Diterima"]}
+            />
+          </div>
+          {isFilterActive && (
+            <button
+              type="button"
+              onClick={handleResetFilter}
+              title="Reset Semua Filter"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: `1px dashed #CBD5E1`,
+                background: "#F8FAFC",
+                fontSize: 11.5,
+                fontWeight: 700,
+                color: COLORS.gray600,
+                cursor: "pointer",
+                height: 35,
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#FEE2E2";
+                e.currentTarget.style.color = COLORS.red;
+                e.currentTarget.style.borderColor = "#FCA5A5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#F8FAFC";
+                e.currentTarget.style.color = COLORS.gray600;
+                e.currentTarget.style.borderColor = "#CBD5E1";
+              }}
+            >
+              <RotateCcw size={12} />
+              <span>Reset</span>
+            </button>
+          )}
         </div>
 
-        <div style={{ minWidth: 260 }}>
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Cari Peserta, KTPA, No. Polis..."
-          />
+        {/* Sisi Kanan: Pencarian + Tooltip Info BRD */}
+        <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+          <div>
+            <label
+              style={{
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: 0.6,
+                textTransform: "uppercase",
+                color: COLORS.gray500,
+                display: "block",
+                marginBottom: 6,
+              }}
+            >
+              Pencarian Data
+            </label>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Cari Peserta, KTPA, No. Polis..."
+              minW={220}
+            />
+          </div>
+
+          <Tooltip
+            position="bottom"
+            content={
+              <div style={{ fontSize: 12, lineHeight: 1.5, maxWidth: 360 }}>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                  Format 15 Kolom Sesuai BRD Keuangan (Line 271-273)
+                </div>
+                <div style={{ color: COLORS.gray300, marginBottom: 6 }}>
+                  Menampilkan <b>{activeComputedList.length}</b> baris data polis {activeTab.toUpperCase()}.
+                </div>
+                <div style={{ fontSize: 11, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 4 }}>
+                  <b>Formula:</b> Imbal Jasa = Premi × {activeTab === "tpb" ? "3%" : "2,5%"} | DPP = 11/12 | PPN 12% | PPh 23 (2%) | Tagihan = Imbal Jasa + PPN | Diterima = Tagihan - PPh 23
+                </div>
+              </div>
+            }
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: `1px solid ${COLORS.gray200}`,
+                background: COLORS.gray50,
+                fontSize: 12,
+                fontWeight: 600,
+                color: COLORS.gray700,
+                cursor: "pointer",
+                height: 35,
+                boxSizing: "border-box",
+              }}
+            >
+              <Info size={14} color={COLORS.blue} />
+              <span>Info BRD</span>
+              <span
+                style={{
+                  background: "#EFF6FF",
+                  color: COLORS.blue,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "1px 6px",
+                  borderRadius: 10,
+                }}
+              >
+                {activeComputedList.length} Data
+              </span>
+            </div>
+          </Tooltip>
         </div>
       </div>
 
@@ -1132,46 +1238,11 @@ export const TaspenImbalJasa = () => {
         style={{
           background: COLORS.white,
           borderRadius: 10,
-          padding: 20,
+          padding: 16,
           border: `1px solid ${COLORS.gray200}`,
           boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 14,
-          }}
-        >
-          <div>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
-              Tabel Rincian Imbal Jasa {activeTab === "tpb" ? "Taspen Proteksi Beasiswa (TPB)" : "Taspen Dwiguna Sejahtera (TDS)"}
-            </h3>
-            <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
-              Struktur 15 Kolom Data Lengkap Sesuai Dokumen BRD Keuangan (Line 271-273)
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 12,
-                background: "#F8FAFC",
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: `1px solid ${COLORS.gray200}`,
-              }}
-            >
-              <Info size={13} color={COLORS.blue} />
-              Rumus: Imbal Jasa = Premi × {activeTab === "tpb" ? "3%" : "2,5%"} | DPP = 11/12 | PPN 12% | PPh 23 (2%) | Tagihan = Imbal Jasa + PPN | Diterima = Tagihan - PPh 23
-            </span>
-          </div>
-        </div>
-
         {activeComputedList.length === 0 ? (
           <NoData message={`Tidak ada data polis ${activeTab.toUpperCase()} yang sesuai dengan filter.`} />
         ) : (

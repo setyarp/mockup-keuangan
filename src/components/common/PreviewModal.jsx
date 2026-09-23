@@ -1,22 +1,63 @@
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Printer, CheckCircle2, ArrowLeft } from "lucide-react";
 import { COLORS } from "../../constants/colors";
 import { Btn } from "./Btn";
+import { SuratTagihanKemenkeu } from "./SuratTagihanKemenkeu";
 
 export const PreviewModal = ({ preview, onClose }) => {
   if (!preview) return null;
-  const { title, subtitle, type, content, fileName } = preview;
+  const { title, subtitle, type, content, fileName, bannerNotice, confirmAction } = preview;
+
+  const isKemenkeuSurat = type === "surat_kemenkeu" || type === "surat_pfk" || (type === "surat" && (content?.program?.includes("THT") || content?.program?.includes("Pensiun") || content?.isPFKKemenkeu || content?.dasarSKP));
+
+  const handleDownload = () => {
+    if (type === "table") {
+      const cols = content?.columns || [];
+      const rows = content?.rows || [];
+      const csvLines = [
+        cols.join(","),
+        ...rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(","))
+      ];
+      if (content?.totalRow) {
+        csvLines.push(content.totalRow.map(c => typeof c === 'object' && c !== null ? `"${c.text || ''}"` : `"${c || ''}"`).join(","));
+      }
+      const blob = new Blob(["\uFEFF" + csvLines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = (fileName || "ekspor_data").replace(/\.pdf$/i, ".csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      window.print();
+    }
+  };
+
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: preview?.width || (content?.satkerList ? 880 : (type === "table" && (content?.columns?.length || 0) > 6 ? (content?.columns?.length > 10 ? 1100 : 880) : 680)), maxWidth: "96vw", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-        <div style={{ padding: "20px 24px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, backdropFilter: "blur(2px)" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: preview?.width || (isKemenkeuSurat ? 920 : (content?.satkerList ? 880 : (type === "table" && (content?.columns?.length || 0) > 6 ? (content?.columns?.length > 10 ? 1100 : 880) : 680))), maxWidth: "96vw", maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div style={{ padding: "16px 22px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, background: confirmAction ? "#FAF5FF" : "#FFFFFF" }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900 }}>{title}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, display: "flex", alignItems: "center", gap: 8 }}>
+              {confirmAction && <span style={{ padding: "2px 8px", background: "#7E22CE", color: "#FFFFFF", borderRadius: 10, fontSize: 11, fontWeight: 800 }}>PRATINJAU DOKUMEN</span>}
+              {title}
+            </div>
             {subtitle && <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>{subtitle}</div>}
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: COLORS.gray400 }}>✕</button>
         </div>
+
+        {bannerNotice && (
+          <div style={{ padding: "10px 22px", background: "#EFF6FF", borderBottom: `1px solid #BFDBFE`, color: "#1E40AF", fontSize: 12.5, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+            <span>{bannerNotice}</span>
+          </div>
+        )}
         {/* Preview Area */}
-        <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+        <div style={{ flex: 1, overflow: "auto", padding: isKemenkeuSurat ? 0 : 24 }}>
+          {isKemenkeuSurat ? (
+            <SuratTagihanKemenkeu data={content} onClose={onClose} />
+          ) : (
           <div style={{ border: `1px solid ${COLORS.gray200}`, borderRadius: 8, background: COLORS.gray50, minHeight: 320 }}>
             {type === "surat" && (
               <div style={{ padding: "32px 40px", background: COLORS.white, margin: 16, borderRadius: 4, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", fontFamily: "'Times New Roman', serif" }}>
@@ -387,18 +428,43 @@ export const PreviewModal = ({ preview, onClose }) => {
               </div>
             )}
           </div>
+          )}
         </div>
         {/* Footer */}
-        <div style={{ padding: "16px 24px", borderTop: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+        <div className="no-print" style={{ padding: "14px 24px", borderTop: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, background: confirmAction ? "#F8FAFC" : "#FFFFFF" }}>
           <div style={{ fontSize: 12, color: COLORS.gray500 }}>
             <FileText size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />
-            {fileName || "document.pdf"} • {type === "surat" ? "PDF" : "Excel / PDF"}
+            {fileName || "document.pdf"} • {type === "surat" || isKemenkeuSurat ? "PDF (Format Resmi)" : type === "table" ? "CSV / Excel" : "Dokumen Resmi"}
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <Btn variant="ghost" onClick={onClose}>Batal</Btn>
-            <Btn onClick={onClose}>
-              <Download size={14} /> Unduh File
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <Btn variant="ghost" onClick={onClose}>
+              {confirmAction ? "Kembali / Ubah Form" : "Tutup"}
             </Btn>
+            <Btn variant="outline" onClick={() => window.print()} style={{ gap: 5 }}>
+              <Printer size={13} /> Cetak / Print
+            </Btn>
+            {confirmAction ? (
+              <Btn
+                onClick={() => {
+                  confirmAction.onClick();
+                  onClose();
+                }}
+                style={{
+                  background: confirmAction.variant === "primary" ? COLORS.blue : "#059669",
+                  color: "#FFFFFF",
+                  fontWeight: 800,
+                  gap: 6,
+                  boxShadow: "0 2px 6px rgba(5, 150, 105, 0.3)"
+                }}
+              >
+                {confirmAction.icon || <CheckCircle2 size={15} />}
+                {confirmAction.label || "Konfirmasi & Terbitkan Tagihan"}
+              </Btn>
+            ) : (
+              <Btn onClick={handleDownload} style={{ background: COLORS.blue, gap: 5 }}>
+                <Download size={13} /> {type === "table" ? "Unduh Excel/CSV" : "Simpan / Unduh Berkas"}
+              </Btn>
+            )}
           </div>
         </div>
       </div>

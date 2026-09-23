@@ -16,7 +16,10 @@ import {
   Plus,
   History,
   Clock,
-  FileCheck
+  FileCheck,
+  Filter,
+  RotateCcw,
+  SlidersHorizontal
 } from "lucide-react";
 import { COLORS } from "../constants/colors";
 import { Table, Badge, Btn, PreviewModal, SatkerModal } from "../components/common";
@@ -38,17 +41,30 @@ export const RekonsIuran = () => {
   const [activeProgram, setActiveProgram] = useState("THT_PENSIUN");
 
   // SUBTAB PER PROGRAM:
-  // "monitoring" : Monitoring Penerimaan Dana
   // "komparasi"  : Komparasi Data Kepesertaan (1 tab saja, filter view: Secara Rekap / Secara Per-Matra)
   // "history"    : Riwayat Proses Selesai (The Complete Process & Berita Acara Rekonsiliasi)
-  const [activeSubtab, setActiveSubtab] = useState("monitoring");
+  const [activeSubtab, setActiveSubtab] = useState("komparasi");
 
   // FILTER TAMPILAN PADA TAB KOMPARASI:
   // "rekap" | "per_matra"
   const [viewModeKomparasi, setViewModeKomparasi] = useState("rekap");
+  const [filterJenisDana, setFilterJenisDana] = useState("Semua"); // "Semua" | "THT" | "PENSIUN"
+  const [filterSubDana, setFilterSubDana] = useState("Semua"); // Nilai dinamis mengikuti Jenis Dana
+
+  const handleJenisDanaChange = (newJenis) => {
+    setFilterJenisDana(newJenis);
+    if (newJenis === "THT") {
+      setFilterSubDana("THT_ALL");
+    } else if (newJenis === "PENSIUN") {
+      setFilterSubDana("PENSIUN_ALL");
+    } else {
+      setFilterSubDana("Semua");
+    }
+  };
 
   // State Filter & Search
-  const [filterMatra, setFilterMatra] = useState("Semua");
+  const [filterSatker, setFilterSatker] = useState("Semua");
+  const [filterGolongan, setFilterGolongan] = useState("Semua");
   const [filterDanaPFK, setFilterDanaPFK] = useState("Semua");
   const [searchTerm, setSearchTerm] = useState("");
   const [tglAwal, setTglAwal] = useState("2026-07-01");
@@ -59,7 +75,6 @@ export const RekonsIuran = () => {
   const [preview, setPreview] = useState(null);
   const [satkerModalData, setSatkerModalData] = useState(null);
   const [notice, setNotice] = useState(null);
-  const [isSyncingBNBA, setIsSyncingBNBA] = useState(false);
   const [selectedMatraDetail, setSelectedMatraDetail] = useState(null);
 
   // State Modal Complete Process & Konfirmasi Selesai
@@ -109,7 +124,7 @@ export const RekonsIuran = () => {
       lightBg: "#EFF6FF",
       badgeBg: "#DBEAFE",
       badgeColor: "#1E40AF",
-      title: "THT & Pensiun (SKP-PFK 8,00%)",
+      title: "THT & Pensiun (SKP-PFK)",
       badgeText: "Tagihan Tunggal"
     },
     JKK: {
@@ -117,16 +132,16 @@ export const RekonsIuran = () => {
       lightBg: "#ECFDF5",
       badgeBg: "#D1FAE5",
       badgeColor: "#065F46",
-      title: "Jaminan Kecelakaan Kerja (JKK 0,24%)",
-      badgeText: "Tarif 0,24%"
+      title: "Jaminan Kecelakaan Kerja (JKK)",
+      badgeText: "Program JKK"
     },
     JKM: {
       primary: "#0D9488",
       lightBg: "#F0FDFA",
       badgeBg: "#CCFBF1",
       badgeColor: "#0F766E",
-      title: "Jaminan Kematian (JKM 0,20%)",
-      badgeText: "Tarif 0,20%"
+      title: "Jaminan Kematian (JKM)",
+      badgeText: "Program JKM"
     }
   }[activeProgram];
 
@@ -480,7 +495,7 @@ export const RekonsIuran = () => {
       statusProses: "Selesai (Completed)",
       tglSelesai: "30 Juni 2026",
       noBAR: "BAR-06/REKON-JKK/VI/2026",
-      keterangan: "Realisasi SP2D 100% sesuai potensi DIPA Belanja Pegawai 5 Matra. BAR penetapan iuran JKK selesai."
+      keterangan: "Realisasi SP2D 100% sesuai potensi DIPA Belanja Pegawai 6 Matra. BAR penetapan iuran JKK selesai."
     }
   ]);
 
@@ -527,7 +542,7 @@ export const RekonsIuran = () => {
       statusProses: "Selesai (Completed)",
       tglSelesai: "30 Juni 2026",
       noBAR: "BAR-06/REKON-JKM/VI/2026",
-      keterangan: "Realisasi SP2D 100% sesuai potensi DIPA Belanja Pegawai 5 Matra. BAR penetapan iuran JKM selesai."
+      keterangan: "Realisasi SP2D 100% sesuai potensi DIPA Belanja Pegawai 6 Matra. BAR penetapan iuran JKM selesai."
     }
   ]);
 
@@ -665,25 +680,31 @@ export const RekonsIuran = () => {
         ];
       }
 
-      const namaDana = item.namaDana || (isTHT ? "THT" : isPensiun ? "Pensiun" : "THT & Pensiun");
+      const namaDana = item.namaDana || (isTHT ? (isPolri ? "THT POLRI" : "THT TNI") : (isPolri ? "Pensiun POLRI" : "Pensiun TNI"));
 
       setPreview({
         title: `Surat Tagihan Iuran ${namaDana} — ${item.noSuratTagihan}`,
-        subtitle: `Kemenkeu RI / Ditjen Perbendaharaan • Periode September 2026`,
-        type: "surat",
+        subtitle: `Format Resmi Kemenkeu RI (3 Halaman) • Satker (440780)`,
+        type: "surat_kemenkeu",
         fileName: `Surat_Tagihan_${namaDana.replace(/[^a-zA-Z0-9]/g, "_")}_${item.noSuratTagihan.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
         content: {
-          judulSurat: `SURAT TAGIHAN IURAN ${namaDana.toUpperCase()}`,
+          program: namaDana,
           noSurat: item.noSuratTagihan,
-          tanggal: item.tglSuratTagihan,
-          periode: "September 2026",
-          batchInfo: `Program: ${namaDana} • Tarif ${item.tarif || (isTHT ? "3,25%" : "4,75%")}`,
-          dasarSKP: {
-            noSurat: item.noSKP,
-            tglSurat: item.tglSKP
-          },
-          items,
-          totalNominal: fmtB(item.nominalDanaSKP || item.nominalDiterima),
+          tanggalSurat: item.tglSuratTagihan || "Oktober 2024",
+          tglCutoff: item.tglCutoff || "10 Oktober 2024",
+          noKEP: item.noSKP || "KEP-41/PB/PB.3/2024",
+          tglKEP: item.tglSKP || "14 Oktober 2024",
+          tahunAnggaran: "2024",
+          nominalNum: item.nominalDanaSKP || (isTHT ? 1121913428 : 20805000000),
+          nominalLalu: isTHT ? 1059518554039 : 812490210000,
+          noBukti: isTHT ? (isPolri ? "22/PFK.THT-POLRI/X/2024-Keu" : "21/PFK.THT-AS/X/2024-Keu") : (isPolri ? "23/PFK.PEN-POLRI/X/2024-Keu" : "24/PFK.PEN-TNI/X/2024-Keu"),
+          namaRekening: isTHT ? "THT Umum ASABRI" : "Pensiun ASABRI",
+          noRekening: isTHT ? "0261-01-000004-30-9" : "0261-01-000005-30-5",
+          namaBank: "BRI Kantor Cabang Jakarta Krekot",
+          namaDirektur: "HELMI I. SATRIYONO",
+          jabatanDirektur: "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO",
+          namaPPK: "Nazif Azhari",
+          isPFKKemenkeu: true,
           satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL
         }
       });
@@ -747,89 +768,290 @@ export const RekonsIuran = () => {
   };
 
   // =========================================================================
-  // DATASET KOMPARASI THT & PENSIUN (8,00%)
+  // DATASET KOMPARASI 4 DANA: THT TNI, THT POLRI, PENSIUN TNI, PENSIUN POLRI
   // =========================================================================
   const rekapSKPData = [
     {
-      pilar: "Surat Tagihan Dana PFK (THT & Pensiun)",
-      deskripsi: "4 Surat Tagihan Resmi (1190 s.d. 1193/KU.06.06/KMR.N/IX/2026) — THT TNI, THT POLRI, Pensiun TNI, Pensiun POLRI",
-      tarif: "8,00% (THT 3,25% + PEN 4,75%)",
-      pesertaSistem: 427620,
-      nominalSistem: 105230000000,
-      pesertaSKP: 427700,
-      nominalSKP: 105280000000,
-      selisihNominal: -50000000,
+      id: "REKAP-THT-TNI",
+      danaType: "THT_TNI",
+      pilar: "THT TNI",
+      namaDana: "THT TNI",
+      noSurat: "1190/KU.06.06/KMR.N/IX/2026",
+      noSKP: "S-184/PB.2/2026",
+      deskripsi: "Iuran Tabungan Hari Tua (THT) Prajurit TNI & ASN Kemhan",
+      matra: "TNI AD, AL, AU, PNS & PPPK Kemhan",
+      tarif: "3,25%",
+      pesertaSistem: 285420,
+      nominalSistem: 28526460000,
+      pesertaSKP: 285500,
+      nominalSKP: 28540000000,
+      selisihNominal: -13540000,
       persenSelisih: -0.05,
-      analisis: "Selisih 80 personel TNI AL mutasi Koarmada II. Seluruh 4 surat tagihan per Dana telah diterbitkan resmi dan tercatat dalam monitoring.",
-      statusRekap: "Terverifikasi Lengkap"
+      analisis: "Potongan 3,25% TNI AD, AU, dan Kemhan 100% cocok. Selisih 80 personel mutasi Koarmada II TNI AL dalam proses pemadanan SK.",
+      statusRekap: "Selisih Mutasi (-80)",
+      badgeColor: "yellow"
+    },
+    {
+      id: "REKAP-THT-POLRI",
+      danaType: "THT_POLRI",
+      pilar: "THT POLRI",
+      namaDana: "THT POLRI",
+      noSurat: "1191/KU.06.06/KMR.N/IX/2026",
+      noSKP: "S-184/PB.2/2026",
+      deskripsi: "Iuran Tabungan Hari Tua (THT) Anggota POLRI & PNS Polri",
+      matra: "POLRI & PNS Polri",
+      tarif: "3,25%",
+      pesertaSistem: 142200,
+      nominalSistem: 14225000000,
+      pesertaSKP: 142200,
+      nominalSKP: 14225000000,
+      selisihNominal: 0,
+      persenSelisih: 0,
+      analisis: "Data potongan THT 3,25% personel POLRI cocok 100% dengan penetapan SKP-PFK Kemenkeu RI tanpa selisih.",
+      statusRekap: "Match (100%)",
+      badgeColor: "green"
+    },
+    {
+      id: "REKAP-PEN-TNI",
+      danaType: "PENSIUN_TNI",
+      pilar: "Pensiun TNI",
+      namaDana: "Pensiun TNI",
+      noSurat: "1192/KU.06.06/KMR.N/IX/2026",
+      noSKP: "S-184/PB.2/2026",
+      deskripsi: "Iuran Pensiun Prajurit TNI & ASN Kemhan",
+      matra: "TNI AD, AL, AU, PNS & PPPK Kemhan",
+      tarif: "4,75%",
+      pesertaSistem: 285420,
+      nominalSistem: 41673540000,
+      pesertaSKP: 285500,
+      nominalSKP: 41710000000,
+      selisihNominal: -36460000,
+      persenSelisih: -0.09,
+      analisis: "Potongan 4,75% TNI AD, AU, dan Kemhan tuntas. Selisih 80 personel mutasi Koarmada II TNI AL pada pilar pensiun sedang divalidasi.",
+      statusRekap: "Selisih Mutasi (-80)",
+      badgeColor: "yellow"
+    },
+    {
+      id: "REKAP-PEN-POLRI",
+      danaType: "PENSIUN_POLRI",
+      pilar: "Pensiun POLRI",
+      namaDana: "Pensiun POLRI",
+      noSurat: "1193/KU.06.06/KMR.N/IX/2026",
+      noSKP: "S-184/PB.2/2026",
+      deskripsi: "Iuran Pensiun Anggota POLRI & PNS Polri",
+      matra: "POLRI & PNS Polri",
+      tarif: "4,75%",
+      pesertaSistem: 142200,
+      nominalSistem: 20805000000,
+      pesertaSKP: 142200,
+      nominalSKP: 20805000000,
+      selisihNominal: 0,
+      persenSelisih: 0,
+      analisis: "Potongan 4,75% POLRI tervalidasi 100% cocok dengan penetapan SKP-PFK DJPb Kemenkeu.",
+      statusRekap: "Match (100%)",
+      badgeColor: "green"
     }
   ];
 
   const bnbaMatraData = [
+    // 1. THT TNI (3,25%)
     {
-      id: "BNBA-01",
+      id: "BNBA-THT-01",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      tarif: "3,25%",
       matra: "TNI AD",
-      jenisIuran: "THT & Pensiun (8,00%)",
+      jenisIuran: "THT TNI (3,25%)",
       pesertaSistem: 154200,
-      nominalSistem: 37950000000,
+      nominalSistem: 15417187500,
       pesertaBNBA: 154200,
-      nominalBNBA: 37950000000,
+      nominalBNBA: 15417187500,
       selisihJiwa: 0,
       selisihNominal: 0,
       status: "Match (100%)",
-      catatan: "Seluruh personel 154.200 terpetakan by NRP & potongan 8,00% sesuai penuh."
+      catatan: "Seluruh 154.200 personel TNI AD terpetakan by NRP & potongan THT 3,25% sesuai penuh."
     },
     {
-      id: "BNBA-02",
+      id: "BNBA-THT-02",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      tarif: "3,25%",
       matra: "TNI AL",
-      jenisIuran: "THT & Pensiun (8,00%)",
+      jenisIuran: "THT TNI (3,25%)",
       pesertaSistem: 68450,
-      nominalSistem: 16805000000,
+      nominalSistem: 6827031250,
       pesertaBNBA: 68530,
-      nominalBNBA: 16855000000,
+      nominalBNBA: 6847331250,
       selisihJiwa: -80,
-      selisihNominal: -50000000,
+      selisihNominal: -20300000,
       status: "Selisih Mutasi",
-      catatan: "80 personel mutasi masuk Koarmada II belum selesai update SK kepesertaan."
+      catatan: "80 personel mutasi masuk Koarmada II sedang dalam proses pemadanan SK THT."
     },
     {
-      id: "BNBA-03",
+      id: "BNBA-THT-03",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      tarif: "3,25%",
       matra: "TNI AU",
-      jenisIuran: "THT & Pensiun (8,00%)",
+      jenisIuran: "THT TNI (3,25%)",
       pesertaSistem: 42150,
-      nominalSistem: 10380000000,
+      nominalSistem: 4216875000,
       pesertaBNBA: 42150,
-      nominalBNBA: 10380000000,
+      nominalBNBA: 4216875000,
       selisihJiwa: 0,
       selisihNominal: 0,
       status: "Match (100%)",
-      catatan: "Data prajurit Lanud & Kohanudnas potongan 8,00% tervalidasi."
+      catatan: "Data prajurit Lanud & Kohanudnas potongan THT 3,25% tervalidasi."
     },
     {
-      id: "BNBA-04",
-      matra: "Kemhan (PNS/PPPK)",
-      jenisIuran: "THT & Pensiun (8,00%)",
-      pesertaSistem: 20620,
-      nominalSistem: 5070000000,
-      pesertaBNBA: 20620,
-      nominalBNBA: 5070000000,
+      id: "BNBA-THT-04A",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      tarif: "3,25%",
+      matra: "PNS Kemhan",
+      jenisIuran: "THT TNI (3,25%)",
+      pesertaSistem: 16500,
+      nominalSistem: 1652666250,
+      pesertaBNBA: 16500,
+      nominalBNBA: 1652666250,
       selisihJiwa: 0,
       selisihNominal: 0,
       status: "Match (100%)",
-      catatan: "ASN Kemhan terintegrasi NIP & potongan 8,00% BKN-Kemenkeu."
+      catatan: "PNS Kemhan terintegrasi NIP & potongan THT 3,25% BKN-Kemenkeu."
     },
     {
-      id: "BNBA-05",
+      id: "BNBA-THT-04B",
+      danaType: "THT_TNI",
+      namaDana: "THT TNI",
+      tarif: "3,25%",
+      matra: "PPPK Kemhan",
+      jenisIuran: "THT TNI (3,25%)",
+      pesertaSistem: 4120,
+      nominalSistem: 412700000,
+      pesertaBNBA: 4120,
+      nominalBNBA: 412700000,
+      selisihJiwa: 0,
+      selisihNominal: 0,
+      status: "Match (100%)",
+      catatan: "PPPK Kemhan terintegrasi NI PPPK & potongan THT 3,25% BKN-Kemenkeu."
+    },
+
+    // 2. THT POLRI (3,25%)
+    {
+      id: "BNBA-THT-05",
+      danaType: "THT_POLRI",
+      namaDana: "THT POLRI",
+      tarif: "3,25%",
       matra: "POLRI",
-      jenisIuran: "THT & Pensiun (8,00%)",
+      jenisIuran: "THT POLRI (3,25%)",
       pesertaSistem: 142200,
-      nominalSistem: 35030000000,
+      nominalSistem: 14225000000,
       pesertaBNBA: 142200,
-      nominalBNBA: 35030000000,
+      nominalBNBA: 14225000000,
       selisihJiwa: 0,
       selisihNominal: 0,
       status: "Match (100%)",
-      catatan: "Seluruh Polda & Mabes Polri cocok dengan penetapan PFK Gaji Web Polri."
+      catatan: "Seluruh Polda & Mabes Polri cocok dengan penetapan THT 3,25% Gaji Web Polri."
+    },
+
+    // 3. Pensiun TNI (4,75%)
+    {
+      id: "BNBA-PEN-01",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      tarif: "4,75%",
+      matra: "TNI AD",
+      jenisIuran: "Pensiun TNI (4,75%)",
+      pesertaSistem: 154200,
+      nominalSistem: 22532812500,
+      pesertaBNBA: 154200,
+      nominalBNBA: 22532812500,
+      selisihJiwa: 0,
+      selisihNominal: 0,
+      status: "Match (100%)",
+      catatan: "Seluruh personel TNI AD potongan Pensiun 4,75% sesuai penuh."
+    },
+    {
+      id: "BNBA-PEN-02",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      tarif: "4,75%",
+      matra: "TNI AL",
+      jenisIuran: "Pensiun TNI (4,75%)",
+      pesertaSistem: 68450,
+      nominalSistem: 9977968750,
+      pesertaBNBA: 68530,
+      nominalBNBA: 10007668750,
+      selisihJiwa: -80,
+      selisihNominal: -29700000,
+      status: "Selisih Mutasi",
+      catatan: "80 personel mutasi Koarmada II pilar pensiun 4,75% dalam rekonsiliasi."
+    },
+    {
+      id: "BNBA-PEN-03",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      tarif: "4,75%",
+      matra: "TNI AU",
+      jenisIuran: "Pensiun TNI (4,75%)",
+      pesertaSistem: 42150,
+      nominalSistem: 6163125000,
+      pesertaBNBA: 42150,
+      nominalBNBA: 6163125000,
+      selisihJiwa: 0,
+      selisihNominal: 0,
+      status: "Match (100%)",
+      catatan: "Data personel TNI AU potongan Pensiun 4,75% cocok."
+    },
+    {
+      id: "BNBA-PEN-04A",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      tarif: "4,75%",
+      matra: "PNS Kemhan",
+      jenisIuran: "Pensiun TNI (4,75%)",
+      pesertaSistem: 16500,
+      nominalSistem: 2403903750,
+      pesertaBNBA: 16500,
+      nominalBNBA: 2403903750,
+      selisihJiwa: 0,
+      selisihNominal: 0,
+      status: "Match (100%)",
+      catatan: "PNS Kemhan potongan Pensiun 4,75% tervalidasi."
+    },
+    {
+      id: "BNBA-PEN-04B",
+      danaType: "PENSIUN_TNI",
+      namaDana: "Pensiun TNI",
+      tarif: "4,75%",
+      matra: "PPPK Kemhan",
+      jenisIuran: "Pensiun TNI (4,75%)",
+      pesertaSistem: 4120,
+      nominalSistem: 600730000,
+      pesertaBNBA: 4120,
+      nominalBNBA: 600730000,
+      selisihJiwa: 0,
+      selisihNominal: 0,
+      status: "Match (100%)",
+      catatan: "PPPK Kemhan potongan Pensiun 4,75% tervalidasi."
+    },
+
+    // 4. Pensiun POLRI (4,75%)
+    {
+      id: "BNBA-PEN-05",
+      danaType: "PENSIUN_POLRI",
+      namaDana: "Pensiun POLRI",
+      tarif: "4,75%",
+      matra: "POLRI",
+      jenisIuran: "Pensiun POLRI (4,75%)",
+      pesertaSistem: 142200,
+      nominalSistem: 20805000000,
+      pesertaBNBA: 142200,
+      nominalBNBA: 20805000000,
+      selisihJiwa: 0,
+      selisihNominal: 0,
+      status: "Match (100%)",
+      catatan: "Seluruh jajaran POLRI potongan Pensiun 4,75% cocok 100%."
     }
   ];
 
@@ -838,31 +1060,25 @@ export const RekonsIuran = () => {
     { nrp: "31090284710291", nama: "Lettu Laut (P) Dimas Arya", pangkat: "Lettu", satker: "KRI Frans Kaisiepo-368", gapok: 3820000, tht: 124150, pensiun: 181450, totalPotongan: 305600, status: "Cocok (API Kemenkeu)" },
     { nrp: "31110398471099", nama: "Serka Nav Hendra Pratama", pangkat: "Serka", satker: "Lantamal V Surabaya", gapok: 3410000, tht: 110825, pensiun: 161975, totalPotongan: 272800, status: "Mutasi Masuk (Perlu SK)" },
     { nrp: "31120489510103", nama: "Kopda Bah Faisal Reza", pangkat: "Kopda", satker: "Koarmada II (TNI AL)", gapok: 2980000, tht: 96850, pensiun: 141550, totalPotongan: 238400, status: "Mutasi Masuk (Perlu SK)" },
-    { nrp: "31070081290382", nama: "Mayor Cba Hendrawan", pangkat: "Mayor", satker: "Bekangdam Jaya (TNI AD)", gapok: 4890000, tht: 158925, pensiun: 232275, totalPotongan: 391200, status: "Cocok (API Kemenkeu)" }
+    { nrp: "31070081290382", nama: "Mayor Cba Hendrawan", pangkat: "Mayor", satker: "Bekangdam Jaya (TNI AD)", gapok: 4890000, tht: 158925, pensiun: 232275, totalPotongan: 391200, status: "Cocok (API Kemenkeu)" },
+    { nrp: "198504122010011002", nama: "Penata Tk.I Agus Priyono, S.Sos", pangkat: "Penata Tk.I (PNS)", satker: "Ditjen Renhan Kemhan (PNS)", gapok: 3850000, tht: 125125, pensiun: 182875, totalPotongan: 308000, status: "Cocok (API Kemenkeu)" },
+    { nrp: "199408252024211001", nama: "Dian Wahyuni, S.Kom", pangkat: "Ahli Pertama (PPPK)", satker: "Pusdatin Kemhan (PPPK)", gapok: 3600000, tht: 117000, pensiun: 171000, totalPotongan: 288000, status: "Cocok (API Kemenkeu)" }
   ];
-
-  const handleSyncBNBA = () => {
-    setIsSyncingBNBA(true);
-    setTimeout(() => {
-      setIsSyncingBNBA(false);
-      setNotice("Sinkronisasi real-time dengan API BNBA SPAN Kemenkeu berhasil diselesaikan (5 Matra terhubung).");
-      setTimeout(() => setNotice(null), 5000);
-    }, 1200);
-  };
 
   // =========================================================================
   // DATASET KOMPARASI JKK & JKM
   // =========================================================================
   const rekapJKKData = [
-    { program: "Jaminan Kecelakaan Kerja (JKK)", tarif: "0,24%", noSuratTagihan: "002/ASABRI/TGH-JKK/VII/2026", peserta: 14328, nominalPotensi: 2630000000, nominalRealisasi: 2630000000, selisih: 0, status: "Terverifikasi Lunas (100%)", analisis: "Seluruh alokasi iuran JKK dari 5 Matra telah disalurkan penuh oleh Kemenkeu sesuai SP2D-260728-004128." },
-    { program: "Jaminan Kematian (JKM)", tarif: "0,20%", noSuratTagihan: "003/ASABRI/TGH-JKM/VII/2026", peserta: 14328, nominalPotensi: 2210000000, nominalRealisasi: 2210000000, selisih: 0, status: "Terverifikasi Lunas (100%)", analisis: "Seluruh alokasi iuran JKM dari 5 Matra telah disalurkan penuh oleh Kemenkeu sesuai SP2D-260728-004129." }
+    { program: "Jaminan Kecelakaan Kerja (JKK)", tarif: "0,24%", noSuratTagihan: "002/ASABRI/TGH-JKK/VII/2026", peserta: 14328, nominalPotensi: 2630000000, nominalRealisasi: 2630000000, selisih: 0, status: "Terverifikasi Lunas (100%)", analisis: "Seluruh alokasi iuran JKK dari 6 Matra telah disalurkan penuh oleh Kemenkeu sesuai SP2D-260728-004128." },
+    { program: "Jaminan Kematian (JKM)", tarif: "0,20%", noSuratTagihan: "003/ASABRI/TGH-JKM/VII/2026", peserta: 14328, nominalPotensi: 2210000000, nominalRealisasi: 2210000000, selisih: 0, status: "Terverifikasi Lunas (100%)", analisis: "Seluruh alokasi iuran JKM dari 6 Matra telah disalurkan penuh oleh Kemenkeu sesuai SP2D-260728-004129." }
   ];
 
   const komparasiJKKMatraData = [
     { id: "KOMP-JKK-01", matra: "TNI AD", peserta: 3250, gapokTotal: 260000000000, nominalJKKSistem: 624000000, nominalJKMSistem: 520000000, realisasiKasJKK: 624000000, realisasiKasJKM: 520000000, selisih: 0, status: "Match (100%)", catatan: "SP2D KPPN sesuai alokasi DIPA Belanja Pegawai TNI AD." },
     { id: "KOMP-JKK-02", matra: "TNI AL", peserta: 1420, gapokTotal: 113600000000, nominalJKKSistem: 272640000, nominalJKMSistem: 227200000, realisasiKasJKK: 272640000, realisasiKasJKM: 227200000, selisih: 0, status: "Match (100%)", catatan: "Lunas tervalidasi KPPN Khusus Jakarta II." },
     { id: "KOMP-JKK-03", matra: "TNI AU", peserta: 1180, gapokTotal: 94400000000, nominalJKKSistem: 226560000, nominalJKMSistem: 188800000, realisasiKasJKK: 226560000, realisasiKasJKM: 188800000, selisih: 0, status: "Match (100%)", catatan: "Lunas tervalidasi KPPN Khusus Jakarta II." },
-    { id: "KOMP-JKK-04", matra: "Kemhan (PNS/PPPK)", peserta: 520, gapokTotal: 41600000000, nominalJKKSistem: 99840000, nominalJKMSistem: 83200000, realisasiKasJKK: 99840000, realisasiKasJKM: 83200000, selisih: 0, status: "Match (100%)", catatan: "Sesuai potongan belanja pegawai satker Kemhan Pusat." },
+    { id: "KOMP-JKK-04A", matra: "PNS Kemhan", peserta: 400, gapokTotal: 32000000000, nominalJKKSistem: 76800000, nominalJKMSistem: 64000000, realisasiKasJKK: 76800000, realisasiKasJKM: 64000000, selisih: 0, status: "Match (100%)", catatan: "Sesuai potongan belanja pegawai satker PNS Kemhan Pusat." },
+    { id: "KOMP-JKK-04B", matra: "PPPK Kemhan", peserta: 120, gapokTotal: 9600000000, nominalJKKSistem: 23040000, nominalJKMSistem: 19200000, realisasiKasJKK: 23040000, realisasiKasJKM: 19200000, selisih: 0, status: "Match (100%)", catatan: "Sesuai potongan belanja pegawai satker PPPK Kemhan Pusat." },
     { id: "KOMP-JKK-05", matra: "POLRI", peserta: 7958, gapokTotal: 586200000000, nominalJKKSistem: 1406960000, nominalJKMSistem: 1190760000, realisasiKasJKK: 1406960000, realisasiKasJKM: 1190760000, selisih: 0, status: "Match (100%)", catatan: "Lunas 100% SP2D Kemenkeu ke giro penampungan Mandiri." }
   ];
 
@@ -928,12 +1144,359 @@ export const RekonsIuran = () => {
       ? filteredHistoryJKK.length
       : filteredHistoryJKM.length;
 
-  const filteredBNBA = bnbaMatraData.filter((item) => {
-    if (filterMatra !== "Semua" && item.matra !== filterMatra) return false;
+  // Helper Opsi & Konversi Golongan
+  const GOLONGAN_OPTIONS = [
+    { key: "Semua", label: "Semua Golongan & Pangkat" },
+    { key: "PATI_PAMEN", label: "Perwira Tinggi & Menengah (Pati/Pamen)" },
+    { key: "PAMA", label: "Perwira Pertama (Pama)" },
+    { key: "BINTARA_TAMTAMA", label: "Bintara & Tamtama (Ba/Ta)" },
+    { key: "PNS_GOL", label: "PNS Kemhan/Polri (Gol I - IV)" },
+    { key: "PPPK", label: "PPPK (Pegawai Pemerintah dg Perjanjian Kerja)" }
+  ];
+
+  const getGolonganRatio = (gol) => {
+    switch (gol) {
+      case "PATI_PAMEN":
+        return { peserta: 0.12, nominal: 0.22, label: "Perwira (Pati/Pamen)" };
+      case "PAMA":
+        return { peserta: 0.16, nominal: 0.18, label: "Perwira Pertama (Pama)" };
+      case "BINTARA_TAMTAMA":
+        return { peserta: 0.62, nominal: 0.52, label: "Bintara & Tamtama" };
+      case "PNS_GOL":
+        return { peserta: 0.08, nominal: 0.06, label: "PNS Gol I-IV" };
+      case "PPPK":
+        return { peserta: 0.02, nominal: 0.02, label: "PPPK" };
+      default:
+        return { peserta: 1, nominal: 1, label: "Semua Golongan" };
+    }
+  };
+
+  const getSatkerLabel = (s = filterSatker) => {
+    switch (s) {
+      case "TNI":
+      case "TNI_ALL": return "TNI";
+      case "POLRI":
+      case "POLRI_ALL": return "POLRI";
+      case "KEMHAN_ALL": return "Kemhan (PNS & PPPK)";
+      case "Semua": return "Semua Satker";
+      default: return s;
+    }
+  };
+
+  const getMatraLabel = getSatkerLabel;
+
+  const getDanaLabel = (sub = filterSubDana, jenis = filterJenisDana) => {
+    if (activeProgram === "THT_PENSIUN") {
+      if (jenis === "THT") {
+        if (sub === "THT_TNI") return "THT TNI";
+        if (sub === "THT_POLRI") return "THT POLRI";
+        return "Semua Dana THT";
+      }
+      if (jenis === "PENSIUN") {
+        if (sub === "PENSIUN_TNI") return "Pensiun TNI";
+        if (sub === "PENSIUN_POLRI") return "Pensiun POLRI";
+        return "Semua Dana Pensiun";
+      }
+      if (sub === "THT_TNI") return "THT TNI";
+      if (sub === "THT_POLRI") return "THT POLRI";
+      if (sub === "PENSIUN_TNI") return "Pensiun TNI";
+      if (sub === "PENSIUN_POLRI") return "Pensiun POLRI";
+      if (sub === "THT_ALL") return "Semua Dana THT";
+      if (sub === "PENSIUN_ALL") return "Semua Dana Pensiun";
+      return "4 Dana (THT & Pensiun)";
+    } else if (activeProgram === "JKK") {
+      if (sub === "JKK_TNI") return "JKK TNI";
+      if (sub === "JKK_POLRI") return "JKK POLRI";
+      return "Semua JKK";
+    } else {
+      if (sub === "JKM_TNI") return "JKM TNI";
+      if (sub === "JKM_POLRI") return "JKM POLRI";
+      return "Semua JKM";
+    }
+  };
+
+  const getGolonganLabel = (g) => {
+    const it = GOLONGAN_OPTIONS.find(x => x.key === g);
+    return it ? it.label : g;
+  };
+
+  const getFilterSummaryText = () => {
+    const dLabel = getDanaLabel();
+    const sLabel = getSatkerLabel(filterSatker);
+    const gLabel = getGolonganLabel(filterGolongan);
+    const modeLabel = viewModeKomparasi === "rekap" ? "Secara Rekap (Makro)" : "Secara Per-Matra (BNBA)";
+    return `Program/Dana: ${dLabel} • Satker: ${sLabel} • Golongan: ${gLabel} • Tampilan: ${modeLabel}`;
+  };
+
+  // Filter Rekap SKP 4 Dana (THT/Pensiun)
+  const filteredRekapSKP = rekapSKPData.filter((item) => {
+    // 1. Filter Jenis Dana & Sub-Dana
+    if (filterJenisDana === "THT" && !item.danaType.startsWith("THT")) return false;
+    if (filterJenisDana === "PENSIUN" && !item.danaType.startsWith("PENSIUN")) return false;
+
+    if (filterSubDana === "THT_ALL" && !item.danaType.startsWith("THT")) return false;
+    if (filterSubDana === "PENSIUN_ALL" && !item.danaType.startsWith("PENSIUN")) return false;
+    if (filterSubDana === "THT_TNI" && item.danaType !== "THT_TNI") return false;
+    if (filterSubDana === "THT_POLRI" && item.danaType !== "THT_POLRI") return false;
+    if (filterSubDana === "PENSIUN_TNI" && item.danaType !== "PENSIUN_TNI") return false;
+    if (filterSubDana === "PENSIUN_POLRI" && item.danaType !== "PENSIUN_POLRI") return false;
+
+    // 2. Filter Satker (TNI vs POLRI)
+    if ((filterSatker === "TNI" || filterSatker === "TNI_ALL") && item.danaType.includes("POLRI")) return false;
+    if ((filterSatker === "POLRI" || filterSatker === "POLRI_ALL") && item.danaType.includes("TNI")) return false;
+    if (filterSatker === "KEMHAN_ALL" && item.danaType.includes("POLRI")) return false;
+    if ((filterSatker === "TNI AD" || filterSatker === "TNI AL" || filterSatker === "TNI AU" || filterSatker === "PNS Kemhan" || filterSatker === "PPPK Kemhan") && item.danaType.includes("POLRI")) return false;
+    if (filterSatker === "POLRI" && item.danaType.includes("TNI")) return false;
+
     return true;
+  }).map((item) => {
+    if (filterGolongan === "Semua") return item;
+    const g = getGolonganRatio(filterGolongan);
+    const pSistem = Math.round(item.pesertaSistem * g.peserta);
+    const nSistem = Math.round(item.nominalSistem * g.nominal);
+    const pSKP = Math.round(item.pesertaSKP * g.peserta);
+    const nSKP = Math.round(item.nominalSKP * g.nominal);
+    return {
+      ...item,
+      pilar: `${item.pilar} (${g.label})`,
+      pesertaSistem: pSistem,
+      nominalSistem: nSistem,
+      pesertaSKP: pSKP,
+      nominalSKP: nSKP,
+      selisihNominal: nSistem - nSKP
+    };
   });
 
-  // Handler Global Ekspor Excel
+  // Filter BNBA Per-Matra (THT/Pensiun)
+  const filteredBNBA = bnbaMatraData.filter((item) => {
+    // 1. Filter Jenis Dana & Sub-Dana
+    if (filterJenisDana === "THT" && !item.danaType.startsWith("THT")) return false;
+    if (filterJenisDana === "PENSIUN" && !item.danaType.startsWith("PENSIUN")) return false;
+
+    if (filterSubDana === "THT_ALL" && !item.danaType.startsWith("THT")) return false;
+    if (filterSubDana === "PENSIUN_ALL" && !item.danaType.startsWith("PENSIUN")) return false;
+    if (filterSubDana === "THT_TNI" && item.danaType !== "THT_TNI") return false;
+    if (filterSubDana === "THT_POLRI" && item.danaType !== "THT_POLRI") return false;
+    if (filterSubDana === "PENSIUN_TNI" && item.danaType !== "PENSIUN_TNI") return false;
+    if (filterSubDana === "PENSIUN_POLRI" && item.danaType !== "PENSIUN_POLRI") return false;
+
+    // 2. Filter Satker (TNI vs POLRI)
+    if ((filterSatker === "TNI" || filterSatker === "TNI_ALL") && item.matra === "POLRI") return false;
+    if ((filterSatker === "POLRI" || filterSatker === "POLRI_ALL") && item.matra !== "POLRI") return false;
+    if (filterSatker === "KEMHAN_ALL" && !(item.matra === "PNS Kemhan" || item.matra === "PPPK Kemhan")) return false;
+    if (filterSatker !== "Semua" && filterSatker !== "TNI" && filterSatker !== "TNI_ALL" && filterSatker !== "POLRI" && filterSatker !== "POLRI_ALL" && filterSatker !== "KEMHAN_ALL" && item.matra !== filterSatker) return false;
+
+    // 3. Search Term
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const matchMatra = item.matra.toLowerCase().includes(q);
+      const matchDana = item.namaDana.toLowerCase().includes(q);
+      const matchCatatan = item.catatan?.toLowerCase().includes(q);
+      if (!matchMatra && !matchDana && !matchCatatan) return false;
+    }
+
+    return true;
+  }).map((item) => {
+    if (filterGolongan === "Semua") return item;
+    const g = getGolonganRatio(filterGolongan);
+    const pSistem = Math.round(item.pesertaSistem * g.peserta);
+    const nSistem = Math.round(item.nominalSistem * g.nominal);
+    const pBNBA = Math.round(item.pesertaBNBA * g.peserta);
+    const nBNBA = Math.round(item.nominalBNBA * g.nominal);
+    return {
+      ...item,
+      matra: `${item.matra} — ${g.label}`,
+      pesertaSistem: pSistem,
+      nominalSistem: nSistem,
+      pesertaBNBA: pBNBA,
+      nominalBNBA: nBNBA,
+      selisihJiwa: pSistem - pBNBA,
+      selisihNominal: nSistem - nBNBA
+    };
+  });
+
+  // Filter Komparasi JKK & JKM Per-Matra
+  const filteredKomparasiJKKMatra = komparasiJKKMatraData.filter((item) => {
+    // 1. Filter Sub-Dana (TNI vs POLRI)
+    if ((filterSubDana === "JKK_TNI" || filterSubDana === "JKM_TNI") && item.matra === "POLRI") return false;
+    if ((filterSubDana === "JKK_POLRI" || filterSubDana === "JKM_POLRI") && item.matra !== "POLRI") return false;
+
+    // 2. Filter Satker (TNI vs POLRI)
+    if ((filterSatker === "TNI" || filterSatker === "TNI_ALL") && item.matra === "POLRI") return false;
+    if ((filterSatker === "POLRI" || filterSatker === "POLRI_ALL") && item.matra !== "POLRI") return false;
+    if (filterSatker === "KEMHAN_ALL" && !(item.matra === "PNS Kemhan" || item.matra === "PPPK Kemhan")) return false;
+    if (filterSatker !== "Semua" && filterSatker !== "TNI" && filterSatker !== "TNI_ALL" && filterSatker !== "POLRI" && filterSatker !== "POLRI_ALL" && filterSatker !== "KEMHAN_ALL" && item.matra !== filterSatker) return false;
+
+    // 3. Search Term
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const matchMatra = item.matra.toLowerCase().includes(q);
+      if (!matchMatra) return false;
+    }
+
+    return true;
+  }).map((item) => {
+    if (filterGolongan === "Semua") return item;
+    const g = getGolonganRatio(filterGolongan);
+    const p = Math.round(item.peserta * g.peserta);
+    const gp = Math.round(item.gapokTotal * g.nominal);
+    const njkk = Math.round(item.nominalJKKSistem * g.nominal);
+    const njkm = Math.round(item.nominalJKMSistem * g.nominal);
+    return {
+      ...item,
+      matra: `${item.matra} — ${g.label}`,
+      peserta: p,
+      gapokTotal: gp,
+      nominalJKKSistem: njkk,
+      nominalJKMSistem: njkm,
+      realisasiKasJKK: njkk,
+      realisasiKasJKM: njkm
+    };
+  });
+
+  // Handler Preview Rekap & Laporan Sesuai Filter Aktif
+  const handlePreviewRekapLaporan = () => {
+    if (activeSubtab === "history") {
+      handleExportExcel();
+      return;
+    }
+
+    if (activeProgram === "THT_PENSIUN") {
+      const isRekap = viewModeKomparasi === "rekap";
+      const dTitle = getDanaLabel();
+      const sTitle = getSatkerLabel(filterSatker);
+      const gTitle = getGolonganLabel(filterGolongan);
+
+      if (isRekap) {
+        const rows = filteredRekapSKP.map((r) => [
+          r.namaDana,
+          r.matra,
+          r.tarif,
+          `${fmtNum(r.pesertaSistem)} Jiwa`,
+          fmtB(r.nominalSistem),
+          `${fmtNum(r.pesertaSKP)} Jiwa`,
+          fmtB(r.nominalSKP),
+          r.selisihNominal === 0 ? "Rp 0 (Cocok)" : fmtB(r.selisihNominal),
+          r.statusRekap
+        ]);
+        const totPSistem = filteredRekapSKP.reduce((a, b) => a + b.pesertaSistem, 0);
+        const totNSistem = filteredRekapSKP.reduce((a, b) => a + b.nominalSistem, 0);
+        const totPSKP = filteredRekapSKP.reduce((a, b) => a + b.pesertaSKP, 0);
+        const totNSKP = filteredRekapSKP.reduce((a, b) => a + b.nominalSKP, 0);
+        const totSelisih = filteredRekapSKP.reduce((a, b) => a + b.selisihNominal, 0);
+
+        setPreview({
+          title: `Laporan Rekapitulasi Komparasi Iuran ${dTitle}`,
+          subtitle: `Filter: Satker ${sTitle} • Golongan ${gTitle} • Periode Juli - September 2026`,
+          type: "table",
+          fileName: `Laporan_Rekap_Komparasi_${filterJenisDana}_${filterSubDana}_${filterSatker}.xlsx`,
+          content: {
+            columns: ["Program Dana", "Matra Cakupan", "Tarif", "Peserta Sistem", "Nominal Sistem", "Peserta SKP", "Nominal SKP", "Selisih Nominal", "Status Rekon"],
+            rows: rows,
+            totalRow: ["TOTAL REKAPITULASI", sTitle, "—", `${fmtNum(totPSistem)} Jiwa`, fmtB(totNSistem), `${fmtNum(totPSKP)} Jiwa`, fmtB(totNSKP), totSelisih === 0 ? "Rp 0 (Match 100%)" : fmtB(totSelisih), "Lunas SKP-PFK"],
+            totalRows: rows.length
+          }
+        });
+      } else {
+        const rows = filteredBNBA.map((b) => [
+          b.namaDana,
+          b.matra,
+          b.tarif,
+          `${fmtNum(b.pesertaSistem)} Jiwa`,
+          fmtB(b.nominalSistem),
+          `${fmtNum(b.pesertaBNBA)} Jiwa`,
+          fmtB(b.nominalBNBA),
+          b.selisihJiwa === 0 ? "0" : String(b.selisihJiwa),
+          b.selisihNominal === 0 ? "Rp 0" : fmtB(b.selisihNominal),
+          b.status
+        ]);
+        const totPSistem = filteredBNBA.reduce((a, b) => a + b.pesertaSistem, 0);
+        const totNSistem = filteredBNBA.reduce((a, b) => a + b.nominalSistem, 0);
+        const totPBNBA = filteredBNBA.reduce((a, b) => a + b.pesertaBNBA, 0);
+        const totNBNBA = filteredBNBA.reduce((a, b) => a + b.nominalBNBA, 0);
+        const totSelJiwa = filteredBNBA.reduce((a, b) => a + b.selisihJiwa, 0);
+        const totSelNom = filteredBNBA.reduce((a, b) => a + b.selisihNominal, 0);
+
+        setPreview({
+          title: `Laporan Komparasi BNBA Per-Satker — ${dTitle}`,
+          subtitle: `Filter: Satker ${sTitle} • Golongan ${gTitle} • Periode Juli - September 2026`,
+          type: "table",
+          fileName: `Laporan_BNBA_PerSatker_${filterJenisDana}_${filterSubDana}_${filterSatker}.xlsx`,
+          content: {
+            columns: ["Program Dana", "Matra / Kesatuan", "Tarif", "Peserta Sistem", "Nominal Sistem", "Peserta BNBA", "Nominal BNBA", "Selisih Jiwa", "Selisih Nominal", "Status Validasi"],
+            rows: rows,
+            totalRow: ["TOTAL PER-SATKER", sTitle, "—", `${fmtNum(totPSistem)} Jiwa`, fmtB(totNSistem), `${fmtNum(totPBNBA)} Jiwa`, fmtB(totNBNBA), String(totSelJiwa), totSelNom === 0 ? "Rp 0" : fmtB(totSelNom), "Tervalidasi API SPAN"],
+            totalRows: rows.length
+          }
+        });
+      }
+    } else {
+      // JKK / JKM
+      const prog = activeProgram;
+      const sTitle = getSatkerLabel(filterSatker);
+      const gTitle = getGolonganLabel(filterGolongan);
+      const isRekap = viewModeKomparasi === "rekap";
+
+      if (isRekap) {
+        const item = rekapJKKData.find(r => r.program.includes(prog));
+        const g = getGolonganRatio(filterGolongan);
+        const p = Math.round((item?.peserta || 14328) * g.peserta);
+        const nomPot = Math.round((item?.nominalPotensi || (prog === "JKK" ? 2630000000 : 2210000000)) * g.nominal);
+        const nomReal = nomPot;
+
+        setPreview({
+          title: `Laporan Rekapitulasi Iuran ${prog}`,
+          subtitle: `Filter: Satker ${sTitle} • Golongan ${gTitle} • Periode Juli - September 2026`,
+          type: "table",
+          fileName: `Laporan_Rekap_${prog}_${filterSatker}.xlsx`,
+          content: {
+            columns: ["Program Iuran", "Matra Cakupan", "Tarif", "Peserta", "Potensi Sistem", "Realisasi SP2D", "Selisih Nominal", "Status"],
+            rows: [[
+              `${prog} (${gTitle})`,
+              sTitle,
+              prog === "JKK" ? "0,24%" : "0,20%",
+              `${fmtNum(p)} Jiwa`,
+              fmtB(nomPot),
+              fmtB(nomReal),
+              "Rp 0",
+              "Terverifikasi Lunas 100%"
+            ]],
+            totalRow: ["TOTAL REKAPITULASI", sTitle, prog === "JKK" ? "0,24%" : "0,20%", `${fmtNum(p)} Jiwa`, fmtB(nomPot), fmtB(nomReal), "Rp 0", "Lunas SP2D"],
+            totalRows: 1
+          }
+        });
+      } else {
+        const rows = filteredKomparasiJKKMatra.map((k) => [
+          k.matra,
+          `${fmtNum(k.peserta)} Jiwa`,
+          fmtB(k.gapokTotal),
+          fmtB(prog === "JKK" ? k.nominalJKKSistem : k.nominalJKMSistem),
+          fmtB(prog === "JKK" ? k.realisasiKasJKK : k.realisasiKasJKM),
+          "Rp 0",
+          k.status
+        ]);
+        const totP = filteredKomparasiJKKMatra.reduce((a, b) => a + b.peserta, 0);
+        const totGapok = filteredKomparasiJKKMatra.reduce((a, b) => a + b.gapokTotal, 0);
+        const totPot = filteredKomparasiJKKMatra.reduce((a, b) => a + (prog === "JKK" ? b.nominalJKKSistem : b.nominalJKMSistem), 0);
+        const totReal = filteredKomparasiJKKMatra.reduce((a, b) => a + (prog === "JKK" ? b.realisasiKasJKK : b.realisasiKasJKM), 0);
+
+        setPreview({
+          title: `Laporan Komparasi Iuran ${prog} Per-Satker`,
+          subtitle: `Filter: Satker ${sTitle} • Golongan ${gTitle} • Periode Juli - September 2026`,
+          type: "table",
+          fileName: `Laporan_PerSatker_${prog}_${filterSatker}.xlsx`,
+          content: {
+            columns: ["Matra / Satuan Kerja", "Peserta Terlindungi", "Total Gaji Pokok", `Potensi ${prog} (Rp)`, `Realisasi SP2D (Rp)`, "Selisih Nominal", "Status"],
+            rows: rows,
+            totalRow: ["TOTAL (TERFILTER)", `${fmtNum(totP)} Jiwa`, fmtB(totGapok), fmtB(totPot), fmtB(totReal), "Rp 0", "Lunas 100%"],
+            totalRows: rows.length
+          }
+        });
+      }
+    }
+  };
+
+  // Handler Global Ekspor Excel (Sesuai Filter Aktif)
   const handleExportExcel = () => {
     if (activeSubtab === "history") {
       const targetHist =
@@ -946,7 +1509,7 @@ export const RekonsIuran = () => {
       const dokCol = activeProgram === "THT_PENSIUN" ? "Surat SKP-PFK Kemenkeu" : "Nota Dinas Kepesertaan";
 
       setPreview({
-        title: `Ekspor Riwayat Proses Selesai (History) — ${activeProgram}`,
+        title: `Ekspor Excel Riwayat Proses Selesai (History) — ${activeProgram}`,
         subtitle: `Periode ${filterPeriode}`,
         type: "table",
         fileName: `History_Complete_Process_${activeProgram}_${filterPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
@@ -968,65 +1531,8 @@ export const RekonsIuran = () => {
       return;
     }
 
-    if (activeProgram === "THT_PENSIUN") {
-      if (activeSubtab === "monitoring") {
-        setPreview({
-          title: `Ekspor Monitoring Penerimaan SKP-PFK`,
-          subtitle: `Periode ${filterPeriode}`,
-          type: "table",
-          fileName: `Monitoring_Penerimaan_SKP_PFK_${filterPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
-          content: {
-            columns: ["Surat Tagihan Resmi", "Nomor SKP-PFK", "Nomor SP2D", "Tgl Realisasi", "Nominal SKP", "Status"],
-            rows: filteredMonitoringSKP.map((m) => [m.noSuratTagihan, m.noSKP, m.noSP2D, m.tglTerimaDana, fmtB(m.nominalDanaSKP), m.statusDana]),
-            totalRows: filteredMonitoringSKP.length
-          }
-        });
-      } else {
-        setPreview({
-          title: `Ekspor Komparasi Data Kepesertaan THT & Pensiun`,
-          subtitle: `Mode: ${viewModeKomparasi === "rekap" ? "Secara Rekap" : "Secara Per-Matra"}`,
-          type: "table",
-          fileName: `Komparasi_THT_Pensiun_${viewModeKomparasi}.xlsx`,
-          content: {
-            columns: ["Matra / Komponen", "Peserta Sistem", "Nominal Sistem", "Peserta BNBA / SKP", "Nominal BNBA / SKP", "Selisih", "Status"],
-            rows: viewModeKomparasi === "rekap"
-              ? rekapSKPData.map(r => [r.pilar, `${fmtNum(r.pesertaSistem)} Jiwa`, fmtB(r.nominalSistem), `${fmtNum(r.pesertaSKP)} Jiwa`, fmtB(r.nominalSKP), fmtB(r.selisihNominal), r.statusRekap])
-              : bnbaMatraData.map(b => [b.matra, `${fmtNum(b.pesertaSistem)} Jiwa`, fmtB(b.nominalSistem), `${fmtNum(b.pesertaBNBA)} Jiwa`, fmtB(b.nominalBNBA), fmtB(b.selisihNominal), b.status]),
-            totalRows: viewModeKomparasi === "rekap" ? rekapSKPData.length : bnbaMatraData.length
-          }
-        });
-      }
-    } else {
-      const prog = activeProgram;
-      const targetList = prog === "JKK" ? filteredMonitoringJKKOnly : filteredMonitoringJKMOnly;
-      if (activeSubtab === "monitoring") {
-        setPreview({
-          title: `Ekspor Monitoring Realisasi ${prog}`,
-          subtitle: `Periode ${filterPeriode}`,
-          type: "table",
-          fileName: `Monitoring_Realisasi_${prog}_${filterPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
-          content: {
-            columns: ["Surat Tagihan Resmi", "Nota Dinas Kepesertaan", "Nomor SP2D", "Tgl Cair", "Nominal Realisasi", "Status"],
-            rows: targetList.map((m) => [m.noSuratTagihan, m.noNotaDinas, m.noSP2D, m.tglTerimaDana, fmtB(m.nominalDiterima), m.statusDana]),
-            totalRows: targetList.length
-          }
-        });
-      } else {
-        setPreview({
-          title: `Ekspor Komparasi Data Kepesertaan ${prog}`,
-          subtitle: `Mode: ${viewModeKomparasi === "rekap" ? "Secara Rekap" : "Secara Per-Matra"}`,
-          type: "table",
-          fileName: `Komparasi_${prog}_${viewModeKomparasi}.xlsx`,
-          content: {
-            columns: ["Matra / Program", "Peserta", "Total Gaji Pokok", `Potensi ${prog}`, `Realisasi SP2D`, "Selisih", "Status"],
-            rows: viewModeKomparasi === "rekap"
-              ? [rekapJKKData.find(r => r.program.includes(prog))].map(r => [r.program, `${fmtNum(r.peserta)} Jiwa`, "—", fmtB(r.nominalPotensi), fmtB(r.nominalRealisasi), "Rp 0", r.status])
-              : komparasiJKKMatraData.map(k => [k.matra, `${fmtNum(k.peserta)} Jiwa`, fmtB(k.gapokTotal), fmtB(prog === "JKK" ? k.nominalJKKSistem : k.nominalJKMSistem), fmtB(prog === "JKK" ? k.realisasiKasJKK : k.realisasiKasJKM), "Rp 0", k.status]),
-            totalRows: viewModeKomparasi === "rekap" ? 1 : komparasiJKKMatraData.length
-          }
-        });
-      }
-    }
+    // Untuk tab Komparasi: Generate tabel ekspor yang persis sesuai filter yang sedang aktif
+    handlePreviewRekapLaporan();
   };
 
   return (
@@ -1225,7 +1731,7 @@ export const RekonsIuran = () => {
                     <div style={{ fontSize: 12, color: COLORS.gray600, marginTop: 4 }}>
                       {activeProgram === "THT_PENSIUN"
                         ? "Penetapan Perhitungan Fihak Ketiga (SKP-PFK) dari Ditjen Perbendaharaan diterima dan dicocokkan dengan data potongan iuran 8,00%."
-                        : "Nota Dinas penetapan kepesertaan divalidasi terhadap daftar personel terlindungi dan basis gaji pokok 5 Matra kedinasan."}
+                        : "Nota Dinas penetapan kepesertaan divalidasi terhadap daftar personel terlindungi dan basis gaji pokok 6 Matra kedinasan."}
                     </div>
                     <div style={{ marginTop: 8, padding: "8px 12px", background: "#F8FAFC", borderRadius: 6, fontSize: 11.5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       <div>
@@ -1275,17 +1781,17 @@ export const RekonsIuran = () => {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>
-                        Komparasi Data Kepesertaan (5 Matra Kedinasan)
+                        Komparasi Data Kepesertaan (6 Matra Kedinasan)
                       </div>
                       <span style={{ fontSize: 10.5, fontWeight: 700, padding: "2px 8px", background: "#E0E7FF", color: "#3730A3", borderRadius: 4 }}>
                         Langkah 4
                       </span>
                     </div>
                     <div style={{ fontSize: 12, color: COLORS.gray600, marginTop: 4 }}>
-                      Pencocokan rekonsiliasi antara realisasi kas yang masuk dengan rincian peserta per Matra (TNI AD, TNI AL, TNI AU, Kemhan, POLRI).
+                      Pencocokan rekonsiliasi antara realisasi kas yang masuk dengan rincian peserta per Matra (TNI AD, TNI AL, TNI AU, PNS Kemhan, PPPK Kemhan, POLRI).
                     </div>
                     <div style={{ marginTop: 8, padding: "8px 12px", background: "#F8FAFC", borderRadius: 6, fontSize: 11.5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                      <div>Cakupan Matra: <b>5 Matra (TNI AD, AL, AU, Kemhan, POLRI)</b></div>
+                      <div>Cakupan Matra: <b>6 Matra (TNI AD, AL, AU, PNS Kemhan, PPPK Kemhan, POLRI)</b></div>
                       <div>Status Komparasi: <b style={{ color: "#059669" }}>Cocok 100% (Zero Discrepancy)</b></div>
                       <div>Sinkronisasi SPAN: <b>Tervalidasi API BNBA Kemenkeu</b></div>
                       <div>Selisih Gantung: <b style={{ color: "#059669" }}>Rp 0 (Seimbang)</b></div>
@@ -1441,535 +1947,6 @@ export const RekonsIuran = () => {
         </div>
       )}
 
-      {/* Modal Input Realisasi SKP-PFK */}
-      {showInputModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15, 23, 42, 0.65)",
-            zIndex: 1250,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(2px)"
-          }}
-          onClick={() => setShowInputModal(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: COLORS.white,
-              borderRadius: 14,
-              width: "100%",
-              maxWidth: 720,
-              maxHeight: "90vh",
-              display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-              overflow: "hidden"
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{
-                padding: "18px 24px",
-                borderBottom: `1px solid ${COLORS.gray200}`,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                background: "#F8FAFC"
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    background: "#EFF6FF",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: COLORS.blue
-                  }}
-                >
-                  <Plus size={20} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
-                    Input Realisasi Penerimaan Tagihan SKP-PFK
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowInputModal(false)}
-                style={{
-                  border: "none",
-                  background: "none",
-                  fontSize: 20,
-                  cursor: "pointer",
-                  color: COLORS.gray400
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Body */}
-            <div style={{ padding: "20px 24px", overflowY: "auto", flex: 1 }}>
-
-              {inputError && (
-                <div
-                  style={{
-                    marginBottom: 16,
-                    padding: "10px 14px",
-                    background: "#FEF2F2",
-                    border: `1px solid #F87171`,
-                    borderRadius: 6,
-                    fontSize: 12,
-                    color: "#B91C1C",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8
-                  }}
-                >
-                  <AlertCircle size={16} color="#DC2626" style={{ flexShrink: 0 }} />
-                  <span>{inputError}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSaveNewSKP}>
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Pilihan Program / Dana PFK <span style={{ color: "#DC2626" }}>*</span>
-                  </label>
-                  <select
-                    value={inputForm.danaType || "THT_TNI"}
-                    onChange={(e) => {
-                      const dt = e.target.value;
-                      const nextNo = `119${Math.floor(Math.random() * 6) + 4}/KU.06.06/KMR.N/IX/2026`;
-                      setInputForm({
-                        ...inputForm,
-                        danaType: dt,
-                        noSuratTagihan: nextNo,
-                        jenisIuran:
-                          dt === "THT_TNI" ? "Iuran Tabungan Hari Tua (THT) TNI & ASN Kemhan" :
-                          dt === "THT_POLRI" ? "Iuran Tabungan Hari Tua (THT) Anggota POLRI & PNS Polri" :
-                          dt === "PENSIUN_TNI" ? "Iuran Pensiun Prajurit TNI & ASN Kemhan" :
-                          "Iuran Pensiun Anggota POLRI & PNS Polri",
-                        peserta: dt.includes("TNI") ? "266150" : "142200",
-                        nominalDanaSKP:
-                          dt === "THT_TNI" ? "28540000000" :
-                          dt === "THT_POLRI" ? "14225000000" :
-                          dt === "PENSIUN_TNI" ? "41710000000" :
-                          "20805000000"
-                      });
-                    }}
-                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box", fontWeight: 700 }}
-                  >
-                    <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan — Tarif 3,25%)</option>
-                    <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri — Tarif 3,25%)</option>
-                    <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan — Tarif 4,75%)</option>
-                    <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri — Tarif 4,75%)</option>
-                  </select>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor Surat Tagihan Resmi (Format Resmi) <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 1190/KU.06.06/KMR.N/IX/2026"
-                      value={inputForm.noSuratTagihan}
-                      onChange={(e) => setInputForm({ ...inputForm, noSuratTagihan: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box", fontFamily: "monospace", fontWeight: 700 }}
-                    />
-                    <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 3 }}>
-                      Pola: NoUrut/KU.06.06/KMR.N/Bulan(Romawi)/Tahun
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Tanggal Surat Tagihan <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 15 September 2026"
-                      value={inputForm.tglSuratTagihan}
-                      onChange={(e) => setInputForm({ ...inputForm, tglSuratTagihan: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor SKP-PFK Kemenkeu <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: S-184/PB.2/2026"
-                      value={inputForm.noSKP}
-                      onChange={(e) => setInputForm({ ...inputForm, noSKP: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Tanggal SKP-PFK <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 14 September 2026"
-                      value={inputForm.tglSKP}
-                      onChange={(e) => setInputForm({ ...inputForm, tglSKP: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Tanggal Penerimaan Dana Masuk <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 18 September 2026"
-                      value={inputForm.tglTerimaDana}
-                      onChange={(e) => setInputForm({ ...inputForm, tglTerimaDana: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor SP2D Kemenkeu <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: SP2D-260918-009412"
-                      value={inputForm.noSP2D}
-                      onChange={(e) => setInputForm({ ...inputForm, noSP2D: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Bank Rekening Giro Penampungan <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={inputForm.bankTujuan}
-                      onChange={(e) => setInputForm({ ...inputForm, bankTujuan: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Jumlah Peserta (Jiwa)
-                    </label>
-                    <input
-                      type="number"
-                      value={inputForm.peserta || ""}
-                      onChange={(e) => setInputForm({ ...inputForm, peserta: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: 18 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Nominal Tagihan Surat Ini (Rp) <span style={{ color: "#DC2626" }}>*</span>
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Contoh: 28540000000"
-                    value={inputForm.nominalDanaSKP}
-                    onChange={(e) => setInputForm({ ...inputForm, nominalDanaSKP: e.target.value })}
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontWeight: 700, fontFamily: "monospace", outline: "none", boxSizing: "border-box" }}
-                  />
-                  {inputForm.nominalDanaSKP && Number(inputForm.nominalDanaSKP) > 0 && (
-                    <div style={{ fontSize: 11, color: COLORS.blue, marginTop: 4 }}>
-                      Nominal: {fmtB(inputForm.nominalDanaSKP)} • Tarif: {(inputForm.danaType || "THT_TNI").startsWith("THT") ? "3,25% (THT)" : "4,75% (Pensiun)"}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, borderTop: `1px solid ${COLORS.gray200}`, paddingTop: 16 }}>
-                  <Btn type="button" variant="ghost" size="sm" onClick={() => setShowInputModal(false)}>
-                    Batal
-                  </Btn>
-                  <Btn type="submit" variant="primary" size="sm">
-                    <Check size={14} style={{ marginRight: 4 }} />
-                    Simpan & Masukkan ke List
-                  </Btn>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Input Realisasi JKK & JKM */}
-      {showInputModalJKK && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15, 23, 42, 0.65)",
-            zIndex: 1250,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            backdropFilter: "blur(2px)"
-          }}
-          onClick={() => setShowInputModalJKK(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: COLORS.white,
-              borderRadius: 14,
-              width: "100%",
-              maxWidth: 720,
-              maxHeight: "90vh",
-              display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-              overflow: "hidden"
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{
-                padding: "18px 24px",
-                borderBottom: `1px solid ${COLORS.gray200}`,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                background: "#F8FAFC"
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    background: inputFormJKK.program === "JKK" ? "#ECFDF5" : "#F0FDFA",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: inputFormJKK.program === "JKK" ? "#047857" : "#0D9488"
-                  }}
-                >
-                  <Shield size={20} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
-                    Input Realisasi Tagihan Iuran {inputFormJKK.program} ({inputFormJKK.program === "JKK" ? "0,24%" : "0,20%"})
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowInputModalJKK(false)}
-                style={{
-                  border: "none",
-                  background: "none",
-                  fontSize: 20,
-                  cursor: "pointer",
-                  color: COLORS.gray400
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Body */}
-            <div style={{ padding: "20px 24px", overflowY: "auto", flex: 1 }}>
-
-              {inputErrorJKK && (
-                <div
-                  style={{
-                    marginBottom: 16,
-                    padding: "10px 14px",
-                    background: "#FEF2F2",
-                    border: `1px solid #F87171`,
-                    borderRadius: 6,
-                    fontSize: 12,
-                    color: "#B91C1C",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8
-                  }}
-                >
-                  <AlertCircle size={16} color="#DC2626" style={{ flexShrink: 0 }} />
-                  <span>{inputErrorJKK}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSaveNewJKK}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Program Iuran <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      disabled
-                      value={inputFormJKK.program === "JKK" ? "Jaminan Kecelakaan Kerja (JKK 0,24%)" : "Jaminan Kematian (JKM 0,20%)"}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, background: "#F1F5F9", fontSize: 12, fontWeight: 700, color: COLORS.gray700, boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Jumlah Peserta Terlindungi <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Contoh: 14328"
-                      value={inputFormJKK.peserta}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, peserta: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor Surat Tagihan <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={`Contoh: 004/ASABRI/TGH-${inputFormJKK.program}/VIII/2026`}
-                      value={inputFormJKK.noSuratTagihan}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, noSuratTagihan: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Tanggal Surat Tagihan <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 26 Juli 2026"
-                      value={inputFormJKK.tglSuratTagihan}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, tglSuratTagihan: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor Nota Dinas Kepesertaan <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={`Contoh: ND-355/KPS/VII/2026`}
-                      value={inputFormJKK.noNotaDinas}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, noNotaDinas: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Tanggal Nota Dinas Kepesertaan <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 25 Juli 2026"
-                      value={inputFormJKK.tglNotaDinas}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, tglNotaDinas: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Tanggal Penerimaan Dana Masuk <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 29 Juli 2026"
-                      value={inputFormJKK.tglTerimaDana}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, tglTerimaDana: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                      Nomor SP2D Kemenkeu <span style={{ color: "#DC2626" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: SP2D-260729-005102"
-                      value={inputFormJKK.noSP2D}
-                      onChange={(e) => setInputFormJKK({ ...inputFormJKK, noSP2D: e.target.value })}
-                      style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Bank Rekening Giro Penampungan <span style={{ color: "#DC2626" }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={inputFormJKK.bankTujuan}
-                    onChange={(e) => setInputFormJKK({ ...inputFormJKK, bankTujuan: e.target.value })}
-                    style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, outline: "none", boxSizing: "border-box" }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: 18 }}>
-                  <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-                    Nominal Dana Realisasi Masuk (Rp) <span style={{ color: "#DC2626" }}>*</span>
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Contoh: 150000000"
-                    value={inputFormJKK.nominalTagihan}
-                    onChange={(e) => setInputFormJKK({ ...inputFormJKK, nominalTagihan: e.target.value })}
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontWeight: 700, fontFamily: "monospace", outline: "none", boxSizing: "border-box" }}
-                  />
-                  {inputFormJKK.nominalTagihan && Number(inputFormJKK.nominalTagihan) > 0 && (
-                    <div style={{ fontSize: 11, color: currentTheme.primary, marginTop: 4 }}>
-                      Nominal Terbilang: {fmtB(Number(inputFormJKK.nominalTagihan))}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, borderTop: `1px solid ${COLORS.gray200}`, paddingTop: 16 }}>
-                  <Btn type="button" variant="ghost" size="sm" onClick={() => setShowInputModalJKK(false)}>
-                    Batal
-                  </Btn>
-                  <Btn type="submit" variant="primary" size="sm" style={{ background: currentTheme.primary }}>
-                    <Check size={14} style={{ marginRight: 4 }} />
-                    Simpan & Masukkan ke List
-                  </Btn>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Modal Drilldown BNBA */}
       {selectedMatraDetail && (
         <div
@@ -2014,7 +1991,7 @@ export const RekonsIuran = () => {
                   Drilldown By-Name-By-Address (API BNBA Kemenkeu)
                 </div>
                 <div style={{ fontSize: 11.5, color: COLORS.gray600, marginTop: 2 }}>
-                  Matra: <b>{selectedMatraDetail.matra}</b> • Program: <b>{selectedMatraDetail.jenisIuran}</b> • Periode Juli 2026
+                  Program Dana: <b>{selectedMatraDetail.namaDana || selectedMatraDetail.jenisIuran}</b> ({selectedMatraDetail.tarif || "3,25%"}) • Matra: <b>{selectedMatraDetail.matra}</b> • Periode Juli 2026
                 </div>
               </div>
               <button
@@ -2034,7 +2011,7 @@ export const RekonsIuran = () => {
 
             <div style={{ padding: 20, overflowY: "auto", flex: 1 }}>
               <div style={{ marginBottom: 14, padding: "10px 14px", background: "#EFF6FF", borderLeft: `4px solid ${COLORS.blue}`, borderRadius: 4, fontSize: 12, color: COLORS.blueDark }}>
-                Menampilkan sampel records transaksi potongan gaji induk per prajurit/anggota yang ditarik secara terpusat melalui API BNBA Kemenkeu RI (SPAN).
+                Menampilkan sampel records transaksi potongan gaji induk per prajurit/anggota berdasarkan rekonsiliasi data Kemenkeu RI.
               </div>
 
               <div style={{ overflowX: "auto" }}>
@@ -2150,7 +2127,7 @@ export const RekonsIuran = () => {
           }}
         >
           <Building2 size={16} color={activeProgram === "THT_PENSIUN" ? COLORS.blue : COLORS.gray500} />
-          <span>THT & Pensiun (SKP-PFK 8,00%)</span>
+          <span>THT & Pensiun</span>
           <span
             style={{
               fontSize: 11,
@@ -2188,7 +2165,7 @@ export const RekonsIuran = () => {
           }}
         >
           <Shield size={16} color={activeProgram === "JKK" ? "#047857" : COLORS.gray500} />
-          <span>Jaminan Kecelakaan Kerja (JKK 0,24%)</span>
+          <span>Jaminan Kecelakaan Kerja (JKK)</span>
           <span
             style={{
               fontSize: 11,
@@ -2199,7 +2176,7 @@ export const RekonsIuran = () => {
               fontWeight: 700
             }}
           >
-            {monitoringJKKList.length} Monitoring
+            Program JKK
           </span>
         </button>
 
@@ -2226,7 +2203,7 @@ export const RekonsIuran = () => {
           }}
         >
           <Shield size={16} color={activeProgram === "JKM" ? "#0D9488" : COLORS.gray500} />
-          <span>Jaminan Kematian (JKM 0,20%)</span>
+          <span>Jaminan Kematian (JKM)</span>
           <span
             style={{
               fontSize: 11,
@@ -2237,17 +2214,13 @@ export const RekonsIuran = () => {
               fontWeight: 700
             }}
           >
-            {monitoringJKMList.length} Monitoring
+            Program JKM
           </span>
         </button>
       </div>
 
       {/* =========================================================================
-          2. NAVIGASI 3 SUBTAB UTAMA: MONITORING, KOMPARASI, DAN HISTORY
-          Sesuai permintaan:
-          - Tab ledger & integrasi D365 dihilangkan
-          - Komparasi dibuat 1 tab saja
-          - Tab History untuk menyimpan complete process rekonsiliasi yang telah tuntas
+          2. NAVIGASI 2 SUBTAB UTAMA: KOMPARASI DAN HISTORY
          ========================================================================= */}
       <div
         style={{
@@ -2263,41 +2236,7 @@ export const RekonsIuran = () => {
         }}
       >
         <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: -2 }}>
-          {/* SUBTAB 1: MONITORING PENERIMAAN DANA */}
-          <button
-            onClick={() => setActiveSubtab("monitoring")}
-            style={{
-              padding: "10px 18px",
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: activeSubtab === "monitoring" ? 800 : 600,
-              color: activeSubtab === "monitoring" ? currentTheme.primary : COLORS.gray600,
-              borderBottom: activeSubtab === "monitoring" ? `3px solid ${currentTheme.primary}` : "3px solid transparent",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              transition: "all 0.15s ease"
-            }}
-          >
-            <ShieldCheck size={16} />
-            Monitoring Penerimaan Dana
-            <span
-              style={{
-                fontSize: 11,
-                background: activeSubtab === "monitoring" ? currentTheme.lightBg : "#F1F5F9",
-                color: activeSubtab === "monitoring" ? currentTheme.primary : COLORS.gray600,
-                padding: "2px 8px",
-                borderRadius: 10,
-                fontWeight: 700
-              }}
-            >
-              {currentMonitoringCount}
-            </span>
-          </button>
-
-          {/* SUBTAB 2: KOMPARASI DATA KEPESERTAAN (HANYA 1 TAB) */}
+          {/* SUBTAB 1: KOMPARASI DATA KEPESERTAAN */}
           <button
             onClick={() => setActiveSubtab("komparasi")}
             style={{
@@ -2319,7 +2258,7 @@ export const RekonsIuran = () => {
             Komparasi Data Kepesertaan
           </button>
 
-          {/* SUBTAB 3: HISTORY / RIWAYAT PROSES (THE COMPLETE PROCESS) */}
+          {/* SUBTAB 2: HISTORY / RIWAYAT PROSES */}
           <button
             onClick={() => setActiveSubtab("history")}
             style={{
@@ -2368,422 +2307,6 @@ export const RekonsIuran = () => {
       </div>
 
       {/* =========================================================================
-          KONTEN SUBTAB 1: MONITORING PENERIMAAN DANA
-          Sesuai permintaan: Card KPI di setiap tab dihilangkan!
-         ========================================================================= */}
-      {activeSubtab === "monitoring" && (
-        <div>
-          {/* Toolbar Filter & Tombol Input */}
-          <div
-            style={{
-              background: COLORS.white,
-              padding: "12px 16px",
-              borderRadius: 10,
-              border: `1px solid ${COLORS.gray200}`,
-              marginBottom: 14,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 12
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Periode:</span>
-                <input
-                  type="date"
-                  value={tglAwal}
-                  onChange={(e) => setTglAwal(e.target.value)}
-                  style={{ padding: "5px 8px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12 }}
-                />
-                <span style={{ fontSize: 12, color: COLORS.gray500 }}>s.d.</span>
-                <input
-                  type="date"
-                  value={tglAkhir}
-                  onChange={(e) => setTglAkhir(e.target.value)}
-                  style={{ padding: "5px 8px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12 }}
-                />
-              </div>
-
-              {activeProgram === "THT_PENSIUN" && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Filter Dana:</span>
-                  <select
-                    value={filterDanaPFK}
-                    onChange={(e) => setFilterDanaPFK(e.target.value)}
-                    style={{
-                      padding: "5px 10px",
-                      borderRadius: 6,
-                      border: `1px solid ${COLORS.gray300}`,
-                      fontSize: 12,
-                      background: COLORS.white,
-                      fontWeight: 700,
-                      color: COLORS.gray800
-                    }}
-                  >
-                    <option value="Semua">Semua Surat Dana PFK (4 Surat)</option>
-                    <option value="THT_TNI">THT TNI (Prajurit TNI & Kemhan)</option>
-                    <option value="THT_POLRI">THT POLRI (Anggota & PNS Polri)</option>
-                    <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & Kemhan)</option>
-                    <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota & PNS Polri)</option>
-                  </select>
-                </div>
-              )}
-
-              <div style={{ position: "relative", width: 240 }}>
-                <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 9 }} />
-                <input
-                  type="text"
-                  placeholder="Cari surat / SKP / SP2D..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "6px 10px 6px 30px",
-                    borderRadius: 6,
-                    border: `1px solid ${COLORS.gray300}`,
-                    fontSize: 12,
-                    outline: "none",
-                    boxSizing: "border-box"
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              {activeProgram === "THT_PENSIUN" ? (
-                <Btn
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setShowInputModal(true)}
-                  style={{ fontWeight: 700 }}
-                >
-                  <Plus size={14} style={{ marginRight: 4 }} />
-                  Input Realisasi SKP-PFK
-                </Btn>
-              ) : (
-                <Btn
-                  variant="primary"
-                  size="sm"
-                  onClick={() => {
-                    setInputFormJKK((prev) => ({ ...prev, program: activeProgram }));
-                    setShowInputModalJKK(true);
-                  }}
-                  style={{ background: currentTheme.primary, fontWeight: 700 }}
-                >
-                  <Plus size={14} style={{ marginRight: 4 }} />
-                  Input Realisasi {activeProgram}
-                </Btn>
-              )}
-            </div>
-          </div>
-
-          {/* TABEL MONITORING SESUAI PROGRAM AKTIF */}
-          {activeProgram === "THT_PENSIUN" ? (
-            /* TABEL THT & PENSIUN - DIPISAH PER DANA */
-            <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                  <thead>
-                    <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan & Program Dana</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Dasar SKP-PFK Kemenkeu</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan (Rp)</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Kas</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMonitoringSKP.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
-                          Tidak ada data penerimaan SKP-PFK dalam monitoring aktif atau semua tagihan telah dipindahkan ke History.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredMonitoringSKP.map((item) => {
-                        const isTHT = item.danaType?.startsWith("THT");
-                        const badgeColor =
-                          item.danaType === "THT_TNI" ? { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" } :
-                          item.danaType === "THT_POLRI" ? { bg: "#EEF2FF", text: "#4338CA", border: "#C7D2FE" } :
-                          item.danaType === "PENSIUN_TNI" ? { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" } :
-                          { bg: "#F0FDFA", text: "#0F766E", border: "#99F6E4" };
-
-                        return (
-                          <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                            <td style={{ padding: "12px 14px" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                                <span
-                                  style={{
-                                    fontSize: 10.5,
-                                    fontWeight: 800,
-                                    padding: "2px 7px",
-                                    borderRadius: 4,
-                                    background: badgeColor.bg,
-                                    color: badgeColor.text,
-                                    border: `1px solid ${badgeColor.border}`
-                                  }}
-                                >
-                                  {item.namaDana || "Dana PFK"} • {item.tarif || (isTHT ? "3,25%" : "4,75%")}
-                                </span>
-                              </div>
-                              <div style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 12.5, color: COLORS.gray900 }}>
-                                {item.noSuratTagihan}
-                              </div>
-                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                                Tgl Surat: {item.tglSuratTagihan} • {item.matraUtama}
-                              </div>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
-                                {item.noSKP}
-                              </div>
-                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                                Tgl SKP: {item.tglSKP}
-                              </div>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
-                                {item.tglTerimaDana}
-                              </div>
-                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                                SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
-                              </div>
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                              <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: badgeColor.text }}>
-                                {fmtB(item.nominalDanaSKP)}
-                              </div>
-                              <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
-                                {fmtNum(item.peserta)} Personel • Tarif {item.tarif || (isTHT ? "3,25%" : "4,75%")}
-                              </div>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <span
-                                style={{
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  padding: "3px 8px",
-                                  borderRadius: 4,
-                                  background: "#ECFDF5",
-                                  color: "#065F46",
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4
-                                }}
-                              >
-                                <CheckCircle2 size={12} />
-                                {item.statusDana}
-                              </span>
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                              <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
-                                <Btn
-                                  size="xs"
-                                  variant="outline"
-                                  onClick={() => openSuratTagihanPreview(item)}
-                                >
-                                  <FileText size={12} style={{ marginRight: 3 }} />
-                                  Surat Tagihan
-                                </Btn>
-                                <Btn
-                                  size="xs"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    setSatkerModalData({
-                                      noSurat: item.noSuratTagihan,
-                                      noSKP: item.noSKP,
-                                      program: item.namaDana,
-                                      danaType: item.danaType,
-                                      satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL,
-                                      periode: "September 2026"
-                                    })
-                                  }
-                                >
-                                  <Building2 size={12} style={{ marginRight: 3 }} />
-                                  Rincian Satker
-                                </Btn>
-                                <Btn
-                                  size="xs"
-                                  variant="primary"
-                                  style={{ background: "#059669", color: COLORS.white, fontWeight: 700 }}
-                                  onClick={() => setConfirmCompleteItem(item)}
-                                >
-                                  <CheckCircle2 size={12} style={{ marginRight: 3 }} />
-                                  Selesaikan Proses
-                                </Btn>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                      <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
-                        Total Realisasi Dana SKP-PFK ({filteredMonitoringSKP.length} Surat Tagihan):
-                      </td>
-                      <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blue, fontSize: 13 }}>
-                        {fmtB(filteredMonitoringSKP.reduce((acc, it) => acc + (it.nominalDanaSKP || 0), 0))}
-                      </td>
-                      <td colSpan={2} style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11 }}>
-                        Lunas 100% SP2D Kemenkeu
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          ) : (
-            /* TABEL JKK ATAU JKM (Disamakan dengan format tabel THT, tanpa tarif, SKP diganti Nota Dinas Kepesertaan) */
-            <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                  <thead>
-                    <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Nota Dinas Kepesertaan</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Realisasi (Rp)</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Kas</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(activeProgram === "JKK" ? filteredMonitoringJKKOnly : filteredMonitoringJKMOnly).length === 0 ? (
-                      <tr>
-                        <td colSpan={6} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
-                          Tidak ada data penerimaan tagihan {activeProgram} dalam monitoring aktif atau semua tagihan telah dipindahkan ke History.
-                        </td>
-                      </tr>
-                    ) : (
-                      (activeProgram === "JKK" ? filteredMonitoringJKKOnly : filteredMonitoringJKMOnly).map((item) => (
-                        <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.noSuratTagihan}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl Surat: {item.tglSuratTagihan}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: currentTheme.primary }}>
-                              {item.noNotaDinas}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl ND: {item.tglNotaDinas}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.tglTerimaDana}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                              SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: currentTheme.primary }}>
-                              {fmtB(item.nominalDiterima)}
-                            </div>
-                            <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
-                              {fmtNum(item.peserta)} Personel (5 Matra)
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <span
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                padding: "3px 8px",
-                                borderRadius: 4,
-                                background: "#ECFDF5",
-                                color: "#065F46",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4
-                              }}
-                            >
-                              <CheckCircle2 size={12} />
-                              {item.statusDana}
-                            </span>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                            <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
-                              <Btn
-                                size="xs"
-                                variant="outline"
-                                onClick={() => openSuratTagihanPreview(item)}
-                              >
-                                <FileText size={12} style={{ marginRight: 3 }} />
-                                Surat Tagihan
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="ghost"
-                                onClick={() =>
-                                  setPreview({
-                                    title: `Detail Rekapitulasi Matra — ${item.program}`,
-                                    subtitle: `Surat Tagihan: ${item.noSuratTagihan} • SP2D: ${item.noSP2D}`,
-                                    type: "table",
-                                    fileName: `Rekap_Matra_${item.program}_Juli2026.xlsx`,
-                                    content: {
-                                      columns: ["Matra / Komponen", "Jumlah Peserta", "Total Gaji Pokok (Rp)", `Alokasi Iuran ${item.program} (Rp)`, "Status Validasi"],
-                                      rows: komparasiJKKMatraData.map((k) => [
-                                        k.matra,
-                                        `${fmtNum(k.peserta)} Jiwa`,
-                                        fmtB(k.gapokTotal),
-                                        fmtB(item.program === "JKK" ? k.nominalJKKSistem : k.nominalJKMSistem),
-                                        k.status
-                                      ]),
-                                      totalRows: komparasiJKKMatraData.length
-                                    }
-                                  })
-                                }
-                              >
-                                <Building2 size={12} style={{ marginRight: 3 }} />
-                                Detail Matra
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="primary"
-                                style={{ background: "#059669", color: COLORS.white, fontWeight: 700 }}
-                                onClick={() => setConfirmCompleteItem(item)}
-                              >
-                                <CheckCircle2 size={12} style={{ marginRight: 3 }} />
-                                Selesaikan Proses
-                              </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                      <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
-                        Total Realisasi Iuran {activeProgram}:
-                      </td>
-                      <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: currentTheme.primary, fontSize: 13 }}>
-                        {fmtB((activeProgram === "JKK" ? filteredMonitoringJKKOnly : filteredMonitoringJKMOnly).reduce((acc, it) => acc + (it.nominalDiterima || 0), 0))}
-                      </td>
-                      <td colSpan={2} style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11 }}>
-                        Lunas 100% SP2D Kemenkeu
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* =========================================================================
           KONTEN SUBTAB 2: KOMPARASI DATA KEPESERTAAN (HANYA 1 TAB)
           Sesuai permintaan:
           - Dibuat 1 tab saja
@@ -2792,102 +2315,318 @@ export const RekonsIuran = () => {
          ========================================================================= */}
       {activeSubtab === "komparasi" && (
         <div>
-          {/* BAR FILTER TAMPILAN KOMPARASI: REKAP VS PER-MATRA */}
+          {/* =========================================================================
+              BAR FILTER KOMPARASI (FORMAT DROPDOWN FIELDS: JENIS DANA & SUB-JENIS DANA)
+             ========================================================================= */}
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
               background: COLORS.white,
-              padding: "12px 16px",
+              padding: "16px 18px",
               borderRadius: 10,
               border: `1px solid ${COLORS.gray200}`,
               marginBottom: 16,
-              flexWrap: "wrap",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+              display: "flex",
+              flexDirection: "column",
               gap: 12
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray700 }}>
-                Filter Tampilan Komparasi:
-              </span>
-              <div style={{ display: "inline-flex", background: "#F1F5F9", padding: 3, borderRadius: 8, gap: 4 }}>
-                <button
-                  onClick={() => setViewModeKomparasi("rekap")}
+            {/* Baris 1: Filter Tingkat Utama (Mode Tampilan, Jenis Dana, Filter Matra) */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 12
+              }}
+            >
+              {/* Field 1: Mode Tampilan */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
+                  <Layers size={13} color={currentTheme.primary} />
+                  Mode Tampilan:
+                </label>
+                <select
+                  value={viewModeKomparasi}
+                  onChange={(e) => setViewModeKomparasi(e.target.value)}
                   style={{
-                    padding: "6px 14px",
-                    border: "none",
+                    padding: "8px 10px",
                     borderRadius: 6,
-                    cursor: "pointer",
+                    border: `1px solid ${COLORS.gray300}`,
+                    background: COLORS.white,
                     fontSize: 12,
-                    fontWeight: viewModeKomparasi === "rekap" ? 800 : 600,
-                    background: viewModeKomparasi === "rekap" ? COLORS.white : "transparent",
-                    color: viewModeKomparasi === "rekap" ? currentTheme.primary : COLORS.gray600,
-                    boxShadow: viewModeKomparasi === "rekap" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    transition: "all 0.15s ease"
+                    fontWeight: 600,
+                    color: COLORS.gray800,
+                    outline: "none"
                   }}
                 >
-                  <Layers size={14} />
-                  Secara Rekap
-                </button>
+                  <option value="rekap">Secara Rekap (Makro)</option>
+                  <option value="per_matra">Secara Per-Matra (BNBA)</option>
+                </select>
+              </div>
 
-                <button
-                  onClick={() => setViewModeKomparasi("per_matra")}
+              {/* Field 2: Jenis Dana (Atas) */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
+                  <Building2 size={13} color={COLORS.blue} />
+                  Jenis Dana:
+                </label>
+                {activeProgram === "THT_PENSIUN" ? (
+                  <select
+                    value={filterJenisDana}
+                    onChange={(e) => handleJenisDanaChange(e.target.value)}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: `1px solid ${filterJenisDana !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
+                      background: filterJenisDana !== "Semua" ? currentTheme.lightBg : COLORS.white,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: filterJenisDana !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                      outline: "none"
+                    }}
+                  >
+                    <option value="Semua">Semua Jenis Dana (THT & Pensiun)</option>
+                    <option value="THT">THT (Tabungan Hari Tua)</option>
+                    <option value="PENSIUN">Pensiun</option>
+                  </select>
+                ) : (
+                  <select
+                    disabled
+                    value={activeProgram}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      background: "#F8FAFC",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: COLORS.gray800,
+                      outline: "none"
+                    }}
+                  >
+                    <option value={activeProgram}>
+                      {activeProgram === "JKK" ? "JKK (Jaminan Kecelakaan Kerja)" : "JKM (Jaminan Kematian)"}
+                    </option>
+                  </select>
+                )}
+              </div>
+
+              {/* Field 3: Filter Satker */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
+                  <Building2 size={13} color={COLORS.gray600} />
+                  Filter Satker:
+                </label>
+                <select
+                  value={filterSatker}
+                  onChange={(e) => setFilterSatker(e.target.value)}
                   style={{
-                    padding: "6px 14px",
-                    border: "none",
+                    padding: "8px 10px",
                     borderRadius: 6,
-                    cursor: "pointer",
+                    border: `1px solid ${filterSatker !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
+                    background: filterSatker !== "Semua" ? currentTheme.lightBg : COLORS.white,
                     fontSize: 12,
-                    fontWeight: viewModeKomparasi === "per_matra" ? 800 : 600,
-                    background: viewModeKomparasi === "per_matra" ? COLORS.white : "transparent",
-                    color: viewModeKomparasi === "per_matra" ? currentTheme.primary : COLORS.gray600,
-                    boxShadow: viewModeKomparasi === "per_matra" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    transition: "all 0.15s ease"
+                    fontWeight: 600,
+                    color: filterSatker !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                    outline: "none"
                   }}
                 >
-                  <Users size={14} />
-                  Secara Per-Matra
-                </button>
+                  <option value="Semua">Semua Satker</option>
+                  <option value="TNI">TNI</option>
+                  <option value="POLRI">POLRI</option>
+                </select>
               </div>
             </div>
 
-            {/* Opsi Khusus jika THT & Pensiun pada mode Per-Matra */}
-            {activeProgram === "THT_PENSIUN" && viewModeKomparasi === "per_matra" && (
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Matra:</span>
-                  <select
-                    value={filterMatra}
-                    onChange={(e) => setFilterMatra(e.target.value)}
-                    style={{ padding: "5px 8px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12 }}
-                  >
-                    <option value="Semua">Semua Matra (5 Matra)</option>
-                    <option value="TNI AD">TNI AD</option>
-                    <option value="TNI AL">TNI AL</option>
-                    <option value="TNI AU">TNI AU</option>
-                    <option value="Kemhan (PNS/PPPK)">Kemhan (PNS/PPPK)</option>
-                    <option value="POLRI">POLRI</option>
-                  </select>
+            {/* Baris 2: Sub-Jenis Dana (Nilai mengikuti Jenis Dana di atas), Golongan, Pencarian & Aksi */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr)) auto",
+                alignItems: "flex-end",
+                gap: 12,
+                paddingTop: 10,
+                borderTop: `1px dashed ${COLORS.gray200}`
+              }}
+            >
+              {/* Field 4: Sub-Jenis Dana (Bawah Jenis Dana) */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
+                  <SlidersHorizontal size={13} color={currentTheme.primary} />
+                  Sub-Jenis Dana:
+                </label>
+                <select
+                  value={filterSubDana}
+                  onChange={(e) => setFilterSubDana(e.target.value)}
+                  style={{
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.primary : COLORS.gray300}`,
+                    background: filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.lightBg : COLORS.white,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.primary : COLORS.gray800,
+                    outline: "none"
+                  }}
+                >
+                  {activeProgram === "THT_PENSIUN" ? (
+                    filterJenisDana === "THT" ? (
+                      <>
+                        <option value="THT_ALL">Semua THT (TNI & POLRI)</option>
+                        <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan)</option>
+                        <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri)</option>
+                      </>
+                    ) : filterJenisDana === "PENSIUN" ? (
+                      <>
+                        <option value="PENSIUN_ALL">Semua Pensiun (TNI & POLRI)</option>
+                        <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan)</option>
+                        <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Semua">Semua Sub-Dana (4 Program Dana)</option>
+                        <optgroup label="── Sub-Dana THT ──">
+                          <option value="THT_ALL">Semua THT (TNI & POLRI)</option>
+                          <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan)</option>
+                          <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri)</option>
+                        </optgroup>
+                        <optgroup label="── Sub-Dana Pensiun ──">
+                          <option value="PENSIUN_ALL">Semua Pensiun (TNI & POLRI)</option>
+                          <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan)</option>
+                          <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri)</option>
+                        </optgroup>
+                      </>
+                    )
+                  ) : activeProgram === "JKK" ? (
+                    <>
+                      <option value="Semua">Semua JKK (TNI & POLRI)</option>
+                      <option value="JKK_TNI">JKK TNI (Prajurit TNI & ASN Kemhan)</option>
+                      <option value="JKK_POLRI">JKK POLRI (Anggota POLRI & PNS Polri)</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Semua">Semua JKM (TNI & POLRI)</option>
+                      <option value="JKM_TNI">JKM TNI (Prajurit TNI & ASN Kemhan)</option>
+                      <option value="JKM_POLRI">JKM POLRI (Anggota POLRI & PNS Polri)</option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              {/* Field 5: Filter Golongan / Kepangkatan */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
+                  <SlidersHorizontal size={13} color={COLORS.gray600} />
+                  Filter Golongan / Pangkat:
+                </label>
+                <select
+                  value={filterGolongan}
+                  onChange={(e) => setFilterGolongan(e.target.value)}
+                  style={{
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${filterGolongan !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
+                    background: filterGolongan !== "Semua" ? currentTheme.lightBg : COLORS.white,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: filterGolongan !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                    outline: "none"
+                  }}
+                >
+                  <option value="Semua">Semua Golongan & Pangkat</option>
+                  <option value="PATI_PAMEN">Perwira Tinggi & Menengah (Pati/Pamen)</option>
+                  <option value="PAMA">Perwira Pertama (Pama)</option>
+                  <option value="BINTARA_TAMTAMA">Bintara & Tamtama (Ba/Ta)</option>
+                  <option value="PNS_GOL">PNS Kemhan/Polri (Golongan I - IV)</option>
+                  <option value="PPPK">PPPK (Pegawai Perjanjian Kerja)</option>
+                </select>
+              </div>
+
+              {/* Field 6: Cari Data */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
+                  <Search size={13} color={COLORS.gray600} />
+                  Pencarian:
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Cari matra, satker..."
+                    style={{
+                      width: "100%",
+                      boxSizing: "border-box",
+                      padding: "8px 24px 8px 10px",
+                      borderRadius: 6,
+                      border: `1px solid ${searchTerm ? currentTheme.primary : COLORS.gray300}`,
+                      fontSize: 12,
+                      outline: "none"
+                    }}
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      style={{
+                        position: "absolute",
+                        right: 6,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        fontSize: 12,
+                        cursor: "pointer",
+                        color: COLORS.gray400
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
+              </div>
+
+              {/* Action: Tombol Ekspor Excel & Reset Filter */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 1 }}>
+                {(filterJenisDana !== "Semua" || filterSubDana !== "Semua" || filterSatker !== "Semua" || filterGolongan !== "Semua" || searchTerm) && (
+                  <button
+                    onClick={() => {
+                      setFilterJenisDana("Semua");
+                      setFilterSubDana("Semua");
+                      setFilterSatker("Semua");
+                      setFilterGolongan("Semua");
+                      setSearchTerm("");
+                    }}
+                    title="Reset Filter ke Default"
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      background: COLORS.white,
+                      color: "#DC2626",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4
+                    }}
+                  >
+                    <RotateCcw size={13} />
+                    Reset
+                  </button>
+                )}
 
                 <Btn
                   variant="primary"
                   size="sm"
-                  disabled={isSyncingBNBA}
-                  onClick={handleSyncBNBA}
+                  onClick={handleExportExcel}
+                  style={{ fontWeight: 700, whiteSpace: "nowrap", padding: "8px 14px" }}
                 >
-                  <RefreshCw size={13} className={isSyncingBNBA ? "animate-spin" : ""} style={{ marginRight: 4 }} />
-                  {isSyncingBNBA ? "Sinkronisasi..." : "Tarik API BNBA Kemenkeu"}
+                  <Download size={13} style={{ marginRight: 5 }} />
+                  Ekspor Excel
                 </Btn>
               </div>
-            )}
+            </div>
           </div>
 
           {/* =====================================================================
@@ -2896,14 +2635,28 @@ export const RekonsIuran = () => {
           {viewModeKomparasi === "rekap" && (
             <div>
               {activeProgram === "THT_PENSIUN" ? (
-                /* REKAP THT & PENSIUN */
+                /* REKAP THT & PENSIUN 4 DANA */
                 <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC" }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
-                      Rekapitulasi Makro Kepesertaan vs SKP-PFK (THT & Pensiun 8,00%)
+                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span>Rekapitulasi Komparasi Iuran vs SKP-PFK Kemenkeu</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#DBEAFE", color: "#1E40AF" }}>
+                          {getDanaLabel()}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
+                        Data perbandingan Sistem ASABRI terhadap SKP-PFK Kemenkeu No. S-184/PB.2/2026 • Satker: <b>{getSatkerLabel(filterSatker)}</b> • Golongan: <b>{getGolonganLabel(filterGolongan)}</b>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
-                      Konsolidasi data peserta sistem ASABRI dibandingkan penetapan SKP-PFK Kemenkeu RI.
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 12, color: COLORS.gray600, fontWeight: 600 }}>
+                        Menampilkan: <b>{filteredRekapSKP.length} Dana/Baris</b>
+                      </span>
+                      <Btn size="xs" variant="outline" onClick={handleExportExcel}>
+                        <Download size={12} style={{ marginRight: 3 }} />
+                        Ekspor Excel
+                      </Btn>
                     </div>
                   </div>
 
@@ -2911,65 +2664,140 @@ export const RekonsIuran = () => {
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                       <thead>
                         <tr style={{ background: "#F1F5F9", color: COLORS.gray700, textAlign: "left" }}>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Dokumen Tagihan</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tarif</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta Sistem</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Sistem (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta SKP</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal SKP (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Program Dana</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra Cakupan</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Tarif</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta Sistem</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Sistem (Rp)</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta SKP</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal SKP (Rp)</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih Nominal (Rp)</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Status Rekon</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {rekapSKPData.map((item, idx) => (
-                          <tr key={idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                            <td style={{ padding: "12px 14px" }}>
-                              <div style={{ fontWeight: 700, color: COLORS.gray900 }}>{item.pilar}</div>
-                              <div style={{ fontSize: 11, color: COLORS.gray500 }}>{item.deskripsi}</div>
-                            </td>
-                            <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
-                              {item.tarif}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtNum(item.pesertaSistem)} Jiwa
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
-                              {fmtB(item.nominalSistem)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtNum(item.pesertaSKP)} Jiwa
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
-                              {fmtB(item.nominalSKP)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: item.selisihNominal < 0 ? "#DC2626" : "#065F46" }}>
-                              {fmtB(item.selisihNominal)} ({item.persenSelisih}%)
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#ECFDF5", color: "#065F46" }}>
-                                {item.statusRekap}
-                              </span>
+                        {filteredRekapSKP.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
+                              Tidak ada data rekap yang sesuai dengan filter yang dipilih.
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        ) : (
+                          filteredRekapSKP.map((item, idx) => {
+                            const isTHT = item.danaType.startsWith("THT");
+                            const isTNI = item.danaType.includes("TNI");
+                            const badgeBg = isTNI ? (isTHT ? "#EFF6FF" : "#F5F3FF") : (isTHT ? "#F0FDF4" : "#ECFEFF");
+                            const badgeBorder = isTNI ? (isTHT ? "#BFDBFE" : "#DDD6FE") : (isTHT ? "#BBF7D0" : "#A5F3FC");
+                            const badgeTxt = isTNI ? (isTHT ? "#1D4ED8" : "#6D28D9") : (isTHT ? "#15803D" : "#0E7490");
 
-                  <div style={{ padding: "14px 18px", background: "#F8FAFC", borderTop: `1px solid ${COLORS.gray200}`, fontSize: 12, color: COLORS.gray600 }}>
-                    <b>Analisis Rekapitulasi:</b> {rekapSKPData[0]?.analisis}
+                            return (
+                              <tr key={item.id || idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                                <td style={{ padding: "12px 14px" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <span
+                                      style={{
+                                        fontSize: 11,
+                                        fontWeight: 800,
+                                        padding: "2px 8px",
+                                        borderRadius: 4,
+                                        background: badgeBg,
+                                        border: `1px solid ${badgeBorder}`,
+                                        color: badgeTxt,
+                                        whiteSpace: "nowrap"
+                                      }}
+                                    >
+                                      {item.namaDana}
+                                    </span>
+                                    <span style={{ fontWeight: 700, color: COLORS.gray900 }}>{item.pilar}</span>
+                                  </div>
+                                </td>
+                                <td style={{ padding: "12px 14px", color: COLORS.gray800, fontWeight: 600 }}>
+                                  {item.matra}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "center", fontFamily: "monospace", fontWeight: 800, color: isTHT ? COLORS.blue : "#7C3AED" }}>
+                                  {item.tarif}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtNum(item.pesertaSistem)} Jiwa
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
+                                  {fmtB(item.nominalSistem)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtNum(item.pesertaSKP)} Jiwa
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
+                                  {fmtB(item.nominalSKP)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: item.selisihNominal < 0 ? "#DC2626" : "#065F46" }}>
+                                  {item.selisihNominal === 0 ? "Rp 0" : fmtB(item.selisihNominal)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                                  <span
+                                    style={{
+                                      fontSize: 10.5,
+                                      fontWeight: 700,
+                                      padding: "2px 8px",
+                                      borderRadius: 4,
+                                      background: item.badgeColor === "green" ? "#ECFDF5" : "#FEF3C7",
+                                      color: item.badgeColor === "green" ? "#065F46" : "#92400E"
+                                    }}
+                                  >
+                                    {item.statusRekap}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
+                          <td colSpan={3} style={{ padding: "12px 14px", textAlign: "left", color: COLORS.gray900 }}>
+                            TOTAL REKAPITULASI ({getDanaLabel()}):
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                            {fmtNum(filteredRekapSKP.reduce((acc, it) => acc + it.pesertaSistem, 0))} Jiwa
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800 }}>
+                            {fmtB(filteredRekapSKP.reduce((acc, it) => acc + it.nominalSistem, 0))}
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                            {fmtNum(filteredRekapSKP.reduce((acc, it) => acc + it.pesertaSKP, 0))} Jiwa
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blue }}>
+                            {fmtB(filteredRekapSKP.reduce((acc, it) => acc + it.nominalSKP, 0))}
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: filteredRekapSKP.reduce((acc, it) => acc + it.selisihNominal, 0) < 0 ? "#DC2626" : "#065F46" }}>
+                            {filteredRekapSKP.reduce((acc, it) => acc + it.selisihNominal, 0) === 0
+                              ? "Rp 0"
+                              : fmtB(filteredRekapSKP.reduce((acc, it) => acc + it.selisihNominal, 0))}
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "center", color: "#065F46" }}>
+                            Lunas SKP-PFK
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
               ) : (
                 /* REKAP JKK ATAU JKM */
                 <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC" }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
-                      Rekapitulasi Makro Tagihan vs Realisasi Kas {activeProgram === "JKK" ? "JKK (0,24%)" : "JKM (0,20%)"}
+                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
+                        Rekapitulasi Tagihan vs Realisasi Kas {activeProgram === "JKK" ? "JKK" : "JKM"}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
+                        Konsolidasi perhitungan potensi iuran pemberi kerja terhadap realisasi SP2D Kemenkeu RI • Satker: <b>{getSatkerLabel(filterSatker)}</b> • Golongan: <b>{getGolonganLabel(filterGolongan)}</b>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
-                      Konsolidasi perhitungan potensi iuran pemberi kerja terhadap realisasi SP2D Kemenkeu RI.
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Btn size="xs" variant="outline" onClick={handleExportExcel}>
+                        <Download size={12} style={{ marginRight: 3 }} />
+                        Ekspor Excel
+                      </Btn>
                     </div>
                   </div>
 
@@ -2977,55 +2805,71 @@ export const RekonsIuran = () => {
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                       <thead>
                         <tr style={{ background: "#F1F5F9", color: COLORS.gray700, textAlign: "left" }}>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Program Iuran</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tarif</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Nomor Surat Tagihan</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Potensi Sistem (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Realisasi Kas SP2D (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Rekap</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Program Iuran</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra Cakupan</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Tarif</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Potensi Sistem (Rp)</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Realisasi Kas SP2D (Rp)</th>
+                          <th style={{ padding: "11px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih Nominal (Rp)</th>
                         </tr>
                       </thead>
                       <tbody>
                         {rekapJKKData
                           .filter((item) => item.program.includes(activeProgram))
-                          .map((item, idx) => (
-                            <tr key={idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                              <td style={{ padding: "12px 14px", fontWeight: 700, color: COLORS.gray900 }}>
-                                {item.program}
-                              </td>
-                              <td style={{ padding: "12px 14px", fontFamily: "monospace", fontWeight: 700, color: currentTheme.primary }}>
-                                {item.tarif}
-                              </td>
-                              <td style={{ padding: "12px 14px", fontFamily: "monospace" }}>
-                                {item.noSuratTagihan}
-                              </td>
-                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                                {fmtNum(item.peserta)} Jiwa
-                              </td>
-                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
-                                {fmtB(item.nominalPotensi)}
-                              </td>
-                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: currentTheme.primary }}>
-                                {fmtB(item.nominalRealisasi)}
-                              </td>
-                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#065F46" }}>
-                                Rp 0
-                              </td>
-                              <td style={{ padding: "12px 14px" }}>
-                                <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#ECFDF5", color: "#065F46" }}>
-                                  {item.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
+                          .map((item, idx) => {
+                            const g = getGolonganRatio(filterGolongan);
+                            const p = Math.round(item.peserta * g.peserta);
+                            const nomPot = Math.round(item.nominalPotensi * g.nominal);
+                            const nomReal = Math.round(item.nominalRealisasi * g.nominal);
 
-                  <div style={{ padding: "14px 18px", background: "#F8FAFC", borderTop: `1px solid ${COLORS.gray200}`, fontSize: 12, color: COLORS.gray600 }}>
-                    <b>Analisis Rekapitulasi:</b> {rekapJKKData.find(i => i.program.includes(activeProgram))?.analisis}
+                            return (
+                              <tr key={idx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                                <td style={{ padding: "12px 14px", fontWeight: 700, color: COLORS.gray900 }}>
+                                  {item.program} {filterGolongan !== "Semua" && `(${g.label})`}
+                                </td>
+                                <td style={{ padding: "12px 14px", color: COLORS.gray800, fontWeight: 600 }}>
+                                  {getSatkerLabel(filterSatker)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "center", fontFamily: "monospace", fontWeight: 700, color: currentTheme.primary }}>
+                                  {item.tarif}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtNum(p)} Jiwa
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
+                                  {fmtB(nomPot)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: currentTheme.primary }}>
+                                  {fmtB(nomReal)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#065F46" }}>
+                                  Rp 0
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
+                          <td colSpan={3} style={{ padding: "12px 14px", textAlign: "left", color: COLORS.gray900 }}>
+                            TOTAL REKAPITULASI {activeProgram}:
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                            {fmtNum(Math.round((rekapJKKData.find(i => i.program.includes(activeProgram))?.peserta || 14328) * getGolonganRatio(filterGolongan).peserta))} Jiwa
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800 }}>
+                            {fmtB(Math.round((rekapJKKData.find(i => i.program.includes(activeProgram))?.nominalPotensi || 0) * getGolonganRatio(filterGolongan).nominal))}
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: currentTheme.primary }}>
+                            {fmtB(Math.round((rekapJKKData.find(i => i.program.includes(activeProgram))?.nominalRealisasi || 0) * getGolonganRatio(filterGolongan).nominal))}
+                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#065F46" }}>
+                            Rp 0
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
               )}
@@ -3033,19 +2877,33 @@ export const RekonsIuran = () => {
           )}
 
           {/* =====================================================================
-              B. TAMPILAN SECARA PER-MATRA
+              B. TAMPILAN SECARA PER-MATRA (BNBA)
              ===================================================================== */}
           {viewModeKomparasi === "per_matra" && (
             <div>
               {activeProgram === "THT_PENSIUN" ? (
-                /* PER-MATRA THT & PENSIUN */
+                /* PER-MATRA THT & PENSIUN 4 DANA */
                 <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC" }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
-                      Komparasi Data Kepesertaan vs API BNBA Kemenkeu Per-Matra
+                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span>Komparasi Data Kepesertaan vs API BNBA Kemenkeu Per-Matra</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#DBEAFE", color: "#1E40AF" }}>
+                          {getDanaLabel()}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
+                        Perbandingan by-name-by-address personel per Satker terhadap potongan gaji induk Kemenkeu SPAN • Satker: <b>{getSatkerLabel(filterSatker)}</b> • Golongan: <b>{getGolonganLabel(filterGolongan)}</b>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
-                      Perbandingan by-name-by-address personel per Matra terhadap potongan gaji induk 8,00% (THT 3,25% + Pensiun 4,75%).
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 12, color: COLORS.gray600, fontWeight: 600 }}>
+                        Menampilkan: <b>{filteredBNBA.length} baris</b>
+                      </span>
+                      <Btn size="xs" variant="outline" onClick={handleExportExcel}>
+                        <Download size={12} style={{ marginRight: 3 }} />
+                        Ekspor Excel
+                      </Btn>
                     </div>
                   </div>
 
@@ -3053,71 +2911,95 @@ export const RekonsIuran = () => {
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                       <thead>
                         <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
+                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Program Dana</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra / Kesatuan</th>
+                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Tarif</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta Sistem</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Sistem (Rp)</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta BNBA</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal BNBA (Rp)</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih Jiwa</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih Nominal (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredBNBA.map((row) => (
-                          <tr key={row.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                            <td style={{ padding: "12px 14px", fontWeight: 700, color: COLORS.gray900 }}>
-                              {row.matra}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtNum(row.pesertaSistem)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtB(row.nominalSistem)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtNum(row.pesertaBNBA)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>
-                              {fmtB(row.nominalBNBA)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: row.selisihJiwa === 0 ? "#065F46" : "#DC2626", fontWeight: 700 }}>
-                              {row.selisihJiwa === 0 ? "0" : row.selisihJiwa}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: row.selisihNominal === 0 ? "#065F46" : "#DC2626", fontWeight: 700 }}>
-                              {row.selisihNominal === 0 ? "Rp 0" : fmtB(row.selisihNominal)}
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <span
-                                style={{
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  padding: "2px 8px",
-                                  borderRadius: 4,
-                                  background: row.status.includes("Match") ? "#ECFDF5" : "#FEF3C7",
-                                  color: row.status.includes("Match") ? "#065F46" : "#92400E"
-                                }}
-                              >
-                                {row.status}
-                              </span>
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                              <Btn
-                                size="xs"
-                                variant="outline"
-                                onClick={() => setSelectedMatraDetail(row)}
-                              >
-                                <Eye size={12} style={{ marginRight: 3 }} />
-                                Drilldown BNBA
-                              </Btn>
+                        {filteredBNBA.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
+                              Tidak ada data komparasi yang sesuai dengan kombinasi filter yang dipilih.
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          filteredBNBA.map((row) => {
+                            const isTHT = row.danaType.startsWith("THT");
+                            const isTNI = row.danaType.includes("TNI");
+                            const badgeBg = isTNI ? (isTHT ? "#EFF6FF" : "#F5F3FF") : (isTHT ? "#F0FDF4" : "#ECFEFF");
+                            const badgeBorder = isTNI ? (isTHT ? "#BFDBFE" : "#DDD6FE") : (isTHT ? "#BBF7D0" : "#A5F3FC");
+                            const badgeTxt = isTNI ? (isTHT ? "#1D4ED8" : "#6D28D9") : (isTHT ? "#15803D" : "#0E7490");
+
+                            return (
+                              <tr key={row.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                                <td style={{ padding: "12px 14px" }}>
+                                  <span
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 800,
+                                      padding: "2px 8px",
+                                      borderRadius: 4,
+                                      background: badgeBg,
+                                      border: `1px solid ${badgeBorder}`,
+                                      color: badgeTxt,
+                                      whiteSpace: "nowrap"
+                                    }}
+                                  >
+                                    {row.namaDana}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "12px 14px", fontWeight: 700, color: COLORS.gray900 }}>
+                                  {row.matra}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "center", fontFamily: "monospace", fontWeight: 800, color: isTHT ? COLORS.blue : "#7C3AED" }}>
+                                  {row.tarif}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtNum(row.pesertaSistem)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtB(row.nominalSistem)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtNum(row.pesertaBNBA)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>
+                                  {fmtB(row.nominalBNBA)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: row.selisihJiwa === 0 ? "#065F46" : "#DC2626", fontWeight: 700 }}>
+                                  {row.selisihJiwa === 0 ? "0" : row.selisihJiwa}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: row.selisihNominal === 0 ? "#065F46" : "#DC2626", fontWeight: 700 }}>
+                                  {row.selisihNominal === 0 ? "Rp 0" : fmtB(row.selisihNominal)}
+                                </td>
+                                <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                                  <Btn
+                                    size="xs"
+                                    variant="outline"
+                                    onClick={() => setSelectedMatraDetail(row)}
+                                  >
+                                    <Eye size={12} style={{ marginRight: 3 }} />
+                                    Drilldown BNBA
+                                  </Btn>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
                       </tbody>
                       <tfoot>
                         <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                          <td style={{ padding: "12px 14px" }}>TOTAL (5 MATRA):</td>
+                          <td colSpan={3} style={{ padding: "12px 14px" }}>
+                            TOTAL ({getDanaLabel()}):
+                          </td>
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
                             {fmtNum(filteredBNBA.reduce((a, b) => a + b.pesertaSistem, 0))}
                           </td>
@@ -3130,15 +3012,13 @@ export const RekonsIuran = () => {
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
                             {fmtB(filteredBNBA.reduce((a, b) => a + b.nominalBNBA, 0))}
                           </td>
-                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: "#DC2626" }}>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: filteredBNBA.reduce((a, b) => a + b.selisihJiwa, 0) < 0 ? "#DC2626" : "#065F46" }}>
                             {filteredBNBA.reduce((a, b) => a + b.selisihJiwa, 0)}
                           </td>
-                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: "#DC2626" }}>
+                          <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: filteredBNBA.reduce((a, b) => a + b.selisihNominal, 0) < 0 ? "#DC2626" : "#065F46" }}>
                             {fmtB(filteredBNBA.reduce((a, b) => a + b.selisihNominal, 0))}
                           </td>
-                          <td colSpan={2} style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11 }}>
-                            Tingkat Kesesuaian: 99.95%
-                          </td>
+                          <td style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>—</td>
                         </tr>
                       </tfoot>
                     </table>
@@ -3147,12 +3027,23 @@ export const RekonsIuran = () => {
               ) : (
                 /* PER-MATRA JKK ATAU JKM */
                 <div style={{ background: COLORS.white, borderRadius: 10, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC" }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
-                      Komparasi Kepesertaan vs Realisasi Kas {activeProgram === "JKK" ? "JKK (0,24%)" : "JKM (0,20%)"} Per-Matra
+                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.gray200}`, background: "#F8FAFC", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
+                        Komparasi Kepesertaan vs Realisasi Kas {activeProgram === "JKK" ? "JKK (0,24%)" : "JKM (0,20%)"} Per-Satker
+                      </div>
+                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
+                        Perhitungan potensi iuran berdasarkan DIPA Belanja Pegawai terhadap realisasi pencairan kas SP2D Kemenkeu • Satker: <b>{getSatkerLabel(filterSatker)}</b> • Golongan: <b>{getGolonganLabel(filterGolongan)}</b>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
-                      Perhitungan potensi iuran berdasarkan DIPA Belanja Pegawai 5 Matra terhadap realisasi pencairan kas SP2D Kemenkeu.
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 12, color: COLORS.gray600, fontWeight: 600 }}>
+                        Menampilkan: <b>{filteredKomparasiJKKMatra.length} Satker</b>
+                      </span>
+                      <Btn size="xs" variant="outline" onClick={handleExportExcel}>
+                        <Download size={12} style={{ marginRight: 3 }} />
+                        Ekspor Excel
+                      </Btn>
                     </div>
                   </div>
 
@@ -3163,76 +3054,60 @@ export const RekonsIuran = () => {
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra / Satuan Kerja</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Peserta Terlindungi</th>
                           <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Total Gaji Pokok (Rp)</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Potensi {activeProgram} ({activeProgram === "JKK" ? "0,24%" : "0,20%"})</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Realisasi Kas SP2D</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status</th>
-                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Catatan KPPN</th>
+                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Potensi {activeProgram} (Rp)</th>
+                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Realisasi Kas SP2D (Rp)</th>
+                          <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Selisih Nominal (Rp)</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {komparasiJKKMatraData.map((row) => (
-                          <tr key={row.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                            <td style={{ padding: "12px 14px", fontWeight: 700, color: COLORS.gray900 }}>
-                              {row.matra}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtNum(row.peserta)} Jiwa
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtB(row.gapokTotal)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: currentTheme.primary, fontWeight: 700 }}>
-                              {fmtB(activeProgram === "JKK" ? row.nominalJKKSistem : row.nominalJKMSistem)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#065F46" }}>
-                              {fmtB(activeProgram === "JKK" ? row.realisasiKasJKK : row.realisasiKasJKM)}
-                            </td>
-                            <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#065F46" }}>
-                              Rp 0
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <span
-                                style={{
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  padding: "2px 8px",
-                                  borderRadius: 4,
-                                  background: "#ECFDF5",
-                                  color: "#065F46"
-                                }}
-                              >
-                                {row.status}
-                              </span>
-                            </td>
-                            <td style={{ padding: "12px 14px", fontSize: 11.5, color: COLORS.gray600 }}>
-                              {row.catatan}
+                        {filteredKomparasiJKKMatra.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
+                              Tidak ada data komparasi yang sesuai dengan filter yang dipilih.
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          filteredKomparasiJKKMatra.map((row) => (
+                            <tr key={row.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                              <td style={{ padding: "12px 14px", fontWeight: 700, color: COLORS.gray900 }}>
+                                {row.matra}
+                              </td>
+                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                {fmtNum(row.peserta)} Jiwa
+                              </td>
+                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                                {fmtB(row.gapokTotal)}
+                              </td>
+                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: currentTheme.primary, fontWeight: 700 }}>
+                                {fmtB(activeProgram === "JKK" ? row.nominalJKKSistem : row.nominalJKMSistem)}
+                              </td>
+                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: "#065F46" }}>
+                                {fmtB(activeProgram === "JKK" ? row.realisasiKasJKK : row.realisasiKasJKM)}
+                              </td>
+                              <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#065F46" }}>
+                                Rp 0
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                       <tfoot>
                         <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                          <td style={{ padding: "12px 14px" }}>TOTAL (5 MATRA):</td>
+                          <td style={{ padding: "12px 14px" }}>TOTAL ({getSatkerLabel(filterSatker)}):</td>
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                            {fmtNum(komparasiJKKMatraData.reduce((a, b) => a + b.peserta, 0))} Jiwa
+                            {fmtNum(filteredKomparasiJKKMatra.reduce((a, b) => a + b.peserta, 0))} Jiwa
                           </td>
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                            {fmtB(komparasiJKKMatraData.reduce((a, b) => a + b.gapokTotal, 0))}
+                            {fmtB(filteredKomparasiJKKMatra.reduce((a, b) => a + b.gapokTotal, 0))}
                           </td>
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: currentTheme.primary, fontSize: 13 }}>
-                            {fmtB(komparasiJKKMatraData.reduce((a, b) => a + (activeProgram === "JKK" ? b.nominalJKKSistem : b.nominalJKMSistem), 0))}
+                            {fmtB(filteredKomparasiJKKMatra.reduce((a, b) => a + (activeProgram === "JKK" ? b.nominalJKKSistem : b.nominalJKMSistem), 0))}
                           </td>
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: "#065F46", fontSize: 13 }}>
-                            {fmtB(komparasiJKKMatraData.reduce((a, b) => a + (activeProgram === "JKK" ? b.realisasiKasJKK : b.realisasiKasJKM), 0))}
+                            {fmtB(filteredKomparasiJKKMatra.reduce((a, b) => a + (activeProgram === "JKK" ? b.realisasiKasJKK : b.realisasiKasJKM), 0))}
                           </td>
                           <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: "#065F46" }}>
                             Rp 0
-                          </td>
-                          <td colSpan={2} style={{ padding: "12px 14px" }}>
-                            <span style={{ fontSize: 11, color: "#065F46", background: "#ECFDF5", padding: "3px 8px", borderRadius: 4, fontWeight: 800 }}>
-                              ✅ MATCH 100% (SEIMBANG)
-                            </span>
                           </td>
                         </tr>
                       </tfoot>
@@ -3366,53 +3241,42 @@ export const RekonsIuran = () => {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan & Program Dana</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat SKP-PFK Kemenkeu</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tuntas (Rp)</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Berita Acara (BAR)</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Proses</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi (The Complete Process)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredHistorySKP.length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ padding: 36, textAlign: "center", color: COLORS.gray500 }}>
+                        <td colSpan={8} style={{ padding: 36, textAlign: "center", color: COLORS.gray500 }}>
                           <History size={32} color={COLORS.gray400} style={{ marginBottom: 8 }} />
                           <div style={{ fontWeight: 600 }}>Belum ada riwayat rekonsiliasi yang tuntas pada periode ini.</div>
                           <div style={{ fontSize: 11.5, color: COLORS.gray400, marginTop: 4 }}>
-                            Tagihan di tab Monitoring yang telah selesai direkonsiliasi dapat diklik &quot;Selesaikan Proses&quot; untuk disimpan permanen ke History.
+                            Tagihan di tab Monitoring yang telah selesai direkonsiliasi otomatis tersimpan permanen di Tab History.
                           </div>
                         </td>
                       </tr>
                     ) : (
                       filteredHistorySKP.map((item) => {
                         const isTHT = item.danaType?.startsWith("THT");
-                        const badgeColor =
-                          item.danaType === "THT_TNI" ? { bg: "#EFF6FF", text: "#1D4ED8", border: "#BFDBFE" } :
-                          item.danaType === "THT_POLRI" ? { bg: "#EEF2FF", text: "#4338CA", border: "#C7D2FE" } :
-                          item.danaType === "PENSIUN_TNI" ? { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" } :
-                          { bg: "#F0FDFA", text: "#0F766E", border: "#99F6E4" };
 
                         return (
                           <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
                             <td style={{ padding: "12px 14px" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                                <span
-                                  style={{
-                                    fontSize: 10.5,
-                                    fontWeight: 800,
-                                    padding: "2px 7px",
-                                    borderRadius: 4,
-                                    background: badgeColor.bg,
-                                    color: badgeColor.text,
-                                    border: `1px solid ${badgeColor.border}`
-                                  }}
-                                >
-                                  {item.namaDana || "Dana PFK"} • {item.tarif || (isTHT ? "3,25%" : "4,75%")}
-                                </span>
+                              <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.gray900 }}>
+                                {item.namaDana || "Dana PFK"}
                               </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tarif {item.tarif || (isTHT ? "3,25%" : "4,75%")}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
                               <div style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 12.5, color: COLORS.gray900 }}>
                                 {item.noSuratTagihan}
                               </div>
@@ -3471,49 +3335,15 @@ export const RekonsIuran = () => {
                               </span>
                             </td>
                             <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                              <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
-                                <Btn
-                                  size="xs"
-                                  variant="primary"
-                                  style={{ background: "#3B82F6", fontWeight: 700 }}
-                                  onClick={() => setSelectedCompleteProcess(item)}
-                                >
-                                  <History size={12} style={{ marginRight: 3 }} />
-                                  Complete Process
-                                </Btn>
+                              <div style={{ display: "flex", justifyContent: "center" }}>
                                 <Btn
                                   size="xs"
                                   variant="outline"
-                                  style={{ borderColor: "#10B981", color: "#065F46", fontWeight: 700 }}
-                                  onClick={() => openBARPreview(item)}
-                                >
-                                  <FileCheck size={12} style={{ marginRight: 3 }} />
-                                  Cetak BAR
-                                </Btn>
-                                <Btn
-                                  size="xs"
-                                  variant="outline"
+                                  style={{ padding: "3px 8px", fontSize: 11, fontWeight: 600, gap: 4 }}
                                   onClick={() => openSuratTagihanPreview(item)}
                                 >
-                                  <FileText size={12} style={{ marginRight: 3 }} />
+                                  <FileText size={11} />
                                   Surat Tagihan
-                                </Btn>
-                                <Btn
-                                  size="xs"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    setSatkerModalData({
-                                      noSurat: item.noSuratTagihan,
-                                      noSKP: item.noSKP,
-                                      program: item.namaDana,
-                                      danaType: item.danaType,
-                                      satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL,
-                                      periode: "Juni 2026"
-                                    })
-                                  }
-                                >
-                                  <Building2 size={12} style={{ marginRight: 3 }} />
-                                  Rincian Satker
                                 </Btn>
                               </div>
                             </td>
@@ -3524,7 +3354,7 @@ export const RekonsIuran = () => {
                   </tbody>
                   <tfoot>
                     <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                      <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
+                      <td colSpan={4} style={{ padding: "12px 14px", textAlign: "right" }}>
                         TOTAL DANA TUNTAS TEREPOSITORI ({filteredHistorySKP.length} Surat Tagihan):
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
@@ -3545,29 +3375,38 @@ export const RekonsIuran = () => {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Nota Dinas Kepesertaan</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tuntas (Rp)</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Berita Acara (BAR)</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Proses</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi (The Complete Process)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(activeProgram === "JKK" ? filteredHistoryJKK : filteredHistoryJKM).length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ padding: 36, textAlign: "center", color: COLORS.gray500 }}>
+                        <td colSpan={8} style={{ padding: 36, textAlign: "center", color: COLORS.gray500 }}>
                           <History size={32} color={COLORS.gray400} style={{ marginBottom: 8 }} />
                           <div style={{ fontWeight: 600 }}>Belum ada riwayat proses {activeProgram} yang tuntas pada periode ini.</div>
                           <div style={{ fontSize: 11.5, color: COLORS.gray400, marginTop: 4 }}>
-                            Tagihan di tab Monitoring yang telah selesai direkonsiliasi dapat diklik &quot;Selesaikan Proses&quot; untuk disimpan permanen ke History.
+                            Tagihan di tab Monitoring yang telah selesai direkonsiliasi otomatis tersimpan permanen di Tab History.
                           </div>
                         </td>
                       </tr>
                     ) : (
                       (activeProgram === "JKK" ? filteredHistoryJKK : filteredHistoryJKM).map((item) => (
                         <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                          <td style={{ padding: "12px 14px" }}>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.gray900 }}>
+                              {item.program}
+                            </div>
+                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                              Tarif {item.program === "JKK" ? "0,24%" : "0,20%"}
+                            </div>
+                          </td>
                           <td style={{ padding: "12px 14px" }}>
                             <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
                               {item.noSuratTagihan}
@@ -3597,7 +3436,7 @@ export const RekonsIuran = () => {
                               {fmtB(item.nominalDiterima || item.nominalTagihan)}
                             </div>
                             <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
-                              {fmtNum(item.peserta)} Personel (5 Matra)
+                              {fmtNum(item.peserta)} Personel (6 Matra)
                             </div>
                           </td>
                           <td style={{ padding: "12px 14px" }}>
@@ -3627,58 +3466,15 @@ export const RekonsIuran = () => {
                             </span>
                           </td>
                           <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                            <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "nowrap" }}>
-                              <Btn
-                                size="xs"
-                                variant="primary"
-                                style={{ background: currentTheme.primary, fontWeight: 700 }}
-                                onClick={() => setSelectedCompleteProcess(item)}
-                              >
-                                <History size={12} style={{ marginRight: 3 }} />
-                                Complete Process
-                              </Btn>
+                            <div style={{ display: "flex", justifyContent: "center" }}>
                               <Btn
                                 size="xs"
                                 variant="outline"
-                                style={{ borderColor: "#10B981", color: "#065F46", fontWeight: 700 }}
-                                onClick={() => openBARPreview(item)}
-                              >
-                                <FileCheck size={12} style={{ marginRight: 3 }} />
-                                Cetak BAR
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="outline"
+                                style={{ padding: "3px 8px", fontSize: 11, fontWeight: 600, gap: 4 }}
                                 onClick={() => openSuratTagihanPreview(item)}
                               >
-                                <FileText size={12} style={{ marginRight: 3 }} />
+                                <FileText size={11} />
                                 Surat Tagihan
-                              </Btn>
-                              <Btn
-                                size="xs"
-                                variant="ghost"
-                                onClick={() =>
-                                  setPreview({
-                                    title: `Detail Rekapitulasi Matra — ${item.program}`,
-                                    subtitle: `Surat Tagihan: ${item.noSuratTagihan} • BAR: ${item.noBAR}`,
-                                    type: "table",
-                                    fileName: `Rekap_Matra_${item.program}_History.xlsx`,
-                                    content: {
-                                      columns: ["Matra / Komponen", "Jumlah Peserta", "Total Gaji Pokok (Rp)", `Alokasi Iuran ${item.program} (Rp)`, "Status Penetapan"],
-                                      rows: komparasiJKKMatraData.map((k) => [
-                                        k.matra,
-                                        `${fmtNum(k.peserta)} Jiwa`,
-                                        fmtB(k.gapokTotal),
-                                        fmtB(item.program === "JKK" ? k.nominalJKKSistem : k.nominalJKMSistem),
-                                        "Tuntas & Ditetapkan (BAR)"
-                                      ]),
-                                      totalRows: komparasiJKKMatraData.length
-                                    }
-                                  })
-                                }
-                              >
-                                <Building2 size={12} style={{ marginRight: 3 }} />
-                                Detail Matra
                               </Btn>
                             </div>
                           </td>
@@ -3688,7 +3484,7 @@ export const RekonsIuran = () => {
                   </tbody>
                   <tfoot>
                     <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                      <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
+                      <td colSpan={4} style={{ padding: "12px 14px", textAlign: "right" }}>
                         TOTAL REALISASI TUNTAS {activeProgram}:
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: currentTheme.primary, fontSize: 13 }}>

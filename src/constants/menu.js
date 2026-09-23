@@ -13,6 +13,8 @@ import {
   DollarSign,
   Shield,
   Wallet,
+  Send,
+  FileUp,
 } from "lucide-react";
 
 export const ICON_MAP = {
@@ -30,13 +32,16 @@ export const ICON_MAP = {
   dollar: DollarSign,
   shield: Shield,
   wallet: Wallet,
+  send: Send,
+  upload: FileUp,
 };
 
 export const MENU = [
   {
-    section: "IKHTISAR",
+    section: "DASHBOARD",
     items: [
-      { id: "dashboard", icon: "chart", label: "Ikhtisar Keuangan" },
+      { id: "dipa", icon: "chart", label: "Dana DIPA" },
+      { id: "dana", icon: "wallet", label: "Dana Pembayaran Manfaat" },
     ],
   },
   {
@@ -47,8 +52,8 @@ export const MENU = [
         label: "Administrasi Iuran Peserta",
         children: [
           { id: "kalkulator", label: "Perhitungan Iuran Peserta" },
-          { id: "rekonsiliasi", label: "Rekonsiliasi Penerimaan Dana" },
           { id: "tagihan", label: "Penagihan Iuran Ke Kemenkeu" },
+          { id: "rekonsiliasi", label: "Rekonsiliasi Penerimaan Dana" },
         ],
       },
     ],
@@ -66,6 +71,14 @@ export const MENU = [
         ],
       },
       {
+        icon: "send",
+        label: "Penyaluran & CMS Mitra",
+        children: [
+          { id: "upload_cms", label: "Upload CMS Mitra Bayar" },
+          { id: "penyaluran_harian", label: "Penyaluran Harian CMS" },
+        ],
+      },
+      {
         icon: "clip",
         label: "Administrasi DAPEM",
         children: [
@@ -73,14 +86,6 @@ export const MENU = [
           { id: "dapem_susulan", label: "DAPEM Susulan" },
           { id: "non_dapem", label: "Non-Dapem (PP, UKP, UDW)" },
           { id: "report_ku", label: "Report KU" },
-        ],
-      },
-      {
-        icon: "trend",
-        label: "Pengendalian Anggaran",
-        children: [
-          { id: "dipa", label: "Realisasi & Sisa Pagu DIPA" },
-          { id: "dana", label: "Ketersediaan Dana Mitra Bayar" },
         ],
       },
     ],

@@ -10,3 +10,4 @@ export { NoData } from "./NoData";
 export { PreviewModal } from "./PreviewModal";
 export { SatkerModal } from "./SatkerModal";
 export { Tooltip } from "./Tooltip";
+export { SuratTagihanKemenkeu, terbilang } from "./SuratTagihanKemenkeu";

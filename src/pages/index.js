@@ -1,4 +1,3 @@
-export { DashboardKeuangan } from "./DashboardKeuangan";
 export { RekonRekeningKoran } from "./RekonRekeningKoran";
 export { KalkulatorIuran } from "./KalkulatorIuran";
 export { RekonsIuran } from "./RekonsIuran";
@@ -22,3 +21,4 @@ export { KonfigurasiManfaat } from "./KonfigurasiManfaat";
 export { HutangPUMKPR } from "./HutangPUMKPR";
 export { JKKPerawatan } from "./JKKPerawatan";
 export { ReportKU } from "./ReportKU";
+export { PenyaluranHarian } from "./PenyaluranHarian";

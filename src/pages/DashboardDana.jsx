@@ -24,28 +24,32 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  X,
+  CalendarRange,
   LineChart as LineChartIcon
 } from "lucide-react";
 import { COLORS, LINE_COLORS, IC } from "../constants/colors";
 import { StatCard, SectionTitle, Badge, Select, SearchInput, Btn, NoData, PreviewModal, Tooltip } from "../components/common";
-import { RekonRekeningKoran } from "./RekonRekeningKoran";
 
-export const DashboardDana = ({ initialTab = "monitoring" }) => {
-  const [activeTab, setActiveTab] = useState(initialTab);
-  const [periodeView, setPeriodeView] = useState("Bulanan"); // "Mingguan" | "Bulanan"
+export const DashboardDana = () => {
   const [selectedMitraView, setSelectedMitraView] = useState("Semua Mitra (Konsolidasi)");
-  const [selectedMitraFilter, setSelectedMitraFilter] = useState("Semua");
-  const [filterJenis, setFilterJenis] = useState("Semua");
-  const [filterStatusBayar, setFilterStatusBayar] = useState("Semua");
   const [selectedPeriodeSP, setSelectedPeriodeSP] = useState("Juli 2026 (Bulan Berjalan)");
-  const [selectedBulanMingguan, setSelectedBulanMingguan] = useState("Juli 2026");
+  const [startDate, setStartDate] = useState("2026-07-01");
+  const [endDate, setEndDate] = useState("2026-07-15");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [calCurrentMonth, setCalCurrentMonth] = useState(6); // 6 = Juli (0-indexed)
+  const [calCurrentYear, setCalCurrentYear] = useState(2026);
+  const [isSelectingEndDate, setIsSelectingEndDate] = useState(false);
   const [selectedProgramView, setSelectedProgramView] = useState("Semua Program (Konsolidasi)");
   const [panel1ProgramFilter, setPanel1ProgramFilter] = useState("Semua Program (Konsolidasi)");
-  const [searchRekap, setSearchRekap] = useState("");
   const [preview, setPreview] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
   const [proyeksiChartType, setProyeksiChartType] = useState("line"); // "line" | "bar"
   const [hoveredP1Bar, setHoveredP1Bar] = useState(null);
+  const [hoveredProyeksiPoint, setHoveredProyeksiPoint] = useState(null);
 
   const programOptions = [
     "Semua Program (Konsolidasi)",
@@ -54,7 +58,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
     "JKm (Jaminan Kematian)",
   ];
 
-  const bulanMingguanOptions = [
+  const bulanOptions = [
     "Juli 2026",
     "Agustus 2026",
     "September 2026",
@@ -62,6 +66,99 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
     "November 2026",
     "Desember 2026",
   ];
+
+  const monthNamesIndo = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const shortMonthNamesIndo = [
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+    "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+  ];
+
+  const formatIndoDate = (dateStr) => {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1;
+    const day = parseInt(parts[2]);
+    return `${String(day).padStart(2, '0')} ${monthNamesIndo[month] || ""} ${year}`;
+  };
+
+  const getDatesInRange = (startStr, endStr) => {
+    if (!startStr || !endStr) return [];
+    let start = new Date(startStr);
+    let end = new Date(endStr);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+    if (start > end) {
+      const temp = start;
+      start = end;
+      end = temp;
+    }
+    const dates = [];
+    const curr = new Date(start);
+    while (curr <= end) {
+      const y = curr.getFullYear();
+      const m = String(curr.getMonth() + 1).padStart(2, '0');
+      const d = String(curr.getDate()).padStart(2, '0');
+      dates.push(`${y}-${m}-${d}`);
+      curr.setDate(curr.getDate() + 1);
+    }
+    return dates;
+  };
+
+  const handlePrevCalMonth = () => {
+    if (calCurrentMonth === 0) {
+      setCalCurrentMonth(11);
+      setCalCurrentYear(y => y - 1);
+    } else {
+      setCalCurrentMonth(m => m - 1);
+    }
+  };
+
+  const handleNextCalMonth = () => {
+    if (calCurrentMonth === 11) {
+      setCalCurrentMonth(0);
+      setCalCurrentYear(y => y + 1);
+    } else {
+      setCalCurrentMonth(m => m + 1);
+    }
+  };
+
+  const handleDateCellClick = (dayNum) => {
+    const clickedStr = `${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+    if (!isSelectingEndDate) {
+      setStartDate(clickedStr);
+      setEndDate(clickedStr);
+      setIsSelectingEndDate(true);
+    } else {
+      if (clickedStr < startDate) {
+        setStartDate(clickedStr);
+        setIsSelectingEndDate(true);
+      } else {
+        setEndDate(clickedStr);
+        setIsSelectingEndDate(false);
+      }
+    }
+  };
+
+  // Profil bobot distribusi pengeluaran harian dana manfaat dalam sebulan (Tgl 1 - 31)
+  const baseDailyWeights = [
+    0.12, 0.10, 0.09, 0.08, 0.06, // Tgl 1 - 5 (Puncak Siklus Pensiun & THT Awal Bulan: 45%)
+    0.05, 0.04, 0.04, 0.04, 0.03, // Tgl 6 - 10 (Tahap Susulan & Verifikasi: 20%)
+    0.025, 0.022, 0.020, 0.018, 0.025, // Tgl 11 - 15 (Klaim Reguler & Cut-off Tahap 1: 11%)
+    0.018, 0.016, 0.015, 0.015, 0.016, // Tgl 16 - 20 (Reguler Pertengahan Bulan: 8%)
+    0.012, 0.012, 0.012, 0.014, 0.035, // Tgl 21 - 25 (Klaim Akhir Bulan & Batch SP 2: 8.5%)
+    0.015, 0.015, 0.013, 0.012, 0.010, 0.010 // Tgl 26 - 31 (Penutupan Bulan: 7.5%)
+  ];
+
+  const getDailyWeights = (totalDays) => {
+    const slice = baseDailyWeights.slice(0, totalDays);
+    const sum = slice.reduce((a, b) => a + b, 0);
+    return slice.map(w => w / sum);
+  };
 
   // Mapping data proyeksi mingguan per bulan untuk konsolidasi dan masing-masing mitra bayar
   const weeklyProjectionsByMonth = {
@@ -662,16 +759,12 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
   const totalNominalSalur = computedSPMitra.reduce((a, m) => a + m.nominalRealisasi, 0).toFixed(1);
   const overallSuccessRate = ((totalSpTerealisasi / totalSpDiterbitkan) * 100).toFixed(1);
 
-  // Periode Labels
-  const periodLabels = periodeView === "Mingguan"
-    ? ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"]
-    : ["Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
   // Filtered / Active Chart Data with distinct wave dynamics
   const isKonsolidasi = selectedMitraView.startsWith("Semua");
   const activeMitra = mitraData.find(m => m.mitra === selectedMitraView);
 
-  const activeWeeklyData = weeklyProjectionsByMonth[selectedBulanMingguan] || weeklyProjectionsByMonth["Juli 2026"];
+  const activeDateRangeList = getDatesInRange(startDate, endDate);
+  const selectedRangeDaysCount = activeDateRangeList.length || 1;
 
   // Menentukan program yang aktif: "Semua", "THT", "JKK", "JKm"
   const progKey = selectedProgramView.includes("THT")
@@ -694,6 +787,88 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
   const activeMitraKebutuhanJKK = isKonsolidasi ? totalKebutuhanJKK : (activeMitra?.kebutuhanProgram?.JKK || 0);
   const activeMitraKebutuhanJKm = isKonsolidasi ? totalKebutuhanJKm : (activeMitra?.kebutuhanProgram?.JKm || 0);
 
+  // Konsolidasi bulanan per program
+  const konsolidasiBulanProgram = {
+    THT: [284, 364, 466, 313, 264, 230],
+    JKK: [78, 101, 131, 86, 73, 64],
+    JKm: [58, 75, 83, 61, 53, 46],
+  };
+
+  // Kalkulasi Series Harian Dinamis Berdasarkan Kalender Rentang Tanggal
+  const dailyLabels = [];
+  const dailyTHTSeries = [];
+  const dailyJKKSeries = [];
+  const dailyJKmSeries = [];
+  const dailyTotalSeries = [];
+
+  activeDateRangeList.forEach(dateStr => {
+    const dParts = dateStr.split("-");
+    const yNum = parseInt(dParts[0]);
+    const mNum = parseInt(dParts[1]) - 1; // 0..11
+    const dNum = parseInt(dParts[2]);
+
+    const daysInThisMonth = new Date(yNum, mNum + 1, 0).getDate();
+    const semesterIdx = Math.max(0, Math.min(5, mNum - 6));
+
+    const targetTHT = isKonsolidasi
+      ? (konsolidasiBulanProgram.THT[semesterIdx] || 284)
+      : (activeMitra?.proyeksiBulanProgram?.THT?.[semesterIdx] || 60);
+
+    const targetJKK = isKonsolidasi
+      ? (konsolidasiBulanProgram.JKK[semesterIdx] || 78)
+      : (activeMitra?.proyeksiBulanProgram?.JKK?.[semesterIdx] || 16);
+
+    const targetJKm = isKonsolidasi
+      ? (konsolidasiBulanProgram.JKm[semesterIdx] || 58)
+      : (activeMitra?.proyeksiBulanProgram?.JKm?.[semesterIdx] || 12);
+
+    const weights = getDailyWeights(daysInThisMonth);
+    const w = weights[dNum - 1] || (1 / daysInThisMonth);
+
+    const thtVal = +(targetTHT * w).toFixed(1);
+    const jkkVal = +(targetJKK * w).toFixed(1);
+    const jkmVal = +(targetJKm * w).toFixed(1);
+    const totVal = +(thtVal + jkkVal + jkmVal).toFixed(1);
+
+    const lbl = `${dNum} ${shortMonthNamesIndo[mNum] || ""}`;
+    dailyLabels.push(lbl);
+    dailyTHTSeries.push(thtVal);
+    dailyJKKSeries.push(jkkVal);
+    dailyJKmSeries.push(jkmVal);
+    dailyTotalSeries.push(totVal);
+  });
+
+  // Periode Labels & Program Series Dinamis Harian (Kalender)
+  const periodLabels = dailyLabels;
+  const seriesTHT = dailyTHTSeries;
+  const seriesJKK = dailyJKKSeries;
+  const seriesJKm = dailyJKmSeries;
+  const seriesTotal = dailyTotalSeries;
+
+  const chartKebutuhanSeries = progKey === "THT"
+    ? seriesTHT
+    : progKey === "JKK"
+    ? seriesJKK
+    : progKey === "JKm"
+    ? seriesJKm
+    : seriesTotal;
+
+  const sumTHT = +(seriesTHT.reduce((a, b) => a + b, 0)).toFixed(1);
+  const avgTHT = +(sumTHT / (seriesTHT.length || 1)).toFixed(1);
+  const peakTHT = seriesTHT.length ? Math.max(...seriesTHT) : 0;
+
+  const sumJKK = +(seriesJKK.reduce((a, b) => a + b, 0)).toFixed(1);
+  const avgJKK = +(sumJKK / (seriesJKK.length || 1)).toFixed(1);
+  const peakJKK = seriesJKK.length ? Math.max(...seriesJKK) : 0;
+
+  const sumJKm = +(seriesJKm.reduce((a, b) => a + b, 0)).toFixed(1);
+  const avgJKm = +(sumJKm / (seriesJKm.length || 1)).toFixed(1);
+  const peakJKm = seriesJKm.length ? Math.max(...seriesJKm) : 0;
+
+  const sumTotal = +(seriesTotal.reduce((a, b) => a + b, 0)).toFixed(1);
+  const avgTotal = +(sumTotal / (seriesTotal.length || 1)).toFixed(1);
+  const peakTotal = seriesTotal.length ? Math.max(...seriesTotal) : 0;
+
   // Nilai Saldo & Kebutuhan program terpilih untuk kartu indikator
   const currentProgSaldo = progKey === "THT"
     ? activeMitraSaldoTHT
@@ -704,68 +879,12 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
     : activeMitraSaldoTotal;
 
   const currentProgKebutuhan = progKey === "THT"
-    ? activeMitraKebutuhanTHT
+    ? sumTHT
     : progKey === "JKK"
-    ? activeMitraKebutuhanJKK
+    ? sumJKK
     : progKey === "JKm"
-    ? activeMitraKebutuhanJKm
-    : activeMitraKebutuhanTotal;
-
-  // Konsolidasi bulanan per program
-  const konsolidasiBulanProgram = {
-    THT: [284, 364, 466, 313, 264, 230],
-    JKK: [78, 101, 131, 86, 73, 64],
-    JKm: [58, 75, 83, 61, 53, 46],
-  };
-
-  // Kalkulasi Series Proyeksi per Program untuk Panel 2 (Bisa Per Program & Per Mitra)
-  const getProgramSeries = (program) => {
-    if (periodeView === "Bulanan") {
-      if (isKonsolidasi) {
-        if (program === "THT") return [284, 364, 466, 313, 264, 230];
-        if (program === "JKK") return [78, 101, 131, 86, 73, 64];
-        if (program === "JKm") return [58, 75, 83, 61, 53, 46];
-        return [420, 540, 680, 460, 390, 340];
-      } else {
-        if (program === "THT") return activeMitra?.proyeksiBulanProgram?.THT || [60, 78, 100, 68, 56, 48];
-        if (program === "JKK") return activeMitra?.proyeksiBulanProgram?.JKK || [16, 22, 28, 19, 16, 14];
-        if (program === "JKm") return activeMitra?.proyeksiBulanProgram?.JKm || [12, 16, 20, 13, 11, 10];
-        return activeMitra?.proyeksiBulan || [88, 116, 148, 100, 83, 72];
-      }
-    } else {
-      // Mingguan
-      const baseWeekly = isKonsolidasi
-        ? (activeWeeklyData?.konsolidasi || [145, 235, 340, 155])
-        : (activeWeeklyData?.[activeMitra?.id] || activeMitra?.proyeksiMinggu || [18, 28, 42, 20]);
-      
-      if (program === "THT") return baseWeekly.map(v => Math.round(v * 0.68));
-      if (program === "JKK") return baseWeekly.map(v => Math.round(v * 0.19));
-      if (program === "JKm") return baseWeekly.map(v => Math.round(v * 0.13));
-      return baseWeekly;
-    }
-  };
-
-  const seriesTHT = getProgramSeries("THT");
-  const seriesJKK = getProgramSeries("JKK");
-  const seriesJKm = getProgramSeries("JKm");
-  const seriesTotal = getProgramSeries("Total");
-
-  const chartKebutuhanSeries = progKey === "THT"
-    ? seriesTHT
-    : progKey === "JKK"
-    ? seriesJKK
-    : progKey === "JKm"
-    ? seriesJKm
-    : seriesTotal;
-
-  const sumTHT = seriesTHT.reduce((a, b) => a + b, 0);
-  const avgTHT = Math.round(sumTHT / seriesTHT.length);
-  const sumJKK = seriesJKK.reduce((a, b) => a + b, 0);
-  const avgJKK = Math.round(sumJKK / seriesJKK.length);
-  const sumJKm = seriesJKm.reduce((a, b) => a + b, 0);
-  const avgJKm = Math.round(sumJKm / seriesJKm.length);
-  const sumTotal = seriesTotal.reduce((a, b) => a + b, 0);
-  const avgTotal = Math.round(sumTotal / seriesTotal.length);
+    ? sumJKm
+    : sumTotal;
 
   // Konfigurasi Tema Warna Berdasarkan Program
   const programThemes = {
@@ -775,33 +894,6 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
     JKm: { label: "Program JKm (Jaminan Kematian)", color: "#7C3AED", lightBg: "#FAF5FF", badgeBg: "#F3E8FF", badgeColor: "#6B21A8" },
   };
   const activeProgTheme = programThemes[progKey] || programThemes.Semua;
-
-  // Transaksi Harian CMS Mapping (THT, JKK, JKm) untuk 12 Mitra Bayar
-  const rekapHarian = [
-    { no: 1, noRef: "CMS-MND-20260706-00142", nrp: "198701234", nama: "Purn. Kol. Ahmad Rifai", jenis: "THT (BUP)", mitra: "Bank Mandiri", noSP: "SP/2026/07/012", nominal: "Rp 125.000.000", status: "Berhasil", waktu: "06:15", cabang: "Kancab Jakarta Timur" },
-    { no: 2, noRef: "CMS-MND-20260706-00143", nrp: "199205678", nama: "Purn. Letda Budi Kartono", jenis: "THT (BUP)", mitra: "Bank Mandiri", noSP: "SP/2026/07/015", nominal: "Rp 98.200.000", status: "Berhasil", waktu: "06:15", cabang: "Kancab Surabaya" },
-    { no: 3, noRef: "CMS-MND-20260706-00187", nrp: "198604321", nama: "Purn. AKP Siti Nurhaliza", jenis: "Klaim JKK Perawatan", mitra: "Bank Mandiri", noSP: "SP/2026/07/044", nominal: "Rp 45.000.000", status: "Berhasil", waktu: "08:30", cabang: "Kancab Medan" },
-    { no: 4, noRef: "CMS-BRI-20260706-01205", nrp: "197803456", nama: "Purn. Serma Hendra W.", jenis: "THT (BUP)", mitra: "Bank BRI", noSP: "SP/2026/07/088", nominal: "Rp 87.800.000", status: "Berhasil", waktu: "06:00", cabang: "Kancab Semarang" },
-    { no: 5, noRef: "CMS-BRI-20260706-01289", nrp: "199312345", nama: "Ny. Warakawuri Siti Aminah", jenis: "Klaim JKm", mitra: "Bank BRI", noSP: "SP/2026/07/092", nominal: "Rp 42.000.000", status: "Berhasil", waktu: "06:00", cabang: "Kancab Bandung" },
-    { no: 6, noRef: "CMS-BNI-20260706-00891", nrp: "199008765", nama: "Purn. Peltu Rizki P.", jenis: "THT (BUP)", mitra: "Bank BNI", noSP: "SP/2026/07/115", nominal: "Rp 120.000.000", status: "Berhasil", waktu: "06:30", cabang: "Kancab Palembang" },
-    { no: 7, noRef: "CMS-BTN-20260706-00245", nrp: "197506789", nama: "Purn. Pengatur Agus S.", jenis: "Klaim JKK Perawatan", mitra: "Bank BTN", noSP: "SP/2026/07/140", nominal: "Rp 35.000.000", status: "Gagal", waktu: "06:15", keterangan: "Saldo Rekening Penyaluran CMS Kurang", cabang: "Kancab Jakarta Selatan" },
-    { no: 8, noRef: "CMS-BSI-20260706-00109", nrp: "198211111", nama: "Purn. Kapten M. Yusuf", jenis: "Klaim JKm", mitra: "Bank BSI", noSP: "SP/2026/07/162", nominal: "Rp 42.000.000", status: "Berhasil", waktu: "11:20", cabang: "Kancab Banda Aceh" },
-    { no: 9, noRef: "CMS-MTP-20260706-00301", nrp: "198109876", nama: "Purn. Mayor Bambang S.", jenis: "THT (BUP)", mitra: "Mandiri Taspen", noSP: "SP/2026/07/175", nominal: "Rp 112.500.000", status: "Berhasil", waktu: "07:10", cabang: "Kancab Denpasar" },
-    { no: 10, noRef: "CMS-BWS-20260706-00088", nrp: "198402319", nama: "Purn. Kapten Dedi Kurniawan", jenis: "THT (BUP)", mitra: "Bank BWS", noSP: "SP/2026/07/188", nominal: "Rp 78.400.000", status: "Berhasil", waktu: "07:45", cabang: "Kancab Bogor" },
-    { no: 11, noRef: "CMS-POS-20260706-00034", nrp: "198512890", nama: "Purn. Pelda Sukamto (3T)", jenis: "THT (BUP)", mitra: "Pos Indonesia", noSP: "SP/2026/07/102", nominal: "Rp 65.200.000", status: "Berhasil", waktu: "09:15", cabang: "Kancab Jayapura" },
-    { no: 12, noRef: "CMS-BBA-20260706-00045", nrp: "198807123", nama: "Purn. Letda Anton Sudrajat", jenis: "Klaim JKK Perawatan", mitra: "Bank Bumi Arta", noSP: "SP/2026/07/210", nominal: "Rp 28.600.000", status: "Berhasil", waktu: "08:15", cabang: "Kancab Cirebon" },
-    { no: 13, noRef: "CMS-BJB-20260706-00167", nrp: "198003982", nama: "Purn. Letkol Asep Saepudin", jenis: "THT (BUP)", mitra: "Bank BJB", noSP: "SP/2026/07/225", nominal: "Rp 94.000.000", status: "Berhasil", waktu: "08:00", cabang: "Kancab Bandung Barat" },
-    { no: 14, noRef: "CMS-KB-20260706-00059", nrp: "198904561", nama: "Ny. Euis Rohaeti (Penerima Manfaat)", jenis: "Klaim JKm", mitra: "KB Bukopin", noSP: "SP/2026/07/238", nominal: "Rp 42.000.000", status: "Berhasil", waktu: "09:30", cabang: "Kancab Tasikmalaya" },
-    { no: 15, noRef: "CMS-SMBC-20260706-00072", nrp: "198305612", nama: "Purn. Mayor Wahyu Wibowo", jenis: "THT (BUP)", mitra: "Bank SMBC", noSP: "SP/2026/07/250", nominal: "Rp 88.700.000", status: "Berhasil", waktu: "07:30", cabang: "Kancab Yogyakarta" }
-  ];
-
-  const filteredRekap = rekapHarian.filter(r => {
-    if (selectedMitraFilter !== "Semua" && r.mitra !== selectedMitraFilter && !r.mitra.includes(selectedMitraFilter)) return false;
-    if (filterJenis !== "Semua" && r.jenis !== filterJenis) return false;
-    if (filterStatusBayar !== "Semua" && r.status !== filterStatusBayar) return false;
-    if (searchRekap && !r.nama.toLowerCase().includes(searchRekap.toLowerCase()) && !r.nrp.includes(searchRekap) && !r.noSP.toLowerCase().includes(searchRekap.toLowerCase())) return false;
-    return true;
-  });
 
   const handleAjukanDropping = (mitraObj) => {
     setToastMessage(`Pengajuan Dropping Dana sebesar Rp ${mitraObj.rekDropping} M untuk ${mitraObj.mitra} berhasil diteruskan ke Divisi Perbendaharaan & Kasda!`);
@@ -837,36 +929,8 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `2px solid ${COLORS.gray200}` }}>
-        {[
-          { id: "monitoring", label: "Dashboard Monitoring Ketersediaan & Realisasi Dana" },
-          { id: "mapping_cms", label: "Standarisasi & Rekonsiliasi Rekening Koran (Mapping CMS)" },
-          { id: "rekap", label: "Rekapitulasi Penyaluran Harian CMS" }
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            style={{
-              padding: "12px 24px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13.5,
-              fontWeight: 700,
-              background: "transparent",
-              color: activeTab === t.id ? COLORS.blueDark : COLORS.gray500,
-              borderBottom: activeTab === t.id ? `3px solid ${COLORS.blueDark}` : "3px solid transparent",
-              marginBottom: -2
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* TAB 1: MONITORING KETERSEDIAAN DANA */}
-      {activeTab === "monitoring" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* MONITORING KETERSEDIAAN DANA */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Top Stat Cards */}
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
             <StatCard
@@ -1575,7 +1639,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
             </div>
           </div>
 
-          {/* PANEL 2 — Proyeksi Kebutuhan Dana (THT, JKK, JKm) */}
+          {/* PANEL 2 — Proyeksi Kebutuhan Dana (THT, JKK, JKm) Dinamis Harian */}
           <div
             style={{
               background: COLORS.white,
@@ -1591,7 +1655,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, margin: 0 }}>
                   Proyeksi Kebutuhan Dana (THT, JKK, JKm)
                 </h3>
-                <Tooltip content="Estimasi dan peramalan kebutuhan likuiditas klaim peserta berdasarkan program (THT, JKK, JKm) dan per mitra bayar untuk periode bulanan maupun mingguan.">
+                <Tooltip content="Estimasi dan peramalan kebutuhan likuiditas klaim peserta berdasarkan program (THT, JKK, JKm) dan per mitra bayar untuk rentang tanggal harian dinamis, mingguan, maupun bulanan.">
                   <span
                     style={{
                       display: "inline-flex",
@@ -1612,138 +1676,570 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                 <Badge color={isKonsolidasi ? "blue" : "purple"}>
                   Perspektif: {selectedMitraView}
                 </Badge>
-                <Badge color="gray">
-                  {periodeView === "Mingguan" ? `Mingguan (${selectedBulanMingguan})` : "Bulanan (Semester II 2026)"}
+                <Badge color="green">
+                  {`📅 Rentang: ${formatIndoDate(startDate)} — ${formatIndoDate(endDate)} (${selectedRangeDaysCount} Hari)`}
                 </Badge>
               </div>
             </div>
 
-            {/* 2. FILTERS DI BAWAH JUDUL: PER MITRA, RENTANG WAKTU, PILIH BULAN, & TIPE GRAFIK */}
+            {/* 2. FILTERS DI BAWAH JUDUL: PER MITRA & SELEKSI KALENDER RENTANG TANGGAL */}
             <div
               style={{
                 display: "flex",
+                flexDirection: "column",
                 gap: 12,
-                alignItems: "flex-end",
-                flexWrap: "wrap",
                 marginBottom: 16,
-                padding: "12px 14px",
+                padding: "14px 16px",
                 background: "#F8FAFC",
                 borderRadius: 8,
                 border: "1px solid #E2E8F0"
               }}
             >
-              {/* Mitra Selector: Per Mitra atau Konsolidasi */}
-              <div style={{ display: "flex", flexDirection: "column", minWidth: 260 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                  <label
+              <div style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+                {/* Mitra Selector: Per Mitra atau Konsolidasi */}
+                <div style={{ display: "flex", flexDirection: "column", minWidth: 230, flex: "1 1 230px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                    <label
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        letterSpacing: 0.6,
+                        textTransform: "uppercase",
+                        color: COLORS.gray500,
+                      }}
+                    >
+                      Mitra Bayar
+                    </label>
+                    <span style={{ color: "#CBD5E1", fontSize: 10 }}>•</span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: isKonsolidasi ? "#334155" : "#1D4ED8",
+                        background: isKonsolidasi ? "#F1F5F9" : "#EFF6FF",
+                        padding: "1px 6px",
+                        borderRadius: 4,
+                        border: `1px solid ${isKonsolidasi ? "#E2E8F0" : "#BFDBFE"}`,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 150
+                      }}
+                    >
+                      {selectedMitraView}
+                    </span>
+                  </div>
+                  <select
+                    value={selectedMitraView}
+                    onChange={(e) => setSelectedMitraView(e.target.value)}
                     style={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      letterSpacing: 0.6,
-                      textTransform: "uppercase",
-                      color: COLORS.gray500,
+                      padding: "7px 12px",
+                      borderRadius: 8,
+                      border: `1px solid ${COLORS.gray200}`,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: COLORS.gray900,
+                      background: COLORS.white,
+                      height: 35,
+                      boxSizing: "border-box",
+                      cursor: "pointer",
+                      outline: "none",
+                      width: "100%"
                     }}
                   >
-                    Mitra Bayar
+                    {["Semua Mitra (Konsolidasi)", ...initialMitraData.map(m => m.mitra)].map((o, i) => (
+                      <option key={i} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Seleksi Rentang Tanggal Kalender Dinamis */}
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
+                    Rentang Tanggal (Kalender)
                   </label>
-                  <span style={{ color: "#CBD5E1", fontSize: 10 }}>•</span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: isKonsolidasi ? "#334155" : "#1D4ED8",
-                      background: isKonsolidasi ? "#F1F5F9" : "#EFF6FF",
-                      padding: "1px 6px",
-                      borderRadius: 4,
-                      border: `1px solid ${isKonsolidasi ? "#E2E8F0" : "#BFDBFE"}`,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      maxWidth: 160
-                    }}
-                  >
-                    {selectedMitraView}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    {/* Interactive Calendar Button with Popover */}
+                    <div style={{ position: "relative" }}>
+                        <button
+                          type="button"
+                          onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                          style={{
+                            padding: "6px 12px",
+                            borderRadius: 8,
+                            border: isCalendarOpen ? "1.5px solid #2563EB" : "1px solid #CBD5E1",
+                            background: "#FFFFFF",
+                            color: "#1E293B",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            height: 35,
+                            boxSizing: "border-box",
+                            boxShadow: isCalendarOpen ? "0 0 0 3px rgba(37,99,235,0.15)" : "0 1px 2px rgba(0,0,0,0.05)",
+                            transition: "all 0.15s ease"
+                          }}
+                        >
+                          <Calendar size={14} color="#2563EB" />
+                          <span>{formatIndoDate(startDate)} — {formatIndoDate(endDate)}</span>
+                          <span
+                            style={{
+                              background: "#EFF6FF",
+                              color: "#1D4ED8",
+                              padding: "1px 7px",
+                              borderRadius: 10,
+                              fontSize: 10.5,
+                              fontWeight: 800,
+                              border: "1px solid #BFDBFE"
+                            }}
+                          >
+                            {selectedRangeDaysCount} Hari
+                          </span>
+                          <ChevronDown size={14} color="#64748B" style={{ transform: isCalendarOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                        </button>
+
+                        {/* POP-OVER KALENDER INTERAKTIF */}
+                        {isCalendarOpen && (
+                          <>
+                            <div
+                              onClick={() => {
+                                setIsCalendarOpen(false);
+                                setIsSelectingEndDate(false);
+                              }}
+                              style={{
+                                position: "fixed",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                zIndex: 998,
+                                background: "rgba(0,0,0,0.08)"
+                              }}
+                            />
+
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: 42,
+                                left: 0,
+                                zIndex: 999,
+                                background: "#FFFFFF",
+                                borderRadius: 12,
+                                border: "1px solid #CBD5E1",
+                                boxShadow: "0 16px 36px rgba(15,23,42,0.18), 0 2px 8px rgba(0,0,0,0.08)",
+                                padding: 16,
+                                width: 320,
+                                boxSizing: "border-box"
+                              }}
+                            >
+                              {/* Header Kalender: Navigasi Bulan & Tahun */}
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                                <button
+                                  type="button"
+                                  onClick={handlePrevCalMonth}
+                                  style={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: 6,
+                                    border: "1px solid #E2E8F0",
+                                    background: "#F8FAFC",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  <ChevronLeft size={16} color="#475569" />
+                                </button>
+
+                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <select
+                                    value={calCurrentMonth}
+                                    onChange={(e) => setCalCurrentMonth(parseInt(e.target.value))}
+                                    style={{
+                                      fontSize: 12,
+                                      fontWeight: 700,
+                                      color: "#0F172A",
+                                      border: "1px solid #CBD5E1",
+                                      borderRadius: 6,
+                                      padding: "3px 6px",
+                                      background: "#FFFFFF",
+                                      cursor: "pointer",
+                                      outline: "none"
+                                    }}
+                                  >
+                                    {monthNamesIndo.map((m, idx) => (
+                                      <option key={idx} value={idx}>
+                                        {m}
+                                      </option>
+                                    ))}
+                                  </select>
+
+                                  <select
+                                    value={calCurrentYear}
+                                    onChange={(e) => setCalCurrentYear(parseInt(e.target.value))}
+                                    style={{
+                                      fontSize: 12,
+                                      fontWeight: 700,
+                                      color: "#0F172A",
+                                      border: "1px solid #CBD5E1",
+                                      borderRadius: 6,
+                                      padding: "3px 6px",
+                                      background: "#FFFFFF",
+                                      cursor: "pointer",
+                                      outline: "none"
+                                    }}
+                                  >
+                                    {[2025, 2026, 2027].map(y => (
+                                      <option key={y} value={y}>
+                                        {y}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={handleNextCalMonth}
+                                  style={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: 6,
+                                    border: "1px solid #E2E8F0",
+                                    background: "#F8FAFC",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  <ChevronRight size={16} color="#475569" />
+                                </button>
+                              </div>
+
+                              {/* Petunjuk Pemilihan Tanggal */}
+                              <div style={{ fontSize: 10.5, color: isSelectingEndDate ? "#1D4ED8" : "#64748B", fontWeight: 700, marginBottom: 8, textAlign: "center" }}>
+                                {isSelectingEndDate
+                                  ? "👉 Klik tanggal akhir untuk menyelesaikan rentang"
+                                  : "👉 Klik tanggal mulai, lalu klik tanggal selesai"}
+                              </div>
+
+                              {/* Label Hari */}
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, textAlign: "center", marginBottom: 6 }}>
+                                {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((wd, i) => (
+                                  <div key={i} style={{ fontSize: 10.5, fontWeight: 700, color: i === 0 ? "#DC2626" : "#64748B", padding: "2px 0" }}>
+                                    {wd}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Grid Tanggal Kalender */}
+                              {(() => {
+                                const firstDayOfWeek = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
+                                const daysInCalMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+
+                                return (
+                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 12 }}>
+                                    {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
+                                      <div key={`blank-${idx}`} style={{ height: 32 }} />
+                                    ))}
+
+                                    {Array.from({ length: daysInCalMonth }, (_, idx) => idx + 1).map(day => {
+                                      const cellDateStr = `${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                      const isStart = cellDateStr === startDate;
+                                      const isEnd = cellDateStr === endDate;
+                                      const isInRange = startDate && endDate && cellDateStr >= startDate && cellDateStr <= endDate;
+
+                                      let bg = "transparent";
+                                      let textCol = "#1E293B";
+                                      let fontW = 600;
+                                      let borderRadius = "6px";
+
+                                      if (isStart || isEnd) {
+                                        bg = "#1D4ED8";
+                                        textCol = "#FFFFFF";
+                                        fontW = 800;
+                                      } else if (isInRange) {
+                                        bg = "#EFF6FF";
+                                        textCol = "#1D4ED8";
+                                        fontW = 700;
+                                      }
+
+                                      return (
+                                        <button
+                                          key={day}
+                                          type="button"
+                                          onClick={() => handleDateCellClick(day)}
+                                          style={{
+                                            height: 32,
+                                            width: "100%",
+                                            borderRadius,
+                                            border: "none",
+                                            background: bg,
+                                            color: textCol,
+                                            fontSize: 11.5,
+                                            fontWeight: fontW,
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            transition: "all 0.1s ease",
+                                            padding: 0
+                                          }}
+                                          onMouseEnter={(e) => {
+                                            if (!isStart && !isEnd && !isInRange) {
+                                              e.currentTarget.style.background = "#F1F5F9";
+                                            }
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            if (!isStart && !isEnd && !isInRange) {
+                                              e.currentTarget.style.background = "transparent";
+                                            }
+                                          }}
+                                        >
+                                          {day}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })()}
+
+                              {/* Input Manual & Tombol Aksi di Bawah Kalender */}
+                              <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                  <div style={{ flex: 1 }}>
+                                    <label style={{ fontSize: 9.5, fontWeight: 700, color: "#64748B", display: "block", marginBottom: 2 }}>
+                                      Dari
+                                    </label>
+                                    <input
+                                      type="date"
+                                      value={startDate}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setStartDate(val);
+                                        if (val > endDate) setEndDate(val);
+                                      }}
+                                      style={{
+                                        width: "100%",
+                                        fontSize: 11,
+                                        padding: "4px 6px",
+                                        borderRadius: 6,
+                                        border: "1px solid #CBD5E1",
+                                        boxSizing: "border-box"
+                                      }}
+                                    />
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <label style={{ fontSize: 9.5, fontWeight: 700, color: "#64748B", display: "block", marginBottom: 2 }}>
+                                      Sampai
+                                    </label>
+                                    <input
+                                      type="date"
+                                      value={endDate}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        setEndDate(val);
+                                        if (val < startDate) setStartDate(val);
+                                      }}
+                                      style={{
+                                        width: "100%",
+                                        fontSize: 11,
+                                        padding: "4px 6px",
+                                        borderRadius: 6,
+                                        border: "1px solid #CBD5E1",
+                                        boxSizing: "border-box"
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const daysInCalMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+                                      setStartDate(`${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-01`);
+                                      setEndDate(`${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(daysInCalMonth).padStart(2, '0')}`);
+                                      setIsSelectingEndDate(false);
+                                    }}
+                                    style={{
+                                      flex: 1,
+                                      padding: "6px 8px",
+                                      borderRadius: 6,
+                                      border: "1px solid #CBD5E1",
+                                      background: "#F8FAFC",
+                                      color: "#334155",
+                                      fontSize: 11,
+                                      fontWeight: 600,
+                                      cursor: "pointer"
+                                    }}
+                                  >
+                                    1 Bulan Penuh
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsCalendarOpen(false);
+                                      setIsSelectingEndDate(false);
+                                    }}
+                                    style={{
+                                      flex: 1,
+                                      padding: "6px 8px",
+                                      borderRadius: 6,
+                                      border: "none",
+                                      background: "#1D4ED8",
+                                      color: "#FFFFFF",
+                                      fontSize: 11,
+                                      fontWeight: 700,
+                                      cursor: "pointer"
+                                    }}
+                                  >
+                                    Tutup & Terapkan
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Direct Native Date Inputs for Fast Entry */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "#64748B" }}>
+                        <span>Dari:</span>
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setStartDate(val);
+                            if (val > endDate) setEndDate(val);
+                          }}
+                          style={{
+                            padding: "6px 8px",
+                            borderRadius: 8,
+                            border: "1px solid #CBD5E1",
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            color: "#0F172A",
+                            background: "#FFFFFF",
+                            height: 35,
+                            boxSizing: "border-box"
+                          }}
+                        />
+                        <span>s/d</span>
+                        <input
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEndDate(val);
+                            if (val < startDate) setStartDate(val);
+                          }}
+                          style={{
+                            padding: "6px 8px",
+                            borderRadius: 8,
+                            border: "1px solid #CBD5E1",
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            color: "#0F172A",
+                            background: "#FFFFFF",
+                            height: 35,
+                            boxSizing: "border-box"
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                {/* Chart Type Toggle */}
+                <div style={{ display: "flex", flexDirection: "column", marginLeft: "auto" }}>
+                  <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
+                    Tampilan Grafik
+                  </label>
+                  <div style={{ display: "flex", alignItems: "center", gap: 3, background: COLORS.white, padding: "3px 4px", borderRadius: 8, height: 35, boxSizing: "border-box", border: "1px solid #CBD5E1" }}>
+                    <button
+                      type="button"
+                      onClick={() => setProyeksiChartType("line")}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: 6,
+                        border: "none",
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        background: proyeksiChartType === "line" ? COLORS.blueDark : "transparent",
+                        color: proyeksiChartType === "line" ? COLORS.white : COLORS.gray600,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <LineChartIcon size={13} /> Line
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProyeksiChartType("bar")}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: 6,
+                        border: "none",
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        background: proyeksiChartType === "bar" ? COLORS.blueDark : "transparent",
+                        color: proyeksiChartType === "bar" ? COLORS.white : COLORS.gray600,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <BarChart3 size={13} /> Bar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Metric Summary Bar */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 10,
+                  paddingTop: 10,
+                  borderTop: "1px dashed #CBD5E1"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5 }}>
+                  <span style={{ color: "#64748B" }}>
+                    📅 Rentang Kalender:
+                  </span>
+                  <strong style={{ color: "#1D4ED8" }}>
+                    {formatIndoDate(startDate)} s.d. {formatIndoDate(endDate)}
+                  </strong>
+                </div>
+
+                {/* Summary Metric Chips */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11.5, flexWrap: "wrap" }}>
+                  <span style={{ color: "#64748B" }}>
+                    Durasi: <strong style={{ color: "#1D4ED8", fontFamily: "monospace" }}>{selectedRangeDaysCount} Hari</strong>
+                  </span>
+                  <span style={{ color: "#CBD5E1" }}>•</span>
+                  <span style={{ color: "#64748B" }}>
+                    Rata-rata: <strong style={{ color: "#0F172A", fontFamily: "monospace" }}>Rp {avgTotal} M/hari</strong>
+                  </span>
+                  <span style={{ color: "#CBD5E1" }}>•</span>
+                  <span style={{ color: "#64748B" }}>
+                    Puncak Harian: <strong style={{ color: COLORS.orange, fontFamily: "monospace" }}>Rp {peakTotal} M</strong>
                   </span>
                 </div>
-                <select
-                  value={selectedMitraView}
-                  onChange={(e) => setSelectedMitraView(e.target.value)}
-                  style={{
-                    padding: "7px 12px",
-                    borderRadius: 8,
-                    border: `1px solid ${COLORS.gray200}`,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: COLORS.gray900,
-                    background: COLORS.white,
-                    height: 35,
-                    boxSizing: "border-box",
-                    cursor: "pointer",
-                    outline: "none",
-                    width: "100%"
-                  }}
-                >
-                  {["Semua Mitra (Konsolidasi)", ...initialMitraData.map(m => m.mitra)].map((o, i) => (
-                    <option key={i} value={o}>
-                      {o}
-                    </option>
-                  ))}
-                </select>
               </div>
-
-              {/* Toggle Rentang Waktu: Mingguan vs Bulanan */}
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
-                  Rentang Waktu Proyeksi
-                </label>
-                <div style={{ display: "flex", alignItems: "center", gap: 4, background: COLORS.white, padding: "3px 4px", borderRadius: 8, height: 35, boxSizing: "border-box", border: "1px solid #CBD5E1" }}>
-                  <button
-                    onClick={() => setPeriodeView("Mingguan")}
-                    style={{
-                      padding: "5px 12px",
-                      borderRadius: 6,
-                      border: "none",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      background: periodeView === "Mingguan" ? COLORS.blueDark : "transparent",
-                      color: periodeView === "Mingguan" ? COLORS.white : COLORS.gray600,
-                      boxShadow: periodeView === "Mingguan" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                      transition: "all 0.15s ease"
-                    }}
-                  >
-                    Per Minggu
-                  </button>
-                  <button
-                    onClick={() => setPeriodeView("Bulanan")}
-                    style={{
-                      padding: "5px 12px",
-                      borderRadius: 6,
-                      border: "none",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      background: periodeView === "Bulanan" ? COLORS.blueDark : "transparent",
-                      color: periodeView === "Bulanan" ? COLORS.white : COLORS.gray600,
-                      boxShadow: periodeView === "Bulanan" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-                      transition: "all 0.15s ease"
-                    }}
-                  >
-                    Per Bulan
-                  </button>
-                </div>
-              </div>
-
-              {/* Month Selector if Per Minggu */}
-              {periodeView === "Mingguan" && (
-                <Select
-                  label="Pilih Bulan (Per Minggu)"
-                  value={selectedBulanMingguan}
-                  onChange={setSelectedBulanMingguan}
-                  options={bulanMingguanOptions}
-                  minW={165}
-                />
-              )}
             </div>
 
             {/* 4. CARDS INDIKATOR PROYEKSI & KETAHANAN LIKUIDITAS (PERSPEKTIF AKTIF) */}
@@ -1775,18 +2271,20 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                   <span style={{ fontSize: 11, fontWeight: 800, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: 0.5 }}>
                     Program THT
                   </span>
-                  <Badge color={activeMitraSaldoTHT >= activeMitraKebutuhanTHT ? "green" : "red"}>
-                    {activeMitraSaldoTHT >= activeMitraKebutuhanTHT ? "Aman" : "Defisit"}
+                  <Badge color={activeMitraSaldoTHT >= sumTHT ? "green" : "red"}>
+                    {activeMitraSaldoTHT >= sumTHT ? "Aman" : "Defisit"}
                   </Badge>
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {activeMitraKebutuhanTHT} M
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>Proyeksi Kebutuhan</span>
+                  Rp {sumTHT} M
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
+                    ({formatIndoDate(startDate)} – {formatIndoDate(endDate)})
+                  </span>
                 </div>
                 <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
                   <span>Saldo Kas: <strong>Rp {activeMitraSaldoTHT} M</strong></span>
-                  <span style={{ color: activeMitraSaldoTHT >= activeMitraKebutuhanTHT ? "#059669" : "#DC2626", fontWeight: 700 }}>
-                    {activeMitraSaldoTHT >= activeMitraKebutuhanTHT ? "+" : ""}Rp {activeMitraSaldoTHT - activeMitraKebutuhanTHT} M
+                  <span style={{ color: activeMitraSaldoTHT >= sumTHT ? "#059669" : "#DC2626", fontWeight: 700 }}>
+                    {activeMitraSaldoTHT >= sumTHT ? "+" : ""}Rp {+(activeMitraSaldoTHT - sumTHT).toFixed(1)} M
                   </span>
                 </div>
                 <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
@@ -1826,18 +2324,20 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                   <span style={{ fontSize: 11, fontWeight: 800, color: "#EA580C", textTransform: "uppercase", letterSpacing: 0.5 }}>
                     Program JKK
                   </span>
-                  <Badge color={activeMitraSaldoJKK >= activeMitraKebutuhanJKK ? "green" : "red"}>
-                    {activeMitraSaldoJKK >= activeMitraKebutuhanJKK ? "Aman" : "Defisit"}
+                  <Badge color={activeMitraSaldoJKK >= sumJKK ? "green" : "red"}>
+                    {activeMitraSaldoJKK >= sumJKK ? "Aman" : "Defisit"}
                   </Badge>
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {activeMitraKebutuhanJKK} M
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>Proyeksi Kebutuhan</span>
+                  Rp {sumJKK} M
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
+                    ({formatIndoDate(startDate)} – {formatIndoDate(endDate)})
+                  </span>
                 </div>
                 <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
                   <span>Saldo Kas: <strong>Rp {activeMitraSaldoJKK} M</strong></span>
-                  <span style={{ color: activeMitraSaldoJKK >= activeMitraKebutuhanJKK ? "#059669" : "#DC2626", fontWeight: 700 }}>
-                    {activeMitraSaldoJKK >= activeMitraKebutuhanJKK ? "+" : ""}Rp {activeMitraSaldoJKK - activeMitraKebutuhanJKK} M
+                  <span style={{ color: activeMitraSaldoJKK >= sumJKK ? "#059669" : "#DC2626", fontWeight: 700 }}>
+                    {activeMitraSaldoJKK >= sumJKK ? "+" : ""}Rp {+(activeMitraSaldoJKK - sumJKK).toFixed(1)} M
                   </span>
                 </div>
                 <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
@@ -1877,18 +2377,20 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                   <span style={{ fontSize: 11, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: 0.5 }}>
                     Program JKm
                   </span>
-                  <Badge color={activeMitraSaldoJKm >= activeMitraKebutuhanJKm ? "green" : "red"}>
-                    {activeMitraSaldoJKm >= activeMitraKebutuhanJKm ? "Aman" : "Defisit"}
+                  <Badge color={activeMitraSaldoJKm >= sumJKm ? "green" : "red"}>
+                    {activeMitraSaldoJKm >= sumJKm ? "Aman" : "Defisit"}
                   </Badge>
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {activeMitraKebutuhanJKm} M
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>Proyeksi Kebutuhan</span>
+                  Rp {sumJKm} M
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
+                    ({formatIndoDate(startDate)} – {formatIndoDate(endDate)})
+                  </span>
                 </div>
                 <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
                   <span>Saldo Kas: <strong>Rp {activeMitraSaldoJKm} M</strong></span>
-                  <span style={{ color: activeMitraSaldoJKm >= activeMitraKebutuhanJKm ? "#059669" : "#DC2626", fontWeight: 700 }}>
-                    {activeMitraSaldoJKm >= activeMitraKebutuhanJKm ? "+" : ""}Rp {activeMitraSaldoJKm - activeMitraKebutuhanJKm} M
+                  <span style={{ color: activeMitraSaldoJKm >= sumJKm ? "#059669" : "#DC2626", fontWeight: 700 }}>
+                    {activeMitraSaldoJKm >= sumJKm ? "+" : ""}Rp {+(activeMitraSaldoJKm - sumJKm).toFixed(1)} M
                   </span>
                 </div>
                 <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
@@ -1926,20 +2428,22 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                   <span style={{ fontSize: 11, fontWeight: 800, color: "#0F172A", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Total Kebutuhan Proyeksi
+                    Total Proyeksi Kebutuhan
                   </span>
-                  <Badge color={activeMitraSaldoTotal >= activeMitraKebutuhanTotal ? "green" : "red"}>
-                    {activeMitraSaldoTotal >= activeMitraKebutuhanTotal ? "■ AMAN" : "● DEFISIT"}
+                  <Badge color={activeMitraSaldoTotal >= sumTotal ? "green" : "red"}>
+                    {activeMitraSaldoTotal >= sumTotal ? "■ AMAN" : "● DEFISIT"}
                   </Badge>
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {activeMitraKebutuhanTotal} M
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>Konsolidasi</span>
+                  Rp {sumTotal} M
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
+                    ({selectedRangeDaysCount} Hari)
+                  </span>
                 </div>
                 <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
                   <span>Saldo CMS: <strong>Rp {activeMitraSaldoTotal} M</strong></span>
-                  <span style={{ color: activeMitraSaldoTotal >= activeMitraKebutuhanTotal ? "#059669" : "#DC2626", fontWeight: 700 }}>
-                    {activeMitraSaldoTotal >= activeMitraKebutuhanTotal ? "+" : ""}Rp {activeMitraSaldoTotal - activeMitraKebutuhanTotal} M
+                  <span style={{ color: activeMitraSaldoTotal >= sumTotal ? "#059669" : "#DC2626", fontWeight: 700 }}>
+                    {activeMitraSaldoTotal >= sumTotal ? "+" : ""}Rp {+(activeMitraSaldoTotal - sumTotal).toFixed(1)} M
                   </span>
                 </div>
                 <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
@@ -1953,7 +2457,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
               </div>
             </div>
 
-            {/* 5. GRAPHIC AREA: VISUALISASI PROYEKSI KEBUTUHAN DANA */}
+            {/* 5. GRAPHIC AREA: VISUALISASI PROYEKSI KEBUTUHAN DANA DINAMIS */}
             <div style={{ background: COLORS.gray50, borderRadius: 8, padding: "16px 18px", border: `1px solid ${COLORS.gray200}`, marginBottom: 20 }}>
               {/* Header Toolbar Grafik Proyeksi */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
@@ -1971,7 +2475,10 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                     </span>
                   </div>
                   <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 2 }}>
-                    Rentang: <strong>{periodeView === "Mingguan" ? `Mingguan (${selectedBulanMingguan})` : "Semester II 2026 (Bulanan)"}</strong>
+                    Rentang Waktu: <strong>Kalender Harian ({formatIndoDate(startDate)} s.d. {formatIndoDate(endDate)} • {selectedRangeDaysCount} Hari)</strong>
+                    <span style={{ marginLeft: 6, color: "#059669", fontWeight: 700 }}>
+                      • Rata-rata: Rp {avgTotal} M/hari • Puncak: Rp {peakTotal} M
+                    </span>
                   </div>
                 </div>
 
@@ -2006,9 +2513,9 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       <strong style={{ color: activeProgTheme.color }}>Proyeksi {progKey}</strong>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ width: 14, height: 2, background: currentProgSaldo >= Math.max(...chartKebutuhanSeries) ? "#059669" : "#DC2626", display: "inline-block", borderTop: "2px dashed" }} />
-                      <span style={{ color: currentProgSaldo >= Math.max(...chartKebutuhanSeries) ? "#059669" : "#DC2626", fontWeight: 700 }}>
-                        Saldo {progKey} Tersedia: Rp {currentProgSaldo} M ({currentProgSaldo >= Math.max(...chartKebutuhanSeries) ? "Aman" : "Defisit"})
+                      <span style={{ width: 14, height: 2, background: currentProgSaldo >= sumTotal ? "#059669" : "#DC2626", display: "inline-block", borderTop: "2px dashed" }} />
+                      <span style={{ color: currentProgSaldo >= sumTotal ? "#059669" : "#DC2626", fontWeight: 700 }}>
+                        Saldo {progKey} Tersedia: Rp {currentProgSaldo} M ({currentProgSaldo >= sumTotal ? "Aman" : "Defisit"})
                       </span>
                     </div>
                   </div>
@@ -2018,15 +2525,18 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
               {/* RENDER GRAFIK PROYEKSI: MODE LINE ATAU BAR */}
               {(() => {
                 const allPoints = progKey === "Semua"
-                  ? [...seriesTotal, ...seriesTHT, ...seriesJKK, ...seriesJKm, currentProgSaldo]
-                  : [...chartKebutuhanSeries, currentProgSaldo];
-                const maxVal = Math.max(...allPoints, 10);
-                const niceMax = maxVal <= 60 ? 70 : maxVal <= 120 ? 140 : maxVal <= 250 ? 280 : maxVal <= 500 ? 550 : 800;
-                const W = 1000, H = 320, ML = 65, MR = 40, MT = 35, MB = 55;
+                  ? [...seriesTotal, ...seriesTHT, ...seriesJKK, ...seriesJKm]
+                  : [...chartKebutuhanSeries];
+                const maxVal = Math.max(...allPoints, currentProgSaldo > 0 ? currentProgSaldo : 0, 10);
+                const niceMax = maxVal <= 10 ? 12 : maxVal <= 25 ? 30 : maxVal <= 60 ? 70 : maxVal <= 120 ? 140 : maxVal <= 250 ? 280 : maxVal <= 500 ? 550 : 800;
+                
+                const numPeriods = periodLabels.length;
+                const dynamicW = Math.max(1000, numPeriods * 46 + 100);
+                const W = dynamicW, H = 320, ML = 65, MR = 40, MT = 35, MB = 55;
                 const plotW = W - ML - MR, plotH = H - MT - MB;
-                const xAt = i => ML + (plotW / (periodLabels.length - 1)) * i;
+                const xAt = i => ML + (plotW / (numPeriods > 1 ? numPeriods - 1 : 1)) * i;
                 const yAt = v => MT + plotH - (v / niceMax) * plotH;
-                const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(niceMax * f));
+                const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => +(niceMax * f).toFixed(1));
 
                 const ptsTHT = seriesTHT.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
                 const ptsJKK = seriesJKK.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
@@ -2034,12 +2544,14 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                 const ptsTotal = seriesTotal.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
                 const ptsActive = chartKebutuhanSeries.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
 
-                const areaActive = `${xAt(0)},${MT + plotH} ${ptsActive} ${xAt(periodLabels.length - 1)},${MT + plotH}`;
+                const areaActive = numPeriods > 1
+                  ? `${xAt(0)},${MT + plotH} ${ptsActive} ${xAt(numPeriods - 1)},${MT + plotH}`
+                  : "";
 
                 if (proyeksiChartType === "line") {
                   return (
                     <div style={{ width: "100%", overflowX: "auto" }}>
-                      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", minWidth: 680, height: "auto", display: "block" }}>
+                      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", minWidth: numPeriods > 15 ? 900 : 680, height: "auto", display: "block" }}>
                         {/* Gridlines */}
                         {yTicks.map((t, i) => (
                           <g key={i}>
@@ -2052,10 +2564,36 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
 
                         {/* X-axis Labels */}
                         {periodLabels.map((p, i) => (
-                          <text key={i} x={xAt(i)} y={H - MB + 24} textAnchor="middle" fontSize="11.5" fill={COLORS.gray700} fontWeight="700" fontFamily="Inter, sans-serif">
+                          <text key={i} x={xAt(i)} y={H - MB + 24} textAnchor="middle" fontSize={numPeriods > 20 ? "10" : "11"} fill={COLORS.gray700} fontWeight="700" fontFamily="Inter, sans-serif">
                             {p}
                           </text>
                         ))}
+
+                        {/* Average Line */}
+                        {avgTotal > 0 && (
+                          <g>
+                            <line
+                              x1={ML}
+                              y1={yAt(avgTotal)}
+                              x2={W - MR}
+                              y2={yAt(avgTotal)}
+                              stroke="#64748B"
+                              strokeWidth="1.5"
+                              strokeDasharray="4 4"
+                            />
+                            <text
+                              x={W - MR}
+                              y={yAt(avgTotal) - 4}
+                              textAnchor="end"
+                              fontSize="9.5"
+                              fontWeight="700"
+                              fill="#64748B"
+                              fontFamily="monospace"
+                            >
+                              Rata-rata: Rp {avgTotal} M/hari
+                            </text>
+                          </g>
+                        )}
 
                         {/* Garis Referensi Saldo Tersedia (Threshold Line) */}
                         {currentProgSaldo > 0 && currentProgSaldo <= niceMax && (
@@ -2065,7 +2603,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                               y1={yAt(currentProgSaldo)}
                               x2={W - MR}
                               y2={yAt(currentProgSaldo)}
-                              stroke={currentProgSaldo >= Math.max(...chartKebutuhanSeries) ? "#059669" : "#DC2626"}
+                              stroke={currentProgSaldo >= Math.max(...chartKebutuhanSeries, 0) ? "#059669" : "#DC2626"}
                               strokeWidth="2"
                               strokeDasharray="6 4"
                             />
@@ -2075,7 +2613,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                               textAnchor="end"
                               fontSize="10"
                               fontWeight="800"
-                              fill={currentProgSaldo >= Math.max(...chartKebutuhanSeries) ? "#059669" : "#DC2626"}
+                              fill={currentProgSaldo >= Math.max(...chartKebutuhanSeries, 0) ? "#059669" : "#DC2626"}
                               fontFamily="monospace"
                             >
                               Saldo Tersedia: Rp {currentProgSaldo} M
@@ -2089,64 +2627,146 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             {/* Line 1: THT (Biru) */}
                             <polyline points={ptsTHT} fill="none" stroke="#1D4ED8" strokeWidth="2.8" strokeLinejoin="round" />
                             {seriesTHT.map((v, i) => (
-                              <circle key={`tht-${i}`} cx={xAt(i)} cy={yAt(v)} r="4" fill="#FFFFFF" stroke="#1D4ED8" strokeWidth="2.5" />
+                              <circle key={`tht-${i}`} cx={xAt(i)} cy={yAt(v)} r="3.5" fill="#FFFFFF" stroke="#1D4ED8" strokeWidth="2.5" />
                             ))}
 
                             {/* Line 2: JKK (Oranye) */}
                             <polyline points={ptsJKK} fill="none" stroke="#EA580C" strokeWidth="2.8" strokeLinejoin="round" />
                             {seriesJKK.map((v, i) => (
-                              <circle key={`jkk-${i}`} cx={xAt(i)} cy={yAt(v)} r="4" fill="#FFFFFF" stroke="#EA580C" strokeWidth="2.5" />
+                              <circle key={`jkk-${i}`} cx={xAt(i)} cy={yAt(v)} r="3.5" fill="#FFFFFF" stroke="#EA580C" strokeWidth="2.5" />
                             ))}
 
                             {/* Line 3: JKm (Ungu) */}
                             <polyline points={ptsJKm} fill="none" stroke="#7C3AED" strokeWidth="2.8" strokeLinejoin="round" />
                             {seriesJKm.map((v, i) => (
-                              <circle key={`jkm-${i}`} cx={xAt(i)} cy={yAt(v)} r="4" fill="#FFFFFF" stroke="#7C3AED" strokeWidth="2.5" />
+                              <circle key={`jkm-${i}`} cx={xAt(i)} cy={yAt(v)} r="3.5" fill="#FFFFFF" stroke="#7C3AED" strokeWidth="2.5" />
                             ))}
 
                             {/* Line 4: Total Konsolidasi (Navy Tebal Putus-putus) */}
-                            <polyline points={ptsTotal} fill="none" stroke="#0F172A" strokeWidth="3.5" strokeDasharray="6 3" strokeLinejoin="round" />
+                            <polyline points={ptsTotal} fill="none" stroke="#0F172A" strokeWidth="3.2" strokeDasharray="6 3" strokeLinejoin="round" />
                             {seriesTotal.map((v, i) => (
                               <g key={`tot-${i}`}>
-                                <circle cx={xAt(i)} cy={yAt(v)} r="5.5" fill="#0F172A" stroke="#FFFFFF" strokeWidth="2" />
-                                <text x={xAt(i)} y={yAt(v) - 10} textAnchor="middle" fontSize="10.5" fontWeight="800" fill="#0F172A" fontFamily="monospace">
-                                  Rp {v} M
-                                </text>
+                                <circle
+                                  cx={xAt(i)}
+                                  cy={yAt(v)}
+                                  r={hoveredProyeksiPoint?.index === i ? "6.5" : "4.5"}
+                                  fill="#0F172A"
+                                  stroke="#FFFFFF"
+                                  strokeWidth="2"
+                                  style={{ cursor: "pointer", transition: "all 0.15s ease" }}
+                                  onMouseEnter={() => setHoveredProyeksiPoint({
+                                    index: i,
+                                    label: periodLabels[i],
+                                    tht: seriesTHT[i],
+                                    jkk: seriesJKK[i],
+                                    jkm: seriesJKm[i],
+                                    total: v,
+                                    x: xAt(i),
+                                    y: yAt(v)
+                                  })}
+                                  onMouseLeave={() => setHoveredProyeksiPoint(null)}
+                                />
+                                {numPeriods <= 16 && (
+                                  <text x={xAt(i)} y={yAt(v) - 9} textAnchor="middle" fontSize="10" fontWeight="800" fill="#0F172A" fontFamily="monospace">
+                                    {v}
+                                  </text>
+                                )}
                               </g>
                             ))}
                           </>
                         ) : (
                           <>
                             {/* Area Gradient Under Active Program Curve */}
-                            <polygon points={areaActive} fill={progKey === "THT" ? "rgba(29,78,216,0.12)" : progKey === "JKK" ? "rgba(234,88,12,0.12)" : "rgba(124,58,237,0.12)"} />
+                            {areaActive && (
+                              <polygon points={areaActive} fill={progKey === "THT" ? "rgba(29,78,216,0.12)" : progKey === "JKK" ? "rgba(234,88,12,0.12)" : "rgba(124,58,237,0.12)"} />
+                            )}
                             
                             {/* Main Active Program Curve */}
-                            <polyline points={ptsActive} fill="none" stroke={activeProgTheme.color} strokeWidth="3.5" strokeLinejoin="round" strokeLinecap="round" />
+                            <polyline points={ptsActive} fill="none" stroke={activeProgTheme.color} strokeWidth="3.2" strokeLinejoin="round" strokeLinecap="round" />
                             
                             {/* Data Points + Values */}
                             {chartKebutuhanSeries.map((v, i) => (
                               <g key={`p-${i}`}>
-                                <circle cx={xAt(i)} cy={yAt(v)} r="5.5" fill="#FFFFFF" stroke={activeProgTheme.color} strokeWidth="3" />
-                                <text x={xAt(i)} y={yAt(v) - 10} textAnchor="middle" fontSize="11" fontWeight="800" fill={activeProgTheme.color} fontFamily="monospace">
-                                  Rp {v} M
-                                </text>
+                                <circle
+                                  cx={xAt(i)}
+                                  cy={yAt(v)}
+                                  r={hoveredProyeksiPoint?.index === i ? "6.5" : "4.5"}
+                                  fill="#FFFFFF"
+                                  stroke={activeProgTheme.color}
+                                  strokeWidth="3"
+                                  style={{ cursor: "pointer", transition: "all 0.15s ease" }}
+                                  onMouseEnter={() => setHoveredProyeksiPoint({
+                                    index: i,
+                                    label: periodLabels[i],
+                                    tht: seriesTHT[i],
+                                    jkk: seriesJKK[i],
+                                    jkm: seriesJKm[i],
+                                    total: seriesTotal[i],
+                                    value: v,
+                                    x: xAt(i),
+                                    y: yAt(v)
+                                  })}
+                                  onMouseLeave={() => setHoveredProyeksiPoint(null)}
+                                />
+                                {numPeriods <= 20 && (
+                                  <text x={xAt(i)} y={yAt(v) - 9} textAnchor="middle" fontSize="10" fontWeight="800" fill={activeProgTheme.color} fontFamily="monospace">
+                                    {v}
+                                  </text>
+                                )}
                               </g>
                             ))}
                           </>
+                        )}
+
+                        {/* Interactive Tooltip Box on Hover */}
+                        {hoveredProyeksiPoint && (
+                          <g
+                            transform={`translate(${
+                              hoveredProyeksiPoint.x < ML + 110
+                                ? hoveredProyeksiPoint.x + 10
+                                : hoveredProyeksiPoint.x > W - MR - 110
+                                ? hoveredProyeksiPoint.x - 190
+                                : hoveredProyeksiPoint.x - 90
+                            }, ${Math.max(hoveredProyeksiPoint.y - 78, 10)})`}
+                            pointerEvents="none"
+                          >
+                            <rect
+                              x="0"
+                              y="0"
+                              width="180"
+                              height="72"
+                              rx="8"
+                              fill="#0F172A"
+                              stroke="#334155"
+                              strokeWidth="1"
+                              filter="drop-shadow(0 6px 16px rgba(0,0,0,0.4))"
+                            />
+                            <text x="10" y="16" fill="#94A3B8" fontSize="10.5" fontWeight="700" fontFamily="sans-serif">
+                              {hoveredProyeksiPoint.label}
+                            </text>
+                            <text x="10" y="32" fill="#93C5FD" fontSize="10" fontWeight="600" fontFamily="monospace">
+                              • THT: Rp {hoveredProyeksiPoint.tht} M
+                            </text>
+                            <text x="10" y="46" fill="#FDBA74" fontSize="10" fontWeight="600" fontFamily="monospace">
+                              • JKK: Rp {hoveredProyeksiPoint.jkk} M  |  JKm: Rp {hoveredProyeksiPoint.jkm} M
+                            </text>
+                            <text x="10" y="62" fill="#FFFFFF" fontSize="11" fontWeight="800" fontFamily="monospace">
+                              Total Kebutuhan: Rp {hoveredProyeksiPoint.total} M
+                            </text>
+                          </g>
                         )}
                       </svg>
                     </div>
                   );
                 } else {
                   /* MODE BAR KOMPARASI PERIODE */
-                  const numPeriods = periodLabels.length;
                   const groupColW = plotW / numPeriods;
-                  const barColW = progKey === "Semua" ? 18 : 36;
-                  const barColGap = 4;
+                  const barColW = progKey === "Semua" ? (numPeriods > 15 ? 8 : 16) : (numPeriods > 15 ? 16 : 30);
+                  const barColGap = numPeriods > 15 ? 2 : 4;
 
                   return (
                     <div style={{ width: "100%", overflowX: "auto" }}>
-                      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", minWidth: 680, height: "auto", display: "block" }}>
+                      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", minWidth: numPeriods > 15 ? 900 : 680, height: "auto", display: "block" }}>
                         {/* Gridlines */}
                         {yTicks.map((t, i) => (
                           <g key={i}>
@@ -2164,7 +2784,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             y1={yAt(currentProgSaldo)}
                             x2={W - MR}
                             y2={yAt(currentProgSaldo)}
-                            stroke={currentProgSaldo >= Math.max(...chartKebutuhanSeries) ? "#059669" : "#DC2626"}
+                            stroke={currentProgSaldo >= Math.max(...chartKebutuhanSeries, 0) ? "#059669" : "#DC2626"}
                             strokeWidth="2"
                             strokeDasharray="6 4"
                           />
@@ -2194,25 +2814,20 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                             return (
                               <g key={i}>
                                 {/* Bar THT */}
-                                <rect x={bx1} y={by1} width={barColW} height={h1} rx={3} fill="#1D4ED8" />
-                                <text x={bx1 + barColW / 2} y={by1 - 4} textAnchor="middle" fontSize="9" fontWeight="800" fill="#1D4ED8" fontFamily="monospace">
-                                  {v1}
-                                </text>
-
+                                <rect x={bx1} y={by1} width={barColW} height={h1} rx={2} fill="#1D4ED8" />
                                 {/* Bar JKK */}
-                                <rect x={bx2} y={by2} width={barColW} height={h2} rx={3} fill="#EA580C" />
-                                <text x={bx2 + barColW / 2} y={by2 - 4} textAnchor="middle" fontSize="9" fontWeight="800" fill="#EA580C" fontFamily="monospace">
-                                  {v2}
-                                </text>
-
+                                <rect x={bx2} y={by2} width={barColW} height={h2} rx={2} fill="#EA580C" />
                                 {/* Bar JKm */}
-                                <rect x={bx3} y={by3} width={barColW} height={h3} rx={3} fill="#7C3AED" />
-                                <text x={bx3 + barColW / 2} y={by3 - 4} textAnchor="middle" fontSize="9" fontWeight="800" fill="#7C3AED" fontFamily="monospace">
-                                  {v3}
-                                </text>
+                                <rect x={bx3} y={by3} width={barColW} height={h3} rx={2} fill="#7C3AED" />
+
+                                {numPeriods <= 12 && (
+                                  <text x={bx2 + barColW / 2} y={Math.min(by1, by2, by3) - 4} textAnchor="middle" fontSize="9" fontWeight="800" fill="#0F172A" fontFamily="monospace">
+                                    {seriesTotal[i]}
+                                  </text>
+                                )}
 
                                 {/* Period Label */}
-                                <text x={colCenterX} y={H - MB + 22} textAnchor="middle" fontSize="11" fontWeight="700" fill={COLORS.gray800} fontFamily="Inter, sans-serif">
+                                <text x={colCenterX} y={H - MB + 22} textAnchor="middle" fontSize={numPeriods > 20 ? "9.5" : "11"} fontWeight="700" fill={COLORS.gray800} fontFamily="Inter, sans-serif">
                                   {p}
                                 </text>
                               </g>
@@ -2225,11 +2840,13 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
 
                             return (
                               <g key={i}>
-                                <rect x={bx} y={by} width={barColW} height={h} rx={4} fill={activeProgTheme.color} />
-                                <text x={colCenterX} y={by - 6} textAnchor="middle" fontSize="10.5" fontWeight="800" fill={activeProgTheme.color} fontFamily="monospace">
-                                  Rp {val} M
-                                </text>
-                                <text x={colCenterX} y={H - MB + 22} textAnchor="middle" fontSize="11" fontWeight="700" fill={COLORS.gray800} fontFamily="Inter, sans-serif">
+                                <rect x={bx} y={by} width={barColW} height={h} rx={3} fill={activeProgTheme.color} />
+                                {numPeriods <= 20 && (
+                                  <text x={colCenterX} y={by - 5} textAnchor="middle" fontSize="10" fontWeight="800" fill={activeProgTheme.color} fontFamily="monospace">
+                                    {val}
+                                  </text>
+                                )}
+                                <text x={colCenterX} y={H - MB + 22} textAnchor="middle" fontSize={numPeriods > 20 ? "9.5" : "11"} fontWeight="700" fill={COLORS.gray800} fontFamily="Inter, sans-serif">
                                   {p}
                                 </text>
                               </g>
@@ -2243,7 +2860,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
               })()}
             </div>
 
-            {/* 6. TABEL RINCIAN PROYEKSI KEBUTUHAN DANA PER PERIODE */}
+            {/* 6. TABEL RINCIAN PROYEKSI KEBUTUHAN DANA DINAMIS */}
             <div style={{ marginTop: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
                 <div>
@@ -2251,7 +2868,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                     Tabel Rincian Proyeksi Kebutuhan Dana — {selectedMitraView}
                   </div>
                   <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 1 }}>
-                    Estimasi proyeksi kebutuhan klaim per program ({periodeView === "Mingguan" ? `Per Minggu (${selectedBulanMingguan})` : "Per Bulan Semester II 2026"})
+                    Estimasi proyeksi klaim per program (Kalender Harian {formatIndoDate(startDate)} s.d. {formatIndoDate(endDate)} • {selectedRangeDaysCount} Hari)
                   </div>
                 </div>
 
@@ -2261,24 +2878,61 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                   onClick={() =>
                     setPreview({
                       title: `Laporan Proyeksi Kebutuhan Dana — ${selectedMitraView}`,
-                      subtitle: `Periode ${periodeView === "Mingguan" ? selectedBulanMingguan : "Semester II 2026"} (THT, JKK, JKm)`,
+                      subtitle: `Periode Kalender Harian ${formatIndoDate(startDate)} s.d. ${formatIndoDate(endDate)} (THT, JKK, JKm)`,
                       type: "table",
-                      fileName: `Proyeksi_Kebutuhan_Dana_${selectedMitraView.replace(/\s+/g, "_")}.xlsx`,
+                      fileName: `Proyeksi_Kalender_${startDate}_sd_${endDate}_${selectedMitraView.replace(/\s+/g, "_")}.xlsx`,
                       content: {
-                        columns: ["Program Manfaat", ...periodLabels, periodeView === "Bulanan" ? "Rata-rata/Bln" : "Rata-rata/Mgg", "Total Proyeksi", "Saldo CMS", "Selisih (+/-)", "Status"],
+                        columns: [
+                          "Program Manfaat",
+                          ...periodLabels,
+                          "Rata-rata/Hari",
+                          "Puncak (Peak)",
+                          "Total Proyeksi",
+                          "Saldo Kas CMS",
+                          "Ketahanan (+/-)",
+                          "Status"
+                        ],
                         rows: [
-                          ["THT (Tabungan Hari Tua)", ...seriesTHT.map(v => `Rp ${v} M`), `Rp ${avgTHT} M`, `Rp ${sumTHT} M`, `Rp ${activeMitraSaldoTHT} M`, `${activeMitraSaldoTHT - (periodeView === "Bulanan" ? avgTHT : sumTHT) >= 0 ? "+" : ""}Rp ${activeMitraSaldoTHT - (periodeView === "Bulanan" ? avgTHT : sumTHT)} M`, activeMitraSaldoTHT >= (periodeView === "Bulanan" ? avgTHT : sumTHT) ? "AMAN" : "DEFISIT"],
-                          ["JKK (Jaminan Kecelakaan Kerja)", ...seriesJKK.map(v => `Rp ${v} M`), `Rp ${avgJKK} M`, `Rp ${sumJKK} M`, `Rp ${activeMitraSaldoJKK} M`, `${activeMitraSaldoJKK - (periodeView === "Bulanan" ? avgJKK : sumJKK) >= 0 ? "+" : ""}Rp ${activeMitraSaldoJKK - (periodeView === "Bulanan" ? avgJKK : sumJKK)} M`, activeMitraSaldoJKK >= (periodeView === "Bulanan" ? avgJKK : sumJKK) ? "AMAN" : "DEFISIT"],
-                          ["JKm (Jaminan Kematian)", ...seriesJKm.map(v => `Rp ${v} M`), `Rp ${avgJKm} M`, `Rp ${sumJKm} M`, `Rp ${activeMitraSaldoJKm} M`, `${activeMitraSaldoJKm - (periodeView === "Bulanan" ? avgJKm : sumJKm) >= 0 ? "+" : ""}Rp ${activeMitraSaldoJKm - (periodeView === "Bulanan" ? avgJKm : sumJKm)} M`, activeMitraSaldoJKm >= (periodeView === "Bulanan" ? avgJKm : sumJKm) ? "AMAN" : "DEFISIT"],
+                          [
+                            "THT (Tabungan Hari Tua)",
+                            ...seriesTHT.map(v => `Rp ${v} M`),
+                            `Rp ${avgTHT} M`,
+                            `Rp ${peakTHT} M`,
+                            `Rp ${sumTHT} M`,
+                            `Rp ${activeMitraSaldoTHT} M`,
+                            `${activeMitraSaldoTHT - sumTHT >= 0 ? "+" : ""}Rp ${+(activeMitraSaldoTHT - sumTHT).toFixed(1)} M`,
+                            activeMitraSaldoTHT >= sumTHT ? "AMAN" : "DEFISIT"
+                          ],
+                          [
+                            "JKK (Jaminan Kecelakaan Kerja)",
+                            ...seriesJKK.map(v => `Rp ${v} M`),
+                            `Rp ${avgJKK} M`,
+                            `Rp ${peakJKK} M`,
+                            `Rp ${sumJKK} M`,
+                            `Rp ${activeMitraSaldoJKK} M`,
+                            `${activeMitraSaldoJKK - sumJKK >= 0 ? "+" : ""}Rp ${+(activeMitraSaldoJKK - sumJKK).toFixed(1)} M`,
+                            activeMitraSaldoJKK >= sumJKK ? "AMAN" : "DEFISIT"
+                          ],
+                          [
+                            "JKm (Jaminan Kematian)",
+                            ...seriesJKm.map(v => `Rp ${v} M`),
+                            `Rp ${avgJKm} M`,
+                            `Rp ${peakJKm} M`,
+                            `Rp ${sumJKm} M`,
+                            `Rp ${activeMitraSaldoJKm} M`,
+                            `${activeMitraSaldoJKm - sumJKm >= 0 ? "+" : ""}Rp ${+(activeMitraSaldoJKm - sumJKm).toFixed(1)} M`,
+                            activeMitraSaldoJKm >= sumJKm ? "AMAN" : "DEFISIT"
+                          ],
                         ],
                         totalRow: [
                           { text: "TOTAL KONSOLIDASI PROGRAM", align: "left" },
                           ...seriesTotal.map(v => ({ text: `Rp ${v} M`, align: "right" })),
                           { text: `Rp ${avgTotal} M`, align: "right" },
+                          { text: `Rp ${peakTotal} M`, align: "right" },
                           { text: `Rp ${sumTotal} M`, align: "right" },
                           { text: `Rp ${activeMitraSaldoTotal} M`, align: "right" },
-                          { text: `${activeMitraSaldoTotal - (periodeView === "Bulanan" ? avgTotal : sumTotal) >= 0 ? "+" : ""}Rp ${activeMitraSaldoTotal - (periodeView === "Bulanan" ? avgTotal : sumTotal)} M`, align: "right" },
-                          { text: activeMitraSaldoTotal >= (periodeView === "Bulanan" ? avgTotal : sumTotal) ? "■ AMAN" : "● DEFISIT", align: "center" }
+                          { text: `${activeMitraSaldoTotal - sumTotal >= 0 ? "+" : ""}Rp ${+(activeMitraSaldoTotal - sumTotal).toFixed(1)} M`, align: "right" },
+                          { text: activeMitraSaldoTotal >= sumTotal ? "■ AMAN" : "● DEFISIT", align: "center" }
                         ],
                         totalRows: 3
                       }
@@ -2293,25 +2947,30 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
                     <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                      <th style={{ padding: "9px 12px", textAlign: "left", fontWeight: 800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0" }}>Program Manfaat</th>
+                      <th style={{ padding: "9px 12px", textAlign: "left", fontWeight: 800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
+                        Program Manfaat
+                      </th>
                       {periodLabels.map((p, idx) => (
-                        <th key={idx} style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0" }}>
+                        <th key={idx} style={{ padding: "9px 10px", textAlign: "right", fontWeight: 800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                           {p}
                         </th>
                       ))}
-                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.gray800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", background: "#F1F5F9" }}>
-                        {periodeView === "Bulanan" ? "Rata-rata/Bln" : "Rata-rata/Mgg"}
+                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.gray800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", background: "#F1F5F9", whiteSpace: "nowrap" }}>
+                        Rata-rata/Hari
                       </th>
-                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.orange, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0" }}>
+                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.orange, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", background: "#FFF7ED", whiteSpace: "nowrap" }}>
+                        Puncak
+                      </th>
+                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.orange, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         Total Proyeksi
                       </th>
-                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.blueDark, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0" }}>
+                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, color: COLORS.blueDark, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         Saldo Tersedia
                       </th>
-                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0" }}>
+                      <th style={{ padding: "9px 12px", textAlign: "right", fontWeight: 800, borderBottom: "1px solid #E2E8F0", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         Ketahanan Saldo (+/-)
                       </th>
-                      <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 800, borderBottom: "1px solid #E2E8F0" }}>
+                      <th style={{ padding: "9px 12px", textAlign: "center", fontWeight: 800, borderBottom: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         Status
                       </th>
                     </tr>
@@ -2326,16 +2985,19 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                         cursor: "pointer"
                       }}
                     >
-                      <td style={{ padding: "9px 12px", fontWeight: 700, color: "#1D4ED8", borderRight: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "9px 12px", fontWeight: 700, color: "#1D4ED8", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         ● Program THT (Tabungan Hari Tua)
                       </td>
                       {seriesTHT.map((v, i) => (
-                        <td key={i} style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1D4ED8", borderRight: "1px solid #E2E8F0" }}>
+                        <td key={i} style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1D4ED8", borderRight: "1px solid #E2E8F0" }}>
                           Rp {v} M
                         </td>
                       ))}
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1E293B", borderRight: "1px solid #E2E8F0", background: "#F1F5F9" }}>
                         Rp {avgTHT} M
+                      </td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.orange, borderRight: "1px solid #E2E8F0", background: "#FFF7ED" }}>
+                        Rp {peakTHT} M
                       </td>
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.orange, borderRight: "1px solid #E2E8F0" }}>
                         Rp {sumTHT} M
@@ -2343,12 +3005,12 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, borderRight: "1px solid #E2E8F0" }}>
                         Rp {activeMitraSaldoTHT} M
                       </td>
-                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: activeMitraSaldoTHT >= (periodeView === "Bulanan" ? avgTHT : sumTHT) ? COLORS.green : COLORS.red, borderRight: "1px solid #E2E8F0" }}>
-                        {activeMitraSaldoTHT >= (periodeView === "Bulanan" ? avgTHT : sumTHT) ? "+" : ""}Rp {activeMitraSaldoTHT - (periodeView === "Bulanan" ? avgTHT : sumTHT)} M
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: activeMitraSaldoTHT >= sumTHT ? COLORS.green : COLORS.red, borderRight: "1px solid #E2E8F0" }}>
+                        {activeMitraSaldoTHT >= sumTHT ? "+" : ""}Rp {+(activeMitraSaldoTHT - sumTHT).toFixed(1)} M
                       </td>
                       <td style={{ padding: "9px 12px", textAlign: "center" }}>
-                        <Badge color={activeMitraSaldoTHT >= (periodeView === "Bulanan" ? avgTHT : sumTHT) ? "green" : "red"}>
-                          {activeMitraSaldoTHT >= (periodeView === "Bulanan" ? avgTHT : sumTHT) ? "Aman" : "Defisit"}
+                        <Badge color={activeMitraSaldoTHT >= sumTHT ? "green" : "red"}>
+                          {activeMitraSaldoTHT >= sumTHT ? "Aman" : "Defisit"}
                         </Badge>
                       </td>
                     </tr>
@@ -2362,16 +3024,19 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                         cursor: "pointer"
                       }}
                     >
-                      <td style={{ padding: "9px 12px", fontWeight: 700, color: "#EA580C", borderRight: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "9px 12px", fontWeight: 700, color: "#EA580C", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         ● Program JKK (Jaminan Kecelakaan Kerja)
                       </td>
                       {seriesJKK.map((v, i) => (
-                        <td key={i} style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#EA580C", borderRight: "1px solid #E2E8F0" }}>
+                        <td key={i} style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#EA580C", borderRight: "1px solid #E2E8F0" }}>
                           Rp {v} M
                         </td>
                       ))}
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1E293B", borderRight: "1px solid #E2E8F0", background: "#F1F5F9" }}>
                         Rp {avgJKK} M
+                      </td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.orange, borderRight: "1px solid #E2E8F0", background: "#FFF7ED" }}>
+                        Rp {peakJKK} M
                       </td>
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.orange, borderRight: "1px solid #E2E8F0" }}>
                         Rp {sumJKK} M
@@ -2379,12 +3044,12 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, borderRight: "1px solid #E2E8F0" }}>
                         Rp {activeMitraSaldoJKK} M
                       </td>
-                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: activeMitraSaldoJKK >= (periodeView === "Bulanan" ? avgJKK : sumJKK) ? COLORS.green : COLORS.red, borderRight: "1px solid #E2E8F0" }}>
-                        {activeMitraSaldoJKK >= (periodeView === "Bulanan" ? avgJKK : sumJKK) ? "+" : ""}Rp {activeMitraSaldoJKK - (periodeView === "Bulanan" ? avgJKK : sumJKK)} M
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: activeMitraSaldoJKK >= sumJKK ? COLORS.green : COLORS.red, borderRight: "1px solid #E2E8F0" }}>
+                        {activeMitraSaldoJKK >= sumJKK ? "+" : ""}Rp {+(activeMitraSaldoJKK - sumJKK).toFixed(1)} M
                       </td>
                       <td style={{ padding: "9px 12px", textAlign: "center" }}>
-                        <Badge color={activeMitraSaldoJKK >= (periodeView === "Bulanan" ? avgJKK : sumJKK) ? "green" : "red"}>
-                          {activeMitraSaldoJKK >= (periodeView === "Bulanan" ? avgJKK : sumJKK) ? "Aman" : "Defisit"}
+                        <Badge color={activeMitraSaldoJKK >= sumJKK ? "green" : "red"}>
+                          {activeMitraSaldoJKK >= sumJKK ? "Aman" : "Defisit"}
                         </Badge>
                       </td>
                     </tr>
@@ -2398,16 +3063,19 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                         cursor: "pointer"
                       }}
                     >
-                      <td style={{ padding: "9px 12px", fontWeight: 700, color: "#7C3AED", borderRight: "1px solid #E2E8F0" }}>
+                      <td style={{ padding: "9px 12px", fontWeight: 700, color: "#7C3AED", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         ● Program JKm (Jaminan Kematian)
                       </td>
                       {seriesJKm.map((v, i) => (
-                        <td key={i} style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#7C3AED", borderRight: "1px solid #E2E8F0" }}>
+                        <td key={i} style={{ padding: "9px 10px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#7C3AED", borderRight: "1px solid #E2E8F0" }}>
                           Rp {v} M
                         </td>
                       ))}
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#1E293B", borderRight: "1px solid #E2E8F0", background: "#F1F5F9" }}>
                         Rp {avgJKm} M
+                      </td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: COLORS.orange, borderRight: "1px solid #E2E8F0", background: "#FFF7ED" }}>
+                        Rp {peakJKm} M
                       </td>
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.orange, borderRight: "1px solid #E2E8F0" }}>
                         Rp {sumJKm} M
@@ -2415,28 +3083,31 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, borderRight: "1px solid #E2E8F0" }}>
                         Rp {activeMitraSaldoJKm} M
                       </td>
-                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: activeMitraSaldoJKm >= (periodeView === "Bulanan" ? avgJKm : sumJKm) ? COLORS.green : COLORS.red, borderRight: "1px solid #E2E8F0" }}>
-                        {activeMitraSaldoJKm >= (periodeView === "Bulanan" ? avgJKm : sumJKm) ? "+" : ""}Rp {activeMitraSaldoJKm - (periodeView === "Bulanan" ? avgJKm : sumJKm)} M
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: activeMitraSaldoJKm >= sumJKm ? COLORS.green : COLORS.red, borderRight: "1px solid #E2E8F0" }}>
+                        {activeMitraSaldoJKm >= sumJKm ? "+" : ""}Rp {+(activeMitraSaldoJKm - sumJKm).toFixed(1)} M
                       </td>
                       <td style={{ padding: "9px 12px", textAlign: "center" }}>
-                        <Badge color={activeMitraSaldoJKm >= (periodeView === "Bulanan" ? avgJKm : sumJKm) ? "green" : "red"}>
-                          {activeMitraSaldoJKm >= (periodeView === "Bulanan" ? avgJKm : sumJKm) ? "Aman" : "Defisit"}
+                        <Badge color={activeMitraSaldoJKm >= sumJKm ? "green" : "red"}>
+                          {activeMitraSaldoJKm >= sumJKm ? "Aman" : "Defisit"}
                         </Badge>
                       </td>
                     </tr>
 
                     {/* Baris 4: TOTAL KONSOLIDASI PROGRAM */}
                     <tr style={{ background: "#EDF2F7", fontWeight: 800, borderTop: "2px solid #CBD5E1" }}>
-                      <td style={{ padding: "10px 12px", color: COLORS.blueDark, borderRight: "1px solid #CBD5E1" }}>
+                      <td style={{ padding: "10px 12px", color: COLORS.blueDark, borderRight: "1px solid #CBD5E1", whiteSpace: "nowrap" }}>
                         TOTAL PROYEKSI KEBUTUHAN (KONSOLIDASI)
                       </td>
                       {seriesTotal.map((v, i) => (
-                        <td key={i} style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#0F172A", borderRight: "1px solid #CBD5E1" }}>
+                        <td key={i} style={{ padding: "10px 10px", textAlign: "right", fontFamily: "monospace", color: "#0F172A", borderRight: "1px solid #CBD5E1" }}>
                           Rp {v} M
                         </td>
                       ))}
                       <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#0F172A", borderRight: "1px solid #CBD5E1", background: "#E2E8F0" }}>
                         Rp {avgTotal} M
+                      </td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.orange, borderRight: "1px solid #CBD5E1", background: "#FFEDD5" }}>
+                        Rp {peakTotal} M
                       </td>
                       <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.orange, borderRight: "1px solid #CBD5E1" }}>
                         Rp {sumTotal} M
@@ -2444,12 +3115,12 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
                       <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, borderRight: "1px solid #CBD5E1" }}>
                         Rp {activeMitraSaldoTotal} M
                       </td>
-                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: activeMitraSaldoTotal >= (periodeView === "Bulanan" ? avgTotal : sumTotal) ? COLORS.green : COLORS.red, borderRight: "1px solid #CBD5E1" }}>
-                        {activeMitraSaldoTotal >= (periodeView === "Bulanan" ? avgTotal : sumTotal) ? "+" : ""}Rp {activeMitraSaldoTotal - (periodeView === "Bulanan" ? avgTotal : sumTotal)} M
+                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: activeMitraSaldoTotal >= sumTotal ? COLORS.green : COLORS.red, borderRight: "1px solid #CBD5E1" }}>
+                        {activeMitraSaldoTotal >= sumTotal ? "+" : ""}Rp {+(activeMitraSaldoTotal - sumTotal).toFixed(1)} M
                       </td>
                       <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                        <Badge color={activeMitraSaldoTotal >= (periodeView === "Bulanan" ? avgTotal : sumTotal) ? "green" : "red"}>
-                          {activeMitraSaldoTotal >= (periodeView === "Bulanan" ? avgTotal : sumTotal) ? "■ AMAN" : "● DEFISIT"}
+                        <Badge color={activeMitraSaldoTotal >= sumTotal ? "green" : "red"}>
+                          {activeMitraSaldoTotal >= sumTotal ? "■ AMAN" : "● DEFISIT"}
                         </Badge>
                       </td>
                     </tr>
@@ -2686,128 +3357,7 @@ export const DashboardDana = ({ initialTab = "monitoring" }) => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* TAB 2: STANDARISASI & REKONSILIASI REKENING KORAN (MAPPING CMS) */}
-      {activeTab === "mapping_cms" && (
-        <RekonRekeningKoran />
-      )}
-
-      {/* TAB 3: REKAPITULASI PENYALURAN HARIAN CMS */}
-      {activeTab === "rekap" && (
-        <div style={{ background: COLORS.white, borderRadius: 10, padding: 20, border: `1px solid ${COLORS.gray200}`, boxShadow: "0 1px 4px rgba(0,0,0,0.03)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
-            <div>
-              <SectionTitle>Rekapitulasi Mapping CMS Mitra Bayar vs Transaksi YANDU NG (THT, JKK, JKm)</SectionTitle>
-              <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
-                Pemadanan nomor referensi transaksi CMS bank terhadap Nomor Surat Perintah (SP) klaim program <strong>THT, JKK, dan JKm</strong>.
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <Btn
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setPreview({
-                    title: "Rekapitulasi Penyaluran CMS Mitra Bayar (THT, JKK, JKm)",
-                    subtitle: `Periode Juli 2026 • ${filteredRekap.length} Transaksi`,
-                    type: "table",
-                    fileName: "Rekap_Penyaluran_CMS_THT_JKK_JKM.xlsx",
-                    content: {
-                      columns: ["No. Ref CMS", "NRP/NIP", "Nama Peserta", "Program Manfaat", "Mitra Bayar", "No. SP", "Nominal", "Cabang", "Status"],
-                      rows: filteredRekap.map(r => [r.noRef, r.nrp, r.nama, r.jenis, r.mitra, r.noSP, r.nominal, r.cabang, r.status]),
-                      totalRows: filteredRekap.length
-                    }
-                  })
-                }
-              >
-                <Download size={13} /> Ekspor Excel
-              </Btn>
-            </div>
-          </div>
-
-          {/* Filter Bar */}
-          <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "flex-end", flexWrap: "wrap", background: COLORS.gray50, padding: "12px 14px", borderRadius: 8, border: `1px solid ${COLORS.gray200}` }}>
-            <Select label="Mitra Bayar" value={selectedMitraFilter} onChange={setSelectedMitraFilter} options={["Semua", ...initialMitraData.map(m => m.shortName || m.mitra)]} minW={160} />
-            <Select label="Program Manfaat" value={filterJenis} onChange={setFilterJenis} options={["Semua", "THT (BUP)", "Klaim JKK Perawatan", "Klaim JKm"]} minW={160} />
-            <Select label="Status Transaksi" value={filterStatusBayar} onChange={setFilterStatusBayar} options={["Semua", "Berhasil", "Gagal"]} minW={110} />
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <label style={{ fontSize: 12, color: COLORS.gray500, display: "block", marginBottom: 4, fontWeight: 600 }}>Cari Peserta / No. SP</label>
-              <SearchInput value={searchRekap} onChange={setSearchRekap} placeholder="Ketik NRP, Nama, atau No. SP..." />
-            </div>
-          </div>
-
-          <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 8 }}>
-            Menampilkan <strong>{filteredRekap.length}</strong> transaksi penyaluran CMS terverifikasi (THT, JKK, JKm)
-          </div>
-
-          {filteredRekap.length === 0 ? (
-            <NoData text="Tidak ada transaksi yang cocok dengan filter yang dipilih." />
-          ) : (
-            <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid #CBD5E1`, boxShadow: "0 1px 3px rgba(15,23,42,0.04)" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
-                <thead>
-                  <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
-                    {["No", "No. Referensi CMS", "NRP / NOPEN", "Nama Penerima Manfaat", "Program Manfaat", "Mitra Bayar", "No. SP (YANDU)", "Nominal", "Waktu", "Kantor Cabang", "Status"].map((c, i) => (
-                      <th
-                        key={i}
-                        style={{
-                          padding: "10px 12px",
-                          textAlign: i === 7 ? "right" : "left",
-                          fontWeight: 800,
-                          color: "#64748B",
-                          borderBottom: `1px solid #E2E8F0`,
-                          borderRight: i < 10 ? "1px solid #E2E8F0" : "none",
-                          whiteSpace: "nowrap"
-                        }}
-                      >
-                        {c}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRekap.map((r, i) => (
-                    <tr
-                      key={r.no}
-                      style={{
-                        borderBottom: `1px solid #E2E8F0`,
-                        background: r.status === "Gagal" ? "#FFF1F2" : i % 2 === 1 ? "#F8FAFC" : "#FFFFFF"
-                      }}
-                      onMouseEnter={e => {
-                        if (r.status !== "Gagal") e.currentTarget.style.background = "#F1F5F9";
-                      }}
-                      onMouseLeave={e => {
-                        if (r.status !== "Gagal") e.currentTarget.style.background = i % 2 === 1 ? "#F8FAFC" : "#FFFFFF";
-                      }}
-                    >
-                      <td style={{ padding: "10px 12px", color: COLORS.gray500, textAlign: "center", borderRight: "1px solid #E2E8F0" }}>{r.no}</td>
-                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11.5, color: COLORS.blueDark, fontWeight: 600, borderRight: "1px solid #E2E8F0" }}>{r.noRef}</td>
-                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11.5, borderRight: "1px solid #E2E8F0" }}>{r.nrp}</td>
-                      <td style={{ padding: "10px 12px", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0" }}>{r.nama}</td>
-                      <td style={{ padding: "10px 12px", borderRight: "1px solid #E2E8F0" }}>
-                        <Badge color={r.jenis.includes("JKK") ? "orange" : r.jenis.includes("JKm") ? "purple" : "blue"}>
-                          {r.jenis}
-                        </Badge>
-                      </td>
-                      <td style={{ padding: "10px 12px", borderRight: "1px solid #E2E8F0" }}>{r.mitra}</td>
-                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11.5, color: COLORS.gray700, borderRight: "1px solid #E2E8F0" }}>{r.noSP}</td>
-                      <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0" }}>{r.nominal}</td>
-                      <td style={{ padding: "10px 12px", fontSize: 11.5, color: "#475569", borderRight: "1px solid #E2E8F0" }}>{r.waktu}</td>
-                      <td style={{ padding: "10px 12px", fontSize: 11.5, color: COLORS.gray700, borderRight: "1px solid #E2E8F0" }}>{r.cabang}</td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <Badge color={r.status === "Berhasil" ? "green" : "red"}>
-                          {r.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
+

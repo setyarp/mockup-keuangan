@@ -40,21 +40,51 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 
-# Temporary / Cache Files
+# Temporary / Cache / Analysis Scratch Files
 .eslintcache
 *.tmp
 *.temp
-extracted_brd_tax.txt
-extracted_*.txt
-brd_*.txt
-brs_*.txt
-scratch_*.txt
+*.ocr.*
+*_ocr.*
+*_ocr.txt
+*_ocr.json
+*_extracted.*
+*_extracted.txt
+*_parsed.*
+*_parsed.json
+extracted_*
+brd_*
+brs*
+scratch_*
 screenshot*.png
+analysis_*
+sp_flow_*
+*.fitz.txt
+*_fitz.txt
 
 # Document / Reference Files
 *.pdf
 *.docx
 *.doc
+
+# Spreadsheets & Data Files (Rekening Koran, Excel, CSV)
+*.xlsx
+*.xls
+*.csv
+*.xlsm
+*.xlsb
+*.ods
+*.tsv
+[Jj]anuari/
+*Januari*/
+*januari*/
+[Rr]ekening*[Kk]oran*/
+[Ee]xcel*/
+[Uu]pload*/
+downloads/
+Downloads/
+data/
+files/
 
 # Internal Handover & Developer Documents (Excluded from git)
 panduan_teknis_monitoring_dana_developer.md

@@ -1,11 +1,12 @@
-// Data Rincian Alokasi Dana THT dan Pensiun Per-Satuan Kerja (Satker)
+// Data Rincian Alokasi Dana THT dan Pensiun Per-Unor / Satuan Kerja (Satker)
 // THT (3,25%) dan Pensiun (4,75%) diterbitkan dalam 1 Dokumen Surat Tagihan Terpadu
 
 export const SATKER_THT_PENSIUN_ALL = [
   // ==================== MATRA TNI & KEMHAN ====================
   {
     kode: "101001",
-    satker: "Mabes TNI (Cilangkap)",
+    unor: "Mabes TNI",
+    satker: "UNOR Mabes TNI (Cilangkap)",
     matra: "Mabes TNI",
     peserta: 12450,
     gajiPokok: 75384615385,
@@ -16,7 +17,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "102010",
-    satker: "TNI AD — Mabesad & Satker Kotama",
+    unor: "TNI AD",
+    satker: "UNOR TNI AD (Mabesad & Kotama)",
     matra: "TNI AD",
     peserta: 154200,
     gajiPokok: 474461538462,
@@ -27,7 +29,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "103010",
-    satker: "TNI AL — Mabesal, Koarmada & Kolinlamil",
+    unor: "TNI AL",
+    satker: "UNOR TNI AL (Mabesal, Koarmada & Kolinlamil)",
     matra: "TNI AL",
     peserta: 48500,
     gajiPokok: 161230769231,
@@ -38,7 +41,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "104010",
-    satker: "TNI AU — Mabesau & Koopsudnas",
+    unor: "TNI AU",
+    satker: "UNOR TNI AU (Mabesau & Koopsudnas)",
     matra: "TNI AU",
     peserta: 36200,
     gajiPokok: 122461538462,
@@ -49,7 +53,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "100010",
-    satker: "Kementerian Pertahanan RI & Balitbang",
+    unor: "Kemhan RI",
+    satker: "UNOR Kementerian Pertahanan (Kemhan RI & Balitbang)",
     matra: "Kemhan",
     peserta: 14800,
     gajiPokok: 44615384615,
@@ -62,7 +67,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   // ==================== MATRA POLRI ====================
   {
     kode: "201001",
-    satker: "Mabes POLRI (Trunojoyo)",
+    unor: "Mabes POLRI",
+    satker: "UNOR Mabes POLRI (Trunojoyo)",
     matra: "POLRI",
     peserta: 28500,
     gajiPokok: 117538461538,
@@ -73,7 +79,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "202010",
-    satker: "Polda Metro Jaya",
+    unor: "Polda Metro Jaya",
+    satker: "UNOR Polda Metro Jaya",
     matra: "POLRI",
     peserta: 32400,
     gajiPokok: 112307692308,
@@ -84,7 +91,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "202020",
-    satker: "Polda Jawa Barat",
+    unor: "Polda Jawa Barat",
+    satker: "UNOR Polda Jawa Barat",
     matra: "POLRI",
     peserta: 31100,
     gajiPokok: 105230769231,
@@ -95,7 +103,8 @@ export const SATKER_THT_PENSIUN_ALL = [
   },
   {
     kode: "202030",
-    satker: "Polda Jawa Timur",
+    unor: "Polda Jawa Timur",
+    satker: "UNOR Polda Jawa Timur",
     matra: "POLRI",
     peserta: 29800,
     gajiPokok: 102615384615,

@@ -28,6 +28,7 @@ import {
   Layers,
   Send,
   Building2,
+  RotateCcw,
 } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import {
@@ -39,6 +40,7 @@ import {
   Badge,
   NoData,
   PreviewModal,
+  Tooltip,
 } from "../components/common";
 
 // Helper fungsi hitung hari kerja (14 hari kerja setelah surat diterima)
@@ -519,6 +521,19 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
       return true;
     });
   }, [computedAuth, filterMitra, filterPeriode, filterStatus, searchQuery]);
+
+  const isFilterActive =
+    filterMitra !== "Semua" ||
+    filterPeriode !== "Semua" ||
+    filterStatus !== "Semua" ||
+    searchQuery.trim() !== "";
+
+  const handleResetFilter = () => {
+    setFilterMitra("Semua");
+    setFilterPeriode("Semua");
+    setFilterStatus("Semua");
+    setSearchQuery("");
+  };
 
   // Aggregates for Flagging
   const aggFlagging = useMemo(() => {
@@ -1666,14 +1681,8 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
         }}
       >
         <div>
-          <div style={{ fontSize: 13, color: COLORS.gray500, marginBottom: 2 }}>
+          <div style={{ fontSize: 13, color: COLORS.gray500 }}>
             Sistem Penagihan Imbal Jasa Pengembangan Manfaat, Rekonsiliasi Pajak (PPN & PPh 23), dan Sanksi Denda Keterlambatan
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-            <Badge color="blue">Suku Bunga Acuan BI: {biRate.toFixed(2)}%</Badge>
-            <Badge color="green">PPN Nilai Lain: 12% (11/12 DPP)</Badge>
-            <Badge color="orange">PPh Pasal 23: 2%</Badge>
-            <Badge color="gray">Jatuh Tempo: 14 Hari Kerja</Badge>
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1771,65 +1780,6 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
             );
           })}
         </div>
-
-        <div style={{ paddingBottom: 6, fontSize: 12, color: COLORS.gray500 }}>
-          {tab === "flagging"
-            ? "Tabel Resmi 25 Kolom Data Flagging Kredit"
-            : tab === "auth"
-            ? "Tabel Resmi 19 Kolom Data Authentikasi Digital"
-            : "Komparasi Kinerja Penagihan Antar Mitra"}
-        </div>
-      </div>
-
-      {/* FILTER BAR TERPADU */}
-      <div
-        style={{
-          background: COLORS.white,
-          borderRadius: 10,
-          padding: "14px 18px",
-          border: `1px solid ${COLORS.gray200}`,
-          marginBottom: 20,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, color: COLORS.gray500, fontSize: 12, fontWeight: 700 }}>
-            <Filter size={14} /> Filter:
-          </div>
-          <Select
-            label="Mitra Bayar"
-            value={filterMitra}
-            onChange={setFilterMitra}
-            options={["Semua", "BRI", "Bank Mandiri", "BNI", "BTN", "Bank Mantap", "BSI", "PT Pos Indonesia", "Bank BJB"]}
-            minW={150}
-          />
-          <Select
-            label="Periode"
-            value={filterPeriode}
-            onChange={setFilterPeriode}
-            options={["Semua", "Mei 2026", "Juni 2026"]}
-            minW={130}
-          />
-          <Select
-            label="Status Pembayaran"
-            value={filterStatus}
-            onChange={setFilterStatus}
-            options={["Semua", "Dibayar Tepat Waktu", "Terlambat", "Belum Dibayar"]}
-            minW={170}
-          />
-        </div>
-
-        <div style={{ minWidth: 260 }}>
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Cari Mitra, No. Surat, BA, Nota Dinas..."
-          />
-        </div>
       </div>
 
       {/* ========================================================= */}
@@ -1838,7 +1788,7 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
       {tab === "flagging" && (
         <>
           {/* Stat Cards Flagging */}
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 16 }}>
             <StatCard
               icon={<Banknote size={IC} />}
               label="Total Tagihan Bruto"
@@ -1869,50 +1819,171 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
             />
           </div>
 
+          {/* Filter Bar User-Friendly Di Bawah Card */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 10,
+              padding: "12px 16px",
+              border: `1px solid ${COLORS.gray200}`,
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              flexWrap: "wrap",
+              gap: 12,
+              boxShadow: "0 1px 2px rgba(15,23,42,0.03)",
+            }}
+          >
+            {/* Sisi Kiri: Filter Dropdowns */}
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+              <div style={{ minWidth: 145 }}>
+                <Select
+                  label="Mitra Pembayar"
+                  value={filterMitra}
+                  onChange={setFilterMitra}
+                  options={["Semua", "BRI", "Bank Mandiri", "BNI", "BTN", "Bank Mantap", "BSI", "PT Pos Indonesia", "Bank BJB"]}
+                />
+              </div>
+              <div style={{ minWidth: 130 }}>
+                <Select
+                  label="Periode"
+                  value={filterPeriode}
+                  onChange={setFilterPeriode}
+                  options={["Semua", "Mei 2026", "Juni 2026"]}
+                />
+              </div>
+              <div style={{ minWidth: 155 }}>
+                <Select
+                  label="Status Bayar"
+                  value={filterStatus}
+                  onChange={setFilterStatus}
+                  options={["Semua", "Dibayar Tepat Waktu", "Terlambat", "Belum Dibayar"]}
+                />
+              </div>
+              {isFilterActive && (
+                <button
+                  type="button"
+                  onClick={handleResetFilter}
+                  title="Reset Semua Filter"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: `1px dashed #CBD5E1`,
+                    background: "#F8FAFC",
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color: COLORS.gray600,
+                    cursor: "pointer",
+                    height: 35,
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#FEE2E2";
+                    e.currentTarget.style.color = COLORS.red;
+                    e.currentTarget.style.borderColor = "#FCA5A5";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#F8FAFC";
+                    e.currentTarget.style.color = COLORS.gray600;
+                    e.currentTarget.style.borderColor = "#CBD5E1";
+                  }}
+                >
+                  <RotateCcw size={12} />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
+
+            {/* Sisi Kanan: Pencarian + Tooltip Info BRD */}
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+              <div>
+                <label
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: 0.6,
+                    textTransform: "uppercase",
+                    color: COLORS.gray500,
+                    display: "block",
+                    marginBottom: 6,
+                  }}
+                >
+                  Pencarian Data
+                </label>
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Cari Mitra, No. Surat, BA..."
+                  minW={220}
+                />
+              </div>
+
+              <Tooltip
+                position="bottom"
+                content={
+                  <div style={{ fontSize: 12, lineHeight: 1.5, maxWidth: 360 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                      Format 25 Kolom Sesuai BRD Keuangan
+                    </div>
+                    <div style={{ color: COLORS.gray300, marginBottom: 6 }}>
+                      Menampilkan <b>{filteredFlagging.length}</b> baris data flagging kredit.
+                    </div>
+                    <div style={{ fontSize: 11, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 4 }}>
+                      <b>Formula:</b> Imbal Jasa = Nominal / 1,11 | DPP = 11/12 × Imbal Jasa | PPN 12% | PPh 23 (2%) | Denda = Tagihan × BI Rate × Hari / 365
+                    </div>
+                  </div>
+                }
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray200}`,
+                    background: COLORS.gray50,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: COLORS.gray700,
+                    cursor: "pointer",
+                    height: 35,
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <Info size={14} color={COLORS.blue} />
+                  <span>Info BRD</span>
+                  <span
+                    style={{
+                      background: "#EFF6FF",
+                      color: COLORS.blue,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: "1px 6px",
+                      borderRadius: 10,
+                    }}
+                  >
+                    {filteredFlagging.length} Data
+                  </span>
+                </div>
+              </Tooltip>
+            </div>
+          </div>
+
           {/* TABEL LENGKAP 25 KOLOM DATA FLAGGING KREDIT */}
           <div
             style={{
               background: COLORS.white,
               borderRadius: 10,
-              padding: 20,
+              padding: 16,
               border: `1px solid ${COLORS.gray200}`,
               boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-              }}
-            >
-              <div>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
-                  Tabel Tagihan Imbal Jasa Flagging Kredit (25 Kolom Sesuai BRD)
-                </h3>
-                <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
-                  Menampilkan {filteredFlagging.length} baris data • Geser tabel ke kanan untuk melihat rincian pajak & sanksi denda
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 12,
-                    background: "#F8FAFC",
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    border: `1px solid ${COLORS.gray200}`,
-                  }}
-                >
-                  <Info size={13} color={COLORS.blue} />
-                  Formula: Imbal Jasa = Nominal/1,11 | DPP = 11/12 X Imbal Jasa | PPN 12% | PPh 23 (2%)
-                </span>
-              </div>
-            </div>
 
             {filteredFlagging.length === 0 ? (
               <NoData message="Tidak ada data tagihan flagging kredit yang sesuai filter." />
@@ -2257,7 +2328,7 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
       {tab === "auth" && (
         <>
           {/* Stat Cards Auth Digital */}
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 20 }}>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 16 }}>
             <StatCard
               icon={<Smartphone size={IC} />}
               label="Total Penerima Diautentikasi"
@@ -2276,7 +2347,7 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
               icon={<ShieldCheck size={IC} />}
               label="Total Bersih Diterima (NAT)"
               value={fmt(aggAuth.totalNAT)}
-              sub={`Bruto Tagihan: ${fmt(aggAuth.totalTagihan)} • PPh 23: -${fmt(aggAuth.totalPPh23)}`}
+              sub={`PPN 12%: ${fmt(aggAuth.totalPPN)} • PPh 23: -${fmt(aggAuth.totalPPh23)}`}
               color={COLORS.green}
             />
             <StatCard
@@ -2288,51 +2359,171 @@ export const TagihanImbalJasa = ({ defaultTab = "flagging" }) => {
             />
           </div>
 
+          {/* Filter Bar User-Friendly Di Bawah Card */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 10,
+              padding: "12px 16px",
+              border: `1px solid ${COLORS.gray200}`,
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              flexWrap: "wrap",
+              gap: 12,
+              boxShadow: "0 1px 2px rgba(15,23,42,0.03)",
+            }}
+          >
+            {/* Sisi Kiri: Filter Dropdowns */}
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+              <div style={{ minWidth: 145 }}>
+                <Select
+                  label="Mitra Pembayar"
+                  value={filterMitra}
+                  onChange={setFilterMitra}
+                  options={["Semua", "BRI", "Bank Mandiri", "BNI", "BTN", "Bank Mantap", "BSI", "PT Pos Indonesia", "Bank BJB"]}
+                />
+              </div>
+              <div style={{ minWidth: 130 }}>
+                <Select
+                  label="Periode"
+                  value={filterPeriode}
+                  onChange={setFilterPeriode}
+                  options={["Semua", "Mei 2026", "Juni 2026"]}
+                />
+              </div>
+              <div style={{ minWidth: 155 }}>
+                <Select
+                  label="Status Bayar"
+                  value={filterStatus}
+                  onChange={setFilterStatus}
+                  options={["Semua", "Dibayar Tepat Waktu", "Terlambat", "Belum Dibayar"]}
+                />
+              </div>
+              {isFilterActive && (
+                <button
+                  type="button"
+                  onClick={handleResetFilter}
+                  title="Reset Semua Filter"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: `1px dashed #CBD5E1`,
+                    background: "#F8FAFC",
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color: COLORS.gray600,
+                    cursor: "pointer",
+                    height: 35,
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#FEE2E2";
+                    e.currentTarget.style.color = COLORS.red;
+                    e.currentTarget.style.borderColor = "#FCA5A5";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#F8FAFC";
+                    e.currentTarget.style.color = COLORS.gray600;
+                    e.currentTarget.style.borderColor = "#CBD5E1";
+                  }}
+                >
+                  <RotateCcw size={12} />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
+
+            {/* Sisi Kanan: Pencarian + Tooltip Info BRD */}
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+              <div>
+                <label
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: 0.6,
+                    textTransform: "uppercase",
+                    color: COLORS.gray500,
+                    display: "block",
+                    marginBottom: 6,
+                  }}
+                >
+                  Pencarian Data
+                </label>
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Cari Mitra, No. Surat, BA..."
+                  minW={220}
+                />
+              </div>
+
+              <Tooltip
+                position="bottom"
+                content={
+                  <div style={{ fontSize: 12, lineHeight: 1.5, maxWidth: 360 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                      Format 19 Kolom Sesuai BRD Keuangan
+                    </div>
+                    <div style={{ color: COLORS.gray300, marginBottom: 6 }}>
+                      Menampilkan <b>{filteredAuth.length}</b> baris data authentikasi digital.
+                    </div>
+                    <div style={{ fontSize: 11, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 4 }}>
+                      <b>Formula:</b> Nominal = Tarif × Jml Penerima | DPP = 11/12 × Imbal Jasa | PPN 12% | PPh 23 (2%) | Denda = Tagihan × BI Rate × Hari / 365
+                    </div>
+                  </div>
+                }
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray200}`,
+                    background: COLORS.gray50,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: COLORS.gray700,
+                    cursor: "pointer",
+                    height: 35,
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <Info size={14} color={COLORS.blue} />
+                  <span>Info BRD</span>
+                  <span
+                    style={{
+                      background: "#EFF6FF",
+                      color: COLORS.blue,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: "1px 6px",
+                      borderRadius: 10,
+                    }}
+                  >
+                    {filteredAuth.length} Data
+                  </span>
+                </div>
+              </Tooltip>
+            </div>
+          </div>
+
           {/* TABEL LENGKAP 19 KOLOM DATA AUTHENTIKASI DIGITAL */}
           <div
             style={{
               background: COLORS.white,
               borderRadius: 10,
-              padding: 20,
+              padding: 16,
               border: `1px solid ${COLORS.gray200}`,
               boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-              }}
-            >
-              <div>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
-                  Tabel Tagihan Imbal Jasa Authentikasi Digital (19 Kolom Sesuai BRD)
-                </h3>
-                <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
-                  Menampilkan {filteredAuth.length} baris data • Geser ke samping untuk melihat perhitungan pajak dan sanksi denda
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 12,
-                    background: "#F8FAFC",
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    border: `1px solid ${COLORS.gray200}`,
-                  }}
-                >
-                  <Info size={13} color="#7C3AED" />
-                  Formula: Nominal = Tarif X Penerima | DPP = 11/12 X Nominal | PPN 12% | PPh 23 (2%) | NAT
-                </span>
-              </div>
-            </div>
-
             {filteredAuth.length === 0 ? (
               <NoData message="Tidak ada data tagihan autentikasi digital yang sesuai filter." />
             ) : (

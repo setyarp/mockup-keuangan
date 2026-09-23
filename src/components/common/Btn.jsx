@@ -8,7 +8,9 @@ export const Btn = ({ children, variant = "primary", onClick, size = "md", style
     ghost: { background: COLORS.white, color: COLORS.gray700, border: `1px solid ${COLORS.gray300}`, hoverBg: COLORS.gray50, shadow: "0 1px 2px rgba(15,23,42,0.05)" }
   };
   const s = styles[variant] || styles.primary;
-  const pd = size === "sm" ? "6px 14px" : "9px 16px";
+  const pd = size === "xs" ? "4px 9px" : size === "sm" ? "6px 14px" : "9px 16px";
+  const fsz = size === "xs" ? 11 : size === "sm" ? 11 : 12;
+  const br = size === "xs" ? 6 : size === "sm" ? 8 : 10;
   return (
     <button
       onClick={onClick}
@@ -16,14 +18,14 @@ export const Btn = ({ children, variant = "primary", onClick, size = "md", style
       style={{
         ...s,
         padding: pd,
-        borderRadius: size === "sm" ? 8 : 10,
-        fontSize: size === "sm" ? 11 : 12,
-        fontWeight: 800,
+        borderRadius: br,
+        fontSize: fsz,
+        fontWeight: size === "xs" ? 700 : 800,
         letterSpacing: -0.1,
         cursor: disabled ? "not-allowed" : "pointer",
         display: "inline-flex",
         alignItems: "center",
-        gap: 6,
+        gap: size === "xs" ? 4 : 6,
         transition: "all 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
         opacity: disabled ? 0.6 : 1,
         ...style

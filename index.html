@@ -62,6 +62,38 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
       }
+
+      /* Print & PDF Export Media Queries */
+      @media print {
+        body, html {
+          background: #FFFFFF !important;
+          color: #000000 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        /* Hide UI chrome */
+        nav, aside, header, .no-print, button, [role="navigation"] {
+          display: none !important;
+        }
+        /* Make preview container full width */
+        .printable-container {
+          position: static !important;
+          inset: auto !important;
+          background: transparent !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          max-height: none !important;
+          overflow: visible !important;
+          box-shadow: none !important;
+        }
+        .page-break {
+          page-break-after: always !important;
+          break-after: page !important;
+          margin-bottom: 0 !important;
+        }
+      }
     </style>
   </head>
   <body>

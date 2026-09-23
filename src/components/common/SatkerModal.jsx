@@ -39,8 +39,9 @@ export const SatkerModal = ({ data, onClose }) => {
       const matchMatra = filterMatra === "Semua" || s.matra === filterMatra;
       const matchSearch =
         !searchTerm ||
-        s.satker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.kode.toLowerCase().includes(searchTerm.toLowerCase());
+        (s.satker && s.satker.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (s.unor && s.unor.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (s.kode && s.kode.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchMatra && matchSearch;
     });
   }, [satkerList, filterMatra, searchTerm]);
@@ -126,8 +127,8 @@ export const SatkerModal = ({ data, onClose }) => {
             <div>
               <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
                 {isSpecificDana
-                  ? `Rincian Alokasi ${program || (isTHTOnly ? "Dana THT (3,25%)" : "Dana Pensiun (4,75%)")} Per-Satuan Kerja`
-                  : "Rincian Alokasi Dana THT & Pensiun Per-Satuan Kerja (Satker)"}
+                  ? `Rincian Alokasi ${program || (isTHTOnly ? "Dana THT (3,25%)" : "Dana Pensiun (4,75%)")} Per-Unor / Satker`
+                  : "Rincian Alokasi Dana THT & Pensiun Per-Unor / Satker"}
               </div>
               <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2, display: "flex", gap: 8, alignItems: "center" }}>
                 <span>No. Tagihan: <strong style={{ fontFamily: "monospace", color: COLORS.blueDark }}>{noSurat}</strong></span>
@@ -285,10 +286,10 @@ export const SatkerModal = ({ data, onClose }) => {
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.gray500, textTransform: "uppercase" }}>
-                Satker & Personel Tercover
+                Unor / Satker & Personel Tercover
               </div>
               <div style={{ fontSize: 18, fontWeight: 800, color: COLORS.gray900, fontFamily: "monospace", marginTop: 4 }}>
-                {fmtNum(filteredList.length)} <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray500 }}>Satker</span>
+                {fmtNum(filteredList.length)} <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray500 }}>Unor</span>
               </div>
               <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
                 Total {fmtNum(totals.peserta)} Personel
@@ -323,7 +324,7 @@ export const SatkerModal = ({ data, onClose }) => {
                 <Search size={15} color={COLORS.gray400} />
                 <input
                   type="text"
-                  placeholder="Cari Satker atau Kode Satker..."
+                  placeholder="Cari Unor, Satker atau Kode..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{
@@ -392,7 +393,7 @@ export const SatkerModal = ({ data, onClose }) => {
                 <thead>
                   <tr style={{ background: "#F8FAFC", color: COLORS.gray600, textAlign: "left" }}>
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, width: 40 }}>No</th>
-                    <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Kode & Satker Kedinasan</th>
+                    <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Kode & Unor / Satuan Kerja</th>
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra</th>
                     <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Personel</th>
                     {(!isSpecificDana || isTHTOnly) && (
@@ -510,7 +511,7 @@ export const SatkerModal = ({ data, onClose }) => {
           }}
         >
           <div style={{ fontSize: 11.5, color: COLORS.gray500 }}>
-            Menampilkan <strong>{filteredList.length}</strong> dari <strong>{satkerList.length}</strong> Satuan Kerja
+            Menampilkan <strong>{filteredList.length}</strong> dari <strong>{satkerList.length}</strong> Unit Organisasi (Unor)
           </div>
           <Btn variant="primary" onClick={onClose}>
             Tutup Rincian
