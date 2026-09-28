@@ -39,10 +39,6 @@ export const DashboardDana = () => {
   const [selectedPeriodeSP, setSelectedPeriodeSP] = useState("Juli 2026 (Bulan Berjalan)");
   const [startDate, setStartDate] = useState("2026-07-01");
   const [endDate, setEndDate] = useState("2026-07-15");
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [calCurrentMonth, setCalCurrentMonth] = useState(6); // 6 = Juli (0-indexed)
-  const [calCurrentYear, setCalCurrentYear] = useState(2026);
-  const [isSelectingEndDate, setIsSelectingEndDate] = useState(false);
   const [selectedProgramView, setSelectedProgramView] = useState("Semua Program (Konsolidasi)");
   const [panel1ProgramFilter, setPanel1ProgramFilter] = useState("Semua Program (Konsolidasi)");
   const [preview, setPreview] = useState(null);
@@ -107,41 +103,6 @@ export const DashboardDana = () => {
       curr.setDate(curr.getDate() + 1);
     }
     return dates;
-  };
-
-  const handlePrevCalMonth = () => {
-    if (calCurrentMonth === 0) {
-      setCalCurrentMonth(11);
-      setCalCurrentYear(y => y - 1);
-    } else {
-      setCalCurrentMonth(m => m - 1);
-    }
-  };
-
-  const handleNextCalMonth = () => {
-    if (calCurrentMonth === 11) {
-      setCalCurrentMonth(0);
-      setCalCurrentYear(y => y + 1);
-    } else {
-      setCalCurrentMonth(m => m + 1);
-    }
-  };
-
-  const handleDateCellClick = (dayNum) => {
-    const clickedStr = `${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-    if (!isSelectingEndDate) {
-      setStartDate(clickedStr);
-      setEndDate(clickedStr);
-      setIsSelectingEndDate(true);
-    } else {
-      if (clickedStr < startDate) {
-        setStartDate(clickedStr);
-        setIsSelectingEndDate(true);
-      } else {
-        setEndDate(clickedStr);
-        setIsSelectingEndDate(false);
-      }
-    }
   };
 
   // Profil bobot distribusi pengeluaran harian dana manfaat dalam sebulan (Tgl 1 - 31)
@@ -1682,618 +1643,229 @@ export const DashboardDana = () => {
               </div>
             </div>
 
-            {/* 2. FILTERS DI BAWAH JUDUL: PER MITRA & SELEKSI KALENDER RENTANG TANGGAL */}
+            {/* 2. FILTERS DI BAWAH JUDUL: PER MITRA & SELEKSI RENTANG TANGGAL */}
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
                 gap: 12,
+                alignItems: "flex-end",
+                flexWrap: "wrap",
                 marginBottom: 16,
-                padding: "14px 16px",
+                padding: "12px 16px",
                 background: "#F8FAFC",
                 borderRadius: 8,
                 border: "1px solid #E2E8F0"
               }}
             >
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
-                {/* Mitra Selector: Per Mitra atau Konsolidasi */}
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 230, flex: "1 1 230px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                    <label
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 800,
-                        letterSpacing: 0.6,
-                        textTransform: "uppercase",
-                        color: COLORS.gray500,
-                      }}
-                    >
-                      Mitra Bayar
-                    </label>
-                    <span style={{ color: "#CBD5E1", fontSize: 10 }}>•</span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: isKonsolidasi ? "#334155" : "#1D4ED8",
-                        background: isKonsolidasi ? "#F1F5F9" : "#EFF6FF",
-                        padding: "1px 6px",
-                        borderRadius: 4,
-                        border: `1px solid ${isKonsolidasi ? "#E2E8F0" : "#BFDBFE"}`,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxWidth: 150
-                      }}
-                    >
-                      {selectedMitraView}
-                    </span>
-                  </div>
-                  <select
-                    value={selectedMitraView}
-                    onChange={(e) => setSelectedMitraView(e.target.value)}
+              {/* Mitra Selector: Per Mitra atau Konsolidasi */}
+              <div style={{ display: "flex", flexDirection: "column", minWidth: 230, flex: "1 1 230px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <label
                     style={{
-                      padding: "7px 12px",
+                      fontSize: 10,
+                      fontWeight: 800,
+                      letterSpacing: 0.6,
+                      textTransform: "uppercase",
+                      color: COLORS.gray500,
+                    }}
+                  >
+                    Mitra Bayar
+                  </label>
+                  <span style={{ color: "#CBD5E1", fontSize: 10 }}>•</span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: isKonsolidasi ? "#334155" : "#1D4ED8",
+                      background: isKonsolidasi ? "#F1F5F9" : "#EFF6FF",
+                      padding: "1px 6px",
+                      borderRadius: 4,
+                      border: `1px solid ${isKonsolidasi ? "#E2E8F0" : "#BFDBFE"}`,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: 150
+                    }}
+                  >
+                    {selectedMitraView}
+                  </span>
+                </div>
+                <select
+                  value={selectedMitraView}
+                  onChange={(e) => setSelectedMitraView(e.target.value)}
+                  style={{
+                    padding: "7px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray200}`,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: COLORS.gray900,
+                    background: COLORS.white,
+                    height: 35,
+                    boxSizing: "border-box",
+                    cursor: "pointer",
+                    outline: "none",
+                    width: "100%"
+                  }}
+                >
+                  {["Semua Mitra (Konsolidasi)", ...initialMitraData.map(m => m.mitra)].map((o, i) => (
+                    <option key={i} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filter Rentang Tanggal Proyeksi */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
+                  Rentang Tanggal Proyeksi
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: COLORS.gray600, fontWeight: 600 }}>
+                  <span>Dari:</span>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setStartDate(val);
+                      if (val > endDate) setEndDate(val);
+                    }}
+                    style={{
+                      padding: "6px 10px",
                       borderRadius: 8,
-                      border: `1px solid ${COLORS.gray200}`,
+                      border: "1px solid #CBD5E1",
                       fontSize: 12,
                       fontWeight: 600,
                       color: COLORS.gray900,
                       background: COLORS.white,
                       height: 35,
                       boxSizing: "border-box",
-                      cursor: "pointer",
-                      outline: "none",
-                      width: "100%"
+                      outline: "none"
                     }}
-                  >
-                    {["Semua Mitra (Konsolidasi)", ...initialMitraData.map(m => m.mitra)].map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Seleksi Rentang Tanggal Kalender Dinamis */}
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
-                    Rentang Tanggal (Kalender)
-                  </label>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    {/* Interactive Calendar Button with Popover */}
-                    <div style={{ position: "relative" }}>
-                        <button
-                          type="button"
-                          onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                          style={{
-                            padding: "6px 12px",
-                            borderRadius: 8,
-                            border: isCalendarOpen ? "1.5px solid #2563EB" : "1px solid #CBD5E1",
-                            background: "#FFFFFF",
-                            color: "#1E293B",
-                            fontSize: 12,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 8,
-                            height: 35,
-                            boxSizing: "border-box",
-                            boxShadow: isCalendarOpen ? "0 0 0 3px rgba(37,99,235,0.15)" : "0 1px 2px rgba(0,0,0,0.05)",
-                            transition: "all 0.15s ease"
-                          }}
-                        >
-                          <Calendar size={14} color="#2563EB" />
-                          <span>{formatIndoDate(startDate)} — {formatIndoDate(endDate)}</span>
-                          <span
-                            style={{
-                              background: "#EFF6FF",
-                              color: "#1D4ED8",
-                              padding: "1px 7px",
-                              borderRadius: 10,
-                              fontSize: 10.5,
-                              fontWeight: 800,
-                              border: "1px solid #BFDBFE"
-                            }}
-                          >
-                            {selectedRangeDaysCount} Hari
-                          </span>
-                          <ChevronDown size={14} color="#64748B" style={{ transform: isCalendarOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-                        </button>
-
-                        {/* POP-OVER KALENDER INTERAKTIF */}
-                        {isCalendarOpen && (
-                          <>
-                            <div
-                              onClick={() => {
-                                setIsCalendarOpen(false);
-                                setIsSelectingEndDate(false);
-                              }}
-                              style={{
-                                position: "fixed",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                zIndex: 998,
-                                background: "rgba(0,0,0,0.08)"
-                              }}
-                            />
-
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: 42,
-                                left: 0,
-                                zIndex: 999,
-                                background: "#FFFFFF",
-                                borderRadius: 12,
-                                border: "1px solid #CBD5E1",
-                                boxShadow: "0 16px 36px rgba(15,23,42,0.18), 0 2px 8px rgba(0,0,0,0.08)",
-                                padding: 16,
-                                width: 320,
-                                boxSizing: "border-box"
-                              }}
-                            >
-                              {/* Header Kalender: Navigasi Bulan & Tahun */}
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                                <button
-                                  type="button"
-                                  onClick={handlePrevCalMonth}
-                                  style={{
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: 6,
-                                    border: "1px solid #E2E8F0",
-                                    background: "#F8FAFC",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    cursor: "pointer"
-                                  }}
-                                >
-                                  <ChevronLeft size={16} color="#475569" />
-                                </button>
-
-                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                  <select
-                                    value={calCurrentMonth}
-                                    onChange={(e) => setCalCurrentMonth(parseInt(e.target.value))}
-                                    style={{
-                                      fontSize: 12,
-                                      fontWeight: 700,
-                                      color: "#0F172A",
-                                      border: "1px solid #CBD5E1",
-                                      borderRadius: 6,
-                                      padding: "3px 6px",
-                                      background: "#FFFFFF",
-                                      cursor: "pointer",
-                                      outline: "none"
-                                    }}
-                                  >
-                                    {monthNamesIndo.map((m, idx) => (
-                                      <option key={idx} value={idx}>
-                                        {m}
-                                      </option>
-                                    ))}
-                                  </select>
-
-                                  <select
-                                    value={calCurrentYear}
-                                    onChange={(e) => setCalCurrentYear(parseInt(e.target.value))}
-                                    style={{
-                                      fontSize: 12,
-                                      fontWeight: 700,
-                                      color: "#0F172A",
-                                      border: "1px solid #CBD5E1",
-                                      borderRadius: 6,
-                                      padding: "3px 6px",
-                                      background: "#FFFFFF",
-                                      cursor: "pointer",
-                                      outline: "none"
-                                    }}
-                                  >
-                                    {[2025, 2026, 2027].map(y => (
-                                      <option key={y} value={y}>
-                                        {y}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-
-                                <button
-                                  type="button"
-                                  onClick={handleNextCalMonth}
-                                  style={{
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: 6,
-                                    border: "1px solid #E2E8F0",
-                                    background: "#F8FAFC",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    cursor: "pointer"
-                                  }}
-                                >
-                                  <ChevronRight size={16} color="#475569" />
-                                </button>
-                              </div>
-
-                              {/* Petunjuk Pemilihan Tanggal */}
-                              <div style={{ fontSize: 10.5, color: isSelectingEndDate ? "#1D4ED8" : "#64748B", fontWeight: 700, marginBottom: 8, textAlign: "center" }}>
-                                {isSelectingEndDate
-                                  ? "👉 Klik tanggal akhir untuk menyelesaikan rentang"
-                                  : "👉 Klik tanggal mulai, lalu klik tanggal selesai"}
-                              </div>
-
-                              {/* Label Hari */}
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, textAlign: "center", marginBottom: 6 }}>
-                                {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((wd, i) => (
-                                  <div key={i} style={{ fontSize: 10.5, fontWeight: 700, color: i === 0 ? "#DC2626" : "#64748B", padding: "2px 0" }}>
-                                    {wd}
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* Grid Tanggal Kalender */}
-                              {(() => {
-                                const firstDayOfWeek = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
-                                const daysInCalMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
-
-                                return (
-                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 12 }}>
-                                    {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
-                                      <div key={`blank-${idx}`} style={{ height: 32 }} />
-                                    ))}
-
-                                    {Array.from({ length: daysInCalMonth }, (_, idx) => idx + 1).map(day => {
-                                      const cellDateStr = `${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                      const isStart = cellDateStr === startDate;
-                                      const isEnd = cellDateStr === endDate;
-                                      const isInRange = startDate && endDate && cellDateStr >= startDate && cellDateStr <= endDate;
-
-                                      let bg = "transparent";
-                                      let textCol = "#1E293B";
-                                      let fontW = 600;
-                                      let borderRadius = "6px";
-
-                                      if (isStart || isEnd) {
-                                        bg = "#1D4ED8";
-                                        textCol = "#FFFFFF";
-                                        fontW = 800;
-                                      } else if (isInRange) {
-                                        bg = "#EFF6FF";
-                                        textCol = "#1D4ED8";
-                                        fontW = 700;
-                                      }
-
-                                      return (
-                                        <button
-                                          key={day}
-                                          type="button"
-                                          onClick={() => handleDateCellClick(day)}
-                                          style={{
-                                            height: 32,
-                                            width: "100%",
-                                            borderRadius,
-                                            border: "none",
-                                            background: bg,
-                                            color: textCol,
-                                            fontSize: 11.5,
-                                            fontWeight: fontW,
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            transition: "all 0.1s ease",
-                                            padding: 0
-                                          }}
-                                          onMouseEnter={(e) => {
-                                            if (!isStart && !isEnd && !isInRange) {
-                                              e.currentTarget.style.background = "#F1F5F9";
-                                            }
-                                          }}
-                                          onMouseLeave={(e) => {
-                                            if (!isStart && !isEnd && !isInRange) {
-                                              e.currentTarget.style.background = "transparent";
-                                            }
-                                          }}
-                                        >
-                                          {day}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                );
-                              })()}
-
-                              {/* Input Manual & Tombol Aksi di Bawah Kalender */}
-                              <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                                  <div style={{ flex: 1 }}>
-                                    <label style={{ fontSize: 9.5, fontWeight: 700, color: "#64748B", display: "block", marginBottom: 2 }}>
-                                      Dari
-                                    </label>
-                                    <input
-                                      type="date"
-                                      value={startDate}
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        setStartDate(val);
-                                        if (val > endDate) setEndDate(val);
-                                      }}
-                                      style={{
-                                        width: "100%",
-                                        fontSize: 11,
-                                        padding: "4px 6px",
-                                        borderRadius: 6,
-                                        border: "1px solid #CBD5E1",
-                                        boxSizing: "border-box"
-                                      }}
-                                    />
-                                  </div>
-                                  <div style={{ flex: 1 }}>
-                                    <label style={{ fontSize: 9.5, fontWeight: 700, color: "#64748B", display: "block", marginBottom: 2 }}>
-                                      Sampai
-                                    </label>
-                                    <input
-                                      type="date"
-                                      value={endDate}
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        setEndDate(val);
-                                        if (val < startDate) setStartDate(val);
-                                      }}
-                                      style={{
-                                        width: "100%",
-                                        fontSize: 11,
-                                        padding: "4px 6px",
-                                        borderRadius: 6,
-                                        border: "1px solid #CBD5E1",
-                                        boxSizing: "border-box"
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const daysInCalMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
-                                      setStartDate(`${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-01`);
-                                      setEndDate(`${calCurrentYear}-${String(calCurrentMonth + 1).padStart(2, '0')}-${String(daysInCalMonth).padStart(2, '0')}`);
-                                      setIsSelectingEndDate(false);
-                                    }}
-                                    style={{
-                                      flex: 1,
-                                      padding: "6px 8px",
-                                      borderRadius: 6,
-                                      border: "1px solid #CBD5E1",
-                                      background: "#F8FAFC",
-                                      color: "#334155",
-                                      fontSize: 11,
-                                      fontWeight: 600,
-                                      cursor: "pointer"
-                                    }}
-                                  >
-                                    1 Bulan Penuh
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setIsCalendarOpen(false);
-                                      setIsSelectingEndDate(false);
-                                    }}
-                                    style={{
-                                      flex: 1,
-                                      padding: "6px 8px",
-                                      borderRadius: 6,
-                                      border: "none",
-                                      background: "#1D4ED8",
-                                      color: "#FFFFFF",
-                                      fontSize: 11,
-                                      fontWeight: 700,
-                                      cursor: "pointer"
-                                    }}
-                                  >
-                                    Tutup & Terapkan
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Direct Native Date Inputs for Fast Entry */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "#64748B" }}>
-                        <span>Dari:</span>
-                        <input
-                          type="date"
-                          value={startDate}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setStartDate(val);
-                            if (val > endDate) setEndDate(val);
-                          }}
-                          style={{
-                            padding: "6px 8px",
-                            borderRadius: 8,
-                            border: "1px solid #CBD5E1",
-                            fontSize: 11.5,
-                            fontWeight: 600,
-                            color: "#0F172A",
-                            background: "#FFFFFF",
-                            height: 35,
-                            boxSizing: "border-box"
-                          }}
-                        />
-                        <span>s/d</span>
-                        <input
-                          type="date"
-                          value={endDate}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setEndDate(val);
-                            if (val < startDate) setStartDate(val);
-                          }}
-                          style={{
-                            padding: "6px 8px",
-                            borderRadius: 8,
-                            border: "1px solid #CBD5E1",
-                            fontSize: 11.5,
-                            fontWeight: 600,
-                            color: "#0F172A",
-                            background: "#FFFFFF",
-                            height: 35,
-                            boxSizing: "border-box"
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                {/* Chart Type Toggle */}
-                <div style={{ display: "flex", flexDirection: "column", marginLeft: "auto" }}>
-                  <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
-                    Tampilan Grafik
-                  </label>
-                  <div style={{ display: "flex", alignItems: "center", gap: 3, background: COLORS.white, padding: "3px 4px", borderRadius: 8, height: 35, boxSizing: "border-box", border: "1px solid #CBD5E1" }}>
-                    <button
-                      type="button"
-                      onClick={() => setProyeksiChartType("line")}
-                      style={{
-                        padding: "5px 10px",
-                        borderRadius: 6,
-                        border: "none",
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        background: proyeksiChartType === "line" ? COLORS.blueDark : "transparent",
-                        color: proyeksiChartType === "line" ? COLORS.white : COLORS.gray600,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4
-                      }}
-                    >
-                      <LineChartIcon size={13} /> Line
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setProyeksiChartType("bar")}
-                      style={{
-                        padding: "5px 10px",
-                        borderRadius: 6,
-                        border: "none",
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        background: proyeksiChartType === "bar" ? COLORS.blueDark : "transparent",
-                        color: proyeksiChartType === "bar" ? COLORS.white : COLORS.gray600,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4
-                      }}
-                    >
-                      <BarChart3 size={13} /> Bar
-                    </button>
-                  </div>
+                  />
+                  <span style={{ marginLeft: 2, marginRight: 2 }}>s/d</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEndDate(val);
+                      if (val < startDate) setStartDate(val);
+                    }}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      border: "1px solid #CBD5E1",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: COLORS.gray900,
+                      background: COLORS.white,
+                      height: 35,
+                      boxSizing: "border-box",
+                      outline: "none"
+                    }}
+                  />
                 </div>
               </div>
 
-              {/* Live Metric Summary Bar */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: 10,
-                  paddingTop: 10,
-                  borderTop: "1px dashed #CBD5E1"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5 }}>
-                  <span style={{ color: "#64748B" }}>
-                    📅 Rentang Kalender:
-                  </span>
-                  <strong style={{ color: "#1D4ED8" }}>
-                    {formatIndoDate(startDate)} s.d. {formatIndoDate(endDate)}
-                  </strong>
-                </div>
-
-                {/* Summary Metric Chips */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11.5, flexWrap: "wrap" }}>
-                  <span style={{ color: "#64748B" }}>
-                    Durasi: <strong style={{ color: "#1D4ED8", fontFamily: "monospace" }}>{selectedRangeDaysCount} Hari</strong>
-                  </span>
-                  <span style={{ color: "#CBD5E1" }}>•</span>
-                  <span style={{ color: "#64748B" }}>
-                    Rata-rata: <strong style={{ color: "#0F172A", fontFamily: "monospace" }}>Rp {avgTotal} M/hari</strong>
-                  </span>
-                  <span style={{ color: "#CBD5E1" }}>•</span>
-                  <span style={{ color: "#64748B" }}>
-                    Puncak Harian: <strong style={{ color: COLORS.orange, fontFamily: "monospace" }}>Rp {peakTotal} M</strong>
-                  </span>
+              {/* Chart Type Toggle */}
+              <div style={{ display: "flex", flexDirection: "column", marginLeft: "auto" }}>
+                <label style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
+                  Tampilan Grafik
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 3, background: COLORS.white, padding: "3px 4px", borderRadius: 8, height: 35, boxSizing: "border-box", border: "1px solid #CBD5E1" }}>
+                  <button
+                    type="button"
+                    onClick={() => setProyeksiChartType("line")}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: "none",
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: proyeksiChartType === "line" ? COLORS.blueDark : "transparent",
+                      color: proyeksiChartType === "line" ? COLORS.white : COLORS.gray600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4
+                    }}
+                  >
+                    <LineChartIcon size={13} /> Line
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProyeksiChartType("bar")}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: "none",
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: proyeksiChartType === "bar" ? COLORS.blueDark : "transparent",
+                      color: proyeksiChartType === "bar" ? COLORS.white : COLORS.gray600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4
+                    }}
+                  >
+                    <BarChart3 size={13} /> Bar
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* 4. CARDS INDIKATOR PROYEKSI & KETAHANAN LIKUIDITAS (PERSPEKTIF AKTIF) */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, marginBottom: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginBottom: 14 }}>
               {/* Card THT */}
               <div
                 onClick={() => setSelectedProgramView("THT (Tabungan Hari Tua)")}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-3px)";
-                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(37,99,235,0.18)";
                   e.currentTarget.style.borderColor = "#2563EB";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(37,99,235,0.12)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = selectedProgramView.includes("THT") ? "0 2px 8px rgba(37,99,235,0.15)" : "none";
                   e.currentTarget.style.borderColor = selectedProgramView.includes("THT") ? "#2563EB" : "#E2E8F0";
+                  e.currentTarget.style.boxShadow = selectedProgramView.includes("THT") ? "0 2px 6px rgba(37,99,235,0.12)" : "none";
                 }}
                 style={{
                   background: selectedProgramView.includes("THT") ? "#EFF6FF" : "#FFFFFF",
                   borderRadius: 8,
-                  padding: "14px 16px",
+                  padding: "10px 12px",
                   border: `1.5px solid ${selectedProgramView.includes("THT") ? "#2563EB" : "#E2E8F0"}`,
                   cursor: "pointer",
-                  transition: "all 0.18s ease",
-                  boxShadow: selectedProgramView.includes("THT") ? "0 2px 8px rgba(37,99,235,0.15)" : "none"
+                  transition: "all 0.15s ease",
+                  boxShadow: selectedProgramView.includes("THT") ? "0 2px 6px rgba(37,99,235,0.12)" : "none"
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Program THT
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#1D4ED8", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                    Proyeksi THT
                   </span>
-                  <Badge color={activeMitraSaldoTHT >= sumTHT ? "green" : "red"}>
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      fontWeight: 700,
+                      padding: "1px 6px",
+                      borderRadius: 10,
+                      background: activeMitraSaldoTHT >= sumTHT ? "#ECFDF5" : "#FEF2F2",
+                      color: activeMitraSaldoTHT >= sumTHT ? "#065F46" : "#DC2626",
+                      border: `1px solid ${activeMitraSaldoTHT >= sumTHT ? "#A7F3D0" : "#FECACA"}`
+                    }}
+                  >
                     {activeMitraSaldoTHT >= sumTHT ? "Aman" : "Defisit"}
-                  </Badge>
-                </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {sumTHT} M
-                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
-                    ({formatIndoDate(startDate)} – {formatIndoDate(endDate)})
                   </span>
                 </div>
-                <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-                  <span>Saldo Kas: <strong>Rp {activeMitraSaldoTHT} M</strong></span>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", fontFamily: "monospace", lineHeight: 1.2 }}>
+                  Rp {sumTHT} M
+                </div>
+                <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Saldo: <b>Rp {activeMitraSaldoTHT} M</b></span>
                   <span style={{ color: activeMitraSaldoTHT >= sumTHT ? "#059669" : "#DC2626", fontWeight: 700 }}>
                     {activeMitraSaldoTHT >= sumTHT ? "+" : ""}Rp {+(activeMitraSaldoTHT - sumTHT).toFixed(1)} M
                   </span>
-                </div>
-                <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
-                  <span style={{ color: selectedProgramView.includes("THT") ? "#1D4ED8" : "#94A3B8", fontWeight: selectedProgramView.includes("THT") ? 700 : 500 }}>
-                    {selectedProgramView.includes("THT") ? "● Ditampilkan di Grafik" : "Klik untuk filter grafik"}
-                  </span>
-                  {selectedProgramView.includes("THT") && (
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#1D4ED8" }} />
-                  )}
                 </div>
               </div>
 
@@ -2301,52 +1873,49 @@ export const DashboardDana = () => {
               <div
                 onClick={() => setSelectedProgramView("JKK (Jaminan Kecelakaan Kerja)")}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-3px)";
-                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(234,88,12,0.18)";
                   e.currentTarget.style.borderColor = "#EA580C";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(234,88,12,0.12)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = selectedProgramView.includes("JKK") ? "0 2px 8px rgba(234,88,12,0.15)" : "none";
                   e.currentTarget.style.borderColor = selectedProgramView.includes("JKK") ? "#EA580C" : "#E2E8F0";
+                  e.currentTarget.style.boxShadow = selectedProgramView.includes("JKK") ? "0 2px 6px rgba(234,88,12,0.12)" : "none";
                 }}
                 style={{
                   background: selectedProgramView.includes("JKK") ? "#FFF7ED" : "#FFFFFF",
                   borderRadius: 8,
-                  padding: "14px 16px",
+                  padding: "10px 12px",
                   border: `1.5px solid ${selectedProgramView.includes("JKK") ? "#EA580C" : "#E2E8F0"}`,
                   cursor: "pointer",
-                  transition: "all 0.18s ease",
-                  boxShadow: selectedProgramView.includes("JKK") ? "0 2px 8px rgba(234,88,12,0.15)" : "none"
+                  transition: "all 0.15s ease",
+                  boxShadow: selectedProgramView.includes("JKK") ? "0 2px 6px rgba(234,88,12,0.12)" : "none"
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#EA580C", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Program JKK
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#EA580C", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                    Proyeksi JKK
                   </span>
-                  <Badge color={activeMitraSaldoJKK >= sumJKK ? "green" : "red"}>
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      fontWeight: 700,
+                      padding: "1px 6px",
+                      borderRadius: 10,
+                      background: activeMitraSaldoJKK >= sumJKK ? "#ECFDF5" : "#FEF2F2",
+                      color: activeMitraSaldoJKK >= sumJKK ? "#065F46" : "#DC2626",
+                      border: `1px solid ${activeMitraSaldoJKK >= sumJKK ? "#A7F3D0" : "#FECACA"}`
+                    }}
+                  >
                     {activeMitraSaldoJKK >= sumJKK ? "Aman" : "Defisit"}
-                  </Badge>
-                </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {sumJKK} M
-                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
-                    ({formatIndoDate(startDate)} – {formatIndoDate(endDate)})
                   </span>
                 </div>
-                <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-                  <span>Saldo Kas: <strong>Rp {activeMitraSaldoJKK} M</strong></span>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", fontFamily: "monospace", lineHeight: 1.2 }}>
+                  Rp {sumJKK} M
+                </div>
+                <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Saldo: <b>Rp {activeMitraSaldoJKK} M</b></span>
                   <span style={{ color: activeMitraSaldoJKK >= sumJKK ? "#059669" : "#DC2626", fontWeight: 700 }}>
                     {activeMitraSaldoJKK >= sumJKK ? "+" : ""}Rp {+(activeMitraSaldoJKK - sumJKK).toFixed(1)} M
                   </span>
-                </div>
-                <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
-                  <span style={{ color: selectedProgramView.includes("JKK") ? "#EA580C" : "#94A3B8", fontWeight: selectedProgramView.includes("JKK") ? 700 : 500 }}>
-                    {selectedProgramView.includes("JKK") ? "● Ditampilkan di Grafik" : "Klik untuk filter grafik"}
-                  </span>
-                  {selectedProgramView.includes("JKK") && (
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#EA580C" }} />
-                  )}
                 </div>
               </div>
 
@@ -2354,52 +1923,49 @@ export const DashboardDana = () => {
               <div
                 onClick={() => setSelectedProgramView("JKm (Jaminan Kematian)")}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-3px)";
-                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(124,58,237,0.18)";
                   e.currentTarget.style.borderColor = "#7C3AED";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(124,58,237,0.12)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = selectedProgramView.includes("JKm") ? "0 2px 8px rgba(124,58,237,0.15)" : "none";
                   e.currentTarget.style.borderColor = selectedProgramView.includes("JKm") ? "#7C3AED" : "#E2E8F0";
+                  e.currentTarget.style.boxShadow = selectedProgramView.includes("JKm") ? "0 2px 6px rgba(124,58,237,0.12)" : "none";
                 }}
                 style={{
                   background: selectedProgramView.includes("JKm") ? "#FAF5FF" : "#FFFFFF",
                   borderRadius: 8,
-                  padding: "14px 16px",
+                  padding: "10px 12px",
                   border: `1.5px solid ${selectedProgramView.includes("JKm") ? "#7C3AED" : "#E2E8F0"}`,
                   cursor: "pointer",
-                  transition: "all 0.18s ease",
-                  boxShadow: selectedProgramView.includes("JKm") ? "0 2px 8px rgba(124,58,237,0.15)" : "none"
+                  transition: "all 0.15s ease",
+                  boxShadow: selectedProgramView.includes("JKm") ? "0 2px 6px rgba(124,58,237,0.12)" : "none"
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Program JKm
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                    Proyeksi JKm
                   </span>
-                  <Badge color={activeMitraSaldoJKm >= sumJKm ? "green" : "red"}>
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      fontWeight: 700,
+                      padding: "1px 6px",
+                      borderRadius: 10,
+                      background: activeMitraSaldoJKm >= sumJKm ? "#ECFDF5" : "#FEF2F2",
+                      color: activeMitraSaldoJKm >= sumJKm ? "#065F46" : "#DC2626",
+                      border: `1px solid ${activeMitraSaldoJKm >= sumJKm ? "#A7F3D0" : "#FECACA"}`
+                    }}
+                  >
                     {activeMitraSaldoJKm >= sumJKm ? "Aman" : "Defisit"}
-                  </Badge>
-                </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
-                  Rp {sumJKm} M
-                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
-                    ({formatIndoDate(startDate)} – {formatIndoDate(endDate)})
                   </span>
                 </div>
-                <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-                  <span>Saldo Kas: <strong>Rp {activeMitraSaldoJKm} M</strong></span>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", fontFamily: "monospace", lineHeight: 1.2 }}>
+                  Rp {sumJKm} M
+                </div>
+                <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Saldo: <b>Rp {activeMitraSaldoJKm} M</b></span>
                   <span style={{ color: activeMitraSaldoJKm >= sumJKm ? "#059669" : "#DC2626", fontWeight: 700 }}>
                     {activeMitraSaldoJKm >= sumJKm ? "+" : ""}Rp {+(activeMitraSaldoJKm - sumJKm).toFixed(1)} M
                   </span>
-                </div>
-                <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
-                  <span style={{ color: selectedProgramView.includes("JKm") ? "#7C3AED" : "#94A3B8", fontWeight: selectedProgramView.includes("JKm") ? 700 : 500 }}>
-                    {selectedProgramView.includes("JKm") ? "● Ditampilkan di Grafik" : "Klik untuk filter grafik"}
-                  </span>
-                  {selectedProgramView.includes("JKm") && (
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#7C3AED" }} />
-                  )}
                 </div>
               </div>
 
@@ -2407,52 +1973,49 @@ export const DashboardDana = () => {
               <div
                 onClick={() => setSelectedProgramView("Semua Program (Konsolidasi)")}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-3px)";
-                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(15,23,42,0.18)";
                   e.currentTarget.style.borderColor = "#0F172A";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(15,23,42,0.12)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = selectedProgramView.startsWith("Semua") ? "0 2px 8px rgba(15,23,42,0.15)" : "none";
                   e.currentTarget.style.borderColor = selectedProgramView.startsWith("Semua") ? "#0F172A" : "#E2E8F0";
+                  e.currentTarget.style.boxShadow = selectedProgramView.startsWith("Semua") ? "0 2px 6px rgba(15,23,42,0.12)" : "none";
                 }}
                 style={{
                   background: selectedProgramView.startsWith("Semua") ? "#F8FAFC" : "#FFFFFF",
                   borderRadius: 8,
-                  padding: "14px 16px",
+                  padding: "10px 12px",
                   border: `1.5px solid ${selectedProgramView.startsWith("Semua") ? "#0F172A" : "#E2E8F0"}`,
                   cursor: "pointer",
-                  transition: "all 0.18s ease",
-                  boxShadow: selectedProgramView.startsWith("Semua") ? "0 2px 8px rgba(15,23,42,0.15)" : "none"
+                  transition: "all 0.15s ease",
+                  boxShadow: selectedProgramView.startsWith("Semua") ? "0 2px 6px rgba(15,23,42,0.12)" : "none"
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#0F172A", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                    Total Proyeksi Kebutuhan
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: "#0F172A", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                    Total Proyeksi
                   </span>
-                  <Badge color={activeMitraSaldoTotal >= sumTotal ? "green" : "red"}>
-                    {activeMitraSaldoTotal >= sumTotal ? "■ AMAN" : "● DEFISIT"}
-                  </Badge>
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      fontWeight: 700,
+                      padding: "1px 6px",
+                      borderRadius: 10,
+                      background: activeMitraSaldoTotal >= sumTotal ? "#ECFDF5" : "#FEF2F2",
+                      color: activeMitraSaldoTotal >= sumTotal ? "#065F46" : "#DC2626",
+                      border: `1px solid ${activeMitraSaldoTotal >= sumTotal ? "#A7F3D0" : "#FECACA"}`
+                    }}
+                  >
+                    {activeMitraSaldoTotal >= sumTotal ? "Aman" : "Defisit"}
+                  </span>
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", fontFamily: "monospace" }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", fontFamily: "monospace", lineHeight: 1.2 }}>
                   Rp {sumTotal} M
-                  <span style={{ fontSize: 10.5, fontWeight: 600, color: "#64748B", marginLeft: 4 }}>
-                    ({selectedRangeDaysCount} Hari)
-                  </span>
                 </div>
-                <div style={{ fontSize: 11, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-                  <span>Saldo CMS: <strong>Rp {activeMitraSaldoTotal} M</strong></span>
+                <div style={{ fontSize: 10.5, color: "#64748B", marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Saldo CMS: <b>Rp {activeMitraSaldoTotal} M</b></span>
                   <span style={{ color: activeMitraSaldoTotal >= sumTotal ? "#059669" : "#DC2626", fontWeight: 700 }}>
                     {activeMitraSaldoTotal >= sumTotal ? "+" : ""}Rp {+(activeMitraSaldoTotal - sumTotal).toFixed(1)} M
                   </span>
-                </div>
-                <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px dashed #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5 }}>
-                  <span style={{ color: selectedProgramView.startsWith("Semua") ? "#0F172A" : "#94A3B8", fontWeight: selectedProgramView.startsWith("Semua") ? 700 : 500 }}>
-                    {selectedProgramView.startsWith("Semua") ? "● Ditampilkan di Grafik" : "Klik untuk komparasi 3 program"}
-                  </span>
-                  {selectedProgramView.startsWith("Semua") && (
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#0F172A" }} />
-                  )}
                 </div>
               </div>
             </div>

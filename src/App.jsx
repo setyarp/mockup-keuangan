@@ -53,7 +53,7 @@ const PAGES = {
   konfigurasi_manfaat: { title: "Parameter Suku Bunga", component: KonfigurasiManfaat },
   pajak: { title: "Administrasi PPh 21 & Bukti Potong", component: Perpajakan },
   ukp: { title: "Tabel 24 — Rekap UKP (Uang Kekurangan Pensiun) Peserta Pensiun Bulanan", component: RekapUKP },
-  bpjs: { title: "Rekonsiliasi Iuran BPJS Kesehatan", component: RekonBPJS },
+  bpjs: { title: "Laporan & Ekspor Data", component: ReportGenerator },
   report_ku: { title: "Report KU", hideDefaultHeader: true, component: ReportKU },
   laporan: { title: "Laporan & Ekspor Data", component: ReportGenerator },
 };

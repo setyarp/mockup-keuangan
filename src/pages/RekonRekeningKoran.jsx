@@ -34,7 +34,7 @@ export const RekonRekeningKoran = ({
   const currentFiles = setUploadedFiles ? uploadedFiles : localUploadedFiles;
   const updateFiles = setUploadedFiles || setLocalUploadedFiles;
 
-  const [selectedMitraUpload, setSelectedMitraUpload] = useState("Otomatis (Deteksi dari Berkas / Filename)");
+  const [selectedMitraUpload, setSelectedMitraUpload] = useState("Bank BRI");
   const [isDragOver, setIsDragOver] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [preview, setPreview] = useState(null);
@@ -45,7 +45,6 @@ export const RekonRekeningKoran = ({
 
   // Daftar 12 Mitra Bayar Resmi ASABRI
   const mitraListOptions = [
-    "Otomatis (Deteksi dari Berkas / Filename)",
     "Bank BRI",
     "Bank Mandiri",
     "Bank BNI",
@@ -172,7 +171,7 @@ export const RekonRekeningKoran = ({
               const saldo = colMap.saldo !== undefined ? parseFloat(String(row[colMap.saldo] || 0).replace(/[^0-9.-]/g, "")) || 0 : 0;
               const user = String(row[colMap.user ?? 6] || "SYSTEM").trim();
 
-              let detectedMitra = selectedMitraUpload !== "Otomatis (Deteksi dari Berkas / Filename)" ? selectedMitraUpload : String(row[colMap.mitra ?? 7] || "").trim();
+              let detectedMitra = selectedMitraUpload || String(row[colMap.mitra ?? 7] || "").trim();
               if (!detectedMitra || detectedMitra === "-") {
                 const fname = file.name.toUpperCase();
                 if (fname.includes("BRI")) detectedMitra = "Bank BRI";
@@ -251,7 +250,7 @@ export const RekonRekeningKoran = ({
           });
 
           if (newStandardizedRows.length > 0) {
-            const finalMitra = selectedMitraUpload !== "Otomatis (Deteksi dari Berkas / Filename)" ? selectedMitraUpload : "Terdeteksi Otomatis";
+            const finalMitra = selectedMitraUpload || "Bank BRI";
             updateDataList((prev) => [...prev, ...newStandardizedRows]);
             updateFiles((prev) => [
               {
@@ -275,11 +274,6 @@ export const RekonRekeningKoran = ({
     });
   };
 
-  // Muat data simulasi demo jika pengguna ingin tes cepat
-  const handleLoadDemoData = () => {
-    updateDataList(DEFAULT_RAW_RK_DATA);
-    updateFiles(DEFAULT_UPLOADED_FILES);
-  };
 
   // Filter Search
   const filteredData = currentDataList.filter((item) => {
@@ -360,16 +354,15 @@ export const RekonRekeningKoran = ({
               Upload Berkas Rekening Koran Mitra Bayar
             </h3>
             <div style={{ fontSize: 12, color: "#64748B", marginTop: 2 }}>
-              Pilih mitra bayar (atau otomatis), lalu upload berkas Excel (.xlsx, .xls) / CSV (.csv) rekening koran perbankan.
+              Pilih mitra bayar, lalu upload berkas Excel (.xlsx, .xls) / CSV (.csv) rekening koran perbankan.
+            </div>
+            <div style={{ fontSize: 11, color: "#94A3B8", fontStyle: "italic", marginTop: 3 }}>
+              * Fitur ini masih berupa simulasi dan percobaan, fungsionalitas riil akan tersedia pada saat development.
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {currentDataList.length === 0 ? (
-              <Btn variant="outline" size="sm" onClick={handleLoadDemoData}>
-                <Sparkles size={13} color="#0141A8" /> Simulasi Contoh Berkas Demo
-              </Btn>
-            ) : (
+          {currentDataList.length > 0 && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <Btn
                 variant="outline"
                 size="sm"
@@ -380,66 +373,20 @@ export const RekonRekeningKoran = ({
               >
                 <Trash2 size={13} color="#DC2626" /> Reset / Kosongkan Data
               </Btn>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Layout Side-by-Side: Dropdown 12 Mitra Bayar (Kiri) & Drag 'n Drop (Kanan) */}
+        {/* Layout Side-by-Side: Drag 'n Drop (Kiri) & Dropdown 12 Mitra Bayar (Kanan) */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "330px 1fr",
+            gridTemplateColumns: "1fr 330px",
             gap: 16,
             alignItems: "stretch"
           }}
         >
-          {/* KOLOM KIRI: Dropdown Pilihan 12 Mitra Bayar */}
-          <div
-            style={{
-              background: "#F8FAFC",
-              border: "1px solid #CBD5E1",
-              borderRadius: 8,
-              padding: "16px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              gap: 12
-            }}
-          >
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12, color: "#0F172A", fontWeight: 800, fontSize: 13 }}>
-                <Building2 size={16} color="#0141A8" />
-                <span>Identifikasi 12 Mitra Bayar</span>
-              </div>
-
-              <Select
-                label="Pilih Mitra Bayar (Asal Rekening Koran)"
-                value={selectedMitraUpload}
-                onChange={setSelectedMitraUpload}
-                options={mitraListOptions}
-                minW="100%"
-              />
-
-              <div style={{ fontSize: 11.5, color: "#64748B", lineHeight: 1.5, marginTop: 12 }}>
-                💡 Pilih mitra bayar sebelum mengunggah berkas untuk memastikan sistem memadankan format dan header rekening koran secara spesifik sesuai perbankan/pos asal.
-              </div>
-            </div>
-
-            <div
-              style={{
-                fontSize: 11,
-                background: "#EFF6FF",
-                border: "1px solid #BFDBFE",
-                borderRadius: 6,
-                padding: "8px 10px",
-                color: "#1E40AF"
-              }}
-            >
-              Mode: <strong>{selectedMitraUpload === "Otomatis (Deteksi dari Berkas / Filename)" ? "⚡ Auto-Detect Otomatis" : selectedMitraUpload}</strong>
-            </div>
-          </div>
-
-          {/* KOLOM KANAN: Drop Zone Area */}
+          {/* KOLOM KIRI: Drop Zone Area */}
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -464,7 +411,7 @@ export const RekonRekeningKoran = ({
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              minHeight: 150,
+              minHeight: 140,
               cursor: "pointer",
               transition: "all 0.15s ease"
             }}
@@ -503,6 +450,33 @@ export const RekonRekeningKoran = ({
             <span style={{ fontSize: 11.5, color: "#64748B", marginTop: 3 }}>
               Mendukung upload satu per satu atau sekaligus banyak berkas (.xlsx, .xls, .csv)
             </span>
+          </div>
+
+          {/* KOLOM KANAN: Dropdown Pilihan 12 Mitra Bayar */}
+          <div
+            style={{
+              background: "#F8FAFC",
+              border: "1px solid #CBD5E1",
+              borderRadius: 8,
+              padding: "16px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              gap: 8
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 2, color: "#0F172A", fontWeight: 800, fontSize: 13 }}>
+              <Building2 size={16} color="#0141A8" />
+              <span>Mitra Bayar</span>
+            </div>
+
+            <Select
+              label="Pilih Mitra Bayar (Asal Rekening Koran)"
+              value={selectedMitraUpload}
+              onChange={setSelectedMitraUpload}
+              options={mitraListOptions}
+              minW="100%"
+            />
           </div>
         </div>
 
@@ -625,7 +599,7 @@ export const RekonRekeningKoran = ({
               Belum Ada Rekening Koran yang Diunggah
             </span>
             <span style={{ fontSize: 12, color: "#64748B", maxWidth: 450 }}>
-              Silakan pilih mitra bayar pada dropdown di atas lalu tarik & lepas (drag & drop) berkas Excel / CSV Anda, atau klik tombol <strong>"Simulasi Contoh Berkas Demo"</strong>.
+              Silakan pilih mitra bayar pada dropdown di atas lalu tarik & lepas (drag & drop) berkas Excel / CSV Anda.
             </span>
           </div>
         ) : filteredData.length === 0 ? (

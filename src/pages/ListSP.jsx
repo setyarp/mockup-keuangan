@@ -146,7 +146,7 @@ export const ListSP = ({ defaultTab = "listsp" }) => {
     "JKM SRK SKS BINTARA/TAMTAMA - Santunan Resiko Kematian - Santunan Kematian Sekaligus untuk bintara dan tamtama",
     "JKM SRK SKS PA - Santunan Resiko Kematian - Santunan Kematian Sekaligus untuk perwira",
     "JKM SRK UDW AKTIF - Santunan Resiko Kematian - Uang Duka wafat Aktif",
-    "NTIP - NTIP",
+    "NTIP - Nilai Tunai Iuran Pensiun",
     "PEMBATALAN_BUM - PEMBATALAN BUM",
     "PINPOL - PELUNASAN POLIS",
     "PINPOL - PINJAMAN POLIS",
@@ -227,7 +227,7 @@ export const ListSP = ({ defaultTab = "listsp" }) => {
       noDPS: "—",
       tglBayar: "—",
       status: "Belum Bayar",
-      manfaat: "NTIP - NTIP",
+      manfaat: "NTIP - Nilai Tunai Iuran Pensiun",
     },
     {
       kpa: "KPA-003",
@@ -423,7 +423,7 @@ export const ListSP = ({ defaultTab = "listsp" }) => {
       noDPS: "—",
       tglBayar: "—",
       status: "Belum Bayar",
-      manfaat: "NTIP - NTIP",
+      manfaat: "NTIP - Nilai Tunai Iuran Pensiun",
     },
     {
       kpa: "KPA-010",

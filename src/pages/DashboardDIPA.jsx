@@ -1811,19 +1811,18 @@ export const DashboardDIPA = () => {
                   type: "table",
                   fileName: "Pagu_Realisasi_JKK_2026.xlsx",
                   content: {
-                    columns: ["Kode", "Nama Satker", "Akun MAK", "Jumlah Peserta", "Pagu DIPA (Rp)", "Realisasi SP2D (Rp)", "Sisa Pagu (Rp)", "Serapan (%)"],
+                    columns: ["Kode", "Nama Satker", "Jumlah Peserta", "Pagu DIPA (Rp)", "Realisasi SP2D (Rp)", "Sisa Pagu (Rp)", "Serapan (%)"],
                     rows: [
                       ...satkerJKKList.map(s => [
                         s.kode,
                         s.nama,
-                        s.mak,
                         s.peserta.toLocaleString("id-ID"),
                         fmtRp(s.pagu),
                         fmtRp(s.real),
                         fmtRp(s.pagu - s.real),
                         `${((s.real / s.pagu) * 100).toFixed(1)}%`
                       ]),
-                      ["TOTAL", "Seluruh Satker", "511129", "960.080", fmtRp(paguJKKTotal), fmtRp(realisasiJKKTotal), fmtRp(sisaJKKTotal), `${pctJKKUsed}%`]
+                      ["TOTAL", "Seluruh Satker", "960.080", fmtRp(paguJKKTotal), fmtRp(realisasiJKKTotal), fmtRp(sisaJKKTotal), `${pctJKKUsed}%`]
                     ],
                     totalRows: satkerJKKList.length + 1
                   }
@@ -1838,7 +1837,6 @@ export const DashboardDIPA = () => {
                 <thead>
                   <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                     <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nama Satker / Instansi</th>
-                    <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Akun MAK APBN</th>
                     <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Jumlah Peserta</th>
                     <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Pagu DIPA (Rp)</th>
                     <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Realisasi SP2D (Rp)</th>
@@ -1864,9 +1862,6 @@ export const DashboardDIPA = () => {
                               <ShieldCheck size={14} color="#059669" />
                               <span>{s.nama}</span>
                             </div>
-                          </td>
-                          <td style={{ padding: "11px 14px", fontFamily: "monospace", fontSize: 11.5, color: "#475569", borderRight: "1px solid #E2E8F0" }}>
-                            {s.mak}
                           </td>
                           <td style={{ padding: "11px 14px", textAlign: "right", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0" }}>
                             {s.peserta.toLocaleString("id-ID")} Jiwa
@@ -2065,19 +2060,18 @@ export const DashboardDIPA = () => {
                   type: "table",
                   fileName: "Pagu_Realisasi_JKM_2026.xlsx",
                   content: {
-                    columns: ["Kode", "Nama Satker", "Akun MAK", "Jumlah Peserta", "Pagu DIPA (Rp)", "Realisasi SP2D (Rp)", "Sisa Pagu (Rp)", "Serapan (%)"],
+                    columns: ["Kode", "Nama Satker", "Jumlah Peserta", "Pagu DIPA (Rp)", "Realisasi SP2D (Rp)", "Sisa Pagu (Rp)", "Serapan (%)"],
                     rows: [
                       ...satkerJKMList.map(s => [
                         s.kode,
                         s.nama,
-                        s.mak,
                         s.peserta.toLocaleString("id-ID"),
                         fmtRp(s.pagu),
                         fmtRp(s.real),
                         fmtRp(s.pagu - s.real),
                         `${((s.real / s.pagu) * 100).toFixed(1)}%`
                       ]),
-                      ["TOTAL", "Seluruh Satker", "511130", "960.080", fmtRp(paguJKMTotal), fmtRp(realisasiJKMTotal), fmtRp(sisaJKMTotal), `${pctJKMUsed}%`]
+                      ["TOTAL", "Seluruh Satker", "960.080", fmtRp(paguJKMTotal), fmtRp(realisasiJKMTotal), fmtRp(sisaJKMTotal), `${pctJKMUsed}%`]
                     ],
                     totalRows: satkerJKMList.length + 1
                   }
@@ -2092,7 +2086,6 @@ export const DashboardDIPA = () => {
                 <thead>
                   <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                     <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nama Satker / Instansi</th>
-                    <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Akun MAK APBN</th>
                     <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Jumlah Peserta</th>
                     <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Pagu DIPA (Rp)</th>
                     <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Realisasi SP2D (Rp)</th>
@@ -2118,9 +2111,6 @@ export const DashboardDIPA = () => {
                               <ShieldCheck size={14} color="#0D9488" />
                               <span>{s.nama}</span>
                             </div>
-                          </td>
-                          <td style={{ padding: "11px 14px", fontFamily: "monospace", fontSize: 11.5, color: "#475569", borderRight: "1px solid #E2E8F0" }}>
-                            {s.mak}
                           </td>
                           <td style={{ padding: "11px 14px", textAlign: "right", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0" }}>
                             {s.peserta.toLocaleString("id-ID")} Jiwa

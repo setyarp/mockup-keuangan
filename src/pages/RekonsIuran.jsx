@@ -2316,316 +2316,314 @@ export const RekonsIuran = () => {
       {activeSubtab === "komparasi" && (
         <div>
           {/* =========================================================================
-              BAR FILTER KOMPARASI (FORMAT DROPDOWN FIELDS: JENIS DANA & SUB-JENIS DANA)
+              BAR FILTER KOMPARASI (PROPORSIONAL, ELEGAN, DAN USER-FRIENDLY)
              ========================================================================= */}
           <div
             style={{
               background: COLORS.white,
-              padding: "16px 18px",
+              padding: "14px 18px",
               borderRadius: 10,
               border: `1px solid ${COLORS.gray200}`,
               marginBottom: 16,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+              boxShadow: "0 1px 3px rgba(15,23,42,0.03)",
               display: "flex",
-              flexDirection: "column",
-              gap: 12
+              alignItems: "flex-end",
+              flexWrap: "wrap",
+              gap: "12px 14px"
             }}
           >
-            {/* Baris 1: Filter Tingkat Utama (Mode Tampilan, Jenis Dana, Filter Matra) */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 12
-              }}
-            >
-              {/* Field 1: Mode Tampilan */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
-                  <Layers size={13} color={currentTheme.primary} />
-                  Mode Tampilan:
-                </label>
+            {/* Field 1: Mode Tampilan */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 160 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 5 }}>
+                <Layers size={13} color={currentTheme.primary} />
+                Mode Tampilan
+              </label>
+              <select
+                value={viewModeKomparasi}
+                onChange={(e) => setViewModeKomparasi(e.target.value)}
+                style={{
+                  height: 36,
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: `1px solid ${COLORS.gray300}`,
+                  background: COLORS.white,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: COLORS.gray800,
+                  outline: "none"
+                }}
+              >
+                <option value="rekap">Secara Rekap (Makro)</option>
+                <option value="per_matra">Secara Per-Matra (BNBA)</option>
+              </select>
+            </div>
+
+            {/* Field 2: Jenis Dana */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 165 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 5 }}>
+                <Building2 size={13} color={COLORS.blue} />
+                Jenis Dana
+              </label>
+              {activeProgram === "THT_PENSIUN" ? (
                 <select
-                  value={viewModeKomparasi}
-                  onChange={(e) => setViewModeKomparasi(e.target.value)}
+                  value={filterJenisDana}
+                  onChange={(e) => handleJenisDanaChange(e.target.value)}
                   style={{
-                    padding: "8px 10px",
+                    height: 36,
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${filterJenisDana !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
+                    background: filterJenisDana !== "Semua" ? currentTheme.lightBg : COLORS.white,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: filterJenisDana !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                    outline: "none"
+                  }}
+                >
+                  <option value="Semua">Semua Jenis Dana</option>
+                  <option value="THT">THT (Tabungan Hari Tua)</option>
+                  <option value="PENSIUN">Pensiun</option>
+                </select>
+              ) : (
+                <select
+                  disabled
+                  value={activeProgram}
+                  style={{
+                    height: 36,
+                    padding: "6px 10px",
                     borderRadius: 6,
                     border: `1px solid ${COLORS.gray300}`,
-                    background: COLORS.white,
-                    fontSize: 12,
+                    background: "#F8FAFC",
+                    fontSize: 12.5,
                     fontWeight: 600,
                     color: COLORS.gray800,
                     outline: "none"
                   }}
                 >
-                  <option value="rekap">Secara Rekap (Makro)</option>
-                  <option value="per_matra">Secara Per-Matra (BNBA)</option>
+                  <option value={activeProgram}>
+                    {activeProgram === "JKK" ? "JKK (Kecelakaan Kerja)" : "JKM (Kematian)"}
+                  </option>
                 </select>
-              </div>
-
-              {/* Field 2: Jenis Dana (Atas) */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
-                  <Building2 size={13} color={COLORS.blue} />
-                  Jenis Dana:
-                </label>
-                {activeProgram === "THT_PENSIUN" ? (
-                  <select
-                    value={filterJenisDana}
-                    onChange={(e) => handleJenisDanaChange(e.target.value)}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: 6,
-                      border: `1px solid ${filterJenisDana !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
-                      background: filterJenisDana !== "Semua" ? currentTheme.lightBg : COLORS.white,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: filterJenisDana !== "Semua" ? currentTheme.primary : COLORS.gray800,
-                      outline: "none"
-                    }}
-                  >
-                    <option value="Semua">Semua Jenis Dana (THT & Pensiun)</option>
-                    <option value="THT">THT (Tabungan Hari Tua)</option>
-                    <option value="PENSIUN">Pensiun</option>
-                  </select>
-                ) : (
-                  <select
-                    disabled
-                    value={activeProgram}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: 6,
-                      border: `1px solid ${COLORS.gray300}`,
-                      background: "#F8FAFC",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: COLORS.gray800,
-                      outline: "none"
-                    }}
-                  >
-                    <option value={activeProgram}>
-                      {activeProgram === "JKK" ? "JKK (Jaminan Kecelakaan Kerja)" : "JKM (Jaminan Kematian)"}
-                    </option>
-                  </select>
-                )}
-              </div>
-
-              {/* Field 3: Filter Satker */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
-                  <Building2 size={13} color={COLORS.gray600} />
-                  Filter Satker:
-                </label>
-                <select
-                  value={filterSatker}
-                  onChange={(e) => setFilterSatker(e.target.value)}
-                  style={{
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: `1px solid ${filterSatker !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
-                    background: filterSatker !== "Semua" ? currentTheme.lightBg : COLORS.white,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: filterSatker !== "Semua" ? currentTheme.primary : COLORS.gray800,
-                    outline: "none"
-                  }}
-                >
-                  <option value="Semua">Semua Satker</option>
-                  <option value="TNI">TNI</option>
-                  <option value="POLRI">POLRI</option>
-                </select>
-              </div>
+              )}
             </div>
 
-            {/* Baris 2: Sub-Jenis Dana (Nilai mengikuti Jenis Dana di atas), Golongan, Pencarian & Aksi */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr)) auto",
-                alignItems: "flex-end",
-                gap: 12,
-                paddingTop: 10,
-                borderTop: `1px dashed ${COLORS.gray200}`
-              }}
-            >
-              {/* Field 4: Sub-Jenis Dana (Bawah Jenis Dana) */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
-                  <SlidersHorizontal size={13} color={currentTheme.primary} />
-                  Sub-Jenis Dana:
-                </label>
-                <select
-                  value={filterSubDana}
-                  onChange={(e) => setFilterSubDana(e.target.value)}
-                  style={{
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: `1px solid ${filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.primary : COLORS.gray300}`,
-                    background: filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.lightBg : COLORS.white,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.primary : COLORS.gray800,
-                    outline: "none"
-                  }}
-                >
-                  {activeProgram === "THT_PENSIUN" ? (
-                    filterJenisDana === "THT" ? (
-                      <>
-                        <option value="THT_ALL">Semua THT (TNI & POLRI)</option>
-                        <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan)</option>
-                        <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri)</option>
-                      </>
-                    ) : filterJenisDana === "PENSIUN" ? (
-                      <>
-                        <option value="PENSIUN_ALL">Semua Pensiun (TNI & POLRI)</option>
-                        <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan)</option>
-                        <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri)</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="Semua">Semua Sub-Dana (4 Program Dana)</option>
-                        <optgroup label="── Sub-Dana THT ──">
-                          <option value="THT_ALL">Semua THT (TNI & POLRI)</option>
-                          <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan)</option>
-                          <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri)</option>
-                        </optgroup>
-                        <optgroup label="── Sub-Dana Pensiun ──">
-                          <option value="PENSIUN_ALL">Semua Pensiun (TNI & POLRI)</option>
-                          <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan)</option>
-                          <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri)</option>
-                        </optgroup>
-                      </>
-                    )
-                  ) : activeProgram === "JKK" ? (
+            {/* Field 3: Sub-Jenis Dana */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 185 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 5 }}>
+                <SlidersHorizontal size={13} color={currentTheme.primary} />
+                Sub-Jenis Dana
+              </label>
+              <select
+                value={filterSubDana}
+                onChange={(e) => setFilterSubDana(e.target.value)}
+                style={{
+                  height: 36,
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: `1px solid ${filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.primary : COLORS.gray300}`,
+                  background: filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.lightBg : COLORS.white,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: filterSubDana !== "Semua" && filterSubDana !== "THT_ALL" && filterSubDana !== "PENSIUN_ALL" ? currentTheme.primary : COLORS.gray800,
+                  outline: "none"
+                }}
+              >
+                {activeProgram === "THT_PENSIUN" ? (
+                  filterJenisDana === "THT" ? (
                     <>
-                      <option value="Semua">Semua JKK (TNI & POLRI)</option>
-                      <option value="JKK_TNI">JKK TNI (Prajurit TNI & ASN Kemhan)</option>
-                      <option value="JKK_POLRI">JKK POLRI (Anggota POLRI & PNS Polri)</option>
+                      <option value="THT_ALL">Semua THT (TNI & POLRI)</option>
+                      <option value="THT_TNI">THT TNI (Prajurit TNI & ASN Kemhan)</option>
+                      <option value="THT_POLRI">THT POLRI (Anggota POLRI & PNS Polri)</option>
+                    </>
+                  ) : filterJenisDana === "PENSIUN" ? (
+                    <>
+                      <option value="PENSIUN_ALL">Semua Pensiun (TNI & POLRI)</option>
+                      <option value="PENSIUN_TNI">Pensiun TNI (Prajurit TNI & ASN Kemhan)</option>
+                      <option value="PENSIUN_POLRI">Pensiun POLRI (Anggota POLRI & PNS Polri)</option>
                     </>
                   ) : (
                     <>
-                      <option value="Semua">Semua JKM (TNI & POLRI)</option>
-                      <option value="JKM_TNI">JKM TNI (Prajurit TNI & ASN Kemhan)</option>
-                      <option value="JKM_POLRI">JKM POLRI (Anggota POLRI & PNS Polri)</option>
+                      <option value="Semua">Semua Sub-Dana</option>
+                      <optgroup label="── Sub-Dana THT ──">
+                        <option value="THT_ALL">Semua THT</option>
+                        <option value="THT_TNI">THT TNI</option>
+                        <option value="THT_POLRI">THT POLRI</option>
+                      </optgroup>
+                      <optgroup label="── Sub-Dana Pensiun ──">
+                        <option value="PENSIUN_ALL">Semua Pensiun</option>
+                        <option value="PENSIUN_TNI">Pensiun TNI</option>
+                        <option value="PENSIUN_POLRI">Pensiun POLRI</option>
+                      </optgroup>
                     </>
-                  )}
-                </select>
-              </div>
+                  )
+                ) : activeProgram === "JKK" ? (
+                  <>
+                    <option value="Semua">Semua JKK</option>
+                    <option value="JKK_TNI">JKK TNI</option>
+                    <option value="JKK_POLRI">JKK POLRI</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="Semua">Semua JKM</option>
+                    <option value="JKM_TNI">JKM TNI</option>
+                    <option value="JKM_POLRI">JKM POLRI</option>
+                  </>
+                )}
+              </select>
+            </div>
 
-              {/* Field 5: Filter Golongan / Kepangkatan */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
-                  <SlidersHorizontal size={13} color={COLORS.gray600} />
-                  Filter Golongan / Pangkat:
-                </label>
-                <select
-                  value={filterGolongan}
-                  onChange={(e) => setFilterGolongan(e.target.value)}
+            {/* Field 4: Filter Satker */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 125 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 5 }}>
+                <Building2 size={13} color={COLORS.gray500} />
+                Satker / Matra
+              </label>
+              <select
+                value={filterSatker}
+                onChange={(e) => setFilterSatker(e.target.value)}
+                style={{
+                  height: 36,
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: `1px solid ${filterSatker !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
+                  background: filterSatker !== "Semua" ? currentTheme.lightBg : COLORS.white,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: filterSatker !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                  outline: "none"
+                }}
+              >
+                <option value="Semua">Semua Satker</option>
+                <option value="TNI">TNI</option>
+                <option value="POLRI">POLRI</option>
+              </select>
+            </div>
+
+            {/* Field 5: Filter Golongan / Kepangkatan */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 155 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 5 }}>
+                <SlidersHorizontal size={13} color={COLORS.gray500} />
+                Golongan
+              </label>
+              <select
+                value={filterGolongan}
+                onChange={(e) => setFilterGolongan(e.target.value)}
+                style={{
+                  height: 36,
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: `1px solid ${filterGolongan !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
+                  background: filterGolongan !== "Semua" ? currentTheme.lightBg : COLORS.white,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: filterGolongan !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                  outline: "none"
+                }}
+              >
+                <option value="Semua">Semua Golongan</option>
+                <option value="PATI_PAMEN">Pati & Pamen</option>
+                <option value="PAMA">Pama</option>
+                <option value="BINTARA_TAMTAMA">Bintara & Tamtama</option>
+                <option value="PNS_GOL">PNS Kemhan/Polri</option>
+                <option value="PPPK">PPPK</option>
+              </select>
+            </div>
+
+            {/* Field 6: Cari Data */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 170, flex: "1 1 170px" }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 5 }}>
+                <Search size={13} color={COLORS.gray500} />
+                Pencarian Data
+              </label>
+              <div style={{ position: "relative", width: "100%" }}>
+                <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 11 }} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Cari matra, satker..."
                   style={{
-                    padding: "8px 10px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    height: 36,
+                    padding: "6px 28px 6px 32px",
                     borderRadius: 6,
-                    border: `1px solid ${filterGolongan !== "Semua" ? currentTheme.primary : COLORS.gray300}`,
-                    background: filterGolongan !== "Semua" ? currentTheme.lightBg : COLORS.white,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: filterGolongan !== "Semua" ? currentTheme.primary : COLORS.gray800,
+                    border: `1px solid ${searchTerm ? currentTheme.primary : COLORS.gray300}`,
+                    fontSize: 12.5,
                     outline: "none"
                   }}
-                >
-                  <option value="Semua">Semua Golongan & Pangkat</option>
-                  <option value="PATI_PAMEN">Perwira Tinggi & Menengah (Pati/Pamen)</option>
-                  <option value="PAMA">Perwira Pertama (Pama)</option>
-                  <option value="BINTARA_TAMTAMA">Bintara & Tamtama (Ba/Ta)</option>
-                  <option value="PNS_GOL">PNS Kemhan/Polri (Golongan I - IV)</option>
-                  <option value="PPPK">PPPK (Pegawai Perjanjian Kerja)</option>
-                </select>
-              </div>
-
-              {/* Field 6: Cari Data */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, display: "flex", alignItems: "center", gap: 4 }}>
-                  <Search size={13} color={COLORS.gray600} />
-                  Pencarian:
-                </label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cari matra, satker..."
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      padding: "8px 24px 8px 10px",
-                      borderRadius: 6,
-                      border: `1px solid ${searchTerm ? currentTheme.primary : COLORS.gray300}`,
-                      fontSize: 12,
-                      outline: "none"
-                    }}
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm("")}
-                      style={{
-                        position: "absolute",
-                        right: 6,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "none",
-                        border: "none",
-                        fontSize: 12,
-                        cursor: "pointer",
-                        color: COLORS.gray400
-                      }}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Action: Tombol Ekspor Excel & Reset Filter */}
-              <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 1 }}>
-                {(filterJenisDana !== "Semua" || filterSubDana !== "Semua" || filterSatker !== "Semua" || filterGolongan !== "Semua" || searchTerm) && (
+                />
+                {searchTerm && (
                   <button
-                    onClick={() => {
-                      setFilterJenisDana("Semua");
-                      setFilterSubDana("Semua");
-                      setFilterSatker("Semua");
-                      setFilterGolongan("Semua");
-                      setSearchTerm("");
-                    }}
-                    title="Reset Filter ke Default"
+                    onClick={() => setSearchTerm("")}
                     style={{
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      border: `1px solid ${COLORS.gray300}`,
-                      background: COLORS.white,
-                      color: "#DC2626",
+                      position: "absolute",
+                      right: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
                       fontSize: 12,
-                      fontWeight: 700,
                       cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4
+                      color: COLORS.gray400
                     }}
                   >
-                    <RotateCcw size={13} />
-                    Reset
+                    ✕
                   </button>
                 )}
-
-                <Btn
-                  variant="primary"
-                  size="sm"
-                  onClick={handleExportExcel}
-                  style={{ fontWeight: 700, whiteSpace: "nowrap", padding: "8px 14px" }}
-                >
-                  <Download size={13} style={{ marginRight: 5 }} />
-                  Ekspor Excel
-                </Btn>
               </div>
+            </div>
+
+            {/* Action Buttons: Reset & Ekspor Excel */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
+              {(filterJenisDana !== "Semua" || filterSubDana !== "Semua" || filterSatker !== "Semua" || filterGolongan !== "Semua" || searchTerm) && (
+                <button
+                  onClick={() => {
+                    setFilterJenisDana("Semua");
+                    setFilterSubDana("Semua");
+                    setFilterSatker("Semua");
+                    setFilterGolongan("Semua");
+                    setSearchTerm("");
+                  }}
+                  title="Reset Filter ke Default"
+                  style={{
+                    height: 36,
+                    padding: "0 12px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    background: COLORS.white,
+                    color: "#DC2626",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  Reset
+                </button>
+              )}
+
+              <Btn
+                variant="primary"
+                size="sm"
+                onClick={handleExportExcel}
+                style={{
+                  height: 36,
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                  padding: "0 14px",
+                  fontSize: 12.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6
+                }}
+              >
+                <Download size={13} />
+                Ekspor Excel
+              </Btn>
             </div>
           </div>
 
@@ -3135,47 +3133,53 @@ export const RekonsIuran = () => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: "flex-end",
               background: COLORS.white,
               padding: "14px 18px",
               borderRadius: 10,
               border: `1px solid ${COLORS.gray200}`,
               marginBottom: 16,
+              boxShadow: "0 1px 3px rgba(15,23,42,0.03)",
               flexWrap: "wrap",
-              gap: 12
+              gap: "12px 16px"
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Periode:</span>
-                <input
-                  type="date"
-                  value={tglAwal}
-                  onChange={(e) => setTglAwal(e.target.value)}
-                  style={{ padding: "5px 8px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12 }}
-                />
-                <span style={{ fontSize: 12, color: COLORS.gray500 }}>s.d.</span>
-                <input
-                  type="date"
-                  value={tglAkhir}
-                  onChange={(e) => setTglAkhir(e.target.value)}
-                  style={{ padding: "5px 8px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12 }}
-                />
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 14, flexWrap: "wrap" }}>
+              {/* Periode */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700 }}>Periode Tanggal</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <input
+                    type="date"
+                    value={tglAwal}
+                    onChange={(e) => setTglAwal(e.target.value)}
+                    style={{ height: 36, padding: "6px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5 }}
+                  />
+                  <span style={{ fontSize: 11.5, color: COLORS.gray400, fontWeight: 600 }}>s.d.</span>
+                  <input
+                    type="date"
+                    value={tglAkhir}
+                    onChange={(e) => setTglAkhir(e.target.value)}
+                    style={{ height: 36, padding: "6px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12.5 }}
+                  />
+                </div>
               </div>
 
+              {/* Filter Dana PFK */}
               {activeProgram === "THT_PENSIUN" && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Filter Dana:</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 170 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700 }}>Pilihan Dana PFK</span>
                   <select
                     value={filterDanaPFK}
                     onChange={(e) => setFilterDanaPFK(e.target.value)}
                     style={{
-                      padding: "5px 10px",
+                      height: 36,
+                      padding: "6px 10px",
                       borderRadius: 6,
                       border: `1px solid ${COLORS.gray300}`,
-                      fontSize: 12,
+                      fontSize: 12.5,
                       background: COLORS.white,
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: COLORS.gray800
                     }}
                   >
@@ -3188,27 +3192,32 @@ export const RekonsIuran = () => {
                 </div>
               )}
 
-              <div style={{ position: "relative", width: 260 }}>
-                <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 9 }} />
-                <input
-                  type="text"
-                  placeholder={
-                    activeProgram === "THT_PENSIUN"
-                      ? "Cari surat / SKP / BAR / SP2D..."
-                      : "Cari surat / Nota Dinas / BAR..."
-                  }
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "6px 10px 6px 30px",
-                    borderRadius: 6,
-                    border: `1px solid ${COLORS.gray300}`,
-                    fontSize: 12,
-                    outline: "none",
-                    boxSizing: "border-box"
-                  }}
-                />
+              {/* Pencarian */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 220 }}>
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.gray700 }}>Pencarian Dokumen</span>
+                <div style={{ position: "relative", width: "100%" }}>
+                  <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 11 }} />
+                  <input
+                    type="text"
+                    placeholder={
+                      activeProgram === "THT_PENSIUN"
+                        ? "Cari surat / SKP / BAR / SP2D..."
+                        : "Cari surat / Nota Dinas / BAR..."
+                    }
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: 36,
+                      padding: "6px 10px 6px 32px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      fontSize: 12.5,
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
@@ -3219,12 +3228,14 @@ export const RekonsIuran = () => {
                   color: "#065F46",
                   background: "#ECFDF5",
                   border: "1px solid #A7F3D0",
-                  padding: "5px 12px",
+                  padding: "0 14px",
                   borderRadius: 6,
                   fontWeight: 700,
                   display: "flex",
                   alignItems: "center",
-                  gap: 6
+                  gap: 6,
+                  height: 36,
+                  boxSizing: "border-box"
                 }}
               >
                 <CheckCircle2 size={14} color="#059669" />

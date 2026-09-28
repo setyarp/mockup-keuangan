@@ -520,7 +520,7 @@ export const DEFAULT_RAW_RK_DATA = [
   },
 
   // -------------------------------------------------------------
-  // 4. NTIP (NOTA TRANSAKSI INFORMASI PERBANKAN)
+  // 4. NTIP (NILAI TUNAI IURAN PENSIUN)
   // Format: No | KTPA | Tanggal Transaksi | Nama Penerima | Debet | Credit | Ledger Balance (Rp) | User ID | No SP | Tanggal SP | No DPS | Tanggal DPS | Mitra Bayar
   // -------------------------------------------------------------
   {

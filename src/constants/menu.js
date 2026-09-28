@@ -119,7 +119,7 @@ export const MENU = [
     ],
   },
   {
-    section: "PERPAJAKAN & REKONSILIASI",
+    section: "PERPAJAKAN",
     items: [
       {
         icon: "receipt",
@@ -127,13 +127,6 @@ export const MENU = [
         children: [
           { id: "pajak", label: "PPh 21 & Bukti Potong" },
           { id: "ukp", label: "Rekap Data UKP Pensiun" },
-        ],
-      },
-      {
-        icon: "cross",
-        label: "Rekonsiliasi Jaminan Kesehatan",
-        children: [
-          { id: "bpjs", label: "Iuran BPJS Kesehatan" },
         ],
       },
     ],

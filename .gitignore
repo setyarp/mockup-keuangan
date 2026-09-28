@@ -83,8 +83,8 @@ sp_flow_*
 [Uu]pload*/
 downloads/
 Downloads/
-data/
-files/
+/data/
+/files/
 
 # Internal Handover & Developer Documents (Excluded from git)
 panduan_teknis_monitoring_dana_developer.md

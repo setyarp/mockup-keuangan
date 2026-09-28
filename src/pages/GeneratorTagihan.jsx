@@ -46,8 +46,8 @@ export const GeneratorTagihan = () => {
   // 1. Nomor Surat (Format resmi: NoUrut/KU.06.06/KMR.N/Bulan/Tahun)
   // 2. Nominal
   // 3. Dokumen (Upload / Tergenerate)
-  const [noSurat, setNoSurat] = useState("S-1191/KU.06.06/KMR.N/X/2024");
-  const [nominal, setNominal] = useState("14225000000");
+  const [noSurat, setNoSurat] = useState("");
+  const [nominal, setNominal] = useState("");
   const [dokumenFile, setDokumenFile] = useState(null);
   const [dokumenName, setDokumenName] = useState("SKP-PFK_Kemenkeu_Okt2024_THT_POLRI.pdf");
 
@@ -94,21 +94,15 @@ export const GeneratorTagihan = () => {
   // Efek sinkronisasi nomor surat, nominal, dan berkas sesuai pilihan Program dan Jenis Iuran
   useEffect(() => {
     if (selectedProgram === "THT_PENSIUN") {
+      setNoSurat(""); // Default kosong untuk Nomor Surat PFK
+      setNominal(""); // Default kosong untuk Nominal Tagihan PFK
       if (jenisIuranPFK === "THT_POLRI") {
-        setNoSurat("S-1191/KU.06.06/KMR.N/X/2024");
-        setNominal("14225000000");
         setDokumenName("SKP-PFK_Kemenkeu_Okt2024_THT_POLRI.pdf");
       } else if (jenisIuranPFK === "THT_TNI") {
-        setNoSurat("S-1190/KU.06.06/KMR.N/X/2024");
-        setNominal("1121913428");
         setDokumenName("SKP-PFK_Kemenkeu_Okt2024_THT_TNI.pdf");
       } else if (jenisIuranPFK === "PENSIUN_POLRI") {
-        setNoSurat("S-1193/KU.06.06/KMR.N/X/2024");
-        setNominal("20805000000");
         setDokumenName("SKP-PFK_Kemenkeu_Okt2024_Pensiun_POLRI.pdf");
       } else if (jenisIuranPFK === "PENSIUN_TNI") {
-        setNoSurat("S-1192/KU.06.06/KMR.N/X/2024");
-        setNominal("41710000000");
         setDokumenName("SKP-PFK_Kemenkeu_Okt2024_Pensiun_TNI.pdf");
       }
     } else if (selectedProgram === "JKK") {
@@ -2124,16 +2118,14 @@ export const GeneratorTagihan = () => {
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Dasar SKP-PFK Kemenkeu</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan (Rp)</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Kas</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredMonitoringSKP.length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
+                        <td colSpan={5} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
                           Tidak ada data penerimaan SKP-PFK dalam monitoring aktif.
                         </td>
                       </tr>
@@ -2172,14 +2164,6 @@ export const GeneratorTagihan = () => {
                                 Tgl SKP: {item.tglSKP}
                               </div>
                             </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
-                                {item.tglTerimaDana}
-                              </div>
-                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                                SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
-                              </div>
-                            </td>
                             <td style={{ padding: "12px 14px", textAlign: "right" }}>
                               <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: badgeColor.text }}>
                                 {fmtB(item.nominalDanaSKP)}
@@ -2187,24 +2171,6 @@ export const GeneratorTagihan = () => {
                               <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
                                 {fmtNum(item.peserta)} Personel • Tarif {item.tarif || (isTHT ? "3,25%" : "4,75%")}
                               </div>
-                            </td>
-                            <td style={{ padding: "12px 14px" }}>
-                              <span
-                                style={{
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  padding: "3px 8px",
-                                  borderRadius: 4,
-                                  background: "#ECFDF5",
-                                  color: "#065F46",
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4
-                                }}
-                              >
-                                <CheckCircle2 size={12} />
-                                {item.statusDana}
-                              </span>
                             </td>
                             <td style={{ padding: "12px 14px", textAlign: "center" }}>
                               <div style={{ display: "flex", justifyContent: "center" }}>
@@ -2226,14 +2192,14 @@ export const GeneratorTagihan = () => {
                   </tbody>
                   <tfoot>
                     <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                      <td colSpan={4} style={{ padding: "12px 14px", textAlign: "right" }}>
+                      <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
                         Total Realisasi Dana SKP-PFK ({filteredMonitoringSKP.length} Surat Tagihan):
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blue, fontSize: 13 }}>
                         {fmtB(filteredMonitoringSKP.reduce((acc, it) => acc + (it.nominalDanaSKP || 0), 0))}
                       </td>
-                      <td colSpan={2} style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11 }}>
-                        Lunas 100% SP2D Kemenkeu
+                      <td style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
+                        —
                       </td>
                     </tr>
                   </tfoot>
@@ -2249,16 +2215,14 @@ export const GeneratorTagihan = () => {
                     <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Tanggal Penerimaan Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Realisasi (Rp)</th>
-                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Kas</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(monitoringProgram === "JKK" ? filteredMonitoringJKK : filteredMonitoringJKM).length === 0 ? (
                       <tr>
-                        <td colSpan={6} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
+                        <td colSpan={4} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
                           Tidak ada data penerimaan tagihan {monitoringProgram} dalam monitoring aktif.
                         </td>
                       </tr>
@@ -2281,14 +2245,6 @@ export const GeneratorTagihan = () => {
                               Tgl Surat: {item.tglSuratTagihan} • {item.matraUtama}
                             </div>
                           </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.tglTerimaDana}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                              SP2D: {item.noSP2D} • {item.bankTujuan.split(" - ")[0]}
-                            </div>
-                          </td>
                           <td style={{ padding: "12px 14px", textAlign: "right" }}>
                             <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: monitoringTheme.primary }}>
                               {fmtB(item.nominalDiterima)}
@@ -2296,24 +2252,6 @@ export const GeneratorTagihan = () => {
                             <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
                               {fmtNum(item.peserta)} Personel
                             </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <span
-                              style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                padding: "3px 8px",
-                                borderRadius: 4,
-                                background: "#ECFDF5",
-                                color: "#065F46",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4
-                              }}
-                            >
-                              <CheckCircle2 size={12} />
-                              {item.statusDana}
-                            </span>
                           </td>
                           <td style={{ padding: "12px 14px", textAlign: "center" }}>
                             <div style={{ display: "flex", justifyContent: "center", gap: 6 }}>
@@ -2333,14 +2271,14 @@ export const GeneratorTagihan = () => {
                   </tbody>
                   <tfoot>
                     <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                      <td colSpan={3} style={{ padding: "12px 14px", textAlign: "right" }}>
+                      <td colSpan={2} style={{ padding: "12px 14px", textAlign: "right" }}>
                         Total Realisasi Iuran {monitoringProgram}:
                       </td>
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: monitoringTheme.primary, fontSize: 13 }}>
                         {fmtB((monitoringProgram === "JKK" ? filteredMonitoringJKK : filteredMonitoringJKM).reduce((acc, it) => acc + (it.nominalDiterima || 0), 0))}
                       </td>
-                      <td colSpan={2} style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11 }}>
-                        Lunas 100% SP2D Kemenkeu
+                      <td style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
+                        —
                       </td>
                     </tr>
                   </tfoot>

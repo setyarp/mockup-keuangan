@@ -234,3 +234,20 @@ Imbal jasa yang ditagihkan kepada mitra bayar atas penyediaan data otentikasi bi
 9. **Nilai Pembulatan Denda:**
    $$\text{Pembulatan Denda} = \text{Math.round}(\text{Denda})$$
 
+---
+
+## 9. 🏦 Penyaluran Harian CMS & Rekonsiliasi Rekening Koran (`PenyaluranHarian` & `RekonRekeningKoran`)
+
+### A. Pemadanan Format Transaksi CMS Perbankan (BRD Poin 4.5.15)
+Mengonversi format baku 8 kolom rekening koran perbankan (*No, Tanggal Bayar, Trans Description, Debet, Credit, Ledger Balance, User ID, Mitra Bayar*) ke format spesifik 6 kategori program:
+
+1. **THT (Tabungan Hari Tua):** Klaim asuransi pensiun / BUP, pengembalian iuran THT.
+2. **JKK (Jaminan Kecelakaan Kerja):** Santunan Cacat Dinas Biasa/Khusus (SCDB/SCDK), Santunan Risiko Kematian Khusus (SRKK Gugur/Tewas), Biaya Perawatan.
+3. **JKM (Jaminan Kematian):** Santunan Kematian Sekaligus (SKS), Uang Duka Wafat (UDW), Biaya Pemakaman (BP), Bantuan Beasiswa.
+4. **NTIP (Nilai Tunai Iuran Pensiun):** Pembayaran nilai tunai akumulasi iuran pensiun bagi peserta yang berhenti/keluar sebelum memenuhi masa dinas kepensiunan penuh atau pengembalian saldo iuran pensiun.
+5. **Pembayaran Pensiun:** Realisasi debit penyaluran DAPEM perbankan (Dapem Induk, Susulan, Pensiun Pertama).
+6. **Penyediaan Pensiun:** Setoran dropping dana / transfer kasda penyediaan kas pembayaran pensiun ke rekening giro mitra bayar.
+
+### B. Status Pemadanan Transaksi
+$$\mathbf{Status\ Pemadanan} = \begin{cases} \text{Matched 100\%} & \text{jika Nomor SP, DPS, dan KTPA terverifikasi di database YANDU} \\ \text{Unmatched} & \text{jika belum ditemukan relasi dokumen tagihan/perintah bayar} \end{cases}$$
+

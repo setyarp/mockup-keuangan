@@ -42,7 +42,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
     { id: "tht", label: "THT", fullName: "Tabungan Hari Tua (THT)", count: activeDataset.filter((d) => d.tipe === "THT").length, badgeColor: "blue" },
     { id: "jkk", label: "JKK", fullName: "Jaminan Kecelakaan Kerja (JKK)", count: activeDataset.filter((d) => d.tipe === "JKK").length, badgeColor: "orange" },
     { id: "jkm", label: "JKM", fullName: "Jaminan Kematian (JKM)", count: activeDataset.filter((d) => d.tipe === "JKM").length, badgeColor: "purple" },
-    { id: "ntip", label: "NTIP", fullName: "Nota Transaksi Informasi Perbankan (NTIP)", count: activeDataset.filter((d) => d.tipe === "NTIP").length, badgeColor: "green" },
+    { id: "ntip", label: "NTIP", fullName: "Nilai Tunai Iuran Pensiun (NTIP)", count: activeDataset.filter((d) => d.tipe === "NTIP").length, badgeColor: "green" },
     { id: "bayar_pensiun", label: "Pembayaran Pensiun", fullName: "Pembayaran Pensiun (DAPEM)", count: activeDataset.filter((d) => d.tipe === "Pembayaran Pensiun").length, badgeColor: "cyan" },
     { id: "sedia_pensiun", label: "Penyediaan Pensiun", fullName: "Penyediaan Pensiun (Dropping Kasda)", count: activeDataset.filter((d) => d.tipe === "Penyediaan Pensiun").length, badgeColor: "indigo" }
   ];
@@ -392,52 +392,6 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
         </div>
       )}
 
-      {/* Header Context Banner */}
-      <div
-        style={{
-          background: "#FFFFFF",
-          border: "1px solid #E2E8F0",
-          borderLeft: "5px solid #0141A8",
-          borderRadius: 10,
-          padding: "16px 20px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.03)"
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 14 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16, fontWeight: 800, color: "#0F172A" }}>
-                Penyaluran Harian CMS — Pemadanan Format Spesifik Jenis Program
-              </span>
-              <span style={{ background: "#EFF6FF", color: "#0141A8", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 6, border: "1px solid #BFDBFE" }}>
-                BRD Poin 4.5.15
-              </span>
-            </div>
-            <div style={{ fontSize: 12.5, color: "#64748B", marginTop: 4, lineHeight: 1.5, maxWidth: 900 }}>
-              Tab-tab hasil auto-mapping transaksi rekening koran CMS perbankan ke format spesifik program (<strong>THT, JKK, JKM, NTIP, Pembayaran Pensiun, dan Penyediaan Pensiun</strong>) untuk sinkronisasi Surat Perintah (SP), DPS, dan sistem YANDU NG.
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#F8FAFC", padding: "6px 12px", borderRadius: 6, border: "1px solid #CBD5E1" }}>
-              <Calendar size={14} color="#64748B" />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#0F172A" }}>Tanggal:</span>
-              <input
-                type="date"
-                value={selectedTanggal}
-                onChange={(e) => setSelectedTanggal(e.target.value)}
-                style={{ border: "none", outline: "none", fontSize: 12, fontWeight: 700, color: "#0141A8", cursor: "pointer", background: "transparent" }}
-              />
-            </div>
-
-            {onNavigateToUploadCMS && (
-              <Btn variant="outline" size="sm" onClick={onNavigateToUploadCMS}>
-                <Layers size={13} /> Menu Upload CMS
-              </Btn>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* 6 PROGRAM TABS SWITCHER */}
       <div
@@ -491,41 +445,6 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
         })}
       </div>
 
-      {/* DYNAMIC KPI SUMMARY CARDS FOR ACTIVE TAB */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
-        <StatCard
-          icon={<FileCheck2 size={IC} />}
-          label={`Transaksi ${tabsConfig.find((t) => t.id === activeTab)?.label}`}
-          value={`${filteredData.length} Baris Data`}
-          sub="Hasil Auto-Mapping BRD 4.5.15"
-          color={COLORS.blue}
-        />
-        <StatCard
-          icon={<Building2 size={IC} />}
-          label="Mitra Bayar Terlibat"
-          value={`${totalMitraCount} Mitra Aktif`}
-          sub="WOORI, BRI, MANDIRI, BNI, BTN, POS"
-          color={COLORS.blueDark}
-        />
-        <StatCard
-          icon={<Zap size={IC} />}
-          label="Total Nominal Program"
-          value={fmt(totalNominalTab)}
-          sub={
-            activeTab === "ntip"
-              ? `Debet: ${fmt(totalDebetTab)} | Credit: ${fmt(totalCreditTab)}`
-              : "Telah Tervalidasi YANDU & CMS"
-          }
-          color={COLORS.green}
-        />
-        <StatCard
-          icon={<ShieldCheck size={IC} />}
-          label="Status Pemadanan SP"
-          value="Matched 100%"
-          sub="Nomor SP & DPS Terverifikasi"
-          color={COLORS.purple}
-        />
-      </div>
 
       {/* TABEL HASIL MAPPING JENIS PROGRAM */}
       <div
