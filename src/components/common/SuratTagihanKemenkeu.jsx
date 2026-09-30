@@ -156,8 +156,8 @@ export const SuratTagihanKemenkeu = ({
   const noBukti = data.noBukti || (isTHT ? (isPolri ? "22/PFK.THT-POLRI/X/2024-Keu" : "21/PFK.THT-AS/X/2024-Keu") : (isPolri ? "23/PFK.PEN-POLRI/X/2024-Keu" : "24/PFK.PEN-TNI/X/2024-Keu"));
 
   // Pejabat Penandatangan
-  const namaDirektur = data.namaDirektur || "HELMI I. SATRIYONO";
-  const jabatanDirektur = data.jabatanDirektur || "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO";
+  const namaDirektur = data.namaPejabat || data.namaDirektur || "Helmi I Satriyo";
+  const jabatanDirektur = data.jabatan || data.jabatanDirektur || "Direktur Keuangan dan Manajemen Resiko";
   const namaPPK = data.namaPPK || "Nazif Azhari";
 
   const handleCopyNoSurat = () => {

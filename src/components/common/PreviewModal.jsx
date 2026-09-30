@@ -35,7 +35,7 @@ export const PreviewModal = ({ preview, onClose }) => {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, backdropFilter: "blur(2px)" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1300, backdropFilter: "blur(2px)" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: COLORS.white, borderRadius: 12, width: preview?.width || (isKemenkeuSurat ? 920 : (content?.satkerList ? 880 : (type === "table" && (content?.columns?.length || 0) > 6 ? (content?.columns?.length > 10 ? 1100 : 880) : 680))), maxWidth: "96vw", maxHeight: "92vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
         <div style={{ padding: "16px 22px", borderBottom: `1px solid ${COLORS.gray200}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, background: confirmAction ? "#FAF5FF" : "#FFFFFF" }}>
           <div>
@@ -165,12 +165,16 @@ export const PreviewModal = ({ preview, onClose }) => {
                   
                   <div style={{ marginTop: 24, textAlign: "right" }}>
                     <div>Jakarta, {content?.tanggal || "26 Juli 2026"}</div>
-                    <div style={{ marginTop: 6, fontWeight: 700 }}>Kepala Divisi Keuangan PT ASABRI (Persero)</div>
+                    <div style={{ marginTop: 6, fontWeight: 700 }}>
+                      {content?.jabatan || content?.jabatanDirektur || "Direktur Keuangan dan Manajemen Resiko"}
+                    </div>
                     <div style={{ height: 50, display: "flex", alignItems: "center", justifyContent: "flex-end", color: "#94A3B8", fontStyle: "italic", fontSize: 11 }}>
                       [ Tanda Tangan Basah Manual ]
                     </div>
-                    <div style={{ fontWeight: 700, textDecoration: "underline" }}>Wirata Atmaja, S.E., M.M.</div>
-                    <div style={{ fontSize: 11, color: COLORS.gray500 }}>NRP/NIP: 197804152002121001</div>
+                    <div style={{ fontWeight: 700, textDecoration: "underline" }}>
+                      {content?.namaPejabat || content?.namaDirektur || "Helmi I Satriyo"}
+                    </div>
+                    <div style={{ fontSize: 11, color: COLORS.gray500 }}>PT ASABRI (Persero)</div>
                   </div>
                 </div>
               </div>

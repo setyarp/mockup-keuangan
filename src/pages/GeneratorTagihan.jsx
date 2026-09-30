@@ -16,7 +16,9 @@ import {
   Plus,
   Check,
   AlertCircle,
-  Eye
+  Eye,
+  Edit3,
+  X
 } from "lucide-react";
 import { COLORS } from "../constants/colors";
 import { Btn, PreviewModal, SatkerModal } from "../components/common";
@@ -50,6 +52,10 @@ export const GeneratorTagihan = () => {
   const [nominal, setNominal] = useState("");
   const [dokumenFile, setDokumenFile] = useState(null);
   const [dokumenName, setDokumenName] = useState("SKP-PFK_Kemenkeu_Okt2024_THT_POLRI.pdf");
+
+  // Field Pejabat Penandatangan Tagihan
+  const [namaPejabat, setNamaPejabat] = useState("Helmi I Satriyo");
+  const [jabatan, setJabatan] = useState("Direktur Keuangan dan Manajemen Resiko");
 
   // Nomor Urut Berjalan untuk Tagihan Otomatis JKK & JKM (tidak berubah selagi tagihan belum dibuat)
   const [nextNoUrutJKK_JKM, setNextNoUrutJKK_JKM] = useState(1198);
@@ -512,6 +518,10 @@ export const GeneratorTagihan = () => {
       status: "Siap Cetak & TTD Manual",
       tglTTD: null,
       resiPos: null,
+      namaPejabat: namaPejabat || "Helmi I Satriyo",
+      jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+      namaDirektur: namaPejabat || "Helmi I Satriyo",
+      jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
       skpDetails: skpDetails,
       items: items,
       satkerList: satkerList
@@ -551,8 +561,10 @@ export const GeneratorTagihan = () => {
           namaRekening: isTHTProg ? "THT Umum ASABRI" : "Pensiun ASABRI",
           noRekening: isTHTProg ? "0261-01-000004-30-9" : "0261-01-000005-30-5",
           namaBank: "BRI Kantor Cabang Jakarta Krekot",
-          namaDirektur: "HELMI I. SATRIYONO",
-          jabatanDirektur: "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO",
+          namaPejabat: namaPejabat || "Helmi I Satriyo",
+          jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+          namaDirektur: namaPejabat || "Helmi I Satriyo",
+          jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
           namaPPK: "Nazif Azhari",
           isPFKKemenkeu: true,
           satkerList: satkerList
@@ -584,7 +596,11 @@ export const GeneratorTagihan = () => {
           items: items,
           totalNominal: formatRupiah(nomValue),
           satkerList: satkerList,
-          dasarSKP: null
+          dasarSKP: null,
+          namaPejabat: namaPejabat || "Helmi I Satriyo",
+          jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+          namaDirektur: namaPejabat || "Helmi I Satriyo",
+          jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko"
         }
       });
     }
@@ -616,6 +632,10 @@ export const GeneratorTagihan = () => {
         namaRekening: "THT Umum ASABRI",
         noRekening: "0261-01-000004-30-9",
         namaBank: "BRI Kantor Cabang Jakarta Krekot",
+        namaPejabat: namaPejabat || "Helmi I Satriyo",
+        jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+        namaDirektur: namaPejabat || "Helmi I Satriyo",
+        jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
         dokumen: batchDocName,
         peserta: "266.150",
         status: "Siap Cetak & TTD Manual",
@@ -645,6 +665,10 @@ export const GeneratorTagihan = () => {
         namaRekening: "THT Umum ASABRI",
         noRekening: "0261-01-000004-30-9",
         namaBank: "BRI Kantor Cabang Jakarta Krekot",
+        namaPejabat: namaPejabat || "Helmi I Satriyo",
+        jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+        namaDirektur: namaPejabat || "Helmi I Satriyo",
+        jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
         dokumen: batchDocName,
         peserta: "142.200",
         status: "Siap Cetak & TTD Manual",
@@ -674,6 +698,10 @@ export const GeneratorTagihan = () => {
         namaRekening: "Pensiun ASABRI",
         noRekening: "0261-01-000005-30-5",
         namaBank: "BRI Kantor Cabang Jakarta Krekot",
+        namaPejabat: namaPejabat || "Helmi I Satriyo",
+        jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+        namaDirektur: namaPejabat || "Helmi I Satriyo",
+        jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
         dokumen: batchDocName,
         peserta: "266.150",
         status: "Siap Cetak & TTD Manual",
@@ -703,6 +731,10 @@ export const GeneratorTagihan = () => {
         namaRekening: "Pensiun ASABRI",
         noRekening: "0261-01-000005-30-5",
         namaBank: "BRI Kantor Cabang Jakarta Krekot",
+        namaPejabat: namaPejabat || "Helmi I Satriyo",
+        jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+        namaDirektur: namaPejabat || "Helmi I Satriyo",
+        jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
         dokumen: batchDocName,
         peserta: "142.200",
         status: "Siap Cetak & TTD Manual",
@@ -746,8 +778,10 @@ export const GeneratorTagihan = () => {
         namaRekening: "THT Umum ASABRI",
         noRekening: "0261-01-000004-30-9",
         namaBank: "BRI Kantor Cabang Jakarta Krekot",
-        namaDirektur: "HELMI I. SATRIYONO",
-        jabatanDirektur: "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO",
+        namaPejabat: namaPejabat || "Helmi I Satriyo",
+        jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+        namaDirektur: namaPejabat || "Helmi I Satriyo",
+        jabatanDirektur: jabatan || "Direktur Keuangan dan Manajemen Resiko",
         namaPPK: "Nazif Azhari",
         isPFKKemenkeu: true,
         satkerList: SATKER_THT_TNI
@@ -821,8 +855,25 @@ export const GeneratorTagihan = () => {
       danaTHT: 28540000000,
       danaPensiun: 0,
       nominalDiterima: 28540000000,
-      statusDana: "Dana Masuk (Lunas)",
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
       statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "15 September 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan resmi 1190/KU.06.06/KMR.N/IX/2026 diterbitkan ke Kemenkeu RI",
+          user: "Helmi I Satriyo"
+        },
+        {
+          tanggal: "18 September 2026",
+          status: "Dana Diterima",
+          catatan: "SP2D-260918-008921 cair dan tercatat di Rekening Giro Penampungan",
+          user: "Helmi I Satriyo"
+        }
+      ],
       satkerList: SATKER_THT_TNI
     },
     {
@@ -846,8 +897,25 @@ export const GeneratorTagihan = () => {
       danaTHT: 14225000000,
       danaPensiun: 0,
       nominalDiterima: 14225000000,
-      statusDana: "Dana Masuk (Lunas)",
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
       statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "15 September 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan resmi 1191/KU.06.06/KMR.N/IX/2026 diterbitkan",
+          user: "Helmi I Satriyo"
+        },
+        {
+          tanggal: "18 September 2026",
+          status: "Dana Diterima",
+          catatan: "SP2D-260918-008922 masuk ke rekening",
+          user: "Helmi I Satriyo"
+        }
+      ],
       satkerList: SATKER_THT_POLRI
     },
     {
@@ -871,8 +939,25 @@ export const GeneratorTagihan = () => {
       danaTHT: 0,
       danaPensiun: 41710000000,
       nominalDiterima: 41710000000,
-      statusDana: "Dana Masuk (Lunas)",
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
       statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "15 September 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan resmi 1192/KU.06.06/KMR.N/IX/2026 diterbitkan",
+          user: "Helmi I Satriyo"
+        },
+        {
+          tanggal: "18 September 2026",
+          status: "Dana Diterima",
+          catatan: "SP2D-260918-008923 masuk ke rekening BNI",
+          user: "Helmi I Satriyo"
+        }
+      ],
       satkerList: SATKER_PENSIUN_TNI
     },
     {
@@ -896,8 +981,19 @@ export const GeneratorTagihan = () => {
       danaTHT: 0,
       danaPensiun: 20805000000,
       nominalDiterima: 20805000000,
-      statusDana: "Dana Masuk (Lunas)",
+      statusDana: "Dana Belum Diterima",
+      statusTagihan: "Dana Belum Diterima",
       statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "15 September 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan resmi 1193/KU.06.06/KMR.N/IX/2026 diterbitkan ke Kemenkeu RI (menunggu pencairan dana)",
+          user: "Helmi I Satriyo"
+        }
+      ],
       satkerList: SATKER_PENSIUN_POLRI
     }
   ]);
@@ -919,8 +1015,25 @@ export const GeneratorTagihan = () => {
       nominalTagihan: 1120000000,
       nominalDiterima: 1120000000,
       peserta: 6120,
-      statusDana: "Dana Masuk (Lunas)",
-      statusProses: "Dalam Monitoring"
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
+      statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "25 Juli 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan 002/ASABRI/TGH-JKK/VII/2026 diterbitkan",
+          user: "Helmi I Satriyo"
+        },
+        {
+          tanggal: "28 Juli 2026",
+          status: "Dana Diterima",
+          catatan: "SP2D-260728-004128 masuk ke rekening penampungan",
+          user: "Helmi I Satriyo"
+        }
+      ]
     },
     {
       id: "JKK-002",
@@ -938,8 +1051,25 @@ export const GeneratorTagihan = () => {
       nominalTagihan: 1510000000,
       nominalDiterima: 1510000000,
       peserta: 8208,
-      statusDana: "Dana Masuk (Lunas)",
-      statusProses: "Dalam Monitoring"
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
+      statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "25 Juli 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan 003/ASABRI/TGH-JKK/VII/2026 diterbitkan",
+          user: "Helmi I Satriyo"
+        },
+        {
+          tanggal: "28 Juli 2026",
+          status: "Dana Diterima",
+          catatan: "SP2D-260728-004130 telah disalurkan",
+          user: "Helmi I Satriyo"
+        }
+      ]
     }
   ]);
 
@@ -960,8 +1090,25 @@ export const GeneratorTagihan = () => {
       nominalTagihan: 940000000,
       nominalDiterima: 940000000,
       peserta: 6120,
-      statusDana: "Dana Masuk (Lunas)",
-      statusProses: "Dalam Monitoring"
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
+      statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "25 Juli 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan 004/ASABRI/TGH-JKM/VII/2026 diterbitkan",
+          user: "Helmi I Satriyo"
+        },
+        {
+          tanggal: "28 Juli 2026",
+          status: "Dana Diterima",
+          catatan: "SP2D-260728-004129 cair",
+          user: "Helmi I Satriyo"
+        }
+      ]
     },
     {
       id: "JKM-002",
@@ -979,10 +1126,119 @@ export const GeneratorTagihan = () => {
       nominalTagihan: 1270000000,
       nominalDiterima: 1270000000,
       peserta: 8208,
-      statusDana: "Dana Masuk (Lunas)",
-      statusProses: "Dalam Monitoring"
+      statusDana: "Dana Belum Diterima",
+      statusTagihan: "Dana Belum Diterima",
+      statusProses: "Dalam Monitoring",
+      namaPejabat: "Helmi I Satriyo",
+      jabatan: "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: "25 Juli 2026",
+          status: "Dana Belum Diterima",
+          catatan: "Surat tagihan 005/ASABRI/TGH-JKM/VII/2026 diterbitkan ke Kemenkeu (menunggu pencairan SP2D)",
+          user: "Helmi I Satriyo"
+        }
+      ]
     }
   ]);
+
+  // Modal Detail Monitoring & Input Perubahan Status Tagihan
+  const [selectedDetailMonitoring, setSelectedDetailMonitoring] = useState(null);
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
+  const [statusEditForm, setStatusEditForm] = useState({
+    statusTagihan: "Dana Diterima",
+    noSP2D: "",
+    tglTerimaDana: "",
+    catatan: ""
+  });
+
+  const getStatusTagihanBadge = (status) => {
+    const s = status || "Dana Belum Diterima";
+    if (s === "Dana Diterima" || (s.includes("Diterima") && !s.includes("Belum")) || s.includes("Lunas") || s.includes("Masuk")) {
+      return {
+        bg: "#ECFDF5",
+        text: "#047857",
+        border: "#A7F3D0",
+        label: "Dana Diterima"
+      };
+    }
+    return {
+      bg: "#FFFBEB",
+      text: "#B45309",
+      border: "#FDE68A",
+      label: "Dana Belum Diterima"
+    };
+  };
+
+  const renderStatusIcon = (status) => {
+    const s = status || "";
+    if (s === "Dana Diterima" || (s.includes("Diterima") && !s.includes("Belum")) || s.includes("Lunas") || s.includes("Masuk")) {
+      return <CheckCircle2 size={12} />;
+    }
+    return <Clock size={12} />;
+  };
+
+  const handleOpenDetailModal = (item) => {
+    const curStatus = item.statusTagihan || item.statusDana || "Dana Belum Diterima";
+    const normalizedStatus = (curStatus === "Dana Diterima" || (curStatus.includes("Diterima") && !curStatus.includes("Belum")) || curStatus.includes("Lunas") || curStatus.includes("Masuk"))
+      ? "Dana Diterima"
+      : "Dana Belum Diterima";
+
+    setSelectedDetailMonitoring(item);
+    setIsEditingStatus(false);
+    setStatusEditForm({
+      statusTagihan: normalizedStatus,
+      noSP2D: item.noSP2D || "",
+      tglTerimaDana: item.tglTerimaDana || "",
+      catatan: ""
+    });
+  };
+
+  const handleSaveStatusChange = (e) => {
+    e.preventDefault();
+    if (!selectedDetailMonitoring) return;
+
+    const newStatus = statusEditForm.statusTagihan === "Dana Diterima" ? "Dana Diterima" : "Dana Belum Diterima";
+    const newNoSP2D = statusEditForm.noSP2D?.trim() || selectedDetailMonitoring.noSP2D || "";
+    const newTglTerima = statusEditForm.tglTerimaDana?.trim() || selectedDetailMonitoring.tglTerimaDana || "";
+    const catatan = statusEditForm.catatan?.trim() || `Status tagihan diperbarui menjadi ${newStatus}`;
+
+    const newHistoryEntry = {
+      tanggal: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
+      status: newStatus,
+      catatan: catatan,
+      user: selectedDetailMonitoring.namaPejabat || namaPejabat || "Helmi I Satriyo"
+    };
+
+    const existingHistory = selectedDetailMonitoring.riwayatStatus && selectedDetailMonitoring.riwayatStatus.length > 0
+      ? selectedDetailMonitoring.riwayatStatus
+      : [
+          {
+            tanggal: selectedDetailMonitoring.tglSuratTagihan || "15 September 2026",
+            status: "Dana Belum Diterima",
+            catatan: "Surat tagihan diterbitkan ke Kemenkeu RI",
+            user: selectedDetailMonitoring.namaPejabat || namaPejabat || "Helmi I Satriyo"
+          }
+        ];
+
+    const updatedItem = {
+      ...selectedDetailMonitoring,
+      statusTagihan: newStatus,
+      statusDana: newStatus,
+      noSP2D: newNoSP2D,
+      tglTerimaDana: newTglTerima,
+      riwayatStatus: [...existingHistory, newHistoryEntry]
+    };
+
+    setMonitoringSKPList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+    setMonitoringJKKList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+    setMonitoringJKMList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+
+    setSelectedDetailMonitoring(updatedItem);
+    setIsEditingStatus(false);
+    setSuccessNotice(`Status tagihan nomor ${updatedItem.noSuratTagihan || updatedItem.id} berhasil diubah menjadi "${newStatus}"!`);
+    setTimeout(() => setSuccessNotice(null), 5000);
+  };
 
   // Modal Input Realisasi SKP-PFK
   const [showInputModal, setShowInputModal] = useState(false);
@@ -1069,8 +1325,25 @@ export const GeneratorTagihan = () => {
       danaTHT: isTHT ? nom : 0,
       danaPensiun: isTHT ? 0 : nom,
       nominalDiterima: nom,
-      statusDana: "Dana Masuk (Lunas)",
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
       statusProses: "Dalam Monitoring",
+      namaPejabat: namaPejabat || "Helmi I Satriyo",
+      jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: inputForm.tglSuratTagihan.trim(),
+          status: "Dana Belum Diterima",
+          catatan: `Surat tagihan ${inputForm.noSuratTagihan.trim()} diterbitkan ke Kemenkeu RI`,
+          user: namaPejabat || "Helmi I Satriyo"
+        },
+        {
+          tanggal: inputForm.tglTerimaDana.trim(),
+          status: "Dana Diterima",
+          catatan: `SP2D ${inputForm.noSP2D.trim()} diterima dan dana masuk rekening`,
+          user: namaPejabat || "Helmi I Satriyo"
+        }
+      ],
       satkerList: generateProportionalSatkerList(nom, baseSatker, dType)
     };
 
@@ -1129,8 +1402,25 @@ export const GeneratorTagihan = () => {
       nominalTagihan: nom,
       nominalDiterima: nom,
       peserta: Number(inputFormJKK.peserta || (isPolri ? 6120 : 8208)),
-      statusDana: "Dana Masuk (Lunas)",
-      statusProses: "Dalam Monitoring"
+      statusDana: "Dana Diterima",
+      statusTagihan: "Dana Diterima",
+      statusProses: "Dalam Monitoring",
+      namaPejabat: namaPejabat || "Helmi I Satriyo",
+      jabatan: jabatan || "Direktur Keuangan dan Manajemen Resiko",
+      riwayatStatus: [
+        {
+          tanggal: inputFormJKK.tglSuratTagihan.trim(),
+          status: "Dana Belum Diterima",
+          catatan: `Surat tagihan ${inputFormJKK.noSuratTagihan.trim()} diterbitkan ke Kemenkeu RI`,
+          user: namaPejabat || "Helmi I Satriyo"
+        },
+        {
+          tanggal: inputFormJKK.tglTerimaDana.trim(),
+          status: "Dana Diterima",
+          catatan: `SP2D ${inputFormJKK.noSP2D.trim()} diterima dan dana masuk rekening`,
+          user: namaPejabat || "Helmi I Satriyo"
+        }
+      ]
     };
 
     if (inputFormJKK.program === "JKK") {
@@ -1221,7 +1511,9 @@ export const GeneratorTagihan = () => {
   }[monitoringProgram];
 
   const openSuratTagihanPreview = (item) => {
-    if (monitoringProgram === "THT_PENSIUN") {
+    if (!item) return;
+    const isPFK = item.danaType?.startsWith("THT") || item.danaType?.startsWith("PENSIUN") || item.program?.includes("THT") || item.program?.includes("PENSIUN") || (!item.program?.startsWith("JK") && monitoringProgram === "THT_PENSIUN");
+    if (isPFK) {
       const isTHT = (item.danaType || item.program || "").startsWith("THT");
       const isPolri = (item.danaType || item.program || "").includes("POLRI");
       const isPensiun = (item.danaType || item.program || "").includes("PENSIUN") || (item.danaType || item.program || "").includes("Pensiun");
@@ -1247,15 +1539,17 @@ export const GeneratorTagihan = () => {
           namaRekening: item.namaRekening || (isTHT ? "THT Umum ASABRI" : "Pensiun ASABRI"),
           noRekening: item.noRekening || (isTHT ? "0261-01-000004-30-9" : "0261-01-000005-30-5"),
           namaBank: item.namaBank || "BRI Kantor Cabang Jakarta Krekot",
-          namaDirektur: "HELMI I. SATRIYONO",
-          jabatanDirektur: "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO",
+          namaPejabat: item.namaPejabat || item.namaDirektur || namaPejabat || "Helmi I Satriyo",
+          jabatan: item.jabatan || item.jabatanDirektur || jabatan || "Direktur Keuangan dan Manajemen Resiko",
+          namaDirektur: item.namaPejabat || item.namaDirektur || namaPejabat || "Helmi I Satriyo",
+          jabatanDirektur: item.jabatan || item.jabatanDirektur || jabatan || "Direktur Keuangan dan Manajemen Resiko",
           namaPPK: "Nazif Azhari",
           isPFKKemenkeu: true,
           satkerList: item.satkerList || SATKER_THT_PENSIUN_ALL
         }
       });
     } else {
-      const prog = monitoringProgram;
+      const prog = item.program || monitoringProgram || "JKK";
       const namaDana = item.namaDana || (prog === "JKK" ? "JKK" : "JKM");
       setPreview({
         title: `Surat Tagihan Iuran ${namaDana} — ${item.noSuratTagihan || item.noSurat}`,
@@ -1268,6 +1562,10 @@ export const GeneratorTagihan = () => {
           tanggal: item.tglSuratTagihan || item.tglGenerate,
           periode: "Juli 2026",
           batchInfo: `Program: ${namaDana} • Tarif ${prog === "JKK" ? "0,24%" : "0,20%"}`,
+          namaPejabat: item.namaPejabat || item.namaDirektur || namaPejabat || "Helmi I Satriyo",
+          jabatan: item.jabatan || item.jabatanDirektur || jabatan || "Direktur Keuangan dan Manajemen Resiko",
+          namaDirektur: item.namaPejabat || item.namaDirektur || namaPejabat || "Helmi I Satriyo",
+          jabatanDirektur: item.jabatan || item.jabatanDirektur || jabatan || "Direktur Keuangan dan Manajemen Resiko",
           items: [
             {
               jenis: item.jenisIuran || (prog === "JKK" ? "Iuran JKK (0,24%)" : "Iuran JKM (0,20%)"),
@@ -1461,119 +1759,16 @@ export const GeneratorTagihan = () => {
                   <option value="THT_PENSIUN">THT/Pensiun</option>
                   <option value="JKK">JKK (Jaminan Kecelakaan Kerja)</option>
                   <option value="JKM">JKM (Jaminan Kematian)</option>
-                  <option value="BATCH_PFK">⚡ Batch Generator: 4 Surat Dana PFK Sekaligus</option>
                 </select>
               </div>
             </div>
 
-            {/* JIKA MODE BATCH GENERATE 4 SURAT SEKALIGUS */}
-            {selectedProgram === "BATCH_PFK" ? (
-              <div style={{ width: "100%", boxSizing: "border-box" }}>
-                <div style={{ padding: "16px 20px", background: "linear-gradient(135deg, #F0FDF4 0%, #EFF6FF 100%)", borderRadius: 8, border: "1px solid #86EFAC", marginBottom: 20 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                    <Sparkles size={20} color="#059669" />
-                    <strong style={{ fontSize: 14, color: "#065F46" }}>Batch Generator: 4 Surat Tagihan Per-Dana Sekaligus</strong>
-                  </div>
-                  <div style={{ fontSize: 12, color: "#1E3A8A", lineHeight: 1.6 }}>
-                    Fitur ini otomatis menerbitkan <strong>4 Surat Tagihan terpisah</strong> dengan 4 nomor surat berurutan (incremental) berdasarkan 1 dokumen sumber <strong>SKP-PFK Kemenkeu</strong> total Rp 105.280.000.000.
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 18 }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: COLORS.gray800, marginBottom: 6 }}>
-                      Nomor Dasar SKP-PFK Kemenkeu <span style={{ color: "red" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={batchNoSKP}
-                      onChange={(e) => setBatchNoSKP(e.target.value)}
-                      placeholder="Contoh: S-184/PB.2/2026"
-                      style={{ width: "100%", padding: "9px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontFamily: "monospace", fontWeight: 700, boxSizing: "border-box" }}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: COLORS.gray800, marginBottom: 6 }}>
-                      Nomor Urut Awal Surat (Incremental) <span style={{ color: "red" }}>*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={batchStartNo}
-                      onChange={(e) => setBatchStartNo(e.target.value)}
-                      placeholder="Contoh: 1190"
-                      style={{ width: "100%", padding: "9px 12px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 13, fontFamily: "monospace", fontWeight: 700, boxSizing: "border-box" }}
-                      required
-                    />
-                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>
-                      Nomor surat akan digenerate otomatis: <code>{formatNomorSuratPFK(batchStartNo, "IX", 2026)}</code> s.d. <code>{formatNomorSuratPFK(Number(batchStartNo) + 3, "IX", 2026)}</code>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Preview 4 Surat yang akan Digenerate */}
-                <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: COLORS.gray800, marginBottom: 8 }}>
-                    Rincian 4 Surat yang Akan Diterbitkan:
-                  </label>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
-                    <div style={{ padding: "12px 14px", borderRadius: 8, border: "1px solid #BFDBFE", background: "#F0F7FF" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#1E40AF" }}>1. SURAT TAGIHAN THT TNI</div>
-                      <div style={{ fontSize: 12, fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900, marginTop: 4 }}>{formatNomorSuratPFK(batchStartNo, "IX", 2026)}</div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: "#1D4ED8", marginTop: 4 }}>Rp 28.540.000.000</div>
-                      <div style={{ fontSize: 11, color: COLORS.gray600, marginTop: 2 }}>266.150 Peserta • Tarif 3,25%</div>
-                    </div>
-
-                    <div style={{ padding: "12px 14px", borderRadius: 8, border: "1px solid #BFDBFE", background: "#F0F7FF" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#1E40AF" }}>2. SURAT TAGIHAN THT POLRI</div>
-                      <div style={{ fontSize: 12, fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900, marginTop: 4 }}>{formatNomorSuratPFK(Number(batchStartNo) + 1, "IX", 2026)}</div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: "#1D4ED8", marginTop: 4 }}>Rp 14.225.000.000</div>
-                      <div style={{ fontSize: 11, color: COLORS.gray600, marginTop: 2 }}>142.200 Peserta • Tarif 3,25%</div>
-                    </div>
-
-                    <div style={{ padding: "12px 14px", borderRadius: 8, border: "1px solid #D1FAE5", background: "#F0FDF4" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#065F46" }}>3. SURAT TAGIHAN PENSIUN TNI</div>
-                      <div style={{ fontSize: 12, fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900, marginTop: 4 }}>{formatNomorSuratPFK(Number(batchStartNo) + 2, "IX", 2026)}</div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: "#059669", marginTop: 4 }}>Rp 41.710.000.000</div>
-                      <div style={{ fontSize: 11, color: COLORS.gray600, marginTop: 2 }}>266.150 Peserta • Tarif 4,75%</div>
-                    </div>
-
-                    <div style={{ padding: "12px 14px", borderRadius: 8, border: "1px solid #D1FAE5", background: "#F0FDF4" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#065F46" }}>4. SURAT TAGIHAN PENSIUN POLRI</div>
-                      <div style={{ fontSize: 12, fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900, marginTop: 4 }}>{formatNomorSuratPFK(Number(batchStartNo) + 3, "IX", 2026)}</div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: "#059669", marginTop: 4 }}>Rp 20.805.000.000</div>
-                      <div style={{ fontSize: 11, color: COLORS.gray600, marginTop: 2 }}>142.200 Peserta • Tarif 4,75%</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", borderTop: `1px solid ${COLORS.gray200}`, paddingTop: 14 }}>
-                  <Btn
-                    type="button"
-                    onClick={handleGenerateBatch}
-                    disabled={isGenerating}
-                    style={{
-                      background: "#059669",
-                      padding: "10px 24px",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6
-                    }}
-                  >
-                    <Eye size={15} />
-                    Preview & Terbitkan 4 Surat Tagihan Per-Dana
-                  </Btn>
-                </div>
-              </div>
-            ) : (
-              /* FORM PENAGIHAN SINGLE (THT/PENSIUN, JKK, & JKM) */
-              <form onSubmit={handleGenerate} style={{ width: "100%", boxSizing: "border-box" }}>
+            {/* FORM PENAGIHAN (THT/PENSIUN, JKK, & JKM) */}
+            <form onSubmit={handleGenerate} style={{ width: "100%", boxSizing: "border-box" }}>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: (selectedProgram === "JKK" || selectedProgram === "JKM") ? "1fr 1fr" : "repeat(auto-fit, minmax(280px, 1fr))",
+                    gridTemplateColumns: "1fr 1fr",
                     gap: 16,
                     marginBottom: 16,
                     width: "100%",
@@ -1797,6 +1992,76 @@ export const GeneratorTagihan = () => {
                   )}
                 </div>
 
+                {/* FIELD NAMA PEJABAT & JABATAN SEJAJAR */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 16,
+                    marginBottom: 16,
+                    width: "100%",
+                    boxSizing: "border-box"
+                  }}
+                >
+                  {/* FIELD: NAMA PEJABAT */}
+                  <div style={{ minWidth: 0, boxSizing: "border-box" }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: COLORS.gray800, marginBottom: 6 }}>
+                      Nama Pejabat <span style={{ color: "red" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={namaPejabat}
+                      onChange={(e) => setNamaPejabat(e.target.value)}
+                      placeholder="Contoh: Helmi I Satriyo"
+                      style={{
+                        width: "100%",
+                        padding: "9px 12px",
+                        borderRadius: 6,
+                        border: `1px solid ${COLORS.gray300}`,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: COLORS.gray800,
+                        background: COLORS.white,
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                      required
+                    />
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>
+                      Nama pejabat penandatangan tagihan
+                    </div>
+                  </div>
+
+                  {/* FIELD: JABATAN */}
+                  <div style={{ minWidth: 0, boxSizing: "border-box" }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: COLORS.gray800, marginBottom: 6 }}>
+                      Jabatan <span style={{ color: "red" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={jabatan}
+                      onChange={(e) => setJabatan(e.target.value)}
+                      placeholder="Contoh: Direktur Keuangan dan Manajemen Resiko"
+                      style={{
+                        width: "100%",
+                        padding: "9px 12px",
+                        borderRadius: 6,
+                        border: `1px solid ${COLORS.gray300}`,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: COLORS.gray800,
+                        background: COLORS.white,
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                      required
+                    />
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>
+                      Jabatan pejabat penandatangan
+                    </div>
+                  </div>
+                </div>
+
                 {/* Tombol Generate Tagihan */}
                 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", borderTop: `1px solid ${COLORS.gray200}`, paddingTop: 14 }}>
                   <Btn
@@ -1817,7 +2082,6 @@ export const GeneratorTagihan = () => {
                   </Btn>
                 </div>
               </form>
-            )}
           </div>
         </div>
       )}
@@ -2119,13 +2383,14 @@ export const GeneratorTagihan = () => {
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Dasar SKP-PFK Kemenkeu</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan (Rp)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Status Tagihan</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredMonitoringSKP.length === 0 ? (
                       <tr>
-                        <td colSpan={5} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
+                        <td colSpan={6} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
                           Tidak ada data penerimaan SKP-PFK dalam monitoring aktif.
                         </td>
                       </tr>
@@ -2137,6 +2402,7 @@ export const GeneratorTagihan = () => {
                           item.danaType === "THT_POLRI" ? { bg: "#EEF2FF", text: "#4338CA", border: "#C7D2FE" } :
                           item.danaType === "PENSIUN_TNI" ? { bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" } :
                           { bg: "#F0FDFA", text: "#0F766E", border: "#99F6E4" };
+                        const stBadge = getStatusTagihanBadge(item.statusTagihan || item.statusDana);
 
                         return (
                           <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
@@ -2173,17 +2439,34 @@ export const GeneratorTagihan = () => {
                               </div>
                             </td>
                             <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                              <div style={{ display: "flex", justifyContent: "center" }}>
-                                <Btn
-                                  size="xs"
-                                  variant="outline"
-                                  style={{ padding: "3px 8px", fontSize: 11, fontWeight: 600, gap: 4 }}
-                                  onClick={() => openSuratTagihanPreview(item)}
-                                >
-                                  <FileText size={11} />
-                                  Surat Tagihan
-                                </Btn>
-                              </div>
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 5,
+                                  padding: "3px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  background: stBadge.bg,
+                                  color: stBadge.text,
+                                  border: `1px solid ${stBadge.border}`
+                                }}
+                              >
+                                {renderStatusIcon(stBadge.label)}
+                                {stBadge.label}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                              <Btn
+                                size="xs"
+                                variant="primary"
+                                style={{ padding: "5px 12px", fontSize: 11.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}
+                                onClick={() => handleOpenDetailModal(item)}
+                              >
+                                <Eye size={12} />
+                                Detail
+                              </Btn>
                             </td>
                           </tr>
                         );
@@ -2198,7 +2481,7 @@ export const GeneratorTagihan = () => {
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blue, fontSize: 13 }}>
                         {fmtB(filteredMonitoringSKP.reduce((acc, it) => acc + (it.nominalDanaSKP || 0), 0))}
                       </td>
-                      <td style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
+                      <td colSpan={2} style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
                         —
                       </td>
                     </tr>
@@ -2216,57 +2499,79 @@ export const GeneratorTagihan = () => {
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Tagihan Resmi</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Realisasi (Rp)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Status Tagihan</th>
                       <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(monitoringProgram === "JKK" ? filteredMonitoringJKK : filteredMonitoringJKM).length === 0 ? (
                       <tr>
-                        <td colSpan={4} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
+                        <td colSpan={5} style={{ padding: 30, textAlign: "center", color: COLORS.gray500 }}>
                           Tidak ada data penerimaan tagihan {monitoringProgram} dalam monitoring aktif.
                         </td>
                       </tr>
                     ) : (
-                      (monitoringProgram === "JKK" ? filteredMonitoringJKK : filteredMonitoringJKM).map((item) => (
-                        <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.gray900 }}>
-                              {item.namaDana || item.program}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tarif {item.program === "JKK" ? "0,24%" : "0,20%"}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
-                              {item.noSuratTagihan}
-                            </div>
-                            <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
-                              Tgl Surat: {item.tglSuratTagihan} • {item.matraUtama}
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "right" }}>
-                            <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: monitoringTheme.primary }}>
-                              {fmtB(item.nominalDiterima)}
-                            </div>
-                            <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
-                              {fmtNum(item.peserta)} Personel
-                            </div>
-                          </td>
-                          <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                            <div style={{ display: "flex", justifyContent: "center", gap: 6 }}>
+                      (monitoringProgram === "JKK" ? filteredMonitoringJKK : filteredMonitoringJKM).map((item) => {
+                        const stBadge = getStatusTagihanBadge(item.statusTagihan || item.statusDana);
+                        return (
+                          <tr key={item.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.gray900 }}>
+                                {item.namaDana || item.program}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tarif {item.program === "JKK" ? "0,24%" : "0,20%"}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray900 }}>
+                                {item.noSuratTagihan}
+                              </div>
+                              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>
+                                Tgl Surat: {item.tglSuratTagihan} • {item.matraUtama}
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "right" }}>
+                              <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: 13, color: monitoringTheme.primary }}>
+                                {fmtB(item.nominalDiterima)}
+                              </div>
+                              <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
+                                {fmtNum(item.peserta)} Personel
+                              </div>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 5,
+                                  padding: "3px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  background: stBadge.bg,
+                                  color: stBadge.text,
+                                  border: `1px solid ${stBadge.border}`
+                                }}
+                              >
+                                {renderStatusIcon(stBadge.label)}
+                                {stBadge.label}
+                              </span>
+                            </td>
+                            <td style={{ padding: "12px 14px", textAlign: "center" }}>
                               <Btn
                                 size="xs"
-                                variant="outline"
-                                onClick={() => openSuratTagihanPreview(item)}
+                                variant="primary"
+                                style={{ padding: "5px 12px", fontSize: 11.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}
+                                onClick={() => handleOpenDetailModal(item)}
                               >
-                                <FileText size={12} style={{ marginRight: 3 }} />
-                                Surat Tagihan
+                                <Eye size={12} />
+                                Detail
                               </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                   <tfoot>
@@ -2277,7 +2582,7 @@ export const GeneratorTagihan = () => {
                       <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: monitoringTheme.primary, fontSize: 13 }}>
                         {fmtB((monitoringProgram === "JKK" ? filteredMonitoringJKK : filteredMonitoringJKM).reduce((acc, it) => acc + (it.nominalDiterima || 0), 0))}
                       </td>
-                      <td style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
+                      <td colSpan={2} style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
                         —
                       </td>
                     </tr>
@@ -2362,24 +2667,18 @@ export const GeneratorTagihan = () => {
                   <th style={{ padding: "9px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>No. Surat Resmi</th>
                   <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana / Porsi</th>
                   <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra Peserta</th>
-                  <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan</th>
-                  <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Dokumen</th>
-                  <th style={{ padding: "9px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Aksi</th>
+                  <th style={{ padding: "9px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan</th>
                 </tr>
               </thead>
               <tbody>
                 {displayedTagihan.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
+                    <td colSpan={4} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
                       Belum ada surat tagihan pada filter ini.
                     </td>
                   </tr>
                 ) : (
                   displayedTagihan.map((t) => {
-                    const isSigned = t.status.includes("Sudah Ditandatangani");
-                    const isTNI = t.program.includes("TNI");
-                    const isPolri = t.program.includes("POLRI");
-
                     return (
                       <tr key={t.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
                         <td style={{ padding: "10px 14px" }}>
@@ -2391,6 +2690,9 @@ export const GeneratorTagihan = () => {
                           </div>
                           <div style={{ fontSize: 10.5, color: COLORS.gray600, fontFamily: "monospace", marginTop: 2 }}>
                             📄 {t.dokumen}
+                          </div>
+                          <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 2 }}>
+                            ✍️ {t.namaPejabat || t.namaDirektur || "Helmi I Satriyo"} ({t.jabatan || t.jabatanDirektur || "Direktur Keuangan dan Manajemen Resiko"})
                           </div>
                         </td>
 
@@ -2419,118 +2721,8 @@ export const GeneratorTagihan = () => {
                           <div style={{ fontSize: 11, color: COLORS.gray500 }}>{t.peserta} Jiwa</div>
                         </td>
 
-                        <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
+                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
                           {t.nominal}
-                        </td>
-
-                        <td style={{ padding: "10px 12px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span
-                              style={{
-                                width: 7,
-                                height: 7,
-                                borderRadius: "50%",
-                                background: isSigned ? "#10B981" : "#F59E0B"
-                              }}
-                            />
-                            <span style={{ fontSize: 11.5, fontWeight: 600, color: isSigned ? "#065F46" : "#92400E" }}>
-                              {isSigned ? "Sudah TTD & Dikirim" : "Siap Cetak & TTD"}
-                            </span>
-                          </div>
-                          {t.resiPos && (
-                            <div style={{ fontSize: 10, color: COLORS.gray500, marginTop: 2, fontFamily: "monospace" }}>
-                              Resi: {t.resiPos}
-                            </div>
-                          )}
-                        </td>
-
-                        <td style={{ padding: "10px 14px", textAlign: "right" }}>
-                          <div style={{ display: "flex", justifyContent: "flex-end", gap: 6, flexWrap: "wrap" }}>
-                            <button
-                              onClick={() => {
-                                const isTHT = t.program.includes("THT");
-                                const isPensiun = t.program.includes("Pensiun");
-                                const isPFK = isTHT || isPensiun;
-
-                                if (isPFK) {
-                                  const isPolri = t.program.includes("POLRI");
-                                  setPreview({
-                                    title: `Surat Tagihan Iuran ${t.program} — ${t.noSurat}`,
-                                    subtitle: `Format Resmi Kemenkeu RI (3 Halaman) • Satker (440780)`,
-                                    type: "surat_kemenkeu",
-                                    fileName: `Surat_Tagihan_${t.program.replace(/\s+/g, "_")}_${t.noSurat.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
-                                    content: {
-                                      program: t.program,
-                                      noSurat: t.noSurat,
-                                      tanggalSurat: t.tglSurat || t.tglGenerate || "Oktober 2024",
-                                      tglCutoff: t.tglCutoff || "10 Oktober 2024",
-                                      noKEP: t.noKEP || (t.skpDetails?.noSurat) || "KEP-41/PB/PB.3/2024",
-                                      tglKEP: t.tglKEP || (t.skpDetails?.tglSurat) || "14 Oktober 2024",
-                                      tahunAnggaran: t.tahunAnggaran || "2024",
-                                      nominalNum: t.nominalNum || (isTHT ? 1121913428 : 20805000000),
-                                      nominalStr: t.nominal,
-                                      nominalLalu: t.nominalLalu || (isTHT ? 1059518554039 : 812490210000),
-                                      noBukti: t.noBukti || (isTHT ? (isPolri ? "22/PFK.THT-POLRI/X/2024-Keu" : "21/PFK.THT-AS/X/2024-Keu") : (isPolri ? "23/PFK.PEN-POLRI/X/2024-Keu" : "24/PFK.PEN-TNI/X/2024-Keu")),
-                                      namaRekening: t.namaRekening || (isTHT ? "THT Umum ASABRI" : "Pensiun ASABRI"),
-                                      noRekening: t.noRekening || (isTHT ? "0261-01-000004-30-9" : "0261-01-000005-30-5"),
-                                      namaBank: t.namaBank || "BRI Kantor Cabang Jakarta Krekot",
-                                      namaDirektur: "HELMI I. SATRIYONO",
-                                      jabatanDirektur: "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO",
-                                      namaPPK: "Nazif Azhari",
-                                      isPFKKemenkeu: true,
-                                      satkerList: t.satkerList
-                                    }
-                                  });
-                                } else {
-                                  setPreview({
-                                    title: `Surat Tagihan — ${t.program}`,
-                                    subtitle: `${t.noSurat} • Periode ${t.periode}`,
-                                    type: "surat",
-                                    fileName: `Surat_Tagihan_${t.program.replace(/\s+/g, "_")}_${t.periode.replace(" ", "_")}.pdf`,
-                                    content: {
-                                      noSurat: t.noSurat,
-                                      periode: t.periode,
-                                      program: t.program,
-                                      items: t.items,
-                                      totalNominal: t.nominal,
-                                      satkerList: t.satkerList,
-                                      dasarSKP: t.skpDetails ? { noSurat: t.skpDetails.noSurat, tglSurat: t.skpDetails.tglSurat } : null
-                                    }
-                                  });
-                                }
-                              }}
-                              style={{
-                                padding: "4px 8px",
-                                borderRadius: 4,
-                                border: `1px solid ${COLORS.gray300}`,
-                                background: COLORS.white,
-                                cursor: "pointer",
-                                fontSize: 11,
-                                fontWeight: 600,
-                                color: COLORS.gray700
-                              }}
-                            >
-                              Preview / Cetak
-                            </button>
-
-                            {!isSigned && (
-                              <button
-                                onClick={() => handleMarkAsSigned(t.id)}
-                                style={{
-                                  padding: "4px 8px",
-                                  borderRadius: 4,
-                                  border: "none",
-                                  background: "#10B981",
-                                  cursor: "pointer",
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  color: COLORS.white
-                                }}
-                              >
-                                Tandai TTD
-                              </button>
-                            )}
-                          </div>
                         </td>
                       </tr>
                     );
@@ -3076,6 +3268,624 @@ export const GeneratorTagihan = () => {
                   </Btn>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Monitoring & Input Perubahan Status Tagihan */}
+      {selectedDetailMonitoring && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            zIndex: 1150,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            backdropFilter: "blur(2px)"
+          }}
+          onClick={() => setSelectedDetailMonitoring(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: COLORS.white,
+              borderRadius: 14,
+              width: "100%",
+              maxWidth: 860,
+              maxHeight: "92vh",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
+              overflow: "hidden"
+            }}
+          >
+            {/* Header Modal */}
+            <div
+              style={{
+                padding: "18px 24px",
+                borderBottom: `1px solid ${COLORS.gray200}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "#F8FAFC"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 10,
+                    background: COLORS.blueLight,
+                    color: COLORS.blue,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
+                >
+                  <FileText size={22} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
+                    Detail Tagihan & Monitoring Penerimaan Dana
+                  </div>
+                  <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.gray800 }}>
+                      {selectedDetailMonitoring.noSuratTagihan || selectedDetailMonitoring.noSurat}
+                    </span>
+                    <span>•</span>
+                    <span>{selectedDetailMonitoring.namaDana || selectedDetailMonitoring.program}</span>
+                    <span>•</span>
+                    <span>Periode {selectedDetailMonitoring.tglSuratTagihan}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedDetailMonitoring(null)}
+                style={{
+                  border: "none",
+                  background: "none",
+                  fontSize: 22,
+                  cursor: "pointer",
+                  color: COLORS.gray400,
+                  padding: 4,
+                  lineHeight: 1
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body Modal (Scrollable) */}
+            <div style={{ padding: "20px 24px", overflowY: "auto", flex: 1 }}>
+              {/* Banner Status & Tombol Input Perubahan Status */}
+              <div
+                style={{
+                  background: "#F8FAFC",
+                  border: `1px solid ${COLORS.gray200}`,
+                  borderRadius: 10,
+                  padding: "16px 18px",
+                  marginBottom: 20
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 12
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.gray500, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+                      Status Pemrosesan Tagihan
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      {(() => {
+                        const b = getStatusTagihanBadge(selectedDetailMonitoring.statusTagihan || selectedDetailMonitoring.statusDana);
+                        return (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              padding: "5px 12px",
+                              borderRadius: 6,
+                              fontSize: 12.5,
+                              fontWeight: 700,
+                              background: b.bg,
+                              color: b.text,
+                              border: `1px solid ${b.border}`
+                            }}
+                          >
+                            {renderStatusIcon(b.label)}
+                            {b.label}
+                          </span>
+                        );
+                      })()}
+                      <span style={{ fontSize: 12, color: COLORS.gray600 }}>
+                        SP2D: <code style={{ fontWeight: 700, color: COLORS.gray800 }}>{selectedDetailMonitoring.noSP2D || "-"}</code>
+                      </span>
+                      <span style={{ fontSize: 12, color: COLORS.gray600 }}>
+                        • Terima: <strong style={{ color: COLORS.gray800 }}>{selectedDetailMonitoring.tglTerimaDana || "-"}</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Btn
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openSuratTagihanPreview(selectedDetailMonitoring)}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 700 }}
+                    >
+                      <FileText size={14} />
+                      Preview Dokumen
+                    </Btn>
+                    <Btn
+                      size="sm"
+                      variant={isEditingStatus ? "secondary" : "primary"}
+                      onClick={() => setIsEditingStatus(!isEditingStatus)}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 700 }}
+                    >
+                      <Edit3 size={14} />
+                      {isEditingStatus ? "Batal Update Status" : "Update Status"}
+                    </Btn>
+                  </div>
+                </div>
+
+                {/* Form Perubahan Status Tagihan */}
+                {isEditingStatus && (
+                  <form
+                    onSubmit={handleSaveStatusChange}
+                    style={{
+                      marginTop: 16,
+                      paddingTop: 16,
+                      borderTop: `1px dashed ${COLORS.gray300}`,
+                      background: "#F0F9FF",
+                      padding: 16,
+                      borderRadius: 8,
+                      border: "1px solid #BAE6FD"
+                    }}
+                  >
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#0369A1", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                      <Edit3 size={15} /> Form Update Status Tagihan
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                          Pilih Status Tagihan <span style={{ color: "#DC2626" }}>*</span>
+                        </label>
+                        <select
+                          value={statusEditForm.statusTagihan}
+                          onChange={(e) => setStatusEditForm({ ...statusEditForm, statusTagihan: e.target.value })}
+                          style={{
+                            width: "100%",
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            border: `1px solid ${COLORS.gray300}`,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            outline: "none",
+                            background: COLORS.white,
+                            boxSizing: "border-box"
+                          }}
+                        >
+                          <option value="Dana Belum Diterima">Dana Belum Diterima</option>
+                          <option value="Dana Diterima">Dana Diterima</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                          Nomor SP2D Kemenkeu
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: SP2D-260918-008925"
+                          value={statusEditForm.noSP2D}
+                          onChange={(e) => setStatusEditForm({ ...statusEditForm, noSP2D: e.target.value })}
+                          style={{
+                            width: "100%",
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            border: `1px solid ${COLORS.gray300}`,
+                            fontSize: 12,
+                            outline: "none",
+                            background: COLORS.white,
+                            boxSizing: "border-box"
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                          Tanggal Penerimaan Dana
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: 20 September 2026"
+                          value={statusEditForm.tglTerimaDana}
+                          onChange={(e) => setStatusEditForm({ ...statusEditForm, tglTerimaDana: e.target.value })}
+                          style={{
+                            width: "100%",
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            border: `1px solid ${COLORS.gray300}`,
+                            fontSize: 12,
+                            outline: "none",
+                            background: COLORS.white,
+                            boxSizing: "border-box"
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
+                          Catatan Perubahan / Keterangan
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: Verifikasi SP2D KPPN telah valid dan dana masuk rekening"
+                          value={statusEditForm.catatan}
+                          onChange={(e) => setStatusEditForm({ ...statusEditForm, catatan: e.target.value })}
+                          style={{
+                            width: "100%",
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            border: `1px solid ${COLORS.gray300}`,
+                            fontSize: 12,
+                            outline: "none",
+                            background: COLORS.white,
+                            boxSizing: "border-box"
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                      <Btn
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => setIsEditingStatus(false)}
+                      >
+                        Batal
+                      </Btn>
+                      <Btn
+                        type="submit"
+                        variant="primary"
+                        size="xs"
+                        style={{ fontWeight: 700 }}
+                      >
+                        <Check size={12} style={{ marginRight: 4 }} />
+                        Simpan Perubahan Status
+                      </Btn>
+                    </div>
+                  </form>
+                )}
+              </div>
+
+              {/* 2 Kolom Informasi: Surat & Finansial */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                {/* Kolom 1: Administrasi Surat & Pejabat */}
+                <div
+                  style={{
+                    background: COLORS.white,
+                    border: `1px solid ${COLORS.gray200}`,
+                    borderRadius: 10,
+                    padding: "16px 18px"
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 800, color: COLORS.gray900, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                    <FileText size={15} color={COLORS.blue} />
+                    Informasi Surat Tagihan
+                  </div>
+
+                  <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                    <tbody>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500, width: "38%" }}>Nomor Surat</td>
+                        <td style={{ padding: "7px 0", fontWeight: 700, color: COLORS.gray900, fontFamily: "monospace" }}>
+                          {selectedDetailMonitoring.noSuratTagihan || selectedDetailMonitoring.noSurat}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Tanggal Terbit</td>
+                        <td style={{ padding: "7px 0", fontWeight: 600, color: COLORS.gray800 }}>
+                          {selectedDetailMonitoring.tglSuratTagihan || "-"}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Program / Dana</td>
+                        <td style={{ padding: "7px 0", fontWeight: 700, color: COLORS.blueDark }}>
+                          {selectedDetailMonitoring.namaDana || selectedDetailMonitoring.program} ({selectedDetailMonitoring.tarif || selectedDetailMonitoring.kodeTarif || "-"})
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Matra Peserta</td>
+                        <td style={{ padding: "7px 0", color: COLORS.gray800 }}>
+                          {selectedDetailMonitoring.matraUtama} • <strong>{fmtNum(selectedDetailMonitoring.peserta)}</strong> Jiwa
+                        </td>
+                      </tr>
+                      {selectedDetailMonitoring.noSKP && (
+                        <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                          <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Dasar SKP-PFK</td>
+                          <td style={{ padding: "7px 0", fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
+                            {selectedDetailMonitoring.noSKP} (Tgl: {selectedDetailMonitoring.tglSKP})
+                          </td>
+                        </tr>
+                      )}
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Nama Pejabat</td>
+                        <td style={{ padding: "7px 0", fontWeight: 700, color: COLORS.gray900 }}>
+                          {selectedDetailMonitoring.namaPejabat || namaPejabat || "Helmi I Satriyo"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Jabatan Pejabat</td>
+                        <td style={{ padding: "7px 0", color: COLORS.gray700 }}>
+                          {selectedDetailMonitoring.jabatan || jabatan || "Direktur Keuangan dan Manajemen Resiko"}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Kolom 2: Realisasi Keuangan & Rekening */}
+                <div
+                  style={{
+                    background: COLORS.white,
+                    border: `1px solid ${COLORS.gray200}`,
+                    borderRadius: 10,
+                    padding: "16px 18px"
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 800, color: COLORS.gray900, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                    <ShieldCheck size={15} color="#059669" />
+                    Realisasi Keuangan & Perbankan
+                  </div>
+
+                  <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                    <tbody>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500, width: "38%" }}>Nominal Realisasi</td>
+                        <td style={{ padding: "7px 0", fontWeight: 800, color: "#047857", fontSize: 13, fontFamily: "monospace" }}>
+                          {fmtB(selectedDetailMonitoring.nominalDanaSKP || selectedDetailMonitoring.nominalTagihan || selectedDetailMonitoring.nominalDiterima)}
+                        </td>
+                      </tr>
+                      {selectedDetailMonitoring.danaTHT > 0 && (
+                        <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                          <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Porsi Dana THT</td>
+                          <td style={{ padding: "7px 0", fontWeight: 700, color: "#1D4ED8", fontFamily: "monospace" }}>
+                            {fmtB(selectedDetailMonitoring.danaTHT)}
+                          </td>
+                        </tr>
+                      )}
+                      {selectedDetailMonitoring.danaPensiun > 0 && (
+                        <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                          <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Porsi Dana Pensiun</td>
+                          <td style={{ padding: "7px 0", fontWeight: 700, color: "#047857", fontFamily: "monospace" }}>
+                            {fmtB(selectedDetailMonitoring.danaPensiun)}
+                          </td>
+                        </tr>
+                      )}
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Nomor SP2D</td>
+                        <td style={{ padding: "7px 0", fontWeight: 700, color: COLORS.gray800, fontFamily: "monospace" }}>
+                          {selectedDetailMonitoring.noSP2D || "-"}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Tanggal Penerimaan</td>
+                        <td style={{ padding: "7px 0", color: COLORS.gray800 }}>
+                          {selectedDetailMonitoring.tglTerimaDana || "-"}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Rekening Penampung</td>
+                        <td style={{ padding: "7px 0", color: COLORS.gray800, fontSize: 11.5 }}>
+                          {selectedDetailMonitoring.bankTujuan || "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: "7px 0", color: COLORS.gray500 }}>Status Monitoring</td>
+                        <td style={{ padding: "7px 0", color: COLORS.gray800 }}>
+                          <span style={{ padding: "2px 8px", background: "#F1F5F9", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                            {selectedDetailMonitoring.statusProses || "Dalam Monitoring"}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Satker List Preview (jika ada) */}
+              {selectedDetailMonitoring.satkerList && selectedDetailMonitoring.satkerList.length > 0 && (
+                <div
+                  style={{
+                    background: "#F8FAFC",
+                    border: `1px solid ${COLORS.gray200}`,
+                    borderRadius: 10,
+                    padding: "14px 18px",
+                    marginBottom: 20,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <Building2 size={18} color={COLORS.gray600} />
+                    <div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray800 }}>
+                        Distribusi Satuan Kerja (Satker)
+                      </div>
+                      <div style={{ fontSize: 11.5, color: COLORS.gray500 }}>
+                        Surat tagihan ini mencakup rincian gaji pokok dan potongan {selectedDetailMonitoring.satkerList.length} Satker Kemhan/TNI/Polri.
+                      </div>
+                    </div>
+                  </div>
+                  <Btn
+                    size="xs"
+                    variant="outline"
+                    onClick={() => {
+                      setSatkerModalData({
+                        noSurat: selectedDetailMonitoring.noSuratTagihan || selectedDetailMonitoring.noSurat,
+                        noSKP: selectedDetailMonitoring.noSKP || "S-184/PB.2/2026",
+                        periode: selectedDetailMonitoring.tglSuratTagihan || "September 2026",
+                        program: selectedDetailMonitoring.namaDana || selectedDetailMonitoring.program,
+                        danaType: selectedDetailMonitoring.danaType,
+                        satkerList: selectedDetailMonitoring.satkerList
+                      });
+                    }}
+                    style={{ fontWeight: 600 }}
+                  >
+                    Lihat Rincian Satker
+                  </Btn>
+                </div>
+              )}
+
+              {/* Riwayat Perubahan Status (Audit Trail) */}
+              <div
+                style={{
+                  background: COLORS.white,
+                  border: `1px solid ${COLORS.gray200}`,
+                  borderRadius: 10,
+                  padding: "16px 18px"
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 800, color: COLORS.gray900, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Clock size={15} color={COLORS.gray600} />
+                  Riwayat Perubahan Status (Audit Trail)
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {(selectedDetailMonitoring.riwayatStatus && selectedDetailMonitoring.riwayatStatus.length > 0
+                    ? selectedDetailMonitoring.riwayatStatus
+                    : [
+                        {
+                          tanggal: selectedDetailMonitoring.tglSuratTagihan || "15 September 2026",
+                          status: "Dana Belum Diterima",
+                          catatan: "Surat tagihan resmi diterbitkan oleh sistem",
+                          user: selectedDetailMonitoring.namaPejabat || namaPejabat || "Helmi I Satriyo"
+                        },
+                        {
+                          tanggal: selectedDetailMonitoring.tglTerimaDana || "18 September 2026",
+                          status: selectedDetailMonitoring.statusTagihan || selectedDetailMonitoring.statusDana || "Dana Diterima",
+                          catatan: `SP2D diterbitkan (${selectedDetailMonitoring.noSP2D || "-"}) dan dana telah masuk ke rekening giro`,
+                          user: "KPPN / Helmi I Satriyo"
+                        }
+                      ]
+                  ).map((hist, idx) => {
+                    const hb = getStatusTagihanBadge(hist.status);
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 12,
+                          padding: "8px 12px",
+                          background: "#F8FAFC",
+                          borderRadius: 6,
+                          border: `1px solid ${COLORS.gray100}`
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: "50%",
+                            background: hb.bg,
+                            color: hb.text,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                            marginTop: 2
+                          }}
+                        >
+                          {renderStatusIcon(hist.status)}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: "1px 6px",
+                                borderRadius: 4,
+                                background: hb.bg,
+                                color: hb.text,
+                                border: `1px solid ${hb.border}`
+                              }}
+                            >
+                              {hist.status}
+                            </span>
+                            <span style={{ fontSize: 11, color: COLORS.gray400 }}>
+                              {hist.tanggal} • oleh <strong style={{ color: COLORS.gray600 }}>{hist.user}</strong>
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 11.5, color: COLORS.gray700, marginTop: 4 }}>
+                            {hist.catatan}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Modal */}
+            <div
+              style={{
+                padding: "14px 24px",
+                borderTop: `1px solid ${COLORS.gray200}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "#F8FAFC"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Btn
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openSuratTagihanPreview(selectedDetailMonitoring)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
+                >
+                  <FileText size={14} />
+                  Preview Dokumen
+                </Btn>
+                <Btn
+                  size="sm"
+                  variant={isEditingStatus ? "secondary" : "primary"}
+                  onClick={() => setIsEditingStatus(!isEditingStatus)}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}
+                >
+                  <Edit3 size={14} />
+                  {isEditingStatus ? "Batal Update Status" : "Update Status"}
+                </Btn>
+              </div>
+
+              <Btn
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelectedDetailMonitoring(null)}
+                style={{ fontWeight: 600 }}
+              >
+                Tutup
+              </Btn>
             </div>
           </div>
         </div>
