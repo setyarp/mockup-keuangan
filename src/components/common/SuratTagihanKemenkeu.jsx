@@ -392,7 +392,7 @@ export const SuratTagihanKemenkeu = ({
                       <td style={{ verticalAlign: "top" }}>Hal</td>
                       <td style={{ verticalAlign: "top" }}>:</td>
                       <td style={{ verticalAlign: "top", fontWeight: 700 }}>
-                        Tagihan/Permintaan Pembayaran Dana PFK {tarif} untuk {halProgram} s.d. Tanggal {tglCutoff}
+                        {data.perihal || `Tagihan/Permintaan Pembayaran Dana PFK ${tarif} untuk ${halProgram} s.d. Tanggal ${tglCutoff}`}
                       </td>
                     </tr>
                   </tbody>
@@ -691,7 +691,7 @@ export const SuratTagihanKemenkeu = ({
                 <div>LAMPIRAN</div>
                 <div>SURAT DIREKSI PT ASABRI (PERSERO)</div>
                 <div>NOMOR : {noSurat}</div>
-                <div>HAL : TAGIHAN/PERMINTAAN PEMBAYARAN DANA PFK {tarif} UNTUK {halProgram.toUpperCase()} S.D. TANGGAL {tglCutoff.toUpperCase()}</div>
+                <div>HAL : {(data.perihal || `TAGIHAN/PERMINTAAN PEMBAYARAN DANA PFK ${tarif} UNTUK ${halProgram} S.D. TANGGAL ${tglCutoff}`).toUpperCase()}</div>
               </div>
             </div>
 

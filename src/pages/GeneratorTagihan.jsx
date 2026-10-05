@@ -57,6 +57,9 @@ export const GeneratorTagihan = () => {
   const [namaPejabat, setNamaPejabat] = useState("Helmi I Satriyo");
   const [jabatan, setJabatan] = useState("Direktur Keuangan dan Manajemen Resiko");
 
+  // Field Perihal Surat (freetext). Jika dikosongkan, surat memakai perihal standar sesuai program.
+  const [perihal, setPerihal] = useState("");
+
   // Nomor Urut Berjalan untuk Tagihan Otomatis JKK & JKM (tidak berubah selagi tagihan belum dibuat)
   const [nextNoUrutJKK_JKM, setNextNoUrutJKK_JKM] = useState(1198);
 
@@ -95,6 +98,63 @@ export const GeneratorTagihan = () => {
       return jenisIuranPFK === "JKM_TNI" ? "JKM TNI" : "JKM POLRI";
     }
     return selectedProgram;
+  };
+
+  // Perihal standar surat tagihan (placeholder & fallback jika field Perihal dikosongkan)
+  const getDefaultPerihal = () => {
+    if (selectedProgram === "THT_PENSIUN") {
+      const isTHT = jenisIuranPFK.startsWith("THT");
+      const isPolri = jenisIuranPFK.includes("POLRI");
+      const halProgram = isTHT ? (isPolri ? "THT POLRI" : "THT") : (isPolri ? "Pensiun POLRI" : "Pensiun TNI");
+      return `Tagihan/Permintaan Pembayaran Dana PFK ${isTHT ? "3,25%" : "4,75%"} untuk ${halProgram} s.d. Tanggal 10 Oktober 2024`;
+    }
+    return `Tagihan Iuran ${getProgramDisplayName()} Periode Juli 2026`;
+  };
+
+  // Konversi surat tagihan yang baru diterbitkan menjadi record Monitoring Penerimaan Dana.
+  // Tagihan baru selalu masuk Monitoring dahulu, dan baru tampil di Riwayat setelah ditandai "Selesai".
+  const buildMonitoringRecord = (t, danaType) => {
+    const isPFK = danaType.startsWith("THT") || danaType.startsWith("PENSIUN");
+    const isTHT = danaType.startsWith("THT");
+    const prog = danaType.startsWith("JKK") ? "JKK" : (danaType.startsWith("JKM") ? "JKM" : undefined);
+    const tarif = isPFK ? (isTHT ? "3,25%" : "4,75%") : (prog === "JKK" ? "0,24%" : "0,20%");
+    const user = t.namaPejabat || "Helmi I Satriyo";
+    return {
+      ...t,
+      id: `MON-${t.id}`,
+      program: prog,
+      danaType,
+      namaDana: t.program,
+      jenisIuran: t.danaPorsi,
+      kodeTarif: `${tarif} ${isPFK ? "Gaji Pokok" : "Basis Gaji Pokok"}`,
+      tarif,
+      peserta: Number(String(t.items?.[0]?.peserta || t.peserta || 0).replace(/\./g, "")),
+      matraUtama: t.matra,
+      noSuratTagihan: t.noSurat,
+      tglSuratTagihan: t.tglGenerate,
+      statusSuratTagihan: "Terbit (Tergenerate)",
+      noSKP: isPFK ? t.noKEP : undefined,
+      tglSKP: isPFK ? t.tglKEP : undefined,
+      tglTerimaDana: "",
+      noSP2D: "",
+      bankTujuan: "Bank Mandiri - Rek. Giro Penampungan Iuran Kemenkeu",
+      nominalDanaSKP: isPFK ? t.nominalNum : undefined,
+      danaTHT: isPFK && isTHT ? t.nominalNum : 0,
+      danaPensiun: isPFK && !isTHT ? t.nominalNum : 0,
+      nominalTagihan: isPFK ? undefined : t.nominalNum,
+      nominalDiterima: t.nominalNum,
+      statusDana: "Dana Belum Diterima",
+      statusTagihan: "Dana Belum Diterima",
+      statusProses: "Dalam Monitoring",
+      riwayatStatus: [
+        {
+          tanggal: t.tglGenerate,
+          status: "Dana Belum Diterima",
+          catatan: `Surat tagihan ${t.noSurat} diterbitkan ke Kemenkeu RI`,
+          user
+        }
+      ]
+    };
   };
 
   // Efek sinkronisasi nomor surat, nominal, dan berkas sesuai pilihan Program dan Jenis Iuran
@@ -145,238 +205,6 @@ export const GeneratorTagihan = () => {
     }
   };
 
-  // Daftar Riwayat Tagihan - Terpisah per masing-masing Dana PFK (THT TNI, THT POLRI, Pensiun TNI, Pensiun POLRI)
-  const [tagihanList, setTagihanList] = useState([
-    {
-      id: "TGH-001",
-      noSurat: "S-1190/KU.06.06/KMR.N/X/2024",
-      program: "THT TNI",
-      danaPorsi: "Iuran THT Prajurit TNI & ASN Kemhan (3,25%)",
-      matra: "TNI & Kemhan",
-      periode: "Oktober 2024",
-      tglGenerate: "15 Oktober 2024",
-      tglCutoff: "10 Oktober 2024",
-      noKEP: "KEP-41/PB/PB.3/2024",
-      tglKEP: "14 Oktober 2024",
-      tahunAnggaran: "2024",
-      noBukti: "21/PFK.THT-AS/X/2024-Keu",
-      nominal: "Rp 1.121.913.428",
-      nominalNum: 1121913428,
-      nominalLalu: 1059518554039,
-      namaRekening: "THT Umum ASABRI",
-      noRekening: "0261-01-000004-30-9",
-      namaBank: "BRI Kantor Cabang Jakarta Krekot",
-      acuan: "Keputusan Dirjen Perbendaharaan KEP-41/PB/PB.3/2024",
-      dokumen: "SKP-PFK_Kemenkeu_Okt2024_THT_TNI.pdf",
-      peserta: "266.150",
-      status: "Sudah Ditandatangani Manual & Dikirim",
-      tglTTD: "17 Oktober 2024",
-      resiPos: "POS-JKT-20241017-0941",
-      skpDetails: {
-        noSurat: "KEP-41/PB/PB.3/2024",
-        tglSurat: "14 Oktober 2024",
-        fileName: "SKP-PFK_Kemenkeu_Okt2024_THT_TNI.pdf",
-        nominal: "Rp 1.121.913.428"
-      },
-      items: [
-        { jenis: "Iuran THT (3,25% Gaji Pokok Prajurit TNI & ASN Kemhan)", peserta: "266.150", nominal: "Rp 1.121.913.428" }
-      ],
-      satkerList: SATKER_THT_TNI
-    },
-    {
-      id: "TGH-002",
-      noSurat: "S-1191/KU.06.06/KMR.N/X/2024",
-      program: "THT POLRI",
-      danaPorsi: "Iuran THT Anggota POLRI & PNS Polri (3,25%)",
-      matra: "POLRI",
-      periode: "Oktober 2024",
-      tglGenerate: "15 Oktober 2024",
-      tglCutoff: "10 Oktober 2024",
-      noKEP: "KEP-41/PB/PB.3/2024",
-      tglKEP: "14 Oktober 2024",
-      tahunAnggaran: "2024",
-      noBukti: "22/PFK.THT-POLRI/X/2024-Keu",
-      nominal: "Rp 14.225.000.000",
-      nominalNum: 14225000000,
-      nominalLalu: 542180412000,
-      namaRekening: "THT Umum ASABRI",
-      noRekening: "0261-01-000004-30-9",
-      namaBank: "BRI Kantor Cabang Jakarta Krekot",
-      acuan: "Keputusan Dirjen Perbendaharaan KEP-41/PB/PB.3/2024",
-      dokumen: "SKP-PFK_Kemenkeu_Okt2024_THT_POLRI.pdf",
-      peserta: "142.200",
-      status: "Sudah Ditandatangani Manual & Dikirim",
-      tglTTD: "17 Oktober 2024",
-      resiPos: "POS-JKT-20241017-0942",
-      skpDetails: {
-        noSurat: "KEP-41/PB/PB.3/2024",
-        tglSurat: "14 Oktober 2024",
-        fileName: "SKP-PFK_Kemenkeu_Okt2024_THT_POLRI.pdf",
-        nominal: "Rp 14.225.000.000"
-      },
-      items: [
-        { jenis: "Iuran THT (3,25% Gaji Pokok Anggota POLRI & PNS Polri)", peserta: "142.200", nominal: "Rp 14.225.000.000" }
-      ],
-      satkerList: SATKER_THT_POLRI
-    },
-    {
-      id: "TGH-003",
-      noSurat: "S-1192/KU.06.06/KMR.N/X/2024",
-      program: "Pensiun TNI",
-      danaPorsi: "Iuran Pensiun Prajurit TNI & ASN Kemhan (4,75%)",
-      matra: "TNI & Kemhan",
-      periode: "Oktober 2024",
-      tglGenerate: "15 Oktober 2024",
-      tglCutoff: "10 Oktober 2024",
-      noKEP: "KEP-41/PB/PB.3/2024",
-      tglKEP: "14 Oktober 2024",
-      tahunAnggaran: "2024",
-      noBukti: "24/PFK.PEN-TNI/X/2024-Keu",
-      nominal: "Rp 41.710.000.000",
-      nominalNum: 41710000000,
-      nominalLalu: 1628410500000,
-      namaRekening: "Pensiun ASABRI",
-      noRekening: "0261-01-000005-30-5",
-      namaBank: "BRI Kantor Cabang Jakarta Krekot",
-      acuan: "Keputusan Dirjen Perbendaharaan KEP-41/PB/PB.3/2024",
-      dokumen: "SKP-PFK_Kemenkeu_Okt2024_Pensiun_TNI.pdf",
-      peserta: "266.150",
-      status: "Sudah Ditandatangani Manual & Dikirim",
-      tglTTD: "17 Oktober 2024",
-      resiPos: "POS-JKT-20241017-0943",
-      skpDetails: {
-        noSurat: "KEP-41/PB/PB.3/2024",
-        tglSurat: "14 Oktober 2024",
-        fileName: "SKP-PFK_Kemenkeu_Okt2024_Pensiun_TNI.pdf",
-        nominal: "Rp 41.710.000.000"
-      },
-      items: [
-        { jenis: "Iuran Pensiun (4,75% Gaji Pokok Prajurit TNI & ASN Kemhan)", peserta: "266.150", nominal: "Rp 41.710.000.000" }
-      ],
-      satkerList: SATKER_PENSIUN_TNI
-    },
-    {
-      id: "TGH-004",
-      noSurat: "S-1193/KU.06.06/KMR.N/X/2024",
-      program: "Pensiun POLRI",
-      danaPorsi: "Iuran Pensiun Anggota POLRI & PNS Polri (4,75%)",
-      matra: "POLRI",
-      periode: "Oktober 2024",
-      tglGenerate: "15 Oktober 2024",
-      tglCutoff: "10 Oktober 2024",
-      noKEP: "KEP-41/PB/PB.3/2024",
-      tglKEP: "14 Oktober 2024",
-      tahunAnggaran: "2024",
-      noBukti: "23/PFK.PEN-POLRI/X/2024-Keu",
-      nominal: "Rp 20.805.000.000",
-      nominalNum: 20805000000,
-      nominalLalu: 812490210000,
-      namaRekening: "Pensiun ASABRI",
-      noRekening: "0261-01-000005-30-5",
-      namaBank: "BRI Kantor Cabang Jakarta Krekot",
-      acuan: "Keputusan Dirjen Perbendaharaan KEP-41/PB/PB.3/2024",
-      dokumen: "SKP-PFK_Kemenkeu_Okt2024_Pensiun_POLRI.pdf",
-      peserta: "142.200",
-      status: "Sudah Ditandatangani Manual & Dikirim",
-      tglTTD: "17 Oktober 2024",
-      resiPos: "POS-JKT-20241017-0944",
-      skpDetails: {
-        noSurat: "KEP-41/PB/PB.3/2024",
-        tglSurat: "14 Oktober 2024",
-        fileName: "SKP-PFK_Kemenkeu_Okt2024_Pensiun_POLRI.pdf",
-        nominal: "Rp 20.805.000.000"
-      },
-      items: [
-        { jenis: "Iuran Pensiun (4,75% Gaji Pokok Anggota POLRI & PNS Polri)", peserta: "142.200", nominal: "Rp 20.805.000.000" }
-      ],
-      satkerList: SATKER_PENSIUN_POLRI
-    },
-    {
-      id: "TGH-005",
-      noSurat: "1194/KU.06.06/KMR.N/IX/2026",
-      program: "JKK TNI",
-      danaPorsi: "Iuran Jaminan Kecelakaan Kerja TNI (0,24%)",
-      matra: "TNI & Kemhan",
-      periode: "Juli 2026",
-      tglGenerate: "25 Juli 2026",
-      acuan: "Data Kepesertaan TNI & Kemhan (0,24%)",
-      nominal: "Rp 1.510.000.000",
-      nominalNum: 1510000000,
-      dokumen: "Rekap_Iuran_JKK_TNI_Juli2026.pdf",
-      peserta: "8.208",
-      status: "Siap Cetak & TTD Manual",
-      tglTTD: null,
-      resiPos: null,
-      skpDetails: null,
-      items: [
-        { jenis: "Iuran JKK (0,24% Basis GP Prajurit TNI & Kemhan)", peserta: "8.208", nominal: "Rp 1.510.000.000" }
-      ]
-    },
-    {
-      id: "TGH-006",
-      noSurat: "1195/KU.06.06/KMR.N/IX/2026",
-      program: "JKK POLRI",
-      danaPorsi: "Iuran Jaminan Kecelakaan Kerja POLRI (0,24%)",
-      matra: "POLRI",
-      periode: "Juli 2026",
-      tglGenerate: "25 Juli 2026",
-      acuan: "Data Kepesertaan POLRI (0,24%)",
-      nominal: "Rp 1.120.000.000",
-      nominalNum: 1120000000,
-      dokumen: "Rekap_Iuran_JKK_POLRI_Juli2026.pdf",
-      peserta: "6.120",
-      status: "Siap Cetak & TTD Manual",
-      tglTTD: null,
-      resiPos: null,
-      skpDetails: null,
-      items: [
-        { jenis: "Iuran JKK (0,24% Basis GP Anggota POLRI & PNS Polri)", peserta: "6.120", nominal: "Rp 1.120.000.000" }
-      ]
-    },
-    {
-      id: "TGH-007",
-      noSurat: "1196/KU.06.06/KMR.N/IX/2026",
-      program: "JKM TNI",
-      danaPorsi: "Iuran Jaminan Kematian TNI (0,20%)",
-      matra: "TNI & Kemhan",
-      periode: "Juli 2026",
-      tglGenerate: "25 Juli 2026",
-      acuan: "Data Kepesertaan TNI & Kemhan (0,20%)",
-      nominal: "Rp 1.270.000.000",
-      nominalNum: 1270000000,
-      dokumen: "Rekap_Iuran_JKM_TNI_Juli2026.pdf",
-      peserta: "8.208",
-      status: "Siap Cetak & TTD Manual",
-      tglTTD: null,
-      resiPos: null,
-      skpDetails: null,
-      items: [
-        { jenis: "Iuran JKM (0,20% Basis GP Prajurit TNI & Kemhan)", peserta: "8.208", nominal: "Rp 1.270.000.000" }
-      ]
-    },
-    {
-      id: "TGH-008",
-      noSurat: "1197/KU.06.06/KMR.N/IX/2026",
-      program: "JKM POLRI",
-      danaPorsi: "Iuran Jaminan Kematian POLRI (0,20%)",
-      matra: "POLRI",
-      periode: "Juli 2026",
-      tglGenerate: "25 Juli 2026",
-      acuan: "Data Kepesertaan POLRI (0,20%)",
-      nominal: "Rp 940.000.000",
-      nominalNum: 940000000,
-      dokumen: "Rekap_Iuran_JKM_POLRI_Juli2026.pdf",
-      peserta: "6.120",
-      status: "Siap Cetak & TTD Manual",
-      tglTTD: null,
-      resiPos: null,
-      skpDetails: null,
-      items: [
-        { jenis: "Iuran JKM (0,20% Basis GP Anggota POLRI & PNS Polri)", peserta: "6.120", nominal: "Rp 940.000.000" }
-      ]
-    }
-  ]);
-
   // Handler Generate Single Surat (Membuka Preview Modal terlebih dahulu sebelum diterbitkan)
   const handleGenerate = (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -384,6 +212,7 @@ export const GeneratorTagihan = () => {
     let curNoSurat = noSurat ? noSurat.trim() : "";
     let curNominal = nominal;
     let curDok = dokumenName ? dokumenName.trim() : "";
+    const curPerihal = perihal.trim() || getDefaultPerihal();
 
     if (selectedProgram === "THT_PENSIUN") {
       if (!curNoSurat) {
@@ -496,6 +325,7 @@ export const GeneratorTagihan = () => {
     const newItem = {
       id: `TGH-${Date.now().toString().slice(-4)}`,
       noSurat: curNoSurat,
+      perihal: curPerihal,
       program: programName,
       danaPorsi: porsiKet,
       matra: matraName,
@@ -534,21 +364,26 @@ export const GeneratorTagihan = () => {
         subtitle: `Format Resmi Kemenkeu RI (3 Halaman) • Satker (440780)`,
         type: "surat_kemenkeu",
         fileName: `Surat_Tagihan_${programName.replace(/\s+/g, "_")}_${curNoSurat.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
-        bannerNotice: `🔍 Pratinjau Dokumen Sebelum Diterbitkan: Silakan periksa kelengkapan nomor surat dan rincian nominal di bawah ini. Klik "Konfirmasi & Terbitkan Tagihan" untuk menyimpan resmi ke Riwayat Penagihan.`,
+        bannerNotice: `🔍 Pratinjau Dokumen Sebelum Diterbitkan: Silakan periksa kelengkapan nomor surat, perihal, dan rincian nominal di bawah ini. Klik "Konfirmasi & Terbitkan Tagihan" untuk menerbitkan dan memasukkannya ke Monitoring Penerimaan Dana.`,
         confirmAction: {
           label: `Konfirmasi & Terbitkan Tagihan ${programName}`,
           icon: <CheckCircle2 size={15} />,
           variant: "success",
           onClick: () => {
-            setTagihanList((prev) => [newItem, ...prev]);
-            setSuccessNotice(`Surat Tagihan ${programName} (${curNoSurat}) berhasil diterbitkan dan disimpan ke Riwayat Penagihan!`);
-            setActiveTab("history");
+            setMonitoringSKPList((prev) => [buildMonitoringRecord(newItem, jenisIuranPFK), ...prev]);
+            setMonitoringProgram("THT_PENSIUN");
+            setMonFilterDanaPFK("Semua");
+            setMonSearchTerm("");
+            setPerihal("");
+            setSuccessNotice(`Surat Tagihan ${programName} (${curNoSurat}) berhasil diterbitkan dan masuk ke Monitoring Penerimaan Dana.`);
+            setActiveTab("monitoring");
             setTimeout(() => setSuccessNotice(null), 6000);
           }
         },
         content: {
           program: programName,
           noSurat: curNoSurat,
+          perihal: curPerihal,
           tanggalSurat: todayStr,
           tglCutoff: "10 Oktober 2024",
           noKEP: "KEP-41/PB/PB.3/2024",
@@ -576,21 +411,32 @@ export const GeneratorTagihan = () => {
         subtitle: `${curNoSurat} • Periode Juli 2026`,
         type: "surat",
         fileName: `Surat_Tagihan_${programName.replace(/\s+/g, "_")}_Juli_2026.pdf`,
-        bannerNotice: `🔍 Pratinjau Dokumen Sebelum Diterbitkan: Silakan periksa rincian kepesertaan & nominal tagihan ${programName}. Klik "Konfirmasi & Terbitkan Tagihan" untuk menyimpan resmi ke Riwayat Penagihan.`,
+        bannerNotice: `🔍 Pratinjau Dokumen Sebelum Diterbitkan: Silakan periksa perihal, rincian kepesertaan & nominal tagihan ${programName}. Klik "Konfirmasi & Terbitkan Tagihan" untuk menerbitkan dan memasukkannya ke Monitoring Penerimaan Dana.`,
         confirmAction: {
           label: `Konfirmasi & Terbitkan Tagihan ${programName}`,
           icon: <CheckCircle2 size={15} />,
           variant: "success",
           onClick: () => {
-            setTagihanList((prev) => [newItem, ...prev]);
+            const monRecord = buildMonitoringRecord(newItem, jenisIuranPFK);
+            if (selectedProgram === "JKK") {
+              setMonitoringJKKList((prev) => [monRecord, ...prev]);
+              setMonFilterDanaJKK("Semua");
+            } else {
+              setMonitoringJKMList((prev) => [monRecord, ...prev]);
+              setMonFilterDanaJKM("Semua");
+            }
+            setMonitoringProgram(selectedProgram);
+            setMonSearchTerm("");
             setNextNoUrutJKK_JKM((prev) => prev + 1);
-            setSuccessNotice(`Surat Tagihan ${programName} (${curNoSurat}) berhasil diterbitkan dan disimpan ke Riwayat Penagihan!`);
-            setActiveTab("history");
+            setPerihal("");
+            setSuccessNotice(`Surat Tagihan ${programName} (${curNoSurat}) berhasil diterbitkan dan masuk ke Monitoring Penerimaan Dana.`);
+            setActiveTab("monitoring");
             setTimeout(() => setSuccessNotice(null), 6000);
           }
         },
         content: {
           noSurat: curNoSurat,
+          perihal: curPerihal,
           periode: "Juli 2026",
           program: programName,
           items: items,
@@ -757,9 +603,12 @@ export const GeneratorTagihan = () => {
         icon: <Sparkles size={15} />,
         variant: "success",
         onClick: () => {
-          setTagihanList((prev) => [...batchLetters, ...prev]);
-          setSuccessNotice(`Sukses! 4 Surat Tagihan Per-Dana PFK (No. S-${start} s.d. S-${start + 3}) berhasil digenerate sekaligus sesuai format resmi Kemenkeu!`);
-          setActiveTab("history");
+          const batchDanaTypes = ["THT_TNI", "THT_POLRI", "PENSIUN_TNI", "PENSIUN_POLRI"];
+          setMonitoringSKPList((prev) => [...batchLetters.map((l, i) => buildMonitoringRecord(l, batchDanaTypes[i])), ...prev]);
+          setMonitoringProgram("THT_PENSIUN");
+          setMonFilterDanaPFK("Semua");
+          setSuccessNotice(`Sukses! 4 Surat Tagihan Per-Dana PFK (No. S-${start} s.d. S-${start + 3}) berhasil digenerate sekaligus dan masuk ke Monitoring Penerimaan Dana.`);
+          setActiveTab("monitoring");
           setTimeout(() => setSuccessNotice(null), 6000);
         }
       },
@@ -789,35 +638,8 @@ export const GeneratorTagihan = () => {
     });
   };
 
-  // Tandai sudah ditandatangani manual & dikirim
-  const handleMarkAsSigned = (id) => {
-    const today = new Date();
-    const tglStr = today.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-    const resi = `POS-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, "0")}${today.getDate().toString().padStart(2, "0")}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    setTagihanList((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? {
-              ...t,
-              status: "Sudah Ditandatangani Manual & Dikirim",
-              tglTTD: tglStr,
-              resiPos: resi
-            }
-          : t
-      )
-    );
-    setSuccessNotice(`Surat tagihan ${id} telah ditandai selesai ditandatangani basah dan dikirim ke Kemenkeu.`);
-    setTimeout(() => setSuccessNotice(null), 5000);
-  };
-
-  // Filter Tabel Tagihan
+  // Filter Tabel Riwayat Penagihan (data riwayat diturunkan dari monitoring berstatus "Selesai", lihat riwayatList)
   const [filterTable, setFilterTable] = useState("Semua");
-  const displayedTagihan = tagihanList.filter((t) => {
-    if (filterTable === "Semua") return true;
-    if (filterTable === "DANA_PFK") return ["THT TNI", "THT POLRI", "Pensiun TNI", "Pensiun POLRI"].includes(t.program);
-    return t.program === filterTable;
-  });
 
   // =========================================================================
   // STATE & DATASET TAB 2: MONITORING PENERIMAAN DANA
@@ -1142,6 +964,48 @@ export const GeneratorTagihan = () => {
     }
   ]);
 
+  // Data Riwayat Penagihan: diturunkan dari seluruh item monitoring yang telah dinyatakan "Selesai"
+  const allCompletedTagihan = [
+    ...monitoringSKPList.filter((x) => x.statusProses === "Selesai"),
+    ...monitoringJKKList.filter((x) => x.statusProses === "Selesai"),
+    ...monitoringJKMList.filter((x) => x.statusProses === "Selesai")
+  ].map((item) => {
+    const isTHT = (item.danaType || item.program || "").startsWith("THT");
+    const isPolri = (item.danaType || item.program || "").includes("POLRI");
+    const nom = Number(item.nominalDanaSKP || item.nominalTagihan || item.nominalDiterima || item.nominalNum || 0);
+    const progName = item.program || item.namaDana || (isTHT ? (isPolri ? "THT POLRI" : "THT TNI") : (isPolri ? "Pensiun POLRI" : "Pensiun TNI"));
+    return {
+      ...item,
+      id: item.id,
+      noSurat: item.noSuratTagihan || item.noSurat || "-",
+      perihal: item.perihal || `Tagihan Iuran ${progName}`,
+      program: progName,
+      danaPorsi: item.jenisIuran || item.danaPorsi || item.kodeTarif || "-",
+      matra: item.matraUtama || item.matra || (isPolri ? "POLRI" : "TNI & Kemhan"),
+      periode: item.periode || "Oktober 2024",
+      tglGenerate: item.tglSuratTagihan || item.tglGenerate || "-",
+      tglSelesai: item.tglSelesai || "-",
+      dokumen: item.dokumen || item.noSKP || `SKP-PFK_${progName.replace(/\s+/g, "_")}.pdf`,
+      peserta: typeof item.peserta === "number" ? fmtNum(item.peserta) : (item.peserta || "-"),
+      nominal: typeof item.nominal === "string" && item.nominal.startsWith("Rp") ? item.nominal : fmtB(nom),
+      nominalNum: nom,
+      namaPejabat: item.namaPejabat || item.namaDirektur || "Helmi I Satriyo",
+      jabatan: item.jabatan || item.jabatanDirektur || "Direktur Keuangan dan Manajemen Resiko",
+      statusProses: "Selesai"
+    };
+  });
+
+  const displayedTagihan = allCompletedTagihan.filter((t) => {
+    if (filterTable === "Semua") return true;
+    if (filterTable === "DANA_PFK") return ["THT TNI", "THT POLRI", "Pensiun TNI", "Pensiun POLRI"].includes(t.program);
+    return t.program === filterTable;
+  });
+
+  const activeMonitoringCount =
+    monitoringSKPList.filter((x) => x.statusProses !== "Selesai").length +
+    monitoringJKKList.filter((x) => x.statusProses !== "Selesai").length +
+    monitoringJKMList.filter((x) => x.statusProses !== "Selesai").length;
+
   // Modal Detail Monitoring & Input Perubahan Status Tagihan
   const [selectedDetailMonitoring, setSelectedDetailMonitoring] = useState(null);
   const [isEditingStatus, setIsEditingStatus] = useState(false);
@@ -1154,6 +1018,14 @@ export const GeneratorTagihan = () => {
 
   const getStatusTagihanBadge = (status) => {
     const s = status || "Dana Belum Diterima";
+    if (s.includes("Selesai")) {
+      return {
+        bg: "#EEF2FF",
+        text: "#4338CA",
+        border: "#C7D2FE",
+        label: "Monitoring Selesai"
+      };
+    }
     if (s === "Dana Diterima" || (s.includes("Diterima") && !s.includes("Belum")) || s.includes("Lunas") || s.includes("Masuk")) {
       return {
         bg: "#ECFDF5",
@@ -1172,6 +1044,7 @@ export const GeneratorTagihan = () => {
 
   const renderStatusIcon = (status) => {
     const s = status || "";
+    if (s.includes("Selesai")) return <CheckCircle2 size={12} />;
     if (s === "Dana Diterima" || (s.includes("Diterima") && !s.includes("Belum")) || s.includes("Lunas") || s.includes("Masuk")) {
       return <CheckCircle2 size={12} />;
     }
@@ -1237,6 +1110,39 @@ export const GeneratorTagihan = () => {
     setSelectedDetailMonitoring(updatedItem);
     setIsEditingStatus(false);
     setSuccessNotice(`Status tagihan nomor ${updatedItem.noSuratTagihan || updatedItem.id} berhasil diubah menjadi "${newStatus}"!`);
+    setTimeout(() => setSuccessNotice(null), 5000);
+  };
+
+  // Tandai proses monitoring selesai: tagihan keluar dari daftar Monitoring aktif dan masuk ke tab Riwayat Penagihan
+  const handleMarkMonitoringSelesai = () => {
+    if (!selectedDetailMonitoring) return;
+    const noSuratLabel = selectedDetailMonitoring.noSuratTagihan || selectedDetailMonitoring.id;
+    if (!window.confirm(`Nyatakan monitoring tagihan ${noSuratLabel} selesai?\nTagihan akan dipindahkan dari Monitoring ke Riwayat Penagihan.`)) return;
+
+    const todayStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    const updatedItem = {
+      ...selectedDetailMonitoring,
+      statusProses: "Selesai",
+      tglSelesai: todayStr,
+      selesaiAt: Date.now(),
+      riwayatStatus: [
+        ...(selectedDetailMonitoring.riwayatStatus || []),
+        {
+          tanggal: todayStr,
+          status: "Monitoring Selesai",
+          catatan: `Proses monitoring dinyatakan selesai (status dana terakhir: ${selectedDetailMonitoring.statusTagihan || selectedDetailMonitoring.statusDana || "Dana Belum Diterima"})`,
+          user: selectedDetailMonitoring.namaPejabat || namaPejabat || "Helmi I Satriyo"
+        }
+      ]
+    };
+
+    setMonitoringSKPList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+    setMonitoringJKKList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+    setMonitoringJKMList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+
+    setSelectedDetailMonitoring(null);
+    setIsEditingStatus(false);
+    setSuccessNotice(`Monitoring tagihan ${noSuratLabel} dinyatakan selesai dan telah dipindahkan ke Riwayat Penagihan.`);
     setTimeout(() => setSuccessNotice(null), 5000);
   };
 
@@ -1447,6 +1353,7 @@ export const GeneratorTagihan = () => {
   };
 
   const filteredMonitoringSKP = monitoringSKPList.filter((item) => {
+    if (item.statusProses === "Selesai") return false;
     if (monFilterDanaPFK !== "Semua" && item.danaType !== monFilterDanaPFK) return false;
     if (monSearchTerm.trim()) {
       const q = monSearchTerm.toLowerCase();
@@ -1460,6 +1367,7 @@ export const GeneratorTagihan = () => {
   });
 
   const filteredMonitoringJKK = monitoringJKKList.filter((item) => {
+    if (item.statusProses === "Selesai") return false;
     if (monFilterDanaJKK !== "Semua" && item.danaType !== monFilterDanaJKK) return false;
     if (monSearchTerm.trim()) {
       const q = monSearchTerm.toLowerCase();
@@ -1472,6 +1380,7 @@ export const GeneratorTagihan = () => {
   });
 
   const filteredMonitoringJKM = monitoringJKMList.filter((item) => {
+    if (item.statusProses === "Selesai") return false;
     if (monFilterDanaJKM !== "Semua" && item.danaType !== monFilterDanaJKM) return false;
     if (monSearchTerm.trim()) {
       const q = monSearchTerm.toLowerCase();
@@ -1645,7 +1554,7 @@ export const GeneratorTagihan = () => {
               fontWeight: 700
             }}
           >
-            {monitoringSKPList.length + monitoringJKKList.length + monitoringJKMList.length}
+            {activeMonitoringCount}
           </span>
         </button>
 
@@ -1679,7 +1588,7 @@ export const GeneratorTagihan = () => {
               fontWeight: 700
             }}
           >
-            {tagihanList.length}
+            {allCompletedTagihan.length}
           </span>
         </button>
       </div>
@@ -1875,6 +1784,34 @@ export const GeneratorTagihan = () => {
                         </div>
                       </>
                     )}
+                  </div>
+
+                  {/* FIELD: PERIHAL SURAT (FREETEXT) */}
+                  <div style={{ gridColumn: "1 / -1", minWidth: 0, boxSizing: "border-box" }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: COLORS.gray800, marginBottom: 6 }}>
+                      Perihal Surat <span style={{ color: COLORS.gray400, fontWeight: 400 }}>(Freetext)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={perihal}
+                      onChange={(e) => setPerihal(e.target.value)}
+                      placeholder={getDefaultPerihal()}
+                      style={{
+                        width: "100%",
+                        padding: "9px 12px",
+                        borderRadius: 6,
+                        border: `1px solid ${COLORS.gray300}`,
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: COLORS.gray900,
+                        background: COLORS.white,
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>
+                      Ketik perihal surat secara bebas. Jika dikosongkan, surat otomatis menggunakan: <em>"{getDefaultPerihal()}"</em>
+                    </div>
                   </div>
 
                   {/* FIELD 3 & 4: HANYA DITAMPILKAN UNTUK THT / PENSIUN */}
@@ -2458,15 +2395,62 @@ export const GeneratorTagihan = () => {
                               </span>
                             </td>
                             <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                              <Btn
-                                size="xs"
-                                variant="primary"
-                                style={{ padding: "5px 12px", fontSize: 11.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}
-                                onClick={() => handleOpenDetailModal(item)}
-                              >
-                                <Eye size={12} />
-                                Detail
-                              </Btn>
+                              <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                <Btn
+                                  size="xs"
+                                  variant="primary"
+                                  style={{ padding: "5px 12px", fontSize: 11.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}
+                                  onClick={() => handleOpenDetailModal(item)}
+                                >
+                                  <Eye size={12} />
+                                  Detail
+                                </Btn>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const noSuratLabel = item.noSuratTagihan || item.noSurat || item.id;
+                                    if (!window.confirm(`Nyatakan monitoring tagihan ${noSuratLabel} selesai?\nTagihan akan dipindahkan dari Monitoring ke Riwayat Penagihan.`)) return;
+                                    const todayStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+                                    const updatedItem = {
+                                      ...item,
+                                      statusProses: "Selesai",
+                                      tglSelesai: todayStr,
+                                      selesaiAt: Date.now(),
+                                      riwayatStatus: [
+                                        ...(item.riwayatStatus || []),
+                                        {
+                                          tanggal: todayStr,
+                                          status: "Monitoring Selesai",
+                                          catatan: `Proses monitoring dinyatakan selesai (status dana terakhir: ${item.statusTagihan || item.statusDana || "Dana Belum Diterima"})`,
+                                          user: item.namaPejabat || namaPejabat || "Helmi I Satriyo"
+                                        }
+                                      ]
+                                    };
+                                    setMonitoringSKPList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+                                    setMonitoringJKKList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+                                    setMonitoringJKMList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+                                    setSuccessNotice(`Monitoring tagihan ${noSuratLabel} dinyatakan selesai dan telah dipindahkan ke Riwayat Penagihan.`);
+                                    setTimeout(() => setSuccessNotice(null), 5000);
+                                  }}
+                                  title="Nyatakan Monitoring Selesai (Pindah ke Riwayat)"
+                                  style={{
+                                    padding: "5px 10px",
+                                    fontSize: 11.5,
+                                    fontWeight: 600,
+                                    borderRadius: 5,
+                                    border: "1px solid #A7F3D0",
+                                    background: "#ECFDF5",
+                                    color: "#047857",
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4
+                                  }}
+                                >
+                                  <CheckCircle2 size={12} />
+                                  Selesai
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -2559,15 +2543,62 @@ export const GeneratorTagihan = () => {
                               </span>
                             </td>
                             <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                              <Btn
-                                size="xs"
-                                variant="primary"
-                                style={{ padding: "5px 12px", fontSize: 11.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}
-                                onClick={() => handleOpenDetailModal(item)}
-                              >
-                                <Eye size={12} />
-                                Detail
-                              </Btn>
+                              <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                <Btn
+                                  size="xs"
+                                  variant="primary"
+                                  style={{ padding: "5px 12px", fontSize: 11.5, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 5 }}
+                                  onClick={() => handleOpenDetailModal(item)}
+                                >
+                                  <Eye size={12} />
+                                  Detail
+                                </Btn>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const noSuratLabel = item.noSuratTagihan || item.noSurat || item.id;
+                                    if (!window.confirm(`Nyatakan monitoring tagihan ${noSuratLabel} selesai?\nTagihan akan dipindahkan dari Monitoring ke Riwayat Penagihan.`)) return;
+                                    const todayStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+                                    const updatedItem = {
+                                      ...item,
+                                      statusProses: "Selesai",
+                                      tglSelesai: todayStr,
+                                      selesaiAt: Date.now(),
+                                      riwayatStatus: [
+                                        ...(item.riwayatStatus || []),
+                                        {
+                                          tanggal: todayStr,
+                                          status: "Monitoring Selesai",
+                                          catatan: `Proses monitoring dinyatakan selesai (status dana terakhir: ${item.statusTagihan || item.statusDana || "Dana Belum Diterima"})`,
+                                          user: item.namaPejabat || namaPejabat || "Helmi I Satriyo"
+                                        }
+                                      ]
+                                    };
+                                    setMonitoringSKPList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+                                    setMonitoringJKKList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+                                    setMonitoringJKMList((prev) => prev.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+                                    setSuccessNotice(`Monitoring tagihan ${noSuratLabel} dinyatakan selesai dan telah dipindahkan ke Riwayat Penagihan.`);
+                                    setTimeout(() => setSuccessNotice(null), 5000);
+                                  }}
+                                  title="Nyatakan Monitoring Selesai (Pindah ke Riwayat)"
+                                  style={{
+                                    padding: "5px 10px",
+                                    fontSize: 11.5,
+                                    fontWeight: 600,
+                                    borderRadius: 5,
+                                    border: "1px solid #A7F3D0",
+                                    background: "#ECFDF5",
+                                    color: "#047857",
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4
+                                  }}
+                                >
+                                  <CheckCircle2 size={12} />
+                                  Selesai
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -2659,29 +2690,39 @@ export const GeneratorTagihan = () => {
             </div>
           </div>
 
-          {/* Tabel Riwayat Data */}
+          {/* Tabel Riwayat Data (Hanya menampilkan data setelah proses monitoring selesai) */}
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
                 <tr style={{ background: "#F8FAFC", color: COLORS.gray600, textAlign: "left" }}>
-                  <th style={{ padding: "9px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>No. Surat Resmi</th>
-                  <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana / Porsi</th>
-                  <th style={{ padding: "9px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra Peserta</th>
-                  <th style={{ padding: "9px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan</th>
+                  <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>No. Surat Resmi</th>
+                  <th style={{ padding: "10px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Perihal Surat</th>
+                  <th style={{ padding: "10px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jenis Dana / Porsi</th>
+                  <th style={{ padding: "10px 12px", borderBottom: `1px solid ${COLORS.gray200}` }}>Matra Peserta</th>
+                  <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Nominal Tagihan</th>
+                  <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Status Monitoring</th>
                 </tr>
               </thead>
               <tbody>
                 {displayedTagihan.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ padding: 24, textAlign: "center", color: COLORS.gray500 }}>
-                      Belum ada surat tagihan pada filter ini.
+                    <td colSpan={6} style={{ padding: "40px 20px", textAlign: "center" }}>
+                      <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#F1F5F9", display: "inline-flex", alignItems: "center", justifyContent: "center", color: COLORS.gray400, marginBottom: 10 }}>
+                        <Clock size={22} />
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray800 }}>
+                        Belum Ada Data di Riwayat Penagihan
+                      </div>
+                      <div style={{ fontSize: 12, color: COLORS.gray500, maxWidth: 520, margin: "6px auto 0", lineHeight: 1.5 }}>
+                        Data surat tagihan akan otomatis muncul di Riwayat setelah proses monitoring penerimaan dana dinyatakan <strong>Selesai</strong> pada tab <em>Monitoring Penerimaan Dana</em>.
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   displayedTagihan.map((t) => {
                     return (
                       <tr key={t.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                        <td style={{ padding: "10px 14px" }}>
+                        <td style={{ padding: "12px 14px" }}>
                           <div style={{ fontWeight: 800, color: COLORS.blueDark, fontFamily: "monospace", fontSize: 12.5 }}>
                             {t.noSurat}
                           </div>
@@ -2696,7 +2737,13 @@ export const GeneratorTagihan = () => {
                           </div>
                         </td>
 
-                        <td style={{ padding: "10px 12px" }}>
+                        <td style={{ padding: "12px 12px", maxWidth: 260 }}>
+                          <div style={{ fontWeight: 600, color: COLORS.gray800, fontSize: 12, lineHeight: 1.4 }}>
+                            {t.perihal}
+                          </div>
+                        </td>
+
+                        <td style={{ padding: "12px 12px" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <span
                               style={{
@@ -2716,19 +2763,59 @@ export const GeneratorTagihan = () => {
                           </div>
                         </td>
 
-                        <td style={{ padding: "10px 12px" }}>
+                        <td style={{ padding: "12px 12px" }}>
                           <div style={{ fontWeight: 600, color: COLORS.gray800 }}>{t.matra}</div>
                           <div style={{ fontSize: 11, color: COLORS.gray500 }}>{t.peserta} Jiwa</div>
                         </td>
 
-                        <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
+                        <td style={{ padding: "12px 14px", textAlign: "right", fontWeight: 800, fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
                           {t.nominal}
+                        </td>
+
+                        <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 5,
+                              padding: "4px 9px",
+                              borderRadius: 6,
+                              fontSize: 11,
+                              fontWeight: 700,
+                              background: "#EEF2FF",
+                              color: "#4338CA",
+                              border: "1px solid #C7D2FE"
+                            }}
+                          >
+                            <CheckCircle2 size={12} />
+                            Monitoring Selesai
+                          </span>
+                          {t.tglSelesai && t.tglSelesai !== "-" && (
+                            <div style={{ fontSize: 10.5, color: COLORS.gray500, marginTop: 3 }}>
+                              {t.tglSelesai}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
                   })
                 )}
               </tbody>
+              {displayedTagihan.length > 0 && (
+                <tfoot>
+                  <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
+                    <td colSpan={4} style={{ padding: "12px 14px", textAlign: "right" }}>
+                      Total Realisasi Tagihan Selesai ({displayedTagihan.length} Surat):
+                    </td>
+                    <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13 }}>
+                      {fmtB(displayedTagihan.reduce((acc, it) => acc + (it.nominalNum || 0), 0))}
+                    </td>
+                    <td style={{ padding: "12px 14px", textAlign: "center", color: COLORS.gray400 }}>
+                      —
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </div>
@@ -3436,6 +3523,14 @@ export const GeneratorTagihan = () => {
                       <Edit3 size={14} />
                       {isEditingStatus ? "Batal Update Status" : "Update Status"}
                     </Btn>
+                    <Btn
+                      size="sm"
+                      onClick={handleMarkMonitoringSelesai}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 700, background: "#059669", color: "#FFFFFF" }}
+                    >
+                      <CheckCircle2 size={14} />
+                      Tandai Monitoring Selesai
+                    </Btn>
                   </div>
                 </div>
 
@@ -3875,6 +3970,14 @@ export const GeneratorTagihan = () => {
                 >
                   <Edit3 size={14} />
                   {isEditingStatus ? "Batal Update Status" : "Update Status"}
+                </Btn>
+                <Btn
+                  size="sm"
+                  onClick={handleMarkMonitoringSelesai}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 700, background: "#059669", color: "#FFFFFF" }}
+                >
+                  <CheckCircle2 size={14} />
+                  Tandai Monitoring Selesai
                 </Btn>
               </div>
 

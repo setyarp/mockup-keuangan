@@ -68,6 +68,11 @@ export const PreviewModal = ({ preview, onClose }) => {
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, textDecoration: "underline" }}>SURAT TAGIHAN IURAN</div>
                   <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 4 }}>{content?.noSurat || "No. 001/ASABRI/TGH/VII/2026"}</div>
+                  {content?.perihal && (
+                    <div style={{ fontSize: 11.5, color: COLORS.gray700, fontWeight: 700, marginTop: 4 }}>
+                      Hal: {content.perihal}
+                    </div>
+                  )}
                   {content?.batchInfo && (
                     <div style={{ display: "inline-block", marginTop: 6, padding: "2px 10px", background: "#EFF6FF", color: COLORS.blueDark, borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
                       📌 {content.batchInfo}
