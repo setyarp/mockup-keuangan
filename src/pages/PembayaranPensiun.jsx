@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Users,
   Banknote,
@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   Eye,
   Calendar,
-  Layers
+  Layers,
+  ArrowLeft
 } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import { StatCard, Btn, NoData, PreviewModal } from "../components/common";
@@ -28,10 +29,15 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
   // "susulan"  : DAPEM Susulan (Termin Susulan SK Terlambat & Rekening Pasif)
   // "nondapem" : NON-DAPEM (Pembayaran Pertama / PP, Rapel UKP, & Uang Duka Wafat / UDW)
   const [activeSubtab, setActiveSubtab] = useState(defaultTab);
+  // View mode: "list" (daftar per bulan) or "detail" (rincian bulan terpilih)
+  const [viewMode, setViewMode] = useState("list");
+  const [filterStatusSalur, setFilterStatusSalur] = useState("Semua");
+  const [searchBulan, setSearchBulan] = useState("");
 
   useEffect(() => {
     if (defaultTab) {
       setActiveSubtab(defaultTab);
+      setViewMode("list");
     }
   }, [defaultTab]);
 
@@ -564,20 +570,83 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
     { nopen: "2023910293", nrp: "84029182", nama: "PELDA (PURN) AGUS SANTOSO", matra: "TNI AD", golongan: "Bintara (III/a)", pokok: 2850000, tunjKeluarga: 285000, tunjBeras: 315000, pph21: 65000, askes: 28500, netto: 3356500, bank: "Bank BSI", noRek: "7100-99-445566-1", status: "Siap Bayar" }
   ];
 
-  // Pemilihan Dataset berdasarkan Subtab Aktif
-  const currentDataset =
+  const NAMA_BULAN = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const monthNum = parseInt(selectedBulan.split("-")[1], 10) || 7;
+  const monthMultiplier = 1 + (monthNum - 7) * (activeSubtab === "induk" ? 0.0025 : 0.003);
+
+  // Pemilihan Base Dataset berdasarkan Subtab Aktif
+  const baseDataset =
     activeSubtab === "susulan"
       ? dapemSusulanData
       : activeSubtab === "nondapem"
       ? nonDapemData
       : dapemIndukData;
 
-  const currentMitraList =
+  const baseMitraList =
     activeSubtab === "susulan"
       ? mitraBayarData.susulan
       : activeSubtab === "nondapem"
       ? mitraBayarData.nondapem
       : mitraBayarData.induk;
+
+  // Dataset Dinamis Sesuai Bulan Terpilih (Detail View)
+  const currentDataset = useMemo(() => {
+    if (monthMultiplier === 1.0) return baseDataset;
+    return baseDataset.map((d) => ({
+      ...d,
+      jenisList: d.jenisList.map((j) => ({
+        ...j,
+        jiwa: {
+          ...j.jiwa,
+          penerima: Math.round(j.jiwa.penerima * monthMultiplier),
+          istriSuami: Math.round(j.jiwa.istriSuami * monthMultiplier),
+          anak: Math.round(j.jiwa.anak * monthMultiplier),
+          total: Math.round(j.jiwa.total * monthMultiplier),
+        },
+        bruto: {
+          ...j.bruto,
+          total: Math.round(j.bruto.total * monthMultiplier),
+        },
+        potongan: {
+          ...j.potongan,
+          total: Math.round(j.potongan.total * monthMultiplier),
+        },
+        netto: Math.round(j.netto * monthMultiplier),
+      })),
+      totalJiwa: {
+        ...d.totalJiwa,
+        penerima: Math.round(d.totalJiwa.penerima * monthMultiplier),
+        total: Math.round(d.totalJiwa.total * monthMultiplier),
+      },
+      totalBruto: {
+        ...d.totalBruto,
+        total: Math.round(d.totalBruto.total * monthMultiplier),
+      },
+      totalPotongan: {
+        ...d.totalPotongan,
+        total: Math.round(d.totalPotongan.total * monthMultiplier),
+      },
+      totalNetto: Math.round(d.totalNetto * monthMultiplier),
+    }));
+  }, [baseDataset, monthMultiplier]);
+
+  const currentMitraList = useMemo(() => {
+    const bStr = selectedBulan.replace("-", "");
+    const mName = NAMA_BULAN[monthNum - 1] || "Juli";
+    const cairDay = activeSubtab === "susulan" ? "16" : activeSubtab === "nondapem" ? "10" : "01";
+    return baseMitraList.map((m) => ({
+      ...m,
+      penerima: Math.round(m.penerima * monthMultiplier),
+      alokasiNetto: Math.round(m.alokasiNetto * monthMultiplier),
+      noSP: m.noSP.replace(/202607/, bStr),
+      tglCair: `${cairDay} ${mName} 2026`,
+      status: monthNum <= 6 ? "Selesai Disalurkan" : (monthNum === 7 ? "Dana Tersedia (Disalurkan)" : "Terjadwal")
+    }));
+  }, [baseMitraList, monthMultiplier, selectedBulan, monthNum, activeSubtab]);
 
   // Filter List MAK
   const filteredMAKList = currentDataset.filter((d) => {
@@ -586,7 +655,7 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
     return true;
   });
 
-  // Grand Totals Dinamis
+  // Grand Totals Dinamis Bulan Terpilih (Detail View)
   const grandTotalJiwa = {
     penerima: currentDataset.reduce((a, d) => a + d.totalJiwa.penerima, 0),
     istriSuami: currentDataset.reduce((a, d) => a + d.totalJiwa.istriSuami, 0),
@@ -598,6 +667,107 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
   const grandTotalBruto = currentDataset.reduce((a, d) => a + d.totalBruto.total, 0);
   const grandTotalPotongan = currentDataset.reduce((a, d) => a + d.totalPotongan.total, 0);
   const grandTotalNetto = currentDataset.reduce((a, d) => a + d.totalNetto, 0);
+
+  // DATASET 12 BULAN (LIST VIEW)
+  const monthlyListDapem = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const mNum = i + 1;
+      const mStr = String(mNum).padStart(2, "0");
+      const key = `2026-${mStr}`;
+      const mName = NAMA_BULAN[i];
+      const prevMName = mNum === 1 ? "Des 2025" : NAMA_BULAN[mNum - 2].slice(0, 3);
+
+      const mult = 1 + (mNum - 7) * (activeSubtab === "induk" ? 0.0025 : 0.003);
+      let jiwa = 0;
+      let bruto = 0;
+      let potongan = 0;
+      let jadwal = "";
+      let status = "Terjadwal";
+      let statusColor = "#64748B";
+      let statusBg = "#F1F5F9";
+
+      if (activeSubtab === "induk") {
+        jiwa = Math.round(427620 * (1 + (mNum - 7) * 0.0018));
+        bruto = Math.round(82200000000 * mult);
+        potongan = Math.round(5800000000 * mult);
+        jadwal = `Cut-off: 20 ${prevMName} • Cair: 01 ${mName.slice(0, 3)} 2026`;
+      } else if (activeSubtab === "susulan") {
+        jiwa = Math.round(1210 * (1 + (mNum - 7) * 0.002));
+        bruto = Math.round(5480000000 * mult);
+        potongan = Math.round(460000000 * mult);
+        jadwal = `Verifikasi: 10 ${mName.slice(0, 3)} • Cair: 16 ${mName.slice(0, 3)} 2026`;
+      } else {
+        jiwa = Math.round(510 * (1 + (mNum - 7) * 0.002));
+        bruto = Math.round(3540000000 * mult);
+        potongan = Math.round(220000000 * mult);
+        jadwal = `Verifikasi: 05 ${mName.slice(0, 3)} • Cair: 10 ${mName.slice(0, 3)} 2026`;
+      }
+
+      const netto = bruto - potongan;
+
+      if (mNum <= 6) {
+        status = "Selesai Disalurkan";
+        statusColor = "#059669";
+        statusBg = "#ECFDF5";
+      } else if (mNum === 7) {
+        status = "Batch Aktif (Siap Salur)";
+        statusColor = "#1D4ED8";
+        statusBg = "#EFF6FF";
+      } else if (mNum === 8) {
+        status = activeSubtab === "induk" ? "Proses Cut-Off" : "Verifikasi Berkas";
+        statusColor = "#D97706";
+        statusBg = "#FFFBEB";
+      }
+
+      return {
+        no: mNum,
+        monthNum: mNum,
+        key,
+        namaBulan: mName,
+        periodeLabel: `${mName} 2026`,
+        jadwal,
+        jiwa,
+        bruto,
+        potongan,
+        netto,
+        status,
+        statusColor,
+        statusBg
+      };
+    });
+  }, [activeSubtab]);
+
+  // Filtered List View
+  const filteredMonthlyDapem = useMemo(() => {
+    return monthlyListDapem.filter((m) => {
+      if (searchBulan.trim() && !m.namaBulan.toLowerCase().includes(searchBulan.toLowerCase().trim())) {
+        return false;
+      }
+      return true;
+    });
+  }, [monthlyListDapem, searchBulan]);
+
+  const annualAvgJiwa = Math.round(monthlyListDapem.reduce((a, m) => a + m.jiwa, 0) / monthlyListDapem.length);
+  const annualTotalBruto = monthlyListDapem.reduce((a, m) => a + m.bruto, 0);
+  const annualTotalPotongan = monthlyListDapem.reduce((a, m) => a + m.potongan, 0);
+  const annualTotalNetto = monthlyListDapem.reduce((a, m) => a + m.netto, 0);
+
+  const getSubtabTitle = () => {
+    if (activeSubtab === "susulan") return "DAPEM Susulan (Termin Susulan)";
+    if (activeSubtab === "nondapem") return "NON-DAPEM (PP, UKP, UDW)";
+    return "DAPEM Induk (Rutin Bulanan)";
+  };
+
+  const getSubtabBadge = () => {
+    if (activeSubtab === "susulan") return "Termin Susulan SK Terlambat & Rekening Pasif";
+    if (activeSubtab === "nondapem") return "Pembayaran Pertama (PP), Rapel UKP & Santunan UDW";
+    return "Gaji Pokok & Tunjangan Pensiun Rutin";
+  };
+
+  const handleOpenMonthDetail = (m) => {
+    setSelectedBulan(m.key);
+    setViewMode("detail");
+  };
 
   // Helper Preview Surat Perintah (SP) Penyaluran ke Bank Mitra
   const handleOpenSPPreview = (item) => {
@@ -827,93 +997,7 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
       )}
 
       {/* =========================================================================
-          1. HEADER & PERIODE BATCH CONTROL BAR
-         ========================================================================= */}
-      <div
-        style={{
-          background: COLORS.white,
-          borderRadius: 12,
-          padding: "16px 20px",
-          border: `1px solid ${COLORS.gray200}`,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14
-        }}
-      >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 8,
-                background: "#EFF6FF",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: COLORS.blue
-              }}
-            >
-              <Wallet size={20} />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: COLORS.gray900 }}>
-                Administrasi & Monitoring Pembayaran Pensiun (DAPEM)
-              </h2>
-              <p style={{ margin: "2px 0 0", fontSize: 12, color: COLORS.gray500 }}>
-                Perhitungan dinamis hak pensiun bulanan, pemotongan pajak/BPJS, dan penyaluran kas ke Bank Mitra Bayar.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* BATCH SELECTOR & STATUS */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Periode Bulan:</span>
-            <select
-              value={selectedBulan}
-              onChange={(e) => setSelectedBulan(e.target.value)}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: `1px solid ${COLORS.gray300}`,
-                fontSize: 12.5,
-                fontWeight: 700,
-                color: COLORS.blueDark,
-                background: COLORS.white
-              }}
-            >
-              <option value="2026-07">Juli 2026 (Batch Aktif / Siap Salur)</option>
-              <option value="2026-06">Juni 2026 (Tuntas / Terarsip)</option>
-              <option value="2026-05">Mei 2026 (Tuntas / Terarsip)</option>
-            </select>
-          </div>
-
-          <span
-            style={{
-              fontSize: 11.5,
-              padding: "5px 12px",
-              borderRadius: 20,
-              background: "#ECFDF5",
-              color: "#065F46",
-              fontWeight: 700,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-              border: "1px solid #A7F3D0"
-            }}
-          >
-            <CheckCircle2 size={13} color="#059669" />
-            Batch Terkunci (Cut-Off: 20 Juni 2026)
-          </span>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          2. NAVIGASI 3 SUBTAB TERPADU: INDUK | SUSULAN | NON-DAPEM
+          NAVIGASI 3 SUBTAB TERPADU: INDUK | SUSULAN | NON-DAPEM
          ========================================================================= */}
       <div
         style={{
@@ -923,7 +1007,7 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
         }}
       >
         <button
-          onClick={() => setActiveSubtab("induk")}
+          onClick={() => { setActiveSubtab("induk"); }}
           style={{
             padding: "10px 20px",
             border: "none",
@@ -956,7 +1040,7 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
         </button>
 
         <button
-          onClick={() => setActiveSubtab("susulan")}
+          onClick={() => { setActiveSubtab("susulan"); }}
           style={{
             padding: "10px 20px",
             border: "none",
@@ -989,7 +1073,7 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
         </button>
 
         <button
-          onClick={() => setActiveSubtab("nondapem")}
+          onClick={() => { setActiveSubtab("nondapem"); }}
           style={{
             padding: "10px 20px",
             border: "none",
@@ -1022,378 +1106,773 @@ export const PembayaranPensiun = ({ defaultTab = "induk" }) => {
         </button>
       </div>
 
-      {/* PENJELASAN OPERASIONAL DIVISI KEUANGAN */}
-      <div
-        style={{
-          background: "#F8FAFC",
-          borderRadius: 8,
-          padding: "10px 16px",
-          border: `1px solid ${COLORS.gray200}`,
-          fontSize: 12,
-          color: COLORS.gray700,
-          display: "flex",
-          alignItems: "center",
-          gap: 10
-        }}
-      >
-        <span style={{ fontSize: 16 }}>💡</span>
-        <div>
-          <b>Panduan Divisi Keuangan:</b> Data dihitung ulang setiap bulan berdasarkan cut-off tanggal 20 dari Divisi Pelayanan/Kepesertaan. Divisi Keuangan fokus memastikan <b>ketersediaan likuiditas kas netto</b>, memonitor <b>potongan pajak PPh 21 & iuran BPJS</b>, serta menerbitkan <b>Surat Perintah (SP) Penyaluran Dana ke Bank Mitra Bayar</b>.
-        </div>
-      </div>
-
       {/* =========================================================================
-          3. STATCARDS: RINGKASAN KEBUTUHAN KAS KEUANGAN
+          VIEW 1: LIST VIEW (DAFTAR PER BULAN)
          ========================================================================= */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
-        <StatCard
-          icon={<Users size={IC} />}
-          label="Total Jiwa Penerima"
-          value={`${fmtJiwa(grandTotalJiwa.total)} Jiwa`}
-          sub={`${fmtJiwa(grandTotalJiwa.penerima)} Penerima • ${fmtJiwa(grandTotalJiwa.istriSuami + grandTotalJiwa.anak)} Keluarga`}
-          color={COLORS.blue}
-        />
-        <StatCard
-          icon={<Banknote size={IC} />}
-          label="Beban Bruto Hak Pensiun"
-          value={fmt(grandTotalBruto)}
-          sub="Akumulasi Hak Pensiun Bruto"
-          color={COLORS.green}
-        />
-        <StatCard
-          icon={<Receipt size={IC} />}
-          label="Total Potongan Resmi"
-          value={fmt(grandTotalPotongan)}
-          sub="PPh 21 Pensiun, Iuran BPJS & Non-TGR"
-          color={COLORS.red}
-        />
-        <StatCard
-          icon={<Wallet size={IC} />}
-          label="Total Netto Kas Disalurkan"
-          value={fmt(grandTotalNetto)}
-          sub="Kas Keluar Bersih via Bank Mitra"
-          color={COLORS.blueDark}
-        />
-      </div>
-
-      {/* =========================================================================
-          4. MATRIKS ALOKASI KAS KE BANK MITRA BAYAR & SURAT PERINTAH (SP)
-          Menjawab fungsi utama Keuangan: Ke mana uang kas tersebut disalurkan?
-         ========================================================================= */}
-      <div
-        style={{
-          background: COLORS.white,
-          borderRadius: 10,
-          border: `1px solid ${COLORS.gray200}`,
-          overflow: "hidden"
-        }}
-      >
-        <div
-          style={{
-            padding: "14px 18px",
-            borderBottom: `1px solid ${COLORS.gray200}`,
-            background: "#F8FAFC",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Building2 size={18} color={COLORS.blue} />
+      {viewMode === "list" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          {/* Header Banner */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 12,
+              padding: "16px 20px",
+              border: `1px solid ${COLORS.gray200}`,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 14
+            }}
+          >
             <div>
-              <div style={{ fontSize: 13.5, fontWeight: 800, color: COLORS.gray900 }}>
-                Alokasi Kebutuhan Kas Penyaluran ke Bank Mitra Bayar ({selectedBulan})
-              </div>
-              <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>
-                Dasar penerbitan Surat Perintah (SP) pemindahbukuan dana pensiun dari giro ASABRI ke rekening mitra bayar.
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <Btn
-              size="xs"
-              variant="outline"
-              onClick={() => {
-                setPreview({
-                  title: `Rekapitulasi Penyaluran Kas Mitra Bayar — ${selectedBulan}`,
-                  subtitle: `Kebutuhan Kas Penyaluran Pensiun via Bank Mitra`,
-                  type: "table",
-                  fileName: `Alokasi_Mitra_DAPEM_${selectedBulan}.xlsx`,
-                  content: {
-                    columns: ["No", "Mitra Bayar", "Jumlah Penerima", "Alokasi Netto Kas (Rp)", "Nomor Surat Perintah (SP)", "Tanggal Salur", "Status"],
-                    rows: currentMitraList.map((m, idx) => [
-                      idx + 1,
-                      m.mitra,
-                      `${fmtJiwa(m.penerima)} Jiwa`,
-                      fmt(m.alokasiNetto),
-                      m.noSP,
-                      m.tglCair,
-                      m.status
-                    ]),
-                    totalRows: currentMitraList.length
-                  }
-                });
-              }}
-            >
-              <Download size={12} style={{ marginRight: 4 }} />
-              Ekspor Daftar SP
-            </Btn>
-          </div>
-        </div>
-
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-            <thead>
-              <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
-                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Mitra Bayar / Perbankan</th>
-                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Jumlah Penerima</th>
-                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Alokasi Kas Netto (Rp)</th>
-                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Perintah (SP)</th>
-                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Likuiditas</th>
-                <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi Dokumen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentMitraList.map((m) => (
-                <tr key={m.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                  <td style={{ padding: "12px 14px" }}>
-                    <div style={{ fontWeight: 800, color: COLORS.gray900 }}>{m.mitra}</div>
-                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>{m.singkatan} • Rekening Giro Khusus Pensiun</div>
-                  </td>
-                  <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
-                    {fmtJiwa(m.penerima)} Jiwa
-                  </td>
-                  <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 13 }}>
-                    {fmt(m.alokasiNetto)}
-                  </td>
-                  <td style={{ padding: "12px 14px" }}>
-                    <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>{m.noSP}</div>
-                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>Tgl Salur: {m.tglCair}</div>
-                  </td>
-                  <td style={{ padding: "12px 14px" }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: "3px 8px",
-                        borderRadius: 4,
-                        background: "#ECFDF5",
-                        color: "#065F46",
-                        fontWeight: 700,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4
-                      }}
-                    >
-                      <CheckCircle2 size={12} color="#059669" />
-                      {m.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                    <Btn
-                      size="xs"
-                      variant="outline"
-                      onClick={() => handleOpenSPPreview(m)}
-                    >
-                      <FileText size={12} style={{ marginRight: 4 }} />
-                      Lihat SP Mitra
-                    </Btn>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
-                <td style={{ padding: "12px 14px" }}>TOTAL PENYALURAN KAS KE SELURUH MITRA:</td>
-                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
-                  {fmtJiwa(currentMitraList.reduce((a, b) => a + b.penerima, 0))} Jiwa
-                </td>
-                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13.5 }}>
-                  {fmt(currentMitraList.reduce((a, b) => a + b.alokasiNetto, 0))}
-                </td>
-                <td colSpan={3} style={{ padding: "12px 14px", color: "#065F46", fontSize: 11.5 }}>
-                  ✅ Likuiditas Giro Mandiri & BNI Siap Dibukukan
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          5. TABEL REKAPITULASI III RESMI PEMERINTAH (BERDASARKAN 4 MAK RESMI)
-         ========================================================================= */}
-      <div style={{ background: COLORS.white, borderRadius: 10, padding: "20px 22px", border: `1px solid ${COLORS.gray200}` }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
-              Rekapitulasi III Pertanggungjawaban Anggaran Pensiun (4 MAK Kemenkeu)
-            </div>
-            <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
-              Alokasi beban belanja pensiun menurut Bagan Akun Standar (BAS) Kementerian Keuangan RI.
-            </div>
-          </div>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <Btn
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setSelectedBNBAMAK(null);
-                setShowBNBAModal(true);
-              }}
-            >
-              <Users size={13} style={{ marginRight: 4 }} />
-              Lihat Rincian Peserta (BNBA)
-            </Btn>
-            <Btn
-              size="sm"
-              variant="primary"
-              onClick={() => {
-                setPreview({
-                  title: `Rekapitulasi III Pembayaran Pensiun — ${selectedBulan}`,
-                  subtitle: `Format Resmi Laporan Keuangan Ditjen Perbendaharaan`,
-                  type: "table",
-                  fileName: `Rekap_III_${activeSubtab}_${selectedBulan}.xlsx`,
-                  content: {
-                    columns: ["No", "Kode MAK", "Kelompok Pensiun", "Total Jiwa", "Penerima Pokok", "Jumlah Bruto (Rp)", "Total Potongan (Rp)", "Jumlah Netto (Rp)"],
-                    rows: currentDataset.map((d) => [
-                      d.no,
-                      d.kodeMAK,
-                      d.namaKelompok,
-                      `${fmtJiwa(d.totalJiwa.total)} Jiwa`,
-                      `${fmtJiwa(d.totalJiwa.penerima)} Jiwa`,
-                      fmt(d.totalBruto.total),
-                      fmt(d.totalPotongan.total),
-                      fmt(d.totalNetto)
-                    ]),
-                    totalRows: currentDataset.length
-                  }
-                });
-              }}
-            >
-              <Download size={13} style={{ marginRight: 4 }} />
-              Ekspor Rekap III
-            </Btn>
-          </div>
-        </div>
-
-        {/* ACCORDION PER MAK */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {filteredMAKList.map((dapem) => {
-            const isOpen = !!expandedDapem[dapem.kodeMAK];
-
-            return (
-              <div key={dapem.kodeMAK} style={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
-                {/* Header Card MAK */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div
-                  onClick={() => toggleExpand(dapem.kodeMAK)}
                   style={{
-                    padding: "12px 18px",
-                    background: "#F8FAFC",
+                    width: 38,
+                    height: 38,
+                    borderRadius: 8,
+                    background: "#EFF6FF",
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
-                    cursor: "pointer",
-                    userSelect: "none"
+                    justifyContent: "center",
+                    color: COLORS.blue
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 6, background: COLORS.blueDark, color: COLORS.white, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>
-                      {dapem.no}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 13.5, color: COLORS.gray900 }}>
-                        {dapem.namaKelompok}
-                      </div>
-                      <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 1 }}>
-                        MAK: <b>{dapem.kodeMAK}</b> • {fmtJiwa(dapem.totalJiwa.total)} Total Jiwa ({fmtJiwa(dapem.totalJiwa.penerima)} Penerima Manfaat)
-                      </div>
-                    </div>
-                  </div>
+                  <Wallet size={20} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: COLORS.gray900 }}>
+                    Daftar {getSubtabTitle()} Per Bulan (TA 2026)
+                  </h2>
+                  <p style={{ margin: "2px 0 0", fontSize: 12, color: COLORS.gray500 }}>
+                    Monitoring hak pensiun bulanan, pemotongan pajak PPh 21 / BPJS, dan penyaluran kas ke Bank Mitra Bayar. Klik &quot;Lihat Detail&quot; untuk rincian tiap bulan.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 10, textTransform: "uppercase", color: COLORS.gray500, fontWeight: 700 }}>Total Bruto</div>
-                      <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace" }}>{fmt(dapem.totalBruto.total)}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  padding: "6px 14px",
+                  borderRadius: 20,
+                  background: "#EFF6FF",
+                  color: "#1E40AF",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  border: "1px solid #BFDBFE"
+                }}
+              >
+                <Calendar size={13} color="#2563EB" />
+                TA 2026 • 12 Periode Bulanan
+              </span>
+            </div>
+          </div>
+
+          {/* Panduan Operasional Divisi Keuangan */}
+          <div
+            style={{
+              background: "#F8FAFC",
+              borderRadius: 8,
+              padding: "10px 16px",
+              border: `1px solid ${COLORS.gray200}`,
+              fontSize: 12,
+              color: COLORS.gray700,
+              display: "flex",
+              alignItems: "center",
+              gap: 10
+            }}
+          >
+            <span style={{ fontSize: 16 }}>💡</span>
+            <div>
+              <b>Panduan Divisi Keuangan:</b> Data dihitung ulang setiap bulan berdasarkan cut-off tanggal 20 dari Divisi Pelayanan/Kepesertaan. Divisi Keuangan fokus memastikan <b>ketersediaan likuiditas kas netto</b>, memonitor <b>potongan pajak PPh 21 &amp; iuran BPJS</b>, serta menerbitkan <b>Surat Perintah (SP) Penyaluran Dana ke Bank Mitra Bayar</b>.
+            </div>
+          </div>
+
+          {/* StatCards Operasional List Per Bulan */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+            <StatCard
+              icon={<Users size={IC} />}
+              label={`Rata-rata Jiwa Penerima (${getSubtabTitle()})`}
+              value={`${fmtJiwa(annualAvgJiwa)} Jiwa`}
+              sub="Rata-rata penerima manfaat bulanan"
+              color={COLORS.blue}
+            />
+            <StatCard
+              icon={<Calendar size={IC} />}
+              label="Total Periode Anggaran"
+              value="12 Periode Bulan"
+              sub="Tahun Anggaran (TA) 2026"
+              color={COLORS.green}
+            />
+            <StatCard
+              icon={<Building2 size={IC} />}
+              label="Jaringan Bank Mitra Bayar"
+              value="5 Bank / Pos Terdaftar"
+              sub="BRI, Mandiri, BNI, Pos Indonesia, BSI"
+              color={COLORS.blueDark}
+            />
+            <StatCard
+              icon={<CheckCircle2 size={IC} />}
+              label="Masa Batch Berjalan"
+              value="Bulan Juli 2026"
+              sub="Batch Aktif Operasional Siap Salur"
+              color={COLORS.orange}
+            />
+          </div>
+
+          {/* Table Container Per Bulan */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 10,
+              padding: "18px 20px",
+              border: `1px solid ${COLORS.gray200}`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.03)"
+            }}
+          >
+            {/* Toolbar */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 16,
+                flexWrap: "wrap",
+                gap: 12
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <div style={{ position: "relative", width: 260 }}>
+                  <Search size={14} color={COLORS.gray400} style={{ position: "absolute", left: 10, top: 10 }} />
+                  <input
+                    type="text"
+                    placeholder="Cari bulan (misal: Juli)..."
+                    value={searchBulan}
+                    onChange={(e) => setSearchBulan(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "7px 10px 7px 30px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      fontSize: 12,
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Export Buttons */}
+              <div style={{ display: "flex", gap: 8 }}>
+                <Btn
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setPreview({
+                      title: `Daftar ${getSubtabTitle()} Tahunan — TA 2026`,
+                      subtitle: `Format Excel (.xlsx) • Seluruh Periode Bulan`,
+                      type: "table",
+                      fileName: `Daftar_${activeSubtab}_Tahunan_2026.xlsx`,
+                      content: {
+                        columns: ["No", "Bulan / Periode", "Jadwal Cut-Off & Penyaluran", "Penerima (Jiwa)", "Mitra Bayar"],
+                        rows: monthlyListDapem.map((m) => [
+                          m.no,
+                          m.periodeLabel,
+                          m.jadwal,
+                          `${fmtJiwa(m.jiwa)} Jiwa`,
+                          "5 Mitra (BRI, Mandiri, BNI, Pos, BSI)"
+                        ]),
+                        totalRows: monthlyListDapem.length
+                      }
+                    })
+                  }
+                >
+                  <Download size={13} style={{ marginRight: 4 }} />
+                  Ekspor Excel
+                </Btn>
+                <Btn
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setPreview({
+                      title: `Daftar ${getSubtabTitle()} Tahunan — TA 2026`,
+                      subtitle: `Format PDF Resmi Ditjen Perbendaharaan Kemenkeu`,
+                      type: "table",
+                      fileName: `Daftar_${activeSubtab}_Tahunan_2026.pdf`,
+                      content: {
+                        columns: ["No", "Bulan / Periode", "Jadwal Cut-Off & Penyaluran", "Penerima (Jiwa)", "Mitra Bayar"],
+                        rows: monthlyListDapem.map((m) => [
+                          m.no,
+                          m.periodeLabel,
+                          m.jadwal,
+                          `${fmtJiwa(m.jiwa)} Jiwa`,
+                          "5 Mitra (BRI, Mandiri, BNI, Pos, BSI)"
+                        ]),
+                        totalRows: monthlyListDapem.length
+                      }
+                    })
+                  }
+                >
+                  <Download size={13} style={{ marginRight: 4 }} />
+                  Ekspor PDF
+                </Btn>
+              </div>
+            </div>
+
+            {/* Table Months */}
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
+                    <th style={{ padding: "10px 12px", borderBottom: `1px solid ${COLORS.gray200}`, width: 40 }}>No</th>
+                    <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Bulan / Periode</th>
+                    <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Jadwal Cut-Off &amp; Penyaluran</th>
+                    <th style={{ padding: "10px 12px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Penerima (Jiwa)</th>
+                    <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Mitra Bayar</th>
+                    <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center", width: 140 }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMonthlyDapem.map((m) => (
+                    <tr
+                      key={m.key}
+                      style={{
+                        borderBottom: `1px solid ${COLORS.gray100}`,
+                        background: m.monthNum === 7 ? "#F0FDF4" : "transparent",
+                        transition: "background 0.15s"
+                      }}
+                      onMouseEnter={(e) => {
+                        if (m.monthNum !== 7) e.currentTarget.style.background = "#F8FAFC";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (m.monthNum !== 7) e.currentTarget.style.background = "transparent";
+                      }}
+                    >
+                      <td style={{ padding: "12px 12px", color: COLORS.gray500, fontWeight: 600 }}>{m.no}</td>
+                      <td style={{ padding: "12px 14px" }}>
+                        <div style={{ fontWeight: 800, color: COLORS.gray900, fontSize: 13 }}>
+                          {m.namaBulan} 2026
+                        </div>
+                        {m.monthNum === 7 && (
+                          <span style={{ fontSize: 10, color: "#166534", fontWeight: 700 }}>
+                            ★ Batch Aktif (Siap Salur)
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11.5 }}>
+                        {m.jadwal}
+                      </td>
+                      <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
+                        {fmtJiwa(m.jiwa)} Jiwa
+                      </td>
+                      <td style={{ padding: "12px 14px", fontSize: 12, color: COLORS.gray700 }}>
+                        5 Mitra (BRI, Mandiri, BNI, Pos, BSI)
+                      </td>
+                      <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                        <Btn
+                          size="xs"
+                          variant="primary"
+                          onClick={() => handleOpenMonthDetail(m)}
+                          style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+                        >
+                          <Eye size={12} />
+                          Lihat Detail
+                        </Btn>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
+                    <td colSpan={3} style={{ padding: "12px 14px" }}>
+                      TOTAL / RATA-RATA (12 BULAN TA 2026):
+                    </td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                      {fmtJiwa(annualAvgJiwa)} (rata-rata)
+                    </td>
+                    <td style={{ padding: "12px 14px", color: COLORS.gray600, fontSize: 11.5 }}>
+                      5 Bank / Pos Terdaftar
+                    </td>
+                    <td style={{ padding: "12px 14px", textAlign: "center", color: "#065F46", fontSize: 11 }}>
+                      12 Periode Bulan
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          VIEW 2: DETAIL VIEW (RINCIAN BULAN TERPILIH)
+         ========================================================================= */}
+      {viewMode === "detail" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          {/* Header Navigation: Kembali ke Daftar Bulanan */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 12,
+              padding: "14px 20px",
+              border: `1px solid ${COLORS.gray200}`,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 12
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <Btn
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("list")}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontWeight: 700,
+                  color: COLORS.blueDark,
+                  borderColor: COLORS.gray300
+                }}
+              >
+                <ArrowLeft size={14} />
+                Kembali ke Daftar Bulanan
+              </Btn>
+
+              <div style={{ height: 26, width: 1, background: COLORS.gray300 }} />
+
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
+                  Detail {getSubtabTitle()} — Periode Bulan {NAMA_BULAN[monthNum - 1]} 2026
+                </div>
+                <div style={{ fontSize: 11.5, color: COLORS.gray500 }}>
+                  {getSubtabBadge()} • Alokasi likuiditas kas &amp; MAK Kemenkeu RI
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Month Switcher within Detail */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700 }}>Pilih Bulan Lain:</span>
+                <select
+                  value={selectedBulan}
+                  onChange={(e) => setSelectedBulan(e.target.value)}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    color: COLORS.blueDark,
+                    background: COLORS.white,
+                    cursor: "pointer"
+                  }}
+                >
+                  {monthlyListDapem.map((m) => (
+                    <option key={m.key} value={m.key}>
+                      {m.periodeLabel} {m.key === "2026-07" ? "(Batch Aktif)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <span
+                style={{
+                  fontSize: 11.5,
+                  padding: "5px 12px",
+                  borderRadius: 20,
+                  background: monthNum <= 6 ? "#ECFDF5" : (monthNum === 7 ? "#EFF6FF" : "#F1F5F9"),
+                  color: monthNum <= 6 ? "#065F46" : (monthNum === 7 ? "#1D4ED8" : "#475569"),
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  border: `1px solid ${monthNum <= 6 ? "#A7F3D0" : (monthNum === 7 ? "#BFDBFE" : "#CBD5E1")}`
+                }}
+              >
+                <CheckCircle2 size={13} color={monthNum <= 6 ? "#059669" : (monthNum === 7 ? "#2563EB" : "#64748B")} />
+                {monthNum <= 6 ? "Selesai Disalurkan" : (monthNum === 7 ? "Batch Terkunci (Cut-Off: 20 Juni 2026)" : "Rencana Terjadwal")}
+              </span>
+            </div>
+          </div>
+
+          {/* PENJELASAN OPERASIONAL DIVISI KEUANGAN */}
+          <div
+            style={{
+              background: "#F8FAFC",
+              borderRadius: 8,
+              padding: "10px 16px",
+              border: `1px solid ${COLORS.gray200}`,
+              fontSize: 12,
+              color: COLORS.gray700,
+              display: "flex",
+              alignItems: "center",
+              gap: 10
+            }}
+          >
+            <span style={{ fontSize: 16 }}>💡</span>
+            <div>
+              <b>Panduan Divisi Keuangan:</b> Data dihitung ulang setiap bulan berdasarkan cut-off tanggal 20 dari Divisi Pelayanan/Kepesertaan. Divisi Keuangan fokus memastikan <b>ketersediaan likuiditas kas netto</b>, memonitor <b>potongan pajak PPh 21 &amp; iuran BPJS</b>, serta menerbitkan <b>Surat Perintah (SP) Penyaluran Dana ke Bank Mitra Bayar</b>.
+            </div>
+          </div>
+
+          {/* 3. STATCARDS: RINGKASAN KEBUTUHAN KAS KEUANGAN */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+            <StatCard
+              icon={<Users size={IC} />}
+              label="Total Jiwa Penerima"
+              value={`${fmtJiwa(grandTotalJiwa.total)} Jiwa`}
+              sub={`${fmtJiwa(grandTotalJiwa.penerima)} Penerima • ${fmtJiwa(grandTotalJiwa.istriSuami + grandTotalJiwa.anak)} Keluarga`}
+              color={COLORS.blue}
+            />
+            <StatCard
+              icon={<Banknote size={IC} />}
+              label="Beban Bruto Hak Pensiun"
+              value={fmt(grandTotalBruto)}
+              sub="Akumulasi Hak Pensiun Bruto"
+              color={COLORS.green}
+            />
+            <StatCard
+              icon={<Receipt size={IC} />}
+              label="Total Potongan Resmi"
+              value={fmt(grandTotalPotongan)}
+              sub="PPh 21 Pensiun, Iuran BPJS &amp; Non-TGR"
+              color={COLORS.red}
+            />
+            <StatCard
+              icon={<Wallet size={IC} />}
+              label="Total Netto Kas Disalurkan"
+              value={fmt(grandTotalNetto)}
+              sub="Kas Keluar Bersih via Bank Mitra"
+              color={COLORS.blueDark}
+            />
+          </div>
+
+          {/* 4. MATRIKS ALOKASI KAS KE BANK MITRA BAYAR & SURAT PERINTAH (SP) - Di-hide sementara sesuai arahan user, langsung ke List per MAK */}
+          {false && (
+            <div
+              style={{
+                background: COLORS.white,
+                borderRadius: 10,
+                border: `1px solid ${COLORS.gray200}`,
+                overflow: "hidden"
+              }}
+            >
+              <div
+                style={{
+                  padding: "14px 18px",
+                  borderBottom: `1px solid ${COLORS.gray200}`,
+                  background: "#F8FAFC",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Building2 size={18} color={COLORS.blue} />
+                  <div>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: COLORS.gray900 }}>
+                      Alokasi Kebutuhan Kas Penyaluran ke Bank Mitra Bayar ({selectedBulan})
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 10, textTransform: "uppercase", color: COLORS.gray500, fontWeight: 700 }}>Potongan</div>
-                      <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace", color: "#DC2626" }}>{fmt(dapem.totalPotongan.total)}</div>
-                    </div>
-                    <div style={{ textAlign: "right", background: COLORS.white, border: `1.5px solid ${COLORS.blueDark}`, padding: "4px 12px", borderRadius: 6 }}>
-                      <div style={{ fontSize: 9.5, textTransform: "uppercase", color: COLORS.gray600, fontWeight: 800 }}>Jumlah Netto</div>
-                      <div style={{ fontWeight: 800, fontSize: 14, fontFamily: "monospace", color: COLORS.blueDark }}>{fmt(dapem.totalNetto)}</div>
-                    </div>
-                    <div style={{ fontSize: 13, color: COLORS.gray500, transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
-                      ▼
+                    <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>
+                      Dasar penerbitan Surat Perintah (SP) pemindahbukuan dana pensiun dari giro ASABRI ke rekening mitra bayar.
                     </div>
                   </div>
                 </div>
 
-                {/* Body Table MAK */}
-                {isOpen && (
-                  <div style={{ overflowX: "auto", borderTop: `1px solid ${COLORS.gray200}` }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                      <thead>
-                        <tr style={{ background: "#F1F5F9", color: COLORS.gray700 }}>
-                          <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700 }}>Jenis Pensiun / Hak</th>
-                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Total Jiwa</th>
-                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Penerima</th>
-                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Beban Bruto (Rp)</th>
-                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "#DC2626" }}>Potongan (Rp)</th>
-                          <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 800, color: COLORS.blueDark }}>Netto Disalurkan (Rp)</th>
-                          <th style={{ padding: "8px 12px", textAlign: "center", fontWeight: 700 }}>Rincian BNBA</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dapem.jenisList.map((jenis, jIdx) => (
-                          <tr key={jIdx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
-                            <td style={{ padding: "10px 12px", fontWeight: 700, color: COLORS.gray900 }}>
-                              {jenis.nama}
-                              {jenis.deskripsi && (
-                                <div style={{ fontSize: 10.5, color: COLORS.gray500, fontWeight: 400 }}>{jenis.deskripsi}</div>
-                              )}
-                            </td>
-                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtJiwa(jenis.jiwa.total)} Jiwa
-                            </td>
-                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmtJiwa(jenis.jiwa.penerima)} Jiwa
-                            </td>
-                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
-                              {fmt(jenis.bruto.total)}
-                            </td>
-                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#DC2626" }}>
-                              {fmt(jenis.potongan.total)}
-                            </td>
-                            <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 12.5 }}>
-                              {fmt(jenis.netto)}
-                            </td>
-                            <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                              <Btn
-                                size="xs"
-                                variant="ghost"
-                                onClick={() => {
-                                  setSelectedBNBAMAK(`${dapem.namaKelompok} — ${jenis.nama}`);
-                                  setShowBNBAModal(true);
-                                }}
-                              >
-                                <Eye size={11} style={{ marginRight: 3 }} />
-                                Detail Peserta
-                              </Btn>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Btn
+                    size="xs"
+                    variant="outline"
+                    onClick={() => {
+                      setPreview({
+                        title: `Rekapitulasi Penyaluran Kas Mitra Bayar — ${selectedBulan}`,
+                        subtitle: `Kebutuhan Kas Penyaluran Pensiun via Bank Mitra`,
+                        type: "table",
+                        fileName: `Alokasi_Mitra_DAPEM_${selectedBulan}.xlsx`,
+                        content: {
+                          columns: ["No", "Mitra Bayar", "Jumlah Penerima", "Alokasi Netto Kas (Rp)", "Nomor Surat Perintah (SP)", "Tanggal Salur", "Status"],
+                          rows: currentMitraList.map((m, idx) => [
+                            idx + 1,
+                            m.mitra,
+                            `${fmtJiwa(m.penerima)} Jiwa`,
+                            fmt(m.alokasiNetto),
+                            m.noSP,
+                            m.tglCair,
+                            m.status
+                          ]),
+                          totalRows: currentMitraList.length
+                        }
+                      });
+                    }}
+                  >
+                    <Download size={12} style={{ marginRight: 4 }} />
+                    Ekspor Daftar SP
+                  </Btn>
+                </div>
               </div>
-            );
-          })}
+
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr style={{ background: "#F8FAFC", color: COLORS.gray700, textAlign: "left" }}>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Mitra Bayar / Perbankan</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Jumlah Penerima</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "right" }}>Alokasi Kas Netto (Rp)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Surat Perintah (SP)</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}` }}>Status Likuiditas</th>
+                      <th style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.gray200}`, textAlign: "center" }}>Aksi Dokumen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentMitraList.map((m) => (
+                      <tr key={m.id} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ fontWeight: 800, color: COLORS.gray900 }}>{m.mitra}</div>
+                          <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>{m.singkatan} • Rekening Giro Khusus Pensiun</div>
+                        </td>
+                        <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
+                          {fmtJiwa(m.penerima)} Jiwa
+                        </td>
+                        <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 13 }}>
+                          {fmt(m.alokasiNetto)}
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>{m.noSP}</div>
+                          <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 1 }}>Tgl Salur: {m.tglCair}</div>
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: "3px 8px",
+                              borderRadius: 4,
+                              background: "#ECFDF5",
+                              color: "#065F46",
+                              fontWeight: 700,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4
+                            }}
+                          >
+                            <CheckCircle2 size={12} color="#059669" />
+                            {m.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                          <Btn
+                            size="xs"
+                            variant="outline"
+                            onClick={() => handleOpenSPPreview(m)}
+                          >
+                            <FileText size={12} style={{ marginRight: 4 }} />
+                            Lihat SP Mitra
+                          </Btn>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ background: "#F8FAFC", borderTop: `2px solid ${COLORS.gray300}`, fontWeight: 800 }}>
+                      <td style={{ padding: "12px 14px" }}>TOTAL PENYALURAN KAS KE SELURUH MITRA:</td>
+                      <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace" }}>
+                        {fmtJiwa(currentMitraList.reduce((a, b) => a + b.penerima, 0))} Jiwa
+                      </td>
+                      <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "monospace", color: COLORS.blueDark, fontSize: 13.5 }}>
+                        {fmt(currentMitraList.reduce((a, b) => a + b.alokasiNetto, 0))}
+                      </td>
+                      <td colSpan={3} style={{ padding: "12px 14px", color: "#065F46", fontSize: 11.5 }}>
+                        ✅ Likuiditas Giro Mandiri &amp; BNI Siap Dibukukan
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* 5. TABEL REKAPITULASI III RESMI PEMERINTAH (BERDASARKAN 4 MAK RESMI) */}
+          <div style={{ background: COLORS.white, borderRadius: 10, padding: "20px 22px", border: `1px solid ${COLORS.gray200}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: COLORS.gray900 }}>
+                  Rekapitulasi III Pertanggungjawaban Anggaran Pensiun (4 MAK Kemenkeu)
+                </div>
+                <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 2 }}>
+                  Alokasi beban belanja pensiun menurut Bagan Akun Standar (BAS) Kementerian Keuangan RI.
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <Btn
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedBNBAMAK(null);
+                    setShowBNBAModal(true);
+                  }}
+                >
+                  <Users size={13} style={{ marginRight: 4 }} />
+                  Lihat Rincian Peserta (BNBA)
+                </Btn>
+                <Btn
+                  size="sm"
+                  variant="primary"
+                  onClick={() => {
+                    setPreview({
+                      title: `Rekapitulasi III Pembayaran Pensiun — ${selectedBulan}`,
+                      subtitle: `Format Resmi Laporan Keuangan Ditjen Perbendaharaan`,
+                      type: "table",
+                      fileName: `Rekap_III_${activeSubtab}_${selectedBulan}.xlsx`,
+                      content: {
+                        columns: ["No", "Kode MAK", "Kelompok Pensiun", "Total Jiwa", "Penerima Pokok", "Jumlah Bruto (Rp)", "Total Potongan (Rp)", "Jumlah Netto (Rp)"],
+                        rows: currentDataset.map((d) => [
+                          d.no,
+                          d.kodeMAK,
+                          d.namaKelompok,
+                          `${fmtJiwa(d.totalJiwa.total)} Jiwa`,
+                          `${fmtJiwa(d.totalJiwa.penerima)} Jiwa`,
+                          fmt(d.totalBruto.total),
+                          fmt(d.totalPotongan.total),
+                          fmt(d.totalNetto)
+                        ]),
+                        totalRows: currentDataset.length
+                      }
+                    });
+                  }}
+                >
+                  <Download size={13} style={{ marginRight: 4 }} />
+                  Ekspor Rekap III
+                </Btn>
+              </div>
+            </div>
+
+            {/* ACCORDION PER MAK */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {filteredMAKList.map((dapem) => {
+                const isOpen = !!expandedDapem[dapem.kodeMAK];
+
+                return (
+                  <div key={dapem.kodeMAK} style={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, overflow: "hidden" }}>
+                    {/* Header Card MAK */}
+                    <div
+                      onClick={() => toggleExpand(dapem.kodeMAK)}
+                      style={{
+                        padding: "12px 18px",
+                        background: "#F8FAFC",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        userSelect: "none"
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 6, background: COLORS.blueDark, color: COLORS.white, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>
+                          {dapem.no}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: 13.5, color: COLORS.gray900 }}>
+                            {dapem.namaKelompok}
+                          </div>
+                          <div style={{ fontSize: 11.5, color: COLORS.gray500, marginTop: 1 }}>
+                            MAK: <b>{dapem.kodeMAK}</b> • {fmtJiwa(dapem.totalJiwa.total)} Total Jiwa ({fmtJiwa(dapem.totalJiwa.penerima)} Penerima Manfaat)
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontSize: 10, textTransform: "uppercase", color: COLORS.gray500, fontWeight: 700 }}>Total Bruto</div>
+                          <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace" }}>{fmt(dapem.totalBruto.total)}</div>
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontSize: 10, textTransform: "uppercase", color: COLORS.gray500, fontWeight: 700 }}>Potongan</div>
+                          <div style={{ fontWeight: 700, fontSize: 13, fontFamily: "monospace", color: "#DC2626" }}>{fmt(dapem.totalPotongan.total)}</div>
+                        </div>
+                        <div style={{ textAlign: "right", background: COLORS.white, border: `1.5px solid ${COLORS.blueDark}`, padding: "4px 12px", borderRadius: 6 }}>
+                          <div style={{ fontSize: 9.5, textTransform: "uppercase", color: COLORS.gray600, fontWeight: 800 }}>Jumlah Netto</div>
+                          <div style={{ fontWeight: 800, fontSize: 14, fontFamily: "monospace", color: COLORS.blueDark }}>{fmt(dapem.totalNetto)}</div>
+                        </div>
+                        <div style={{ fontSize: 13, color: COLORS.gray500, transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+                          ▼
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Body Table MAK */}
+                    {isOpen && (
+                      <div style={{ overflowX: "auto", borderTop: `1px solid ${COLORS.gray200}` }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                          <thead>
+                            <tr style={{ background: "#F1F5F9", color: COLORS.gray700 }}>
+                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700 }}>Jenis Pensiun / Hak</th>
+                              <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Total Jiwa</th>
+                              <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Penerima</th>
+                              <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700 }}>Beban Bruto (Rp)</th>
+                              <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "#DC2626" }}>Potongan (Rp)</th>
+                              <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 800, color: COLORS.blueDark }}>Netto Disalurkan (Rp)</th>
+                              <th style={{ padding: "8px 12px", textAlign: "center", fontWeight: 700 }}>Rincian BNBA</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dapem.jenisList.map((jenis, jIdx) => (
+                              <tr key={jIdx} style={{ borderBottom: `1px solid ${COLORS.gray100}` }}>
+                                <td style={{ padding: "10px 12px", fontWeight: 700, color: COLORS.gray900 }}>
+                                  {jenis.nama}
+                                  {jenis.deskripsi && (
+                                    <div style={{ fontSize: 10.5, color: COLORS.gray500, fontWeight: 400 }}>{jenis.deskripsi}</div>
+                                  )}
+                                </td>
+                                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtJiwa(jenis.jiwa.total)} Jiwa
+                                </td>
+                                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmtJiwa(jenis.jiwa.penerima)} Jiwa
+                                </td>
+                                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace" }}>
+                                  {fmt(jenis.bruto.total)}
+                                </td>
+                                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", color: "#DC2626" }}>
+                                  {fmt(jenis.potongan.total)}
+                                </td>
+                                <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "monospace", fontWeight: 800, color: COLORS.blueDark, fontSize: 12.5 }}>
+                                  {fmt(jenis.netto)}
+                                </td>
+                                <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                                  <Btn
+                                    size="xs"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setSelectedBNBAMAK(`${dapem.namaKelompok} — ${jenis.nama}`);
+                                      setShowBNBAModal(true);
+                                    }}
+                                  >
+                                    <Eye size={11} style={{ marginRight: 3 }} />
+                                    Detail Peserta
+                                  </Btn>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
