@@ -237,6 +237,29 @@ const getPeriodeLabel = (startStr, endStr) => {
   }
 };
 
+const matchesGolongan = (golName, filter) => {
+  if (!filter || filter === "Semua") return true;
+  if (filter === "Tamtama / Golongan I") {
+    return golName.includes("TAMTAMA") || golName === "Golongan I";
+  }
+  if (filter === "Bintara / Golongan II") {
+    return golName.includes("BINTARA") || golName === "Golongan II";
+  }
+  if (filter === "Pama / Golongan III") {
+    return golName.includes("PAMA") || golName === "Golongan III";
+  }
+  if (filter === "Pamen / Golongan IV") {
+    return golName.includes("PAMEN") || (golName === "Golongan IV" && !golName.includes("PATI"));
+  }
+  if (filter === "Pati / Perwira Tinggi") {
+    return golName.includes("PATI");
+  }
+  if (filter === "PPPK (Golongan IX - XII)") {
+    return golName.includes("Golongan IX") || golName.includes("Golongan X") || golName.includes("Golongan XI") || golName.includes("Golongan XII");
+  }
+  return golName.includes(filter);
+};
+
 export const KalkulatorIuran = () => {
   // View mode: "list" (daftar per bulan) or "detail" (rincian bulan terpilih)
   const [viewMode, setViewMode] = useState("list");
@@ -246,6 +269,7 @@ export const KalkulatorIuran = () => {
 
   const [selectedSatker, setSelectedSatker] = useState(null);
   const [filterSatker, setFilterSatker] = useState("Semua");
+  const [filterGolongan, setFilterGolongan] = useState("Semua");
   const [filterJenis, setFilterJenis] = useState("Semua");
   const [tglAwal, setTglAwal] = useState("2026-07-01");
   const [tglAkhir, setTglAkhir] = useState("2026-07-31");
@@ -329,7 +353,33 @@ export const KalkulatorIuran = () => {
 
   const filterPeriode = `${tglAwal} s.d. ${tglAkhir}`;
 
-  const satkerData = filterSatker === "Semua" ? allSatkerData : allSatkerData.filter(s => s.kode === filterSatker || s.nama === filterSatker);
+  const satkerData = useMemo(() => {
+    let data = filterSatker === "Semua" ? allSatkerData : allSatkerData.filter(s => s.kode === filterSatker || s.nama === filterSatker);
+
+    if (filterGolongan !== "Semua") {
+      data = data.map(s => {
+        const matchingGols = s.gol.filter(g => matchesGolongan(g.gol, filterGolongan));
+        const peserta = matchingGols.reduce((a, g) => a + g.peserta, 0);
+        const gp = Number(matchingGols.reduce((a, g) => a + g.gp, 0).toFixed(2));
+        const tht = Number(matchingGols.reduce((a, g) => a + g.tht, 0).toFixed(2));
+        const Pensiun = s.isPPPK ? 0.0 : Number(matchingGols.reduce((a, g) => a + g.Pensiun, 0).toFixed(2));
+        const jkk = Number(matchingGols.reduce((a, g) => a + g.jkk, 0).toFixed(2));
+        const jkm = Number(matchingGols.reduce((a, g) => a + g.jkm, 0).toFixed(2));
+
+        return {
+          ...s,
+          peserta,
+          gp,
+          tht,
+          Pensiun,
+          jkk,
+          jkm,
+          gol: matchingGols
+        };
+      }).filter(s => s.gol.length > 0);
+    }
+    return data;
+  }, [allSatkerData, filterSatker, filterGolongan]);
 
   const showCol = (jenis) => filterJenis === "Semua" || filterJenis === jenis;
 
@@ -349,6 +399,276 @@ export const KalkulatorIuran = () => {
     setTglAwal(m.start);
     setTglAkhir(m.end);
     setViewMode("detail");
+  };
+
+  const handleExportList = (format = "excel") => {
+    const isExcel = format === "excel";
+    const isFiltered = searchBulan.trim().length > 0;
+
+    const rows = filteredMonths.map((m, idx) => [
+      idx + 1,
+      m.periodeLabel,
+      `${m.start} s.d. ${m.end}`,
+      `${m.totalPeserta.toLocaleString("id-ID")} Peserta`,
+      "5 Entitas (TNI AD, AL, AU, POLRI, Kemhan)",
+      "THT 3,25% • Pensiun 4,75% • JKK 0,24% • JKm 0,20%"
+    ]);
+
+    const avgPesertaFiltered = Math.round(
+      filteredMonths.reduce((a, m) => a + m.totalPeserta, 0) / (filteredMonths.length || 1)
+    );
+
+    const totalRow = [
+      { text: `TOTAL / RATA-RATA (${filteredMonths.length} BULAN TA ${selectedTahun}):`, colSpan: 3, align: "left" },
+      `${avgPesertaFiltered.toLocaleString("id-ID")} (rata-rata)`,
+      "5 Entitas Resmi",
+      "4 Program Iuran"
+    ];
+
+    setPreview({
+      title: `Daftar Iuran Peserta Tahunan — TA ${selectedTahun}`,
+      subtitle: `Format ${isExcel ? "Excel (.xlsx)" : "PDF Resmi"} • ${isFiltered ? `Pencarian: "${searchBulan}" • ` : ""}${filteredMonths.length} Periode Bulan`,
+      type: "table",
+      fileName: `Daftar_Iuran_Tahunan_${selectedTahun}${isFiltered ? `_${searchBulan.replace(/[^a-zA-Z0-9]/g, "_")}` : ""}.${isExcel ? "xlsx" : "pdf"}`,
+      content: {
+        columns: ["No", "Bulan / Periode", "Rentang Tanggal", "Peserta Aktif", "Cakupan Entitas", "Program Iuran"],
+        alignments: ["center", "left", "left", "right", "left", "left"],
+        rows,
+        totalRow,
+        totalRows: rows.length
+      }
+    });
+  };
+
+  const handleExportDetail = (format = "excel") => {
+    const isExcel = format === "excel";
+    const isSingleSatker = filterSatker !== "Semua" && satkerData.length === 1;
+    const isFilteredGolongan = filterGolongan !== "Semua";
+
+    let columns = [];
+    let alignments = [];
+    let rows = [];
+    let totalRow = null;
+
+    if (isSingleSatker) {
+      const s = satkerData[0];
+      const isPPPK = s.isPPPK;
+
+      if (filterJenis === "Semua") {
+        columns = ["No", "Golongan / Pangkat", "Peserta", "Total GP+Tunj", "THT (3,25%)", "Pensiun (4,75%)", "JKK (0,24%)", "JKm (0,20%)", "Total Iuran"];
+        alignments = ["center", "left", "right", "right", "right", "right", "right", "right", "right"];
+        rows = s.gol.map((g, gi) => [
+          gi + 1,
+          g.gol,
+          g.peserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + g.gp.toFixed(2) + " M",
+          "Rp " + g.tht.toFixed(2) + " M",
+          isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + g.Pensiun.toFixed(2) + " M",
+          "Rp " + g.jkk.toFixed(2) + " M",
+          "Rp " + g.jkm.toFixed(2) + " M",
+          "Rp " + (g.tht + (isPPPK ? 0 : g.Pensiun) + g.jkk + g.jkm).toFixed(2) + " M"
+        ]);
+        const totIuran = s.tht + (isPPPK ? 0 : s.Pensiun) + s.jkk + s.jkm;
+        totalRow = [
+          { text: `TOTAL ${s.nama.toUpperCase()}`, colSpan: 2, align: "left" },
+          s.peserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + s.gp.toFixed(2) + " M",
+          "Rp " + s.tht.toFixed(2) + " M",
+          isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + s.Pensiun.toFixed(2) + " M",
+          "Rp " + s.jkk.toFixed(2) + " M",
+          "Rp " + s.jkm.toFixed(2) + " M",
+          "Rp " + totIuran.toFixed(2) + " M"
+        ];
+      } else {
+        const getVal = (g) => {
+          if (filterJenis === "THT") return "Rp " + g.tht.toFixed(2) + " M";
+          if (filterJenis === "Pensiun") return isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + g.Pensiun.toFixed(2) + " M";
+          if (filterJenis === "JKK") return "Rp " + g.jkk.toFixed(2) + " M";
+          if (filterJenis === "JKm") return "Rp " + g.jkm.toFixed(2) + " M";
+          return "Rp 0,00 M";
+        };
+        const getTotVal = () => {
+          if (filterJenis === "THT") return "Rp " + s.tht.toFixed(2) + " M";
+          if (filterJenis === "Pensiun") return isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + s.Pensiun.toFixed(2) + " M";
+          if (filterJenis === "JKK") return "Rp " + s.jkk.toFixed(2) + " M";
+          if (filterJenis === "JKm") return "Rp " + s.jkm.toFixed(2) + " M";
+          return "Rp 0,00 M";
+        };
+        const jenisLabel = filterJenis === "THT" ? "THT (3,25%)" : filterJenis === "Pensiun" ? "Pensiun (4,75%)" : filterJenis === "JKK" ? "JKK (0,24%)" : "JKm (0,20%)";
+
+        columns = ["No", "Golongan / Pangkat", "Peserta", "Total GP+Tunj", `Iuran ${jenisLabel}`];
+        alignments = ["center", "left", "right", "right", "right"];
+        rows = s.gol.map((g, gi) => [
+          gi + 1,
+          g.gol,
+          g.peserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + g.gp.toFixed(2) + " M",
+          getVal(g)
+        ]);
+        totalRow = [
+          { text: `TOTAL ${s.nama.toUpperCase()}`, colSpan: 2, align: "left" },
+          s.peserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + s.gp.toFixed(2) + " M",
+          getTotVal()
+        ];
+      }
+    } else if (isFilteredGolongan) {
+      if (filterJenis === "Semua") {
+        columns = ["No", "Unor / Satker", "Golongan / Pangkat", "Peserta", "Total GP (M)", "THT (3,25%)", "Pensiun (4,75%)", "JKK (0,24%)", "JKm (0,20%)", "Total Iuran"];
+        alignments = ["center", "left", "left", "right", "right", "right", "right", "right", "right", "right"];
+        let rowIdx = 1;
+        rows = [];
+        satkerData.forEach(s => {
+          s.gol.forEach(g => {
+            const tot = g.tht + (s.isPPPK ? 0 : g.Pensiun) + g.jkk + g.jkm;
+            rows.push([
+              rowIdx++,
+              s.nama + (s.isPPPK ? " (PPPK)" : ""),
+              g.gol,
+              g.peserta.toLocaleString("id-ID") + " Peserta",
+              "Rp " + g.gp.toFixed(2) + " M",
+              "Rp " + g.tht.toFixed(2) + " M",
+              s.isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + g.Pensiun.toFixed(2) + " M",
+              "Rp " + g.jkk.toFixed(2) + " M",
+              "Rp " + g.jkm.toFixed(2) + " M",
+              "Rp " + tot.toFixed(2) + " M"
+            ]);
+          });
+        });
+        const grandTotalIuran = totalTHT + totalPensiun + totalJKK + totalJKM;
+        totalRow = [
+          { text: `GRAND TOTAL (${filterGolongan.toUpperCase()})`, colSpan: 3, align: "left" },
+          totalPeserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + totalGP.toFixed(2) + " M",
+          "Rp " + totalTHT.toFixed(2) + " M",
+          "Rp " + totalPensiun.toFixed(2) + " M",
+          "Rp " + totalJKK.toFixed(2) + " M",
+          "Rp " + totalJKM.toFixed(2) + " M",
+          "Rp " + grandTotalIuran.toFixed(2) + " M"
+        ];
+      } else {
+        const jenisLabel = filterJenis === "THT" ? "THT (3,25%)" : filterJenis === "Pensiun" ? "Pensiun (4,75%)" : filterJenis === "JKK" ? "JKK (0,24%)" : "JKm (0,20%)";
+        const getVal = (s, g) => {
+          if (filterJenis === "THT") return "Rp " + g.tht.toFixed(2) + " M";
+          if (filterJenis === "Pensiun") return s.isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + g.Pensiun.toFixed(2) + " M";
+          if (filterJenis === "JKK") return "Rp " + g.jkk.toFixed(2) + " M";
+          if (filterJenis === "JKm") return "Rp " + g.jkm.toFixed(2) + " M";
+          return "Rp 0,00 M";
+        };
+        const getGrandVal = () => {
+          if (filterJenis === "THT") return "Rp " + totalTHT.toFixed(2) + " M";
+          if (filterJenis === "Pensiun") return "Rp " + totalPensiun.toFixed(2) + " M";
+          if (filterJenis === "JKK") return "Rp " + totalJKK.toFixed(2) + " M";
+          if (filterJenis === "JKm") return "Rp " + totalJKM.toFixed(2) + " M";
+          return "Rp 0,00 M";
+        };
+
+        columns = ["No", "Unor / Satker", "Golongan / Pangkat", "Peserta", "Total GP (M)", `Iuran ${jenisLabel}`];
+        alignments = ["center", "left", "left", "right", "right", "right"];
+        let rowIdx = 1;
+        rows = [];
+        satkerData.forEach(s => {
+          s.gol.forEach(g => {
+            rows.push([
+              rowIdx++,
+              s.nama + (s.isPPPK ? " (PPPK)" : ""),
+              g.gol,
+              g.peserta.toLocaleString("id-ID") + " Peserta",
+              "Rp " + g.gp.toFixed(2) + " M",
+              getVal(s, g)
+            ]);
+          });
+        });
+        totalRow = [
+          { text: `GRAND TOTAL (${filterGolongan.toUpperCase()})`, colSpan: 3, align: "left" },
+          totalPeserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + totalGP.toFixed(2) + " M",
+          getGrandVal()
+        ];
+      }
+    } else {
+      if (filterJenis === "Semua") {
+        columns = ["No", "Unor / Satker", "Peserta", "Total GP (M)", "THT (3,25%)", "Pensiun (4,75%)", "JKK (0,24%)", "JKm (0,20%)", "Total Iuran"];
+        alignments = ["center", "left", "right", "right", "right", "right", "right", "right", "right"];
+        rows = satkerData.map((s, si) => [
+          si + 1,
+          s.nama + (s.isPPPK ? " (PPPK Non-Pensiun)" : ""),
+          s.peserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + s.gp.toFixed(2) + " M",
+          "Rp " + s.tht.toFixed(2) + " M",
+          s.isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + s.Pensiun.toFixed(2) + " M",
+          "Rp " + s.jkk.toFixed(2) + " M",
+          "Rp " + s.jkm.toFixed(2) + " M",
+          "Rp " + (s.tht + (s.isPPPK ? 0 : s.Pensiun) + s.jkk + s.jkm).toFixed(2) + " M"
+        ]);
+        const grandTotalIuran = totalTHT + totalPensiun + totalJKK + totalJKM;
+        totalRow = [
+          { text: "GRAND TOTAL SELURUH UNOR", colSpan: 2, align: "left" },
+          totalPeserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + totalGP.toFixed(2) + " M",
+          "Rp " + totalTHT.toFixed(2) + " M",
+          "Rp " + totalPensiun.toFixed(2) + " M",
+          "Rp " + totalJKK.toFixed(2) + " M",
+          "Rp " + totalJKM.toFixed(2) + " M",
+          "Rp " + grandTotalIuran.toFixed(2) + " M"
+        ];
+      } else {
+        const jenisLabel = filterJenis === "THT" ? "THT (3,25%)" : filterJenis === "Pensiun" ? "Pensiun (4,75%)" : filterJenis === "JKK" ? "JKK (0,24%)" : "JKm (0,20%)";
+        const getVal = (s) => {
+          if (filterJenis === "THT") return "Rp " + s.tht.toFixed(2) + " M";
+          if (filterJenis === "Pensiun") return s.isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + s.Pensiun.toFixed(2) + " M";
+          if (filterJenis === "JKK") return "Rp " + s.jkk.toFixed(2) + " M";
+          if (filterJenis === "JKm") return "Rp " + s.jkm.toFixed(2) + " M";
+          return "Rp 0,00 M";
+        };
+        const getGrandVal = () => {
+          if (filterJenis === "THT") return "Rp " + totalTHT.toFixed(2) + " M";
+          if (filterJenis === "Pensiun") return "Rp " + totalPensiun.toFixed(2) + " M";
+          if (filterJenis === "JKK") return "Rp " + totalJKK.toFixed(2) + " M";
+          if (filterJenis === "JKm") return "Rp " + totalJKM.toFixed(2) + " M";
+          return "Rp 0,00 M";
+        };
+
+        columns = ["No", "Unor / Satker", "Peserta", "Total GP (M)", `Iuran ${jenisLabel}`];
+        alignments = ["center", "left", "right", "right", "right"];
+        rows = satkerData.map((s, si) => [
+          si + 1,
+          s.nama + (s.isPPPK ? " (PPPK Non-Pensiun)" : ""),
+          s.peserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + s.gp.toFixed(2) + " M",
+          getVal(s)
+        ]);
+        totalRow = [
+          { text: "GRAND TOTAL SELURUH UNOR", colSpan: 2, align: "left" },
+          totalPeserta.toLocaleString("id-ID") + " Peserta",
+          "Rp " + totalGP.toFixed(2) + " M",
+          getGrandVal()
+        ];
+      }
+    }
+
+    const satkerText = filterSatker !== "Semua" ? filterSatker : "Seluruh Unor";
+    const golText = filterGolongan !== "Semua" ? ` • Gol: ${filterGolongan}` : "";
+    const jenisText = filterJenis !== "Semua" ? `Program ${filterJenis}` : "Seluruh Program";
+
+    const fileSatkerPart = filterSatker.replace(/[^a-zA-Z0-9]/g, "_");
+    const fileGolPart = filterGolongan !== "Semua" ? `_${filterGolongan.replace(/[^a-zA-Z0-9]/g, "_")}` : "";
+    const fileJenisPart = filterJenis;
+    const filePeriodePart = labelPeriode.replace(/[^a-zA-Z0-9]/g, "_");
+
+    setPreview({
+      title: `Preview Ekspor Rekap Iuran — Masa ${labelPeriode}`,
+      subtitle: `Format ${isExcel ? "Excel (.xlsx)" : "PDF"} • Masa: ${labelPeriode} • Unor: ${satkerText}${golText} • ${jenisText}`,
+      type: "table",
+      fileName: `Rekap_Iuran_${fileSatkerPart}${fileGolPart}_${fileJenisPart}_${filePeriodePart}.${isExcel ? "xlsx" : "pdf"}`,
+      content: {
+        columns,
+        alignments,
+        rows,
+        totalRow,
+        totalRows: rows.length
+      }
+    });
   };
 
   return (
@@ -503,26 +823,7 @@ export const KalkulatorIuran = () => {
                 <Btn
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setPreview({
-                      title: `Daftar Iuran Peserta Tahunan — TA ${selectedTahun}`,
-                      subtitle: `Format Excel (.xlsx) • Seluruh Bulan`,
-                      type: "table",
-                      fileName: `Daftar_Iuran_Tahunan_${selectedTahun}.xlsx`,
-                      content: {
-                        columns: ["No", "Bulan / Periode", "Rentang Tanggal", "Peserta Aktif", "Cakupan Entitas", "Program Iuran"],
-                        rows: monthlySummaries.map((m, idx) => [
-                          idx + 1,
-                          m.periodeLabel,
-                          `${m.start} s.d. ${m.end}`,
-                          `${m.totalPeserta.toLocaleString()} Peserta`,
-                          "5 Entitas (TNI AD, AL, AU, POLRI, Kemhan)",
-                          "THT 3,25% • Pensiun 4,75% • JKK 0,24% • JKm 0,20%"
-                        ]),
-                        totalRows: monthlySummaries.length
-                      }
-                    })
-                  }
+                  onClick={() => handleExportList("excel")}
                 >
                   <Download size={13} style={{ marginRight: 4 }} />
                   Ekspor Excel
@@ -530,26 +831,7 @@ export const KalkulatorIuran = () => {
                 <Btn
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setPreview({
-                      title: `Daftar Iuran Peserta Tahunan — TA ${selectedTahun}`,
-                      subtitle: `Format PDF Resmi Ditjen Anggaran Kemenkeu`,
-                      type: "table",
-                      fileName: `Daftar_Iuran_Tahunan_${selectedTahun}.pdf`,
-                      content: {
-                        columns: ["No", "Bulan / Periode", "Rentang Tanggal", "Peserta Aktif", "Cakupan Entitas", "Program Iuran"],
-                        rows: monthlySummaries.map((m, idx) => [
-                          idx + 1,
-                          m.periodeLabel,
-                          `${m.start} s.d. ${m.end}`,
-                          `${m.totalPeserta.toLocaleString()} Peserta`,
-                          "5 Entitas (TNI AD, AL, AU, POLRI, Kemhan)",
-                          "THT 3,25% • Pensiun 4,75% • JKK 0,24% • JKm 0,20%"
-                        ]),
-                        totalRows: monthlySummaries.length
-                      }
-                    })
-                  }
+                  onClick={() => handleExportList("pdf")}
                 >
                   <Download size={13} style={{ marginRight: 4 }} />
                   Ekspor PDF
@@ -779,7 +1061,7 @@ export const KalkulatorIuran = () => {
               border: `1px solid ${COLORS.gray200}`,
               boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
               display: "grid",
-              gridTemplateColumns: "minmax(280px, 1.4fr) minmax(220px, 1.3fr) minmax(180px, 1fr)",
+              gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
               gap: 16,
               width: "100%",
               boxSizing: "border-box",
@@ -858,6 +1140,41 @@ export const KalkulatorIuran = () => {
               </select>
             </div>
 
+            {/* Filter Golongan / Kepangkatan */}
+            <div>
+              <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
+                <Shield size={13} color={COLORS.gray500} /> Golongan / Pangkat
+              </label>
+              <select
+                value={filterGolongan}
+                onChange={e => setFilterGolongan(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  borderRadius: 6,
+                  border: `1px solid ${COLORS.gray300}`,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: COLORS.gray800,
+                  background: COLORS.white,
+                  cursor: "pointer",
+                  boxSizing: "border-box"
+                }}
+              >
+                {[
+                  "Semua",
+                  "Tamtama / Golongan I",
+                  "Bintara / Golongan II",
+                  "Pama / Golongan III",
+                  "Pamen / Golongan IV",
+                  "Pati / Perwira Tinggi",
+                  "PPPK (Golongan IX - XII)"
+                ].map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Filter Jenis Iuran */}
             <div>
               <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
@@ -898,61 +1215,23 @@ export const KalkulatorIuran = () => {
                   <Btn
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      setPreview({
-                        title: `Preview Ekspor Rekap Iuran — Masa ${labelPeriode}`,
-                        subtitle: `Format Excel (.xlsx) • Periode ${filterPeriode}`,
-                        type: "table",
-                        fileName: `Rekap_Iuran_Unor_${labelPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
-                        content: {
-                          columns: ["Unor", "Peserta", "Total GP (M)", "THT", "Pensiun", "JKK", "JKm"],
-                          rows: satkerData.map(s => [
-                            s.nama + (s.isPPPK ? " (PPPK Non-Pensiun)" : ""),
-                            s.peserta.toLocaleString(),
-                            "Rp " + s.gp.toFixed(2) + " M",
-                            "Rp " + s.tht.toFixed(2) + " M",
-                            s.isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + s.Pensiun.toFixed(2) + " M",
-                            "Rp " + s.jkk.toFixed(2) + " M",
-                            "Rp " + s.jkm.toFixed(2) + " M"
-                          ]),
-                          totalRows: satkerData.length
-                        }
-                      })
-                    }
+                    onClick={() => handleExportDetail("excel")}
                   >
+                    <Download size={13} style={{ marginRight: 4 }} />
                     Ekspor Excel
                   </Btn>
                   <Btn
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      setPreview({
-                        title: `Preview Ekspor Rekap Iuran — Masa ${labelPeriode}`,
-                        subtitle: `Format PDF • Periode ${filterPeriode}`,
-                        type: "table",
-                        fileName: `Rekap_Iuran_Unor_${labelPeriode.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
-                        content: {
-                          columns: ["Unor", "Peserta", "Total GP (M)", "THT", "Pensiun", "JKK", "JKm"],
-                          rows: satkerData.map(s => [
-                            s.nama + (s.isPPPK ? " (PPPK Non-Pensiun)" : ""),
-                            s.peserta.toLocaleString(),
-                            "Rp " + s.gp.toFixed(2) + " M",
-                            "Rp " + s.tht.toFixed(2) + " M",
-                            s.isPPPK ? "Rp 0,00 M (Non-Pensiun)" : "Rp " + s.Pensiun.toFixed(2) + " M",
-                            "Rp " + s.jkk.toFixed(2) + " M",
-                            "Rp " + s.jkm.toFixed(2) + " M"
-                          ]),
-                          totalRows: satkerData.length
-                        }
-                      })
-                    }
+                    onClick={() => handleExportDetail("pdf")}
                   >
+                    <Download size={13} style={{ marginRight: 4 }} />
                     Ekspor PDF
                   </Btn>
                 </div>
               }
             >
-              Rekap Iuran per Instansi, Unor &amp; Golongan — Masa {labelPeriode} {filterSatker !== "Semua" && `(${filterSatker})`} {filterJenis !== "Semua" && `• ${filterJenis}`}
+              Rekap Iuran per Instansi, Unor &amp; Golongan — Masa {labelPeriode} {filterSatker !== "Semua" && `(${filterSatker})`} {filterGolongan !== "Semua" && `• ${filterGolongan}`} {filterJenis !== "Semua" && `• ${filterJenis}`}
             </SectionTitle>
 
             {satkerData.length === 0 ? <NoData /> : (() => {
@@ -1053,7 +1332,7 @@ export const KalkulatorIuran = () => {
             <div style={{ marginTop: 16, padding: "14px 18px", background: "#EFF6FF", borderRadius: 8, border: "1px solid #BFDBFE", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 15, color: COLORS.blueDark }}>
-                  Grand Total {filterSatker !== "Semua" ? filterSatker : "Seluruh Instansi & Unor"} — Masa {labelPeriode} {filterJenis !== "Semua" ? `(${filterJenis})` : ""}
+                  Grand Total {filterSatker !== "Semua" ? filterSatker : "Seluruh Instansi & Unor"} — Masa {labelPeriode} {filterGolongan !== "Semua" ? `[${filterGolongan}]` : ""} {filterJenis !== "Semua" ? `(${filterJenis})` : ""}
                 </div>
                 <div style={{ fontSize: 11.5, color: COLORS.gray600, marginTop: 2 }}>
                   Total {totalPeserta.toLocaleString()} Peserta Aktif • Total GP+Tunjangan: Rp {totalGP.toFixed(2)} M
