@@ -80,7 +80,7 @@ export const DEFAULT_UPLOADED_FILES = [
 export const DEFAULT_RAW_RK_DATA = [
   // -------------------------------------------------------------
   // 1. THT (TABUNGAN HARI TUA)
-  // Format: No | Program | Jenis Manfaat | Nomor KTPA | Nominal | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Kode Anggota | Mitra
+  // Format: No | Program | Jenis Manfaat | Nomor KPA | Nominal | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Kode Anggota | Mitra
   // -------------------------------------------------------------
   {
     no: 1,
@@ -246,7 +246,7 @@ export const DEFAULT_RAW_RK_DATA = [
 
   // -------------------------------------------------------------
   // 2. JKK (JAMINAN KECELAKAAN KERJA)
-  // Format: No | Nomor KTPA | DB | DK | Gugur | Tewas | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
+  // Format: No | Nomor KPA | DB | DK | Gugur | Tewas | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
   // -------------------------------------------------------------
   {
     no: 8,
@@ -386,7 +386,7 @@ export const DEFAULT_RAW_RK_DATA = [
 
   // -------------------------------------------------------------
   // 3. JKM (JAMINAN KEMATIAN)
-  // Format: No | Nomor KTPA | SKS | UDW | BP | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
+  // Format: No | Nomor KPA | SKS | UDW | BP | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
   // -------------------------------------------------------------
   {
     no: 13,
@@ -521,7 +521,7 @@ export const DEFAULT_RAW_RK_DATA = [
 
   // -------------------------------------------------------------
   // 4. NTIP (NILAI TUNAI IURAN PENSIUN)
-  // Format: No | KTPA | Tanggal Transaksi | Nama Penerima | Debet | Credit | Ledger Balance (Rp) | User ID | No SP | Tanggal SP | No DPS | Tanggal DPS | Mitra Bayar
+  // Format: No | KPA | Tanggal Transaksi | Nama Penerima | Debet | Credit | Ledger Balance (Rp) | User ID | No SP | Tanggal SP | No DPS | Tanggal DPS | Mitra Bayar
   // -------------------------------------------------------------
   {
     no: 18,

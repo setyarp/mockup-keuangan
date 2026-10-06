@@ -484,7 +484,7 @@ export const BRD_REPORTS_DATA = [
       "No.",
       "Bulan",
       "Peserta",
-      "KTPA",
+      "KPA",
       "Nominal",
       "Nomor Polis",
       "Tanggal Polis",
@@ -498,9 +498,9 @@ export const BRD_REPORTS_DATA = [
       "Tanggal Terima Imbal Jasa"
     ],
     rows: [
-      ["1", "Juli 2026", "Purn. Letda Budi Kartono", "KTPA-098812", "Rp 183.500.000", "TL-TPB-2026-00892", "01 Feb 2026", "02 Jul 2026", "Rp 5.505.000", "Rp 5.046.250", "Rp 605.550", "Rp 110.100", "Rp 10.551.250", "Rp 9.945.700", "05 Jul 2026"],
-      ["2", "Juli 2026", "Purn. AKP Siti Nurhaliza", "KTPA-098813", "Rp 154.200.000", "TL-TPB-2026-01205", "01 Mar 2026", "02 Jul 2026", "Rp 4.626.000", "Rp 4.240.500", "Rp 508.860", "Rp 92.520", "Rp 8.866.500", "Rp 8.357.640", "05 Jul 2026"],
-      ["3", "Juli 2026", "Purn. Mayor Arifin", "KTPA-098814", "Rp 210.000.000", "TL-TPB-2026-01450", "01 Apr 2026", "03 Jul 2026", "Rp 6.300.000", "Rp 5.775.000", "Rp 693.000", "Rp 126.000", "Rp 12.075.000", "Rp 11.382.000", "06 Jul 2026"]
+      ["1", "Juli 2026", "Purn. Letda Budi Kartono", "KPA-098812", "Rp 183.500.000", "TL-TPB-2026-00892", "01 Feb 2026", "02 Jul 2026", "Rp 5.505.000", "Rp 5.046.250", "Rp 605.550", "Rp 110.100", "Rp 10.551.250", "Rp 9.945.700", "05 Jul 2026"],
+      ["2", "Juli 2026", "Purn. AKP Siti Nurhaliza", "KPA-098813", "Rp 154.200.000", "TL-TPB-2026-01205", "01 Mar 2026", "02 Jul 2026", "Rp 4.626.000", "Rp 4.240.500", "Rp 508.860", "Rp 92.520", "Rp 8.866.500", "Rp 8.357.640", "05 Jul 2026"],
+      ["3", "Juli 2026", "Purn. Mayor Arifin", "KPA-098814", "Rp 210.000.000", "TL-TPB-2026-01450", "01 Apr 2026", "03 Jul 2026", "Rp 6.300.000", "Rp 5.775.000", "Rp 693.000", "Rp 126.000", "Rp 12.075.000", "Rp 11.382.000", "06 Jul 2026"]
     ],
     variantData: {
       tds: {
@@ -508,7 +508,7 @@ export const BRD_REPORTS_DATA = [
           "No.",
           "Bulan",
           "Peserta",
-          "KTPA",
+          "KPA",
           "Nominal",
           "Nomor Polis",
           "Tanggal Polis",
@@ -522,8 +522,8 @@ export const BRD_REPORTS_DATA = [
           "Tanggal Terima Imbal Jasa"
         ],
         rows: [
-          ["1", "Juli 2026", "Purn. Kol. Ahmad Rifai", "KTPA-091100", "Rp 6.000.000.000", "TL-TDS-2026-00124", "01 Jan 2026", "02 Jul 2026", "Rp 150.000.000", "Rp 137.500.000", "Rp 16.500.000", "Rp 3.000.000", "Rp 287.500.000", "Rp 271.000.000", "05 Jul 2026"],
-          ["2", "Juli 2026", "Purn. Kombes Hendro", "KTPA-091101", "Rp 4.500.000.000", "TL-TDS-2026-00125", "01 Jan 2026", "02 Jul 2026", "Rp 112.500.000", "Rp 103.125.000", "Rp 12.375.000", "Rp 2.250.000", "Rp 215.625.000", "Rp 203.250.000", "05 Jul 2026"]
+          ["1", "Juli 2026", "Purn. Kol. Ahmad Rifai", "KPA-091100", "Rp 6.000.000.000", "TL-TDS-2026-00124", "01 Jan 2026", "02 Jul 2026", "Rp 150.000.000", "Rp 137.500.000", "Rp 16.500.000", "Rp 3.000.000", "Rp 287.500.000", "Rp 271.000.000", "05 Jul 2026"],
+          ["2", "Juli 2026", "Purn. Kombes Hendro", "KPA-091101", "Rp 4.500.000.000", "TL-TDS-2026-00125", "01 Jan 2026", "02 Jul 2026", "Rp 112.500.000", "Rp 103.125.000", "Rp 12.375.000", "Rp 2.250.000", "Rp 215.625.000", "Rp 203.250.000", "05 Jul 2026"]
         ]
       },
       flagging: {
@@ -628,7 +628,7 @@ export const BRD_REPORTS_DATA = [
       "Mitra Bayar",
       "Program",
       "Jenis Manfaat",
-      "Nomor KTPA",
+      "Nomor KPA",
       "Nominal",
       "No SP",
       "Tanggal SP",
@@ -640,8 +640,8 @@ export const BRD_REPORTS_DATA = [
       "Mitra"
     ],
     rows: [
-      ["1", "06 Jul 2026", "Penyaluran Klaim THT BUP 142 Peserta", "Rp 17.750.000.000", "Rp 0", "Rp 802.250.000.000", "CMS_MANDIRI_01", "Bank Mandiri", "THT", "THT (BUP)", "KTPA-011928", "Rp 17.750.000.000", "SP/2026/07/012", "05 Jul 2026", "DPS-091/2026", "05 Jul 2026", "BAYAR-THT-001", "Kancab Jakarta", "TNI AD", "Bank Mandiri"],
-      ["2", "06 Jul 2026", "Penyaluran Klaim THT BUP 88 Peserta", "Rp 9.680.000.000", "Rp 0", "Rp 646.304.000.000", "CMS_BRI_02", "Bank BRI", "THT", "THT (BUP)", "KTPA-011929", "Rp 9.680.000.000", "SP/2026/07/088", "05 Jul 2026", "DPS-092/2026", "05 Jul 2026", "BAYAR-THT-002", "Kancab Surabaya", "POLRI", "Bank BRI"]
+      ["1", "06 Jul 2026", "Penyaluran Klaim THT BUP 142 Peserta", "Rp 17.750.000.000", "Rp 0", "Rp 802.250.000.000", "CMS_MANDIRI_01", "Bank Mandiri", "THT", "THT (BUP)", "KPA-011928", "Rp 17.750.000.000", "SP/2026/07/012", "05 Jul 2026", "DPS-091/2026", "05 Jul 2026", "BAYAR-THT-001", "Kancab Jakarta", "TNI AD", "Bank Mandiri"],
+      ["2", "06 Jul 2026", "Penyaluran Klaim THT BUP 88 Peserta", "Rp 9.680.000.000", "Rp 0", "Rp 646.304.000.000", "CMS_BRI_02", "Bank BRI", "THT", "THT (BUP)", "KPA-011929", "Rp 9.680.000.000", "SP/2026/07/088", "05 Jul 2026", "DPS-092/2026", "05 Jul 2026", "BAYAR-THT-002", "Kancab Surabaya", "POLRI", "Bank BRI"]
     ],
     variantData: {
       jkm: {
@@ -654,7 +654,7 @@ export const BRD_REPORTS_DATA = [
           "Ladger Balance (Rp)",
           "User ID",
           "Mitra Bayar",
-          "Nomor KTPA",
+          "Nomor KPA",
           "SKS",
           "UDW",
           "BP",
@@ -669,7 +669,7 @@ export const BRD_REPORTS_DATA = [
           "Mitra"
         ],
         rows: [
-          ["1", "06 Jul 2026", "Penyaluran Santunan JKM 12 Ahli Waris", "Rp 504.000.000", "Rp 0", "Rp 418.550.000.000", "CMS_BNI_01", "Bank BNI", "KTPA-088121", "Rp 42.000.000", "Rp 15.000.000", "Rp 12.000.000", "Rp 30.000.000", "SP/2026/07/044", "05 Jul 2026", "DPS-101/2026", "05 Jul 2026", "BAYAR-JKM-001", "Kancab Bandung", "TNI AU", "Bank BNI"]
+          ["1", "06 Jul 2026", "Penyaluran Santunan JKM 12 Ahli Waris", "Rp 504.000.000", "Rp 0", "Rp 418.550.000.000", "CMS_BNI_01", "Bank BNI", "KPA-088121", "Rp 42.000.000", "Rp 15.000.000", "Rp 12.000.000", "Rp 30.000.000", "SP/2026/07/044", "05 Jul 2026", "DPS-101/2026", "05 Jul 2026", "BAYAR-JKM-001", "Kancab Bandung", "TNI AU", "Bank BNI"]
         ]
       },
       jkk: {
@@ -682,7 +682,7 @@ export const BRD_REPORTS_DATA = [
           "Ladger Balance (Rp)",
           "User ID",
           "Mitra Bayar",
-          "Nomor KTPA",
+          "Nomor KPA",
           "DB",
           "DK",
           "Gugur",
@@ -698,13 +698,13 @@ export const BRD_REPORTS_DATA = [
           "Mitra"
         ],
         rows: [
-          ["1", "06 Jul 2026", "Santunan Gugur Tugas Operasi", "Rp 450.000.000", "Rp 0", "Rp 801.800.000.000", "CMS_MANDIRI_01", "Bank Mandiri", "KTPA-077123", "Rp 0", "Rp 0", "Rp 400.000.000", "Rp 0", "Rp 50.000.000", "SP/2026/07/099", "05 Jul 2026", "DPS-105/2026", "05 Jul 2026", "BAYAR-JKK-001", "Kancab Jayapura", "TNI AD", "Bank Mandiri"]
+          ["1", "06 Jul 2026", "Santunan Gugur Tugas Operasi", "Rp 450.000.000", "Rp 0", "Rp 801.800.000.000", "CMS_MANDIRI_01", "Bank Mandiri", "KPA-077123", "Rp 0", "Rp 0", "Rp 400.000.000", "Rp 0", "Rp 50.000.000", "SP/2026/07/099", "05 Jul 2026", "DPS-105/2026", "05 Jul 2026", "BAYAR-JKK-001", "Kancab Jayapura", "TNI AD", "Bank Mandiri"]
         ]
       },
       ntip: {
         columns: [
           "No.",
-          "KTPA",
+          "KPA",
           "Tanggal Transaksi",
           "Nama Penerima",
           "Debet",
@@ -718,8 +718,8 @@ export const BRD_REPORTS_DATA = [
           "Mitra Bayar"
         ],
         rows: [
-          ["1", "KTPA-066124", "06 Jul 2026", "Purn. Letkol Tri W.", "Rp 32.500.000", "Rp 0", "Rp 135.000.000.000", "CMS_BSI_01", "SP/2026/07/110", "05 Jul 2026", "DPS-112/2026", "05 Jul 2026", "Bank BSI"],
-          ["2", "KTPA-066125", "06 Jul 2026", "Purn. Peltu Agus H.", "Rp 24.800.000", "Rp 0", "Rp 134.975.200.000", "CMS_BSI_01", "SP/2026/07/111", "05 Jul 2026", "DPS-113/2026", "05 Jul 2026", "Bank BSI"]
+          ["1", "KPA-066124", "06 Jul 2026", "Purn. Letkol Tri W.", "Rp 32.500.000", "Rp 0", "Rp 135.000.000.000", "CMS_BSI_01", "SP/2026/07/110", "05 Jul 2026", "DPS-112/2026", "05 Jul 2026", "Bank BSI"],
+          ["2", "KPA-066125", "06 Jul 2026", "Purn. Peltu Agus H.", "Rp 24.800.000", "Rp 0", "Rp 134.975.200.000", "CMS_BSI_01", "SP/2026/07/111", "05 Jul 2026", "DPS-113/2026", "05 Jul 2026", "Bank BSI"]
         ]
       }
     },

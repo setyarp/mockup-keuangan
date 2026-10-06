@@ -256,5 +256,5 @@ Mengonversi format baku 8 kolom rekening koran perbankan (*No, Tanggal Bayar, Tr
 6. **Penyediaan Pensiun:** Setoran dropping dana / transfer kasda penyediaan kas pembayaran pensiun ke rekening giro mitra bayar.
 
 ### B. Status Pemadanan Transaksi
-$$\mathbf{Status\ Pemadanan} = \begin{cases} \text{Matched 100\%} & \text{jika Nomor SP, DPS, dan KTPA terverifikasi di database YANDU} \\ \text{Unmatched} & \text{jika belum ditemukan relasi dokumen tagihan/perintah bayar} \end{cases}$$
+$$\mathbf{Status\ Pemadanan} = \begin{cases} \text{Matched 100\%} & \text{jika Nomor SP, DPS, dan KPA terverifikasi di database YANDU} \\ \text{Unmatched} & \text{jika belum ditemukan relasi dokumen tagihan/perintah bayar} \end{cases}$$
 

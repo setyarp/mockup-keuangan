@@ -1298,7 +1298,7 @@ export const ListSP = ({ defaultTab = "listsp" }) => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Ketik No. SP, Nama, NRP, KTPA, Rekening..."
+                  placeholder="Ketik No. SP, Nama, NRP, KPA, Rekening..."
                   style={{
                     width: "100%",
                     padding: "8.5px 12px 8.5px 34px",

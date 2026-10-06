@@ -94,7 +94,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
     if (selectedKancabFilter !== "Semua" && r.kancab !== selectedKancabFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const matchKTPA = r.ktpa?.toLowerCase().includes(q);
+      const matchKPA = r.ktpa?.toLowerCase().includes(q);
       const matchDesc = r.desc?.toLowerCase().includes(q);
       const matchSP = r.noSP?.toLowerCase().includes(q);
       const matchDPS = r.noDPS?.toLowerCase().includes(q);
@@ -102,7 +102,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
       const matchMitra = r.mitra?.toLowerCase().includes(q);
       const matchPensiun = r.noPensiun?.toLowerCase().includes(q);
       const matchPenerima = r.namaPenerima?.toLowerCase().includes(q);
-      if (!matchKTPA && !matchDesc && !matchSP && !matchDPS && !matchUser && !matchMitra && !matchPensiun && !matchPenerima) {
+      if (!matchKPA && !matchDesc && !matchSP && !matchDPS && !matchUser && !matchMitra && !matchPensiun && !matchPenerima) {
         return false;
       }
     }
@@ -124,7 +124,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
         "No.",
         "Program",
         "Jenis Manfaat",
-        "Nomor KTPA",
+        "Nomor KPA",
         "Nominal (Rp)",
         "No SP",
         "Tanggal SP",
@@ -153,7 +153,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
     } else if (activeTab === "jkk") {
       columns = [
         "No.",
-        "Nomor KTPA",
+        "Nomor KPA",
         "DB (Rp)",
         "DK (Rp)",
         "Gugur (Rp)",
@@ -190,7 +190,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
     } else if (activeTab === "jkm") {
       columns = [
         "No.",
-        "Nomor KTPA",
+        "Nomor KPA",
         "SKS (Rp)",
         "UDW (Rp)",
         "BP (Rp)",
@@ -225,7 +225,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
     } else if (activeTab === "ntip") {
       columns = [
         "No.",
-        "KTPA",
+        "KPA",
         "Tanggal Transaksi",
         "Nama Penerima",
         "Debet (Rp)",
@@ -354,7 +354,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
 
             <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
               <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 8, paddingBottom: 8, borderBottom: "1px solid #E2E8F0" }}>
-                <span style={{ color: "#64748B", fontWeight: 600 }}>Nomor KTPA / Ref:</span>
+                <span style={{ color: "#64748B", fontWeight: 600 }}>Nomor KPA / Ref:</span>
                 <span style={{ fontWeight: 800, color: "#0141A8", fontFamily: "monospace" }}>{detailModal.ktpa || detailModal.noPensiun || "—"}</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 8, paddingBottom: 8, borderBottom: "1px solid #E2E8F0" }}>
@@ -506,7 +506,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
           />
           <div style={{ flex: 1, minWidth: 240 }}>
             <label style={{ fontSize: 11.5, color: COLORS.gray500, display: "block", marginBottom: 4, fontWeight: 700 }}>
-              Cari Transaksi (KTPA / No SP / No DPS / Penerima / NOPEN)
+              Cari Transaksi (KPA / No SP / No DPS / Penerima / NOPEN)
             </label>
             <SearchInput
               value={searchQuery}
@@ -552,7 +552,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               {/* =========================================================
                   1. HEADER & BODY: THT
-                  No | Program | Jenis Manfaat | Nomor KTPA | Nominal | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Kode Anggota | Mitra
+                  No | Program | Jenis Manfaat | Nomor KPA | Nominal | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Kode Anggota | Mitra
                   ========================================================= */}
               {activeTab === "tht" && (
                 <>
@@ -561,7 +561,7 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
                       <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, width: 40, borderRight: "1px solid #E2E8F0" }}>No</th>
                       <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Program</th>
                       <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Jenis Manfaat</th>
-                      <th style={{ padding: "10px 12px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nomor KTPA</th>
+                      <th style={{ padding: "10px 12px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nomor KPA</th>
                       <th style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nominal (Rp)</th>
                       <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>No SP</th>
                       <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Tanggal SP</th>
@@ -607,14 +607,14 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
 
               {/* =========================================================
                   2. HEADER & BODY: JKK
-                  No | Nomor KTPA | DB | DK | Gugur | Tewas | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
+                  No | Nomor KPA | DB | DK | Gugur | Tewas | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
                   ========================================================= */}
               {activeTab === "jkk" && (
                 <>
                   <thead>
                     <tr style={{ background: "#F1F5F9", color: "#475569" }}>
                       <th style={{ padding: "10px 8px", textAlign: "center", fontWeight: 800, width: 35, borderRight: "1px solid #E2E8F0" }}>No</th>
-                      <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nomor KTPA</th>
+                      <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nomor KPA</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>DB</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>DK</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Gugur</th>
@@ -666,14 +666,14 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
 
               {/* =========================================================
                   3. HEADER & BODY: JKM
-                  No | Nomor KTPA | SKS | UDW | BP | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
+                  No | Nomor KPA | SKS | UDW | BP | Bantuan Beasiswa | Total (Rp) | No SP | Tanggal SP | No DPS | Tanggal DPS | Kode Bayar | Kantor Cabang | Anggota | Mitra
                   ========================================================= */}
               {activeTab === "jkm" && (
                 <>
                   <thead>
                     <tr style={{ background: "#F1F5F9", color: "#475569" }}>
                       <th style={{ padding: "10px 8px", textAlign: "center", fontWeight: 800, width: 35, borderRight: "1px solid #E2E8F0" }}>No</th>
-                      <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nomor KTPA</th>
+                      <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nomor KPA</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>SKS</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>UDW</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>BP</th>
@@ -723,14 +723,14 @@ export const PenyaluranHarian = ({ onNavigateToUploadCMS, dataList = [] }) => {
 
               {/* =========================================================
                   4. HEADER & BODY: NTIP
-                  No. │ KTPA │ Tanggal Transaksi │ Nama Penerima │ Debet │ Credit │ Ladger Balance (Rp) │ User ID │ No SP │ Tanggal SP │ No DPS │ Tanggal DPS │ Mitra Bayar
+                  No. │ KPA │ Tanggal Transaksi │ Nama Penerima │ Debet │ Credit │ Ladger Balance (Rp) │ User ID │ No SP │ Tanggal SP │ No DPS │ Tanggal DPS │ Mitra Bayar
                   ========================================================= */}
               {activeTab === "ntip" && (
                 <>
                   <thead>
                     <tr style={{ background: "#F1F5F9", color: "#475569" }}>
                       <th style={{ padding: "10px 8px", textAlign: "center", fontWeight: 800, width: 35, borderRight: "1px solid #E2E8F0" }}>No</th>
-                      <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>KTPA</th>
+                      <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>KPA</th>
                       <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Tanggal Transaksi</th>
                       <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Nama Penerima</th>
                       <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, borderRight: "1px solid #E2E8F0" }}>Debet (Rp)</th>

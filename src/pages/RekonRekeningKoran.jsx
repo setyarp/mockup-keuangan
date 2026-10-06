@@ -133,7 +133,7 @@ export const RekonRekeningKoran = ({
               else if (col.includes("db/cr") || col.includes("d/c") || col.includes("cr/db")) colMap.dbcr = idx;
               
               // Mapped columns
-              else if (col.includes("ktpa")) colMap.ktpa = idx;
+              else if (col.includes("ktpa") || col.includes("kpa")) colMap.ktpa = idx;
               else if (col.includes("program")) colMap.program = idx;
               else if (col.includes("jenis manfaat")) colMap.jenisManfaat = idx;
               else if (col.includes("no sp")) colMap.noSP = idx;
@@ -205,8 +205,8 @@ export const RekonRekeningKoran = ({
                 tipeAuto = "Penyediaan Pensiun";
               }
 
-              const rowKTPA = colMap.ktpa !== undefined ? String(row[colMap.ktpa] || "").trim() : "";
-              const ktpaMatch = rowKTPA || desc.match(/([A-Z]{2}\d{6})/i)?.[1]?.toUpperCase() || "—";
+              const rowKPA = colMap.ktpa !== undefined ? String(row[colMap.ktpa] || "").trim() : "";
+              const ktpaMatch = rowKPA || desc.match(/([A-Z]{2}\d{6})/i)?.[1]?.toUpperCase() || "—";
               const rowTgl = formatExcelDate(row[colMap.tgl ?? 1]);
 
               newStandardizedRows.push({

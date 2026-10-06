@@ -43,14 +43,14 @@ export const JKKPerawatan = () => {
     typeof n === "number" ? `Rp ${n.toLocaleString("id-ID")}` : n;
 
   // Master Data Monitoring JKK Perawatan persis 14 kolom sesuai gambar referensi:
-  // 1. NO, 2. Nama Peserta, 3. KTPA, 4. NO SPP, 5. NO REKAP, 6. No Restitusi,
+  // 1. NO, 2. Nama Peserta, 3. KPA, 4. NO SPP, 5. NO REKAP, 6. No Restitusi,
   // 7. JENIS KLAIM, 8. BULAN, 9. MITRA BAYAR, 10. Nama Rekening, 11. Nomor Rekening,
   // 12. Nama Bank, 13. Nominal, 14. Tanggal Bayar
   const rawMonitoringJKK = [
     {
       no: 1,
       namaPeserta: "Serma Agus Prasetyo",
-      ktpa: "KTPA-8829102",
+      ktpa: "KPA-8829102",
       noSPP: "SPP/JKK/2026/07/101",
       noRekap: "RK-001/JKK/2026",
       noRestitusi: "REST-0091/2026",
@@ -73,7 +73,7 @@ export const JKKPerawatan = () => {
     {
       no: 2,
       namaPeserta: "Pratu Dedi Saputra",
-      ktpa: "KTPA-9930192",
+      ktpa: "KPA-9930192",
       noSPP: "SPP/JKK/2026/07/102",
       noRekap: "RK-001/JKK/2026",
       noRestitusi: "REST-0092/2026",
@@ -95,7 +95,7 @@ export const JKKPerawatan = () => {
     {
       no: 3,
       namaPeserta: "Bripka Rina Marlina",
-      ktpa: "KTPA-7721839",
+      ktpa: "KPA-7721839",
       noSPP: "SPP/JKK/2026/07/103",
       noRekap: "RK-002/JKK/2026",
       noRestitusi: "REST-0093/2026",
@@ -117,7 +117,7 @@ export const JKKPerawatan = () => {
     {
       no: 4,
       namaPeserta: "Koptu Hasan Fadilah",
-      ktpa: "KTPA-6648291",
+      ktpa: "KPA-6648291",
       noSPP: "SPP/JKK/2026/07/104",
       noRekap: "RK-002/JKK/2026",
       noRestitusi: "REST-0094/2026",
@@ -139,7 +139,7 @@ export const JKKPerawatan = () => {
     {
       no: 5,
       namaPeserta: "Kapten Lina Wahyuni",
-      ktpa: "KTPA-5539201",
+      ktpa: "KPA-5539201",
       noSPP: "SPP/JKK/2026/07/105",
       noRekap: "RK-003/JKK/2026",
       noRestitusi: "REST-0095/2026",
@@ -161,7 +161,7 @@ export const JKKPerawatan = () => {
     {
       no: 6,
       namaPeserta: "Pelda Susanto",
-      ktpa: "KTPA-4428190",
+      ktpa: "KPA-4428190",
       noSPP: "SPP/JKK/2026/07/106",
       noRekap: "RK-003/JKK/2026",
       noRestitusi: "REST-0096/2026",
@@ -183,7 +183,7 @@ export const JKKPerawatan = () => {
     {
       no: 7,
       namaPeserta: "Briptu Mega Silvia",
-      ktpa: "KTPA-3319082",
+      ktpa: "KPA-3319082",
       noSPP: "SPP/JKK/2026/07/107",
       noRekap: "RK-004/JKK/2026",
       noRestitusi: "REST-0097/2026",
@@ -205,7 +205,7 @@ export const JKKPerawatan = () => {
     {
       no: 8,
       namaPeserta: "Sertu Ahmad Ridwan",
-      ktpa: "KTPA-2208193",
+      ktpa: "KPA-2208193",
       noSPP: "SPP/JKK/2026/07/108",
       noRekap: "RK-004/JKK/2026",
       noRestitusi: "REST-0098/2026",
@@ -227,7 +227,7 @@ export const JKKPerawatan = () => {
     {
       no: 9,
       namaPeserta: "Mayor Laut (P) Hendra Kusuma",
-      ktpa: "KTPA-1197284",
+      ktpa: "KPA-1197284",
       noSPP: "SPP/JKK/2026/07/109",
       noRekap: "RK-005/JKK/2026",
       noRestitusi: "REST-0099/2026",
@@ -249,7 +249,7 @@ export const JKKPerawatan = () => {
     {
       no: 10,
       namaPeserta: "Aipda Bambang Triyono",
-      ktpa: "KTPA-9988172",
+      ktpa: "KPA-9988172",
       noSPP: "SPP/JKK/2026/07/110",
       noRekap: "RK-005/JKK/2026",
       noRestitusi: "REST-0100/2026",
@@ -495,7 +495,7 @@ export const JKKPerawatan = () => {
                     <strong>{selectedDetail.namaPeserta}</strong>
                   </div>
                   <div style={{ marginBottom: 6 }}>
-                    <span style={{ color: COLORS.gray500, display: "inline-block", width: 110 }}>KTPA:</span>
+                    <span style={{ color: COLORS.gray500, display: "inline-block", width: 110 }}>KPA:</span>
                     <span style={{ fontFamily: "monospace", color: COLORS.blue, fontWeight: 700 }}>
                       {selectedDetail.ktpa}
                     </span>
@@ -686,7 +686,7 @@ export const JKKPerawatan = () => {
                   data: filteredData.map((d, idx) => ({
                     NO: idx + 1,
                     "Nama Peserta": d.namaPeserta,
-                    KTPA: d.ktpa,
+                    KPA: d.ktpa,
                     "NO SPP": d.noSPP,
                     "NO REKAP": d.noRekap,
                     "No Restitusi": d.noRestitusi,
@@ -720,7 +720,7 @@ export const JKKPerawatan = () => {
           {/* 1. Quick Search */}
           <div>
             <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 5 }}>
-              Pencarian (Nama, SPP, KTPA, Rekap)
+              Pencarian (Nama, SPP, KPA, Rekap)
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -886,9 +886,9 @@ export const JKKPerawatan = () => {
               <th style={{ padding: "11px 12px", border: "1px solid #1E5296", minWidth: 155 }}>
                 Nama Peserta
               </th>
-              {/* 3. KTPA */}
+              {/* 3. KPA */}
               <th style={{ padding: "11px 10px", border: "1px solid #1E5296", minWidth: 110, textAlign: "center" }}>
-                KTPA
+                KPA
               </th>
               {/* 4. NO SPP */}
               <th style={{ padding: "11px 10px", border: "1px solid #1E5296", minWidth: 140, textAlign: "center" }}>
@@ -969,7 +969,7 @@ export const JKKPerawatan = () => {
                     {row.namaPeserta}
                   </td>
 
-                  {/* 3. KTPA */}
+                  {/* 3. KPA */}
                   <td style={{ padding: "8px 8px", border: "1px solid #CBD5E1", textAlign: "center", fontFamily: "monospace", fontWeight: 600, color: COLORS.blue }}>
                     {row.ktpa}
                   </td>

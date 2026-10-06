@@ -34,9 +34,9 @@ import { COLORS } from "../constants/colors";
 import { StatCard, Badge, Btn, PreviewModal } from "../components/common";
 
 export const HutangPUMKPR = () => {
-  // Filter States: Nama, KTPA, Status (Lunas / Belum Lunas), Program Asal, Tahun, Periode
+  // Filter States: Nama, KPA, Status (Lunas / Belum Lunas), Program Asal, Tahun, Periode
   const [filterNama, setFilterNama] = useState("Semua");
-  const [filterKTPA, setFilterKTPA] = useState("Semua");
+  const [filterKPA, setFilterKPA] = useState("Semua");
   const [filterStatus, setFilterStatus] = useState("Semua"); // "Semua" | "Lunas" | "Belum Lunas"
   const [filterProgram, setFilterProgram] = useState("Semua");
   const [filterTahun, setFilterTahun] = useState("Semua");
@@ -67,7 +67,7 @@ export const HutangPUMKPR = () => {
       no: 1,
       nama: "Mayor Inf. Hendra Kusuma",
       nik: "3175081204850001",
-      ktpa: "KTPA-8829102",
+      ktpa: "KPA-8829102",
       nrp: "1104018291",
       satker: "UNOR TNI AD (Kodam Jaya / Yonif 201)",
       bankPeserta: "PT Bank Tabungan Negara (Persero) Tbk",
@@ -99,7 +99,7 @@ export const HutangPUMKPR = () => {
       no: 2,
       nama: "Lettu Laut Dian Pratama",
       nik: "3273110906880002",
-      ktpa: "KTPA-9930192",
+      ktpa: "KPA-9930192",
       nrp: "1109028371",
       satker: "UNOR TNI AL (Kormar / Brigif 1)",
       bankPeserta: "PT Bank Rakyat Indonesia (Persero) Tbk",
@@ -130,7 +130,7 @@ export const HutangPUMKPR = () => {
       no: 3,
       nama: "Aipda Bambang Triyono",
       nik: "3578012403910003",
-      ktpa: "KTPA-7721839",
+      ktpa: "KPA-7721839",
       nrp: "85030291",
       satker: "UNOR POLRI (Polda Metro Jaya / Ditlantas)",
       bankPeserta: "PT Bank Mandiri (Persero) Tbk",
@@ -161,7 +161,7 @@ export const HutangPUMKPR = () => {
       no: 4,
       nama: "Peltu Agus Susanto",
       nik: "3374021708820004",
-      ktpa: "KTPA-6648291",
+      ktpa: "KPA-6648291",
       nrp: "2102039182",
       satker: "UNOR TNI AU (Lanud Halim Perdanakusuma)",
       bankPeserta: "PT Bank Negara Indonesia (Persero) Tbk",
@@ -192,7 +192,7 @@ export const HutangPUMKPR = () => {
       no: 5,
       nama: "Serka Yudi Hermawan",
       nik: "3174092211890005",
-      ktpa: "KTPA-5539201",
+      ktpa: "KPA-5539201",
       nrp: "3109048291",
       satker: "UNOR TNI AD (Pusbekkangad)",
       bankPeserta: "PT Bank Tabungan Negara (Persero) Tbk",
@@ -223,7 +223,7 @@ export const HutangPUMKPR = () => {
       no: 6,
       nama: "Kapten Kav. Eko Prasetyo",
       nik: "3276051402860006",
-      ktpa: "KTPA-4428190",
+      ktpa: "KPA-4428190",
       nrp: "1106029182",
       satker: "UNOR TNI AD (Kodam III / Siliwangi)",
       bankPeserta: "PT Bank Syariah Indonesia Tbk",
@@ -254,7 +254,7 @@ export const HutangPUMKPR = () => {
       no: 7,
       nama: "PNS Supriyadi, S.Kom.",
       nik: "3171011507870007",
-      ktpa: "KTPA-3319082",
+      ktpa: "KPA-3319082",
       nrp: "198707152011011001",
       satker: "UNOR Kemhan RI (Setjen Kemhan)",
       bankPeserta: "PT Bank Mandiri (Persero) Tbk",
@@ -285,7 +285,7 @@ export const HutangPUMKPR = () => {
       no: 8,
       nama: "Bripka Ahmad Firdaus",
       nik: "3671040810900008",
-      ktpa: "KTPA-2208193",
+      ktpa: "KPA-2208193",
       nrp: "90100452",
       satker: "UNOR POLRI (Korbrimob Polri)",
       bankPeserta: "PT Bank Tabungan Negara (Persero) Tbk",
@@ -316,7 +316,7 @@ export const HutangPUMKPR = () => {
       no: 9,
       nama: "Mayor Laut (P) Faisal Basri",
       nik: "3275031901840009",
-      ktpa: "KTPA-1197284",
+      ktpa: "KPA-1197284",
       nrp: "1103019283",
       satker: "UNOR TNI AL (Dismatal Mabesal)",
       bankPeserta: "PT Bank Rakyat Indonesia (Persero) Tbk",
@@ -347,7 +347,7 @@ export const HutangPUMKPR = () => {
       no: 10,
       nama: "Serma Dwi Cahyono",
       nik: "3372061205880010",
-      ktpa: "KTPA-9988172",
+      ktpa: "KPA-9988172",
       nrp: "3108039182",
       satker: "UNOR TNI AD (Ditziad)",
       bankPeserta: "PT Bank Tabungan Negara (Persero) Tbk",
@@ -472,7 +472,7 @@ export const HutangPUMKPR = () => {
     return ["Semua", ...list];
   }, [pumList]);
 
-  const ktpaOptions = useMemo(() => {
+  const kpaOptions = useMemo(() => {
     const list = Array.from(new Set(pumList.map((d) => d.ktpa)));
     return ["Semua", ...list];
   }, [pumList]);
@@ -503,7 +503,7 @@ export const HutangPUMKPR = () => {
   const filteredData = useMemo(() => {
     return pumList.filter((d) => {
       if (filterNama !== "Semua" && d.nama !== filterNama) return false;
-      if (filterKTPA !== "Semua" && d.ktpa !== filterKTPA) return false;
+      if (filterKPA !== "Semua" && d.ktpa !== filterKPA) return false;
       if (filterStatus !== "Semua" && d.status !== filterStatus) return false;
       if (filterProgram !== "Semua" && d.programPelunasan !== filterProgram) return false;
       if (filterTahun !== "Semua" && d.tahunPenyaluran !== filterTahun && d.tahunPelunasan !== filterTahun)
@@ -542,7 +542,7 @@ export const HutangPUMKPR = () => {
   }, [
     pumList,
     filterNama,
-    filterKTPA,
+    filterKPA,
     filterStatus,
     filterProgram,
     filterTahun,
@@ -578,7 +578,7 @@ export const HutangPUMKPR = () => {
 
   const resetAllFilters = () => {
     setFilterNama("Semua");
-    setFilterKTPA("Semua");
+    setFilterKPA("Semua");
     setFilterStatus("Semua");
     setFilterProgram("Semua");
     setFilterTahun("Semua");
@@ -934,7 +934,7 @@ export const HutangPUMKPR = () => {
                     <td style={{ fontFamily: "monospace" }}>{selectedSKL.nrp}</td>
                   </tr>
                   <tr>
-                    <td style={{ fontWeight: 600, padding: "3px 0" }}>Nomor KTPA</td>
+                    <td style={{ fontWeight: 600, padding: "3px 0" }}>Nomor KPA</td>
                     <td>:</td>
                     <td style={{ fontFamily: "monospace" }}>{selectedSKL.ktpa}</td>
                   </tr>
@@ -1057,7 +1057,7 @@ export const HutangPUMKPR = () => {
                   </span>
                 </div>
                 <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 4 }}>
-                  Debitur: <strong style={{ color: "#E2E8F0" }}>{selectedDetail.nama}</strong> ({selectedDetail.nrp}) • KTPA: {selectedDetail.ktpa}
+                  Debitur: <strong style={{ color: "#E2E8F0" }}>{selectedDetail.nama}</strong> ({selectedDetail.nrp}) • KPA: {selectedDetail.ktpa}
                 </div>
               </div>
               <button
@@ -1131,7 +1131,7 @@ export const HutangPUMKPR = () => {
                     <span style={{ fontWeight: 700, color: COLORS.gray900 }}>{selectedDetail.nama} <span style={{ color: COLORS.gray500, fontWeight: 400 }}>(NIK: {selectedDetail.nik})</span></span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", padding: "8px 14px", borderBottom: `1px solid ${COLORS.gray100}`, background: "#F8FAFC" }}>
-                    <span style={{ color: COLORS.gray500 }}>KTPA / NRP</span>
+                    <span style={{ color: COLORS.gray500 }}>KPA / NRP</span>
                     <span style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blueDark }}>{selectedDetail.ktpa} • {selectedDetail.nrp}</span>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", padding: "8px 14px", borderBottom: `1px solid ${COLORS.gray100}`, background: COLORS.white }}>
@@ -1551,7 +1551,7 @@ export const HutangPUMKPR = () => {
                     No: idx + 1,
                     Nama: d.nama,
                     NIK: d.nik,
-                    KTPA: d.ktpa,
+                    KPA: d.ktpa,
                     NRP: d.nrp,
                     Satker: d.satker,
                     Bank: d.bankPeserta,
@@ -1571,7 +1571,7 @@ export const HutangPUMKPR = () => {
           </div>
         </div>
 
-        {/* 6 DROPDOWNS: Nama, KTPA, Status, Program Klaim, Tahun, Bulan */}
+        {/* 6 DROPDOWNS: Nama, KPA, Status, Program Klaim, Tahun, Bulan */}
         <div
           style={{
             padding: "16px 18px",
@@ -1597,17 +1597,17 @@ export const HutangPUMKPR = () => {
             </select>
           </div>
 
-          {/* 2. KTPA */}
+          {/* 2. KPA */}
           <div>
             <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: COLORS.gray700, marginBottom: 5, textTransform: "uppercase" }}>
-              KTPA
+              KPA
             </label>
             <select
-              value={filterKTPA}
-              onChange={(e) => setFilterKTPA(e.target.value)}
+              value={filterKPA}
+              onChange={(e) => setFilterKPA(e.target.value)}
               style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${COLORS.gray300}`, fontSize: 12, color: COLORS.gray800, background: COLORS.white, outline: "none", cursor: "pointer" }}
             >
-              {ktpaOptions.map((opt, i) => (
+              {kpaOptions.map((opt, i) => (
                 <option key={i} value={opt}>{opt}</option>
               ))}
             </select>
@@ -1694,7 +1694,7 @@ export const HutangPUMKPR = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari Nama, Satker, No. Rekening, KTPA..."
+              placeholder="Cari Nama, Satker, No. Rekening, KPA..."
               style={{
                 width: "100%",
                 padding: "6.5px 10px 6.5px 30px",
@@ -1745,7 +1745,7 @@ export const HutangPUMKPR = () => {
                 NAMA DEBITUR
               </th>
               <th style={{ padding: "12px 10px", border: "1px solid #CBD5E1", minWidth: 120, textAlign: "center" }}>
-                KTPA / NRP
+                KPA / NRP
               </th>
               <th style={{ padding: "12px 12px", border: "1px solid #CBD5E1", minWidth: 180 }}>
                 SATKER (UNOR)
@@ -1808,7 +1808,7 @@ export const HutangPUMKPR = () => {
                       </div>
                     </td>
 
-                    {/* 3. KTPA / NRP */}
+                    {/* 3. KPA / NRP */}
                     <td style={{ padding: "10px 10px", border: "1px solid #CBD5E1", textAlign: "center" }}>
                       <div style={{ fontFamily: "monospace", fontWeight: 700, color: COLORS.blue }}>
                         {row.ktpa}

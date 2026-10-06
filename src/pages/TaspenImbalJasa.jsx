@@ -77,7 +77,7 @@ export const TaspenImbalJasa = () => {
   // -------------------------------------------------------------
   // DATA MOCK RESMI SPESIFIKASI BRD V5 (Line 271-273)
   // Format Kolom Identik:
-  // No | Bulan | Peserta | KTPA | Nominal | Nomor Polis | Tanggal Polis |
+  // No | Bulan | Peserta | KPA | Nominal | Nomor Polis | Tanggal Polis |
   // Tanggal Bayar Polis | Imbal Jasa | DPP 11/12 | PPN (DPP X 12%) |
   // PPH 23 (Imbal Jasa X 2%) | Jumlah Tagihan | Imbal Jasa yang Diterima |
   // Tanggal Terima Imbal Jasa
@@ -88,7 +88,7 @@ export const TaspenImbalJasa = () => {
       no: 1,
       bulan: "Juni 2026",
       peserta: "Letkol Bambang Suharto",
-      ktpa: "KTPA-0012847",
+      ktpa: "KPA-0012847",
       nominalPremi: 7440000,
       noPolis: "TL-JKK-2026-00089",
       tanggalPolis: "08 Mar 2026",
@@ -102,7 +102,7 @@ export const TaspenImbalJasa = () => {
       no: 2,
       bulan: "Juni 2026",
       peserta: "Penata Tk.I Siti Nurhaliza",
-      ktpa: "KTPA-0012848",
+      ktpa: "KPA-0012848",
       nominalPremi: 6480000,
       noPolis: "TL-JKK-2026-00090",
       tanggalPolis: "10 Apr 2026",
@@ -116,7 +116,7 @@ export const TaspenImbalJasa = () => {
       no: 3,
       bulan: "Juni 2026",
       peserta: "AKP Dedi Kurniawan",
-      ktpa: "KTPA-0012849",
+      ktpa: "KPA-0012849",
       nominalPremi: 3720000,
       noPolis: "TL-JKM-2026-00034",
       tanggalPolis: "12 Mei 2026",
@@ -130,7 +130,7 @@ export const TaspenImbalJasa = () => {
       no: 4,
       bulan: "Juni 2026",
       peserta: "Pembina Utama Dr. Ratna",
-      ktpa: "KTPA-0012851",
+      ktpa: "KPA-0012851",
       nominalPremi: 3480000,
       noPolis: "TL-JKM-2026-00035",
       tanggalPolis: "15 Jun 2026",
@@ -144,7 +144,7 @@ export const TaspenImbalJasa = () => {
       no: 5,
       bulan: "Juni 2026",
       peserta: "Kapten Inf. Agus Salim",
-      ktpa: "KTPA-0012853",
+      ktpa: "KPA-0012853",
       nominalPremi: 5200000,
       noPolis: "TL-JKK-2026-00095",
       tanggalPolis: "18 Jun 2026",
@@ -158,7 +158,7 @@ export const TaspenImbalJasa = () => {
       no: 6,
       bulan: "Juni 2026",
       peserta: "Mayor Mar. Joko Prasetyo",
-      ktpa: "KTPA-0012855",
+      ktpa: "KPA-0012855",
       nominalPremi: 4800000,
       noPolis: "TL-JKM-2026-00039",
       tanggalPolis: "20 Jun 2026",
@@ -175,7 +175,7 @@ export const TaspenImbalJasa = () => {
       no: 1,
       bulan: "Juni 2026",
       peserta: "Serka Ahmad Fauzi",
-      ktpa: "KTPA-0012845",
+      ktpa: "KPA-0012845",
       nominalPremi: 6000000,
       noPolis: "TL-TDS-2026-00145",
       tanggalPolis: "05 Jan 2026",
@@ -189,7 +189,7 @@ export const TaspenImbalJasa = () => {
       no: 2,
       bulan: "Juni 2026",
       peserta: "Briptu Rina Marlina",
-      ktpa: "KTPA-0012846",
+      ktpa: "KPA-0012846",
       nominalPremi: 6000000,
       noPolis: "TL-TDS-2026-00146",
       tanggalPolis: "05 Feb 2026",
@@ -203,7 +203,7 @@ export const TaspenImbalJasa = () => {
       no: 3,
       bulan: "Juni 2026",
       peserta: "Peltu Hendra Wijaya",
-      ktpa: "KTPA-0012850",
+      ktpa: "KPA-0012850",
       nominalPremi: 12000000,
       noPolis: "TL-TDS-2026-00147",
       tanggalPolis: "10 Mar 2026",
@@ -217,7 +217,7 @@ export const TaspenImbalJasa = () => {
       no: 4,
       bulan: "Juni 2026",
       peserta: "Bripka Anwar Ibrahim",
-      ktpa: "KTPA-0012852",
+      ktpa: "KPA-0012852",
       nominalPremi: 6000000,
       noPolis: "TL-TDS-2026-00148",
       tanggalPolis: "12 Apr 2026",
@@ -231,7 +231,7 @@ export const TaspenImbalJasa = () => {
       no: 5,
       bulan: "Juni 2026",
       peserta: "Kolonel Cpl. Bambang Tri",
-      ktpa: "KTPA-0012854",
+      ktpa: "KPA-0012854",
       nominalPremi: 18000000,
       noPolis: "TL-TDS-2026-00149",
       tanggalPolis: "15 Mei 2026",
@@ -245,7 +245,7 @@ export const TaspenImbalJasa = () => {
       no: 6,
       bulan: "Juni 2026",
       peserta: "Letda Kav. Supriyadi",
-      ktpa: "KTPA-0012856",
+      ktpa: "KPA-0012856",
       nominalPremi: 6000000,
       noPolis: "TL-TDS-2026-00150",
       tanggalPolis: "18 Jun 2026",
@@ -260,7 +260,7 @@ export const TaspenImbalJasa = () => {
   const [newRow, setNewRow] = useState({
     bulan: "Juni 2026",
     peserta: "Mayor Laut Faisal",
-    ktpa: "KTPA-0012860",
+    ktpa: "KPA-0012860",
     nominalPremi: 6000000,
     noPolis: "TL-2026-NEW",
     tanggalPolis: "20 Jun 2026",
@@ -388,7 +388,7 @@ export const TaspenImbalJasa = () => {
           "No.",
           "Bulan",
           "Peserta",
-          "KTPA",
+          "KPA",
           "Nominal",
           "Nomor Polis",
           "Tanggal Polis",
@@ -438,7 +438,7 @@ export const TaspenImbalJasa = () => {
         cutoff: "14 Hari Kerja",
         tanggal: "15 Juli 2026",
         items: [
-          { jenis: "Nama Peserta / Pemegang Polis", peserta: item.peserta, nominal: "KTPA: " + item.ktpa },
+          { jenis: "Nama Peserta / Pemegang Polis", peserta: item.peserta, nominal: "KPA: " + item.ktpa },
           { jenis: "Nomor Polis & Tanggal Penerbitan", peserta: item.noPolis, nominal: "Tgl: " + item.tanggalPolis },
           { jenis: "Tanggal Pembayaran Premi oleh Peserta", peserta: "Verifikasi Kas", nominal: item.tanggalBayarPolis },
           { jenis: "Nominal Premi Bruto", peserta: "Basis Premi", nominal: fmt(item.nominalPremi) },
@@ -670,7 +670,7 @@ export const TaspenImbalJasa = () => {
                     <div style={{ fontWeight: 700, color: COLORS.gray900 }}>{detailModal.peserta}</div>
                   </div>
                   <div>
-                    <span style={{ color: COLORS.gray500 }}>Nomor KTPA:</span>
+                    <span style={{ color: COLORS.gray500 }}>Nomor KPA:</span>
                     <div style={{ fontWeight: 700, fontFamily: "monospace" }}>{detailModal.ktpa}</div>
                   </div>
                   <div>
@@ -843,7 +843,7 @@ export const TaspenImbalJasa = () => {
                 </div>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.gray700, display: "block", marginBottom: 4 }}>
-                    Nomor KTPA
+                    Nomor KPA
                   </label>
                   <input
                     type="text"
@@ -1176,7 +1176,7 @@ export const TaspenImbalJasa = () => {
             <SearchInput
               value={searchQuery}
               onChange={setSearchQuery}
-              placeholder="Cari Peserta, KTPA, No. Polis..."
+              placeholder="Cari Peserta, KPA, No. Polis..."
               minW={220}
             />
           </div>
@@ -1269,9 +1269,9 @@ export const TaspenImbalJasa = () => {
                   <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, color: COLORS.gray900, borderRight: `1px solid ${COLORS.gray300}`, background: "#E2E8F0", position: "sticky", left: 45, zIndex: 11 }}>
                     Peserta
                   </th>
-                  {/* 4. KTPA */}
+                  {/* 4. KPA */}
                   <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
-                    KTPA
+                    KPA
                   </th>
                   {/* 5. Nominal (Premi) */}
                   <th style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: COLORS.gray900, background: "#EFF6FF", borderRight: `1px solid ${COLORS.gray200}` }}>
@@ -1354,7 +1354,7 @@ export const TaspenImbalJasa = () => {
                           <span>{row.peserta}</span>
                         </div>
                       </td>
-                      {/* 4. KTPA */}
+                      {/* 4. KPA */}
                       <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 11.5, color: COLORS.gray700, borderRight: `1px solid ${COLORS.gray200}` }}>
                         {row.ktpa}
                       </td>

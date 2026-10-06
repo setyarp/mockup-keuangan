@@ -67,7 +67,7 @@ export const TaspenPolis = () => {
     {
       id: "P1",
       noPolis: "TL-TDS-2026-00145",
-      ktpa: "KTPA-0012845",
+      ktpa: "KPA-0012845",
       nrp: "3195012345",
       nik: "3201010101850001",
       nama: "Serka Ahmad Fauzi",
@@ -93,7 +93,7 @@ export const TaspenPolis = () => {
     {
       id: "P2",
       noPolis: "TL-TDS-2026-00146",
-      ktpa: "KTPA-0012846",
+      ktpa: "KPA-0012846",
       nrp: "3196023456",
       nik: "3175020202920002",
       nama: "Briptu Rina Marlina",
@@ -119,7 +119,7 @@ export const TaspenPolis = () => {
     {
       id: "P3",
       noPolis: "TL-JKK-2026-00089",
-      ktpa: "KTPA-0012847",
+      ktpa: "KPA-0012847",
       nrp: "1198034567",
       nik: "3674030303780003",
       nama: "Letkol Bambang Suharto",
@@ -145,7 +145,7 @@ export const TaspenPolis = () => {
     {
       id: "P4",
       noPolis: "TL-JKK-2026-00090",
-      ktpa: "KTPA-0012848",
+      ktpa: "KPA-0012848",
       nrp: "198604042008122001",
       nik: "35780404048600", // Invalid 14 digit
       nama: "Penata Tk.I Siti Nurhaliza",
@@ -171,7 +171,7 @@ export const TaspenPolis = () => {
     {
       id: "P5",
       noPolis: "TL-JKM-2026-00034",
-      ktpa: "KTPA-0012849",
+      ktpa: "KPA-0012849",
       nrp: "2195056789",
       nik: "3273050505850005",
       nama: "AKP Dedi Kurniawan",
@@ -197,7 +197,7 @@ export const TaspenPolis = () => {
     {
       id: "P6",
       noPolis: "TL-TDS-2026-00147",
-      ktpa: "KTPA-0012850",
+      ktpa: "KPA-0012850",
       nrp: "2190067890",
       nik: "", // Kosong
       nama: "Peltu Hendra Wijaya",
@@ -223,7 +223,7 @@ export const TaspenPolis = () => {
     {
       id: "P7",
       noPolis: "TL-JKM-2026-00035",
-      ktpa: "KTPA-0012851",
+      ktpa: "KPA-0012851",
       nrp: "198207072006042001",
       nik: "3171070707820007",
       nama: "Pembina Utama Dr. Ratna",
@@ -249,7 +249,7 @@ export const TaspenPolis = () => {
     {
       id: "P8",
       noPolis: "TL-TDS-2026-00148",
-      ktpa: "KTPA-0012852",
+      ktpa: "KPA-0012852",
       nrp: "3188098765",
       nik: "3578090909880009",
       nama: "Bripka Anwar Ibrahim",
@@ -425,7 +425,7 @@ export const TaspenPolis = () => {
                 {[
                   ["Nama Pemegang Polis", detailPolis.nama],
                   ["NRP / NOPENS", detailPolis.nrp],
-                  ["Nomor KTPA", detailPolis.ktpa],
+                  ["Nomor KPA", detailPolis.ktpa],
                   ["NIK Dukcapil", detailPolis.nik || "(Belum Terisi / Kosong)"],
                   ["Jenis Program", detailPolis.program],
                   ["Kantor Cabang", detailPolis.cabang],
@@ -470,7 +470,7 @@ export const TaspenPolis = () => {
                         rows: [
                           ["Nomor Polis", detailPolis.noPolis],
                           ["Nama Peserta", detailPolis.nama],
-                          ["KTPA / NRP", `${detailPolis.ktpa} / ${detailPolis.nrp}`],
+                          ["KPA / NRP", `${detailPolis.ktpa} / ${detailPolis.nrp}`],
                           ["NIK", detailPolis.nik || "—"],
                           ["Program", detailPolis.program],
                           ["Masa Berlaku", `${detailPolis.tglMulai} s.d. ${detailPolis.tglAkhir}`],
@@ -892,7 +892,7 @@ export const TaspenPolis = () => {
                           ? [
                               "No",
                               "Nomor Polis",
-                              "NRP/KTPA",
+                              "NRP/KPA",
                               "Nama Peserta",
                               "Nominal Premi",
                               "Program",
@@ -903,7 +903,7 @@ export const TaspenPolis = () => {
                             ]
                           : [
                               "Cabang",
-                              "KTPA",
+                              "KPA",
                               "No. Polis",
                               "Nama",
                               "Program",
@@ -1024,7 +1024,7 @@ export const TaspenPolis = () => {
               <SearchInput
                 value={search}
                 onChange={setSearch}
-                placeholder="No. Polis / NRP / KTPA / NIK / Nama..."
+                placeholder="No. Polis / NRP / KPA / NIK / Nama..."
                 minW={260}
               />
             </div>
@@ -1064,7 +1064,7 @@ export const TaspenPolis = () => {
                       {[
                         "No.",
                         "Nomor Polis",
-                        "NRP / Nopens / KTPA",
+                        "NRP / Nopens / KPA",
                         "Nama Peserta",
                         "Jenis Program",
                         "Nominal Premi",
@@ -1258,7 +1258,7 @@ export const TaspenPolis = () => {
                     <tr style={{ background: "#F8FAFC", color: "#64748B" }}>
                       {[
                         "Cabang",
-                        "No. KTPA",
+                        "No. KPA",
                         "No. Polis",
                         "Tgl Ajuan",
                         "No. SP",

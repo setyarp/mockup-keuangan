@@ -788,43 +788,6 @@ export const DashboardDIPA = () => {
               </table>
             </div>
           </div>
-
-          {/* Arsitektur Aliran 4 SP2D Kemenkeu Information Banner */}
-          <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "18px 20px", border: "1px solid #E2E8F0" }}>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: "#0F172A", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-              <Info size={16} color="#0141A8" />
-              Arsitektur Alur Penerbitan SP2D Kemenkeu ke Rekening Penampung & Kas PT ASABRI (Persero)
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, marginTop: 12 }}>
-              <div style={{ background: "#FFFFFF", padding: "12px 14px", borderRadius: 6, border: "1px solid #E2E8F0" }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: "#0141A8", textTransform: "uppercase" }}>1. SP2D Belanja Pensiun (DAPEM)</div>
-                <div style={{ fontSize: 11.5, color: "#334155", marginTop: 4, lineHeight: 1.5 }}>
-                  Diterbitkan Kemenkeu per bulan (4 MAK 513113, 513114, 513122, 513123) ke <strong>Rekening Penampung DAPEM ASABRI</strong> untuk disalurkan ke mitra bayar bank/pos.
-                </div>
-              </div>
-
-              <div style={{ background: "#FFFFFF", padding: "12px 14px", borderRadius: 6, border: "1px solid #E2E8F0" }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: "#059669", textTransform: "uppercase" }}>2. SP2D Iuran JKK (0,24%)</div>
-                <div style={{ fontSize: 11.5, color: "#334155", marginTop: 4, lineHeight: 1.5 }}>
-                  Diterbitkan Kemenkeu atas beban DIPA Belanja Pegawai Mabes TNI & Mabes POLRI langsung ke <strong>Kas Program JKK ASABRI</strong> untuk manfaat kecelakaan kerja peserta aktif.
-                </div>
-              </div>
-
-              <div style={{ background: "#FFFFFF", padding: "12px 14px", borderRadius: 6, border: "1px solid #E2E8F0" }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: "#0D9488", textTransform: "uppercase" }}>3. SP2D Iuran JKM (0,20%)</div>
-                <div style={{ fontSize: 11.5, color: "#334155", marginTop: 4, lineHeight: 1.5 }}>
-                  Diterbitkan Kemenkeu atas beban DIPA Belanja Pegawai Mabes TNI & Mabes POLRI langsung ke <strong>Kas Program JKM ASABRI</strong> untuk santunan kematian dinas / tewas.
-                </div>
-              </div>
-
-              <div style={{ background: "#FFFFFF", padding: "12px 14px", borderRadius: 6, border: "1px solid #E2E8F0" }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: "#7C3AED", textTransform: "uppercase" }}>4. SP2D Tagihan BOP (0,50%)</div>
-                <div style={{ fontSize: 11.5, color: "#334155", marginTop: 4, lineHeight: 1.5 }}>
-                  Diterbitkan Kemenkeu atas tagihan ASABRI (0,50% x Realisasi DAPEM) via DIPA BA BUN ke <strong>Kas Operasional ASABRI</strong> untuk imbal jasa perbankan & operasional.
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
