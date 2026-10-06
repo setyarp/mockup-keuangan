@@ -11,17 +11,19 @@ import { COLORS, IC } from "../constants/colors";
 import { StatCard, SectionTitle, Btn, Select, SearchInput, Badge, NoData, PreviewModal } from "../components/common";
 
 export const KreditPiutang = () => {
+  const [filterJenis, setFilterJenis] = useState("Semua"); // "Semua", "UDW Punah", "Anak Yatim Menikah", "Janda/Duda Menikah Lagi"
   const [filterSatker, setFilterSatker] = useState("Semua");
   const [filterStatus, setFilterStatus] = useState("Semua"); // "Semua", "Dikembalikan", "Ditagih", "Terlambat"
-  const [searchUDW, setSearchUDW] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [preview, setPreview] = useState(null);
 
-  // Data Kasus Monitoring Penagihan Keterlanjuran Bayar (UDW Punah)
+  // Data Kasus Monitoring Penagihan Keterlanjuran Bayar (UDW Punah, Anak Yatim Menikah, Janda/Duda Menikah Lagi)
   const allKasus = [
     {
       no: 1,
-      ref: "UDW/2026/01/001",
-      nama: "Kolonel Inf. Agus Setiawan",
+      ref: "KB-UDW/2026/01/001",
+      jenis: "UDW Punah",
+      nama: "Kolonel Inf. (Purn) Agus Setiawan",
       nrp: "11020014250",
       satker: "TNI AD",
       unor: "Kodam Jaya",
@@ -30,40 +32,94 @@ export const KreditPiutang = () => {
       jatuhTempo: "01 Feb 2026",
       tglBayar: null,
       status: "Ditagih",
-      hariTerlambat: 0
+      hariTerlambat: 0,
+      keterangan: "Penerima pensiun wafat punah tanpa ahli waris berhak."
     },
     {
       no: 2,
-      ref: "UDW/2026/01/042",
+      ref: "KB-JDM/2026/01/014",
+      jenis: "Janda/Duda Menikah Lagi",
+      nama: "Ny. Siti Rahayu (Janda Alm. Kapten Laut Joko)",
+      nrp: "31040058190",
+      satker: "TNI AL",
+      unor: "Koarmada II",
+      jumlah: 8450000,
+      tglPengajuan: "10 Jan 2026",
+      jatuhTempo: "24 Jan 2026",
+      tglBayar: "22 Jan 2026",
+      status: "Dikembalikan",
+      hariTerlambat: 0,
+      keterangan: "Janda telah menikah lagi per Nov 2025, dana Des-Jan dikembalikan."
+    },
+    {
+      no: 3,
+      ref: "KB-AYM/2026/01/028",
+      jenis: "Anak Yatim Menikah",
+      nama: "Rian Hidayat (Anak Alm. Letkol Pol. Wahyu)",
+      nrp: "5201089201",
+      satker: "POLRI",
+      unor: "Polda Jabar",
+      jumlah: 6200000,
+      tglPengajuan: "15 Jan 2026",
+      jatuhTempo: "29 Jan 2026",
+      tglBayar: null,
+      status: "Terlambat",
+      hariTerlambat: 12,
+      keterangan: "Anak yatim telah melangsungkan pernikahan pada Des 2025."
+    },
+    {
+      no: 4,
+      ref: "KB-UDW/2026/01/042",
+      jenis: "UDW Punah",
       nama: "Ny. Ratna Sari (Warakawuri Punah)",
       nrp: "PNS-00125492",
-      satker: "POLRI",
-      unor: "Polda Metro Jaya",
+      satker: "PNS Kemhan",
+      unor: "Ditjen Renhan",
       jumlah: 12800000,
       tglPengajuan: "14 Jan 2026",
       jatuhTempo: "28 Jan 2026",
       tglBayar: "26 Jan 2026",
       status: "Dikembalikan",
-      hariTerlambat: 0
+      hariTerlambat: 0,
+      keterangan: "Pensiunan janda punah tanpa anak di bawah 25 thn."
     },
     {
-      no: 3,
-      ref: "UDW/2026/01/089",
-      nama: "Sertu Bima Prakoso",
-      nrp: "21120485901",
+      no: 5,
+      ref: "KB-AYM/2026/01/067",
+      jenis: "Anak Yatim Menikah",
+      nama: "Dewi Anggraini (Anak Alm. Mayor Arh. Bambang)",
+      nrp: "21030044120",
+      satker: "TNI AD",
+      unor: "Kodam IV Diponegoro",
+      jumlah: 7800000,
+      tglPengajuan: "20 Jan 2026",
+      jatuhTempo: "03 Feb 2026",
+      tglBayar: null,
+      status: "Ditagih",
+      hariTerlambat: 0,
+      keterangan: "Anak yatim menikah per Jan 2026, surat penagihan telah diterbitkan."
+    },
+    {
+      no: 6,
+      ref: "KB-JDM/2026/01/089",
+      jenis: "Janda/Duda Menikah Lagi",
+      nama: "Ny. Maria Ulfa (Warakawuri Menikah Lagi)",
+      nrp: "43020099110",
       satker: "TNI AU",
-      unor: "Lanud Halim",
-      jumlah: 18500000,
+      unor: "Lanud Iswahjudi",
+      jumlah: 11200000,
       tglPengajuan: "12 Jan 2026",
       jatuhTempo: "26 Jan 2026",
       tglBayar: null,
       status: "Terlambat",
-      hariTerlambat: 15
+      hariTerlambat: 18,
+      keterangan: "Warakawuri menikah lagi, belum melakukan pengembalian dana pensiun."
     },
     {
-      no: 4,
-      ref: "UDW/2026/01/112",
-      nama: "Laksamana Muda Yudi K.",
+      no: 7,
+      ref: "KB-UDW/2026/01/112",
+      jenis: "UDW Punah",
+      nama: "Laksamana Muda (Purn) Yudi K.",
       nrp: "74080124110",
       satker: "TNI AL",
       unor: "Mabes AL",
@@ -72,26 +128,30 @@ export const KreditPiutang = () => {
       jatuhTempo: "24 Jan 2026",
       tglBayar: null,
       status: "Terlambat",
-      hariTerlambat: 28
+      hariTerlambat: 28,
+      keterangan: "Keterlanjuran transfer UDW dan Dapem induk ke rekening almarhum."
     },
     {
-      no: 5,
-      ref: "UDW/2026/01/156",
-      nama: "Mayor (P) Hendra Gunawan",
-      nrp: "5109820012",
-      satker: "TNI AL",
-      unor: "Koarmada I",
-      jumlah: 14200000,
+      no: 8,
+      ref: "KB-JDM/2026/01/156",
+      jenis: "Janda/Duda Menikah Lagi",
+      nama: "Ny. Endang Susilowati (Janda Alm. Bripka Heru)",
+      nrp: "61020088190",
+      satker: "POLRI",
+      unor: "Polda Metro Jaya",
+      jumlah: 9500000,
       tglPengajuan: "07 Jan 2026",
       jatuhTempo: "21 Jan 2026",
       tglBayar: "19 Jan 2026",
       status: "Dikembalikan",
-      hariTerlambat: 0
+      hariTerlambat: 0,
+      keterangan: "Keterlanjuran bayar telah disetor lunas ke Kas Negara."
     },
     {
-      no: 6,
-      ref: "UDW/2026/01/201",
-      nama: "Brigjen Pol. Sutrisno",
+      no: 9,
+      ref: "KB-UDW/2026/01/201",
+      jenis: "UDW Punah",
+      nama: "Brigjen Pol. (Purn) Sutrisno",
       nrp: "6201089201",
       satker: "POLRI",
       unor: "Mabes Polri",
@@ -100,42 +160,30 @@ export const KreditPiutang = () => {
       jatuhTempo: "19 Jan 2026",
       tglBayar: "18 Jan 2026",
       status: "Dikembalikan",
-      hariTerlambat: 0
+      hariTerlambat: 0,
+      keterangan: "Penerima punah, dana telah ditarik kembali secara tuntas."
     },
     {
-      no: 7,
-      ref: "UDW/2026/01/245",
-      nama: "Letda Ckm dr. Arif Budiman",
-      nrp: "31190088712",
-      satker: "TNI AD",
-      unor: "Kesdam IV Diponegoro",
-      jumlah: 16800000,
+      no: 10,
+      ref: "KB-AYM/2026/01/245",
+      jenis: "Anak Yatim Menikah",
+      nama: "Dimas Prasetyo (Anak Yatim Alm. PNS Sukirno)",
+      nrp: "PNS-00199412",
+      satker: "PNS Kemhan",
+      unor: "Balitbang Kemhan",
+      jumlah: 5400000,
       tglPengajuan: "22 Jan 2026",
       jatuhTempo: "05 Feb 2026",
       tglBayar: null,
       status: "Ditagih",
-      hariTerlambat: 0
-    },
-    {
-      no: 8,
-      ref: "UDW/2026/01/246",
-      nama: "Mang Asep",
-      nrp: "31190088313",
-      satker: "TNI AL",
-      unor: "Kesdam III Jayakarta",
-      jumlah: 17800000,
-      tglPengajuan: "22 Feb 2026",
-      jatuhTempo: "08 Mar 2026",
-      tglBayar: null,
-      status: "Ditagih",
-      hariTerlambat: 0
+      hariTerlambat: 0,
+      keterangan: "Surat pemberitahuan pengembalian telah diterima pihak keluarga."
     }
   ];
-  //nambah hari
 
   const fmt = (n) => `Rp ${Math.round(n).toLocaleString("id-ID")}`;
 
-  // Rumus Denda UDW Punah: Nominal * (1 / 1000) * Hari Keterlambatan
+  // Rumus Denda Keterlanjuran Bayar: Nominal * (1 / 1000) * Hari Keterlambatan
   const hitungDenda = (nominal, hari) => {
     if (nominal <= 0 || hari <= 0) return 0;
     return Math.round(nominal * (1 / 1000) * hari);
@@ -145,18 +193,22 @@ export const KreditPiutang = () => {
     s === "Dikembalikan" ? "green" : s === "Ditagih" ? "blue" : "red";
 
   const filtered = allKasus.filter((k) => {
+    if (filterJenis !== "Semua" && k.jenis !== filterJenis) return false;
     if (filterSatker !== "Semua" && !k.satker.includes(filterSatker)) return false;
     if (filterStatus !== "Semua" && k.status !== filterStatus) return false;
     if (
-      searchUDW &&
-      !k.nama.toLowerCase().includes(searchUDW.toLowerCase()) &&
-      !k.ref.toLowerCase().includes(searchUDW.toLowerCase()) &&
-      !k.nrp.includes(searchUDW)
+      searchQuery &&
+      !k.nama.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !k.ref.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !k.nrp.includes(searchQuery) &&
+      !k.jenis.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !k.unor.toLowerCase().includes(searchQuery.toLowerCase())
     )
       return false;
     return true;
   });
 
+  // Global Aggregates
   const totalJumlahAll = allKasus.reduce((a, k) => a + k.jumlah, 0);
   const totalDikembalikanAll = allKasus
     .filter((k) => k.status === "Dikembalikan")
@@ -168,24 +220,59 @@ export const KreditPiutang = () => {
     .filter((k) => k.status === "Terlambat")
     .reduce((a, k) => a + hitungDenda(k.jumlah, k.hariTerlambat), 0);
 
+  // Aggregates per Jenis
+  const jenisList = ["UDW Punah", "Anak Yatim Menikah", "Janda/Duda Menikah Lagi"];
+  const countPerJenis = jenisList.reduce((acc, j) => {
+    const list = allKasus.filter((k) => k.jenis === j);
+    acc[j] = {
+      count: list.length,
+      total: list.reduce((a, b) => a + b.jumlah, 0)
+    };
+    return acc;
+  }, {});
+
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
 
+      {/* Header Penjelasan Singkat */}
+      <div
+        style={{
+          background: "#F8FAFC",
+          border: "1px solid #E2E8F0",
+          borderRadius: 8,
+          padding: "14px 18px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 12
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "#0F172A" }}>
+            Monitoring & Penagihan Keterlanjuran Bayar Pensiun
+          </div>
+          <div style={{ fontSize: 12, color: "#64748B", marginTop: 3 }}>
+            Pemantauan piutang pengembalian dana pensiun: UDW Punah, Anak Yatim Menikah, dan Janda/Duda Menikah Lagi dengan sanksi denda keterlambatan 1‰ (satu permil) per hari.
+          </div>
+        </div>
+      </div>
+
       {/* Stat Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
         <StatCard
           icon={<Users size={IC} />}
           label="Total Kasus Terdeteksi"
           value={`${allKasus.length} Kasus`}
-          sub="Monitoring keterlanjuran bayar UDW"
+          sub="3 Jenis Keterlanjuran Bayar"
           color={COLORS.blue}
         />
         <StatCard
           icon={<Wallet size={IC} />}
           label="Total Terlanjur Bayar"
           value={fmt(totalJumlahAll)}
-          sub="Akumulasi UDW punah terbit"
+          sub="Akumulasi seluruh kewajiban penagihan"
           color={COLORS.blue}
         />
         <StatCard
@@ -204,14 +291,60 @@ export const KreditPiutang = () => {
         />
       </div>
 
-      {/* Filters */}
+      {/* Category Filter Tabs (Clean & Neutral) */}
+      <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
+        {[
+          { id: "Semua", label: "Semua Jenis", count: allKasus.length, total: totalJumlahAll },
+          { id: "UDW Punah", label: "UDW Punah", count: countPerJenis["UDW Punah"].count, total: countPerJenis["UDW Punah"].total },
+          { id: "Anak Yatim Menikah", label: "Anak Yatim Menikah", count: countPerJenis["Anak Yatim Menikah"].count, total: countPerJenis["Anak Yatim Menikah"].total },
+          { id: "Janda/Duda Menikah Lagi", label: "Janda/Duda Menikah Lagi", count: countPerJenis["Janda/Duda Menikah Lagi"].count, total: countPerJenis["Janda/Duda Menikah Lagi"].total },
+        ].map((tab) => {
+          const isSelected = filterJenis === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setFilterJenis(tab.id)}
+              style={{
+                background: isSelected ? "#0F172A" : "#FFFFFF",
+                color: isSelected ? "#FFFFFF" : "#334155",
+                border: `1px solid ${isSelected ? "#0F172A" : "#CBD5E1"}`,
+                borderRadius: 6,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: isSelected ? 700 : 500,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                whiteSpace: "nowrap",
+                transition: "all 0.15s ease"
+              }}
+            >
+              <span>{tab.label}</span>
+              <span
+                style={{
+                  background: isSelected ? "rgba(255,255,255,0.2)" : "#F1F5F9",
+                  color: isSelected ? "#FFFFFF" : "#475569",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "1px 6px",
+                  borderRadius: 4
+                }}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filters Bar */}
       <div
         style={{
           background: COLORS.white,
           borderRadius: 8,
           padding: "14px 18px",
           border: `1px solid ${COLORS.gray200}`,
-          marginBottom: 18,
           display: "flex",
           gap: 12,
           alignItems: "flex-end",
@@ -219,27 +352,34 @@ export const KreditPiutang = () => {
         }}
       >
         <Select
+          label="Jenis Keterlanjuran"
+          value={filterJenis}
+          onChange={setFilterJenis}
+          options={["Semua", "UDW Punah", "Anak Yatim Menikah", "Janda/Duda Menikah Lagi"]}
+          minW={190}
+        />
+        <Select
           label="Instansi / Satker"
           value={filterSatker}
           onChange={setFilterSatker}
-          options={["Semua", "TNI AD", "TNI AL", "TNI AU", "POLRI"]}
-          minW={160}
+          options={["Semua", "TNI AD", "TNI AL", "TNI AU", "POLRI", "PNS Kemhan"]}
+          minW={150}
         />
         <Select
           label="Status Pengembalian"
           value={filterStatus}
           onChange={setFilterStatus}
           options={["Semua", "Dikembalikan", "Ditagih", "Terlambat"]}
-          minW={160}
+          minW={150}
         />
         <div style={{ flex: 1, minWidth: 240 }}>
           <label style={{ fontSize: 12, color: COLORS.gray600, display: "block", marginBottom: 4, fontWeight: 600 }}>
-            Pencarian
+            Pencarian Data
           </label>
           <SearchInput
-            value={searchUDW}
-            onChange={setSearchUDW}
-            placeholder="Cari nomor ref, nama peserta, atau NRP..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Cari nomor ref, nama peserta, NRP/NIP, atau satker..."
             minW={240}
           />
         </div>
@@ -263,13 +403,14 @@ export const KreditPiutang = () => {
                 size="sm"
                 onClick={() =>
                   setPreview({
-                    title: "Laporan Monitoring Penagihan Keterlanjuran Bayar UDW Punah",
-                    subtitle: "Format Dokumen Resmi Ditjen Anggaran & Perbendaharaan",
+                    title: "Laporan Monitoring Penagihan Keterlanjuran Bayar Pensiun",
+                    subtitle: `Kategori: ${filterJenis} • Format Dokumen Resmi Ditjen Anggaran & Perbendaharaan`,
                     type: "table",
-                    fileName: "Monitoring_Penagihan_Keterlanjuran_Bayar.pdf",
+                    fileName: `Monitoring_Keterlanjuran_Bayar_${filterJenis.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
                     content: {
                       columns: [
                         "No. Ref",
+                        "Jenis Keterlanjuran",
                         "Nama Peserta",
                         "NRP / NIP",
                         "Satker",
@@ -287,6 +428,7 @@ export const KreditPiutang = () => {
                         const totalWajib = k.status === "Dikembalikan" ? 0 : k.jumlah + denda;
                         return [
                           k.ref,
+                          k.jenis,
                           k.nama,
                           k.nrp,
                           k.satker,
@@ -312,13 +454,14 @@ export const KreditPiutang = () => {
                 size="sm"
                 onClick={() =>
                   setPreview({
-                    title: "Laporan Monitoring Penagihan Keterlanjuran Bayar UDW Punah",
-                    subtitle: "Format Spreadsheet Excel",
+                    title: "Laporan Monitoring Penagihan Keterlanjuran Bayar Pensiun",
+                    subtitle: `Kategori: ${filterJenis} • Format Spreadsheet Excel`,
                     type: "table",
-                    fileName: "Monitoring_Penagihan_Keterlanjuran_Bayar.xlsx",
+                    fileName: `Monitoring_Keterlanjuran_Bayar_${filterJenis.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`,
                     content: {
                       columns: [
                         "No. Ref",
+                        "Jenis Keterlanjuran",
                         "Nama Peserta",
                         "NRP / NIP",
                         "Satker",
@@ -336,6 +479,7 @@ export const KreditPiutang = () => {
                         const totalWajib = k.status === "Dikembalikan" ? 0 : k.jumlah + denda;
                         return [
                           k.ref,
+                          k.jenis,
                           k.nama,
                           k.nrp,
                           k.satker,
@@ -359,11 +503,11 @@ export const KreditPiutang = () => {
             </div>
           }
         >
-          Tabel Monitoring Penagihan Keterlanjuran Bayar (UDW Punah)
+          Tabel Monitoring Penagihan Keterlanjuran Bayar
         </SectionTitle>
 
-        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 12 }}>
-          Seluruh data monitoring penagihan, jadwal tanggal pengajuan, batas jatuh tempo, tanggal bayar, status, serta perhitungan denda 1‰ (satu permil) terangkum dalam tabel di bawah ini.
+        <div style={{ fontSize: 12, color: COLORS.gray500, marginBottom: 14 }}>
+          Seluruh data kasus keterlanjuran bayar (UDW Punah, Anak Yatim Menikah, dan Janda/Duda Menikah Lagi), jadwal pengajuan, jatuh tempo, status bayar, serta kalkulasi denda 1‰ (satu permil) per hari terangkum di bawah ini.
         </div>
 
         {filtered.length === 0 ? (
@@ -376,7 +520,8 @@ export const KreditPiutang = () => {
                   {[
                     "No",
                     "No. Ref Kasus",
-                    "Nama Peserta",
+                    "Jenis Keterlanjuran",
+                    "Nama Peserta / Penerima",
                     "NRP / NIP",
                     "Satker & Unor",
                     "Terlanjur Bayar",
@@ -392,11 +537,11 @@ export const KreditPiutang = () => {
                       key={i}
                       style={{
                         padding: "10px 12px",
-                        textAlign: [5, 11, 12].includes(i) ? "right" : [0, 6, 7, 8, 9, 10].includes(i) ? "center" : "left",
+                        textAlign: [6, 12, 13].includes(i) ? "right" : [0, 7, 8, 9, 10, 11].includes(i) ? "center" : "left",
                         fontWeight: 800,
                         color: "#64748B",
                         borderBottom: `1px solid #E2E8F0`,
-                        borderRight: i < 12 ? "1px solid #E2E8F0" : "none",
+                        borderRight: i < 13 ? "1px solid #E2E8F0" : "none",
                         whiteSpace: "nowrap"
                       }}
                     >
@@ -423,8 +568,16 @@ export const KreditPiutang = () => {
                       <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", whiteSpace: "nowrap" }}>
                         <span style={{ fontWeight: 700, color: COLORS.blueDark, fontFamily: "monospace" }}>{k.ref}</span>
                       </td>
-                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", fontWeight: 700, color: "#0F172A", minWidth: 150 }}>
-                        {k.nama}
+                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", fontWeight: 600, color: "#334155", whiteSpace: "nowrap" }}>
+                        {k.jenis}
+                      </td>
+                      <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", fontWeight: 700, color: "#0F172A", minWidth: 160 }}>
+                        <div>{k.nama}</div>
+                        {k.keterangan && (
+                          <div style={{ fontSize: 10.5, color: "#64748B", fontWeight: 400, marginTop: 2 }}>
+                            {k.keterangan}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: "9px 12px", borderRight: "1px solid #E2E8F0", fontFamily: "monospace", color: "#334155", fontSize: 11.5, whiteSpace: "nowrap" }}>
                         {k.nrp}

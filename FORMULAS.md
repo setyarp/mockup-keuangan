@@ -178,8 +178,15 @@ Sesuai **BRD Keuangan & Perpajakan V5 (PJK 01, Line 566 & 696)** dan **PMK No. 1
 
 ---
 
-## 7. 🏷️ Penarikan Piutang & UDW Punah (`KreditPiutang`)
-* Penarikan kelebihan bayar **Uang Duka Wafat (UDW)** dan hak pensiun bagi penerima yang tercatat punah (meninggal dunia tanpa ada ahli waris sah yang berhak menerima tunjangan lanjutan).
+## 7. 🏷️ Penagihan Keterlanjuran Bayar Pensiun (`KreditPiutang`)
+* Pemantauan dan penagihan piutang pengembalian kelebihan/keterlanjuran transfer dana pensiun ke Kas Negara yang disebabkan oleh 3 (tiga) kategori kasus:
+  1. **UDW Punah:** Penerima pensiun meninggal dunia dan hak pensiun dinyatakan punah (tidak ada ahli waris sah yang berhak atas tunjangan pensiun lanjutan), namun dana pensiun / Uang Duka Wafat sempat terlanjur ditransfer.
+  2. **Anak Yatim Menikah:** Anak penerima tunjangan pensiun yatim/piatu telah melangsungkan pernikahan (sehingga hak pensiun gugur sesuai regulasi), namun dana masih sempat terbayarkan.
+  3. **Janda/Duda Menikah Lagi:** Janda/duda/warakawuri penerima pensiun telah melangsungkan pernikahan kembali (sehingga hak pensiun janda/duda gugur), namun dana masih sempat terbayarkan.
+
+#### Formula Denda Keterlambatan:
+$$\text{Denda} = \text{Nominal Terlanjur Bayar} \times \frac{1}{1000} \times \text{Hari Keterlambatan}$$
+$$\text{Total Kewajiban Disetor} = \begin{cases} 0 & \text{jika Status = "Dikembalikan"} \\ \text{Nominal Terlanjur Bayar} + \text{Denda} & \text{jika Belum Lunas} \end{cases}$$
 
 ---
 

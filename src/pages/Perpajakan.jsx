@@ -3131,40 +3131,6 @@ export const Perpajakan = () => {
               />
             </div>
 
-            {/* Mode Banner Alert */}
-            <div
-              style={{
-                background: isKomparasiTahunan ? "#F0FDF4" : "#EFF6FF",
-                border: `1px solid ${isKomparasiTahunan ? "#BBF7D0" : "#BFDBFE"}`,
-                borderRadius: 8,
-                padding: "10px 14px",
-                marginBottom: 14,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                fontSize: 12,
-                color: isKomparasiTahunan ? "#166534" : "#1E40AF",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {isKomparasiTahunan ? <CheckCircle2 size={16} color="#16A34A" /> : <Info size={16} color="#2563EB" />}
-                <span>
-                  {isKomparasiTahunan ? (
-                    <>
-                      <strong>Tampilan Akumulasi Tahunan (Full Year):</strong> Membuktikan bahwa secara total setahun, perhitungan pajak antara Metode Baru (TER Jan–Nov + Desember P17) dan Metode Lama (Pasal 17) <strong>bernilai identik 100% (selisih Rp 0)</strong>.
-                    </>
-                  ) : (
-                    <>
-                      <strong>Tampilan Evaluasi Masa {filterBulanKomparasi} 2026:</strong> Menampilkan perbandingan riil potongan pajak bulanan. Klik tombol <strong>"Rincian 12 Bulan"</strong> pada baris peserta untuk melihat matriks lengkap dari Januari s.d. Desember.
-                    </>
-                  )}
-                </span>
-              </div>
-              <Badge color={isKomparasiTahunan ? "green" : "blue"}>
-                {isKomparasiTahunan ? "Rekonsiliasi Sempurna" : `Masa ${filterBulanKomparasi}`}
-              </Badge>
-            </div>
-
             {/* Table */}
             <div style={{ overflowX: "auto", borderRadius: 6, border: "1px solid #CBD5E1" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
