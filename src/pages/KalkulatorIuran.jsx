@@ -1060,146 +1060,221 @@ export const KalkulatorIuran = () => {
               padding: "16px 20px",
               border: `1px solid ${COLORS.gray200}`,
               boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-              gap: 16,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
               width: "100%",
-              boxSizing: "border-box",
-              alignItems: "flex-end"
+              boxSizing: "border-box"
             }}
           >
-            {/* Filter Periode Tanggal */}
-            <div>
-              <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                <Calendar size={13} color={COLORS.gray500} /> Rentang Tanggal Kalender
-              </label>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="date"
-                  value={tglAwal}
-                  onChange={e => setTglAwal(e.target.value)}
-                  style={{
-                    flex: 1,
-                    width: "100%",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    border: `1px solid ${COLORS.gray300}`,
-                    fontSize: 12.5,
-                    color: COLORS.gray800,
-                    background: COLORS.white,
-                    boxSizing: "border-box"
+            {/* Active Filters Info & Reset */}
+            {(filterSatker !== "Semua" || filterGolongan !== "Semua" || filterJenis !== "Semua") && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingBottom: 10,
+                  borderBottom: `1px solid ${COLORS.gray200}`,
+                  flexWrap: "wrap",
+                  gap: 8
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: COLORS.gray600, flexWrap: "wrap" }}>
+                  <span style={{ fontWeight: 700, color: COLORS.blueDark }}>Filter Aktif:</span>
+                  {filterSatker !== "Semua" && (
+                    <span style={{ padding: "2px 8px", background: "#EFF6FF", color: COLORS.blueDark, borderRadius: 12, fontWeight: 700, border: "1px solid #BFDBFE" }}>
+                      Unor: {filterSatker}
+                    </span>
+                  )}
+                  {filterGolongan !== "Semua" && (
+                    <span style={{ padding: "2px 8px", background: "#F3E8FF", color: "#6B21A8", borderRadius: 12, fontWeight: 700, border: "1px solid #DDD6FE" }}>
+                      Gol: {filterGolongan}
+                    </span>
+                  )}
+                  {filterJenis !== "Semua" && (
+                    <span style={{ padding: "2px 8px", background: "#ECFDF5", color: "#065F46", borderRadius: 12, fontWeight: 700, border: "1px solid #A7F3D0" }}>
+                      Program: {filterJenis}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterSatker("Semua");
+                    setFilterGolongan("Semua");
+                    setFilterJenis("Semua");
                   }}
-                />
-                <span style={{ fontSize: 11, color: COLORS.gray400, fontWeight: 600 }}>s.d.</span>
-                <input
-                  type="date"
-                  value={tglAkhir}
-                  onChange={e => setTglAkhir(e.target.value)}
                   style={{
-                    flex: 1,
-                    width: "100%",
-                    padding: "8px 10px",
+                    background: "#FEF2F2",
+                    border: "1px solid #FECACA",
                     borderRadius: 6,
-                    border: `1px solid ${COLORS.gray300}`,
-                    fontSize: 12.5,
-                    color: COLORS.gray800,
-                    background: COLORS.white,
-                    boxSizing: "border-box"
+                    color: "#DC2626",
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    padding: "3px 10px",
+                    transition: "background 0.15s"
                   }}
-                />
+                >
+                  ✕ Reset Filter
+                </button>
               </div>
-            </div>
+            )}
 
-            {/* Filter Satker / Unor */}
-            <div>
-              <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                <Filter size={13} color={COLORS.gray500} /> Unor / Satker
-              </label>
-              <select
-                value={filterSatker}
-                onChange={e => {
-                  setFilterSatker(e.target.value);
-                  setSelectedSatker(null);
-                }}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: `1px solid ${COLORS.gray300}`,
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: COLORS.gray800,
-                  background: COLORS.white,
-                  cursor: "pointer",
-                  boxSizing: "border-box"
-                }}
-              >
-                {["Semua", "TNI AD", "TNI AL", "TNI AU", "POLRI", "PNS POLRI", "PPPK POLRI", "PNS Kemenhan", "PPPK Kemenhan"].map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
+            {/* Grid 4 Kolom Filter Proporsional */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 0.85fr)",
+                gap: 14,
+                width: "100%",
+                alignItems: "flex-end"
+              }}
+            >
+              {/* Kolom 1: Rentang Tanggal Kalender */}
+              <div style={{ minWidth: 0 }}>
+                <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6, whiteSpace: "nowrap" }}>
+                  <Calendar size={13} color={COLORS.gray500} /> Rentang Tanggal
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, width: "100%" }}>
+                  <input
+                    type="date"
+                    value={tglAwal}
+                    onChange={e => setTglAwal(e.target.value)}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      width: "100%",
+                      padding: "7.5px 8px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      fontSize: 12,
+                      color: COLORS.gray800,
+                      background: COLORS.white,
+                      boxSizing: "border-box",
+                      outline: "none"
+                    }}
+                  />
+                  <span style={{ fontSize: 11, color: COLORS.gray400, fontWeight: 700, flexShrink: 0 }}>s.d.</span>
+                  <input
+                    type="date"
+                    value={tglAkhir}
+                    onChange={e => setTglAkhir(e.target.value)}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      width: "100%",
+                      padding: "7.5px 8px",
+                      borderRadius: 6,
+                      border: `1px solid ${COLORS.gray300}`,
+                      fontSize: 12,
+                      color: COLORS.gray800,
+                      background: COLORS.white,
+                      boxSizing: "border-box",
+                      outline: "none"
+                    }}
+                  />
+                </div>
+              </div>
 
-            {/* Filter Golongan / Kepangkatan */}
-            <div>
-              <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                <Shield size={13} color={COLORS.gray500} /> Golongan / Pangkat
-              </label>
-              <select
-                value={filterGolongan}
-                onChange={e => setFilterGolongan(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: `1px solid ${COLORS.gray300}`,
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: COLORS.gray800,
-                  background: COLORS.white,
-                  cursor: "pointer",
-                  boxSizing: "border-box"
-                }}
-              >
-                {[
-                  "Semua",
-                  "Tamtama / Golongan I",
-                  "Bintara / Golongan II",
-                  "Pama / Golongan III",
-                  "Pamen / Golongan IV",
-                  "Pati / Perwira Tinggi",
-                  "PPPK (Golongan IX - XII)"
-                ].map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
+              {/* Kolom 2: Unor / Satker */}
+              <div style={{ minWidth: 0 }}>
+                <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6, whiteSpace: "nowrap" }}>
+                  <Filter size={13} color={COLORS.gray500} /> Unor / Satker
+                </label>
+                <select
+                  value={filterSatker}
+                  onChange={e => {
+                    setFilterSatker(e.target.value);
+                    setSelectedSatker(null);
+                  }}
+                  style={{
+                    width: "100%",
+                    minWidth: 0,
+                    padding: "7.5px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: COLORS.gray800,
+                    background: COLORS.white,
+                    cursor: "pointer",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                >
+                  {["Semua", "TNI AD", "TNI AL", "TNI AU", "POLRI", "PNS POLRI", "PPPK POLRI", "PNS Kemenhan", "PPPK Kemenhan"].map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Filter Jenis Iuran */}
-            <div>
-              <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "block", marginBottom: 6 }}>
-                Jenis Iuran (Tabel)
-              </label>
-              <select
-                value={filterJenis}
-                onChange={e => setFilterJenis(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: `1px solid ${COLORS.gray300}`,
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: COLORS.gray800,
-                  background: COLORS.white,
-                  cursor: "pointer",
-                  boxSizing: "border-box"
-                }}
-              >
-                {["Semua", "THT", "Pensiun", "JKK", "JKm"].map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
+              {/* Kolom 3: Golongan / Kepangkatan */}
+              <div style={{ minWidth: 0 }}>
+                <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6, whiteSpace: "nowrap" }}>
+                  <Shield size={13} color={COLORS.gray500} /> Golongan / Pangkat
+                </label>
+                <select
+                  value={filterGolongan}
+                  onChange={e => setFilterGolongan(e.target.value)}
+                  style={{
+                    width: "100%",
+                    minWidth: 0,
+                    padding: "7.5px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: COLORS.gray800,
+                    background: COLORS.white,
+                    cursor: "pointer",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                >
+                  {[
+                    "Semua",
+                    "Tamtama / Golongan I",
+                    "Bintara / Golongan II",
+                    "Pama / Golongan III",
+                    "Pamen / Golongan IV",
+                    "Pati / Perwira Tinggi",
+                    "PPPK (Golongan IX - XII)"
+                  ].map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Kolom 4: Jenis Iuran */}
+              <div style={{ minWidth: 0 }}>
+                <label style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 0.6, textTransform: "uppercase", color: COLORS.gray500, display: "flex", alignItems: "center", gap: 5, marginBottom: 6, whiteSpace: "nowrap" }}>
+                  <BarChart3 size={13} color={COLORS.gray500} /> Jenis Iuran
+                </label>
+                <select
+                  value={filterJenis}
+                  onChange={e => setFilterJenis(e.target.value)}
+                  style={{
+                    width: "100%",
+                    minWidth: 0,
+                    padding: "7.5px 10px",
+                    borderRadius: 6,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: COLORS.gray800,
+                    background: COLORS.white,
+                    cursor: "pointer",
+                    boxSizing: "border-box",
+                    outline: "none"
+                  }}
+                >
+                  {["Semua", "THT", "Pensiun", "JKK", "JKm"].map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
