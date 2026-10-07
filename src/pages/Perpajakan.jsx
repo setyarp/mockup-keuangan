@@ -22,13 +22,33 @@ import {
   Info,
   X,
   ChevronRight,
-  FileText
+  FileText,
+  Edit3,
+  Clock,
+  Send
 } from "lucide-react";
 import { COLORS, IC } from "../constants/colors";
 import { StatCard, SectionTitle, Btn, Select, Badge, NoData, PreviewModal } from "../components/common";
+import { INITIAL_PESERTA_PAJAK } from "../data/perpajakanData";
+import {
+  ModalUpdateNIK,
+  ModalNotaDinas,
+  ModalRiwayatTiket,
+  ModalDetailMonitoringNIK,
+  TabValidasiNIK
+} from "../components/perpajakan";
 
-export const Perpajakan = () => {
-  const [tab, setTab] = useState("ter_jan_nov");
+export const Perpajakan = ({ defaultTab = "ter_jan_nov" }) => {
+  const [tab, setTab] = useState(defaultTab === "tindak_lanjut_nik" ? "validasi_nik" : defaultTab);
+  const [pesertaList, setPesertaList] = useState(INITIAL_PESERTA_PAJAK);
+  const [modalUpdateNIK, setModalUpdateNIK] = useState(null);
+  const [modalNotaDinas, setModalNotaDinas] = useState(null);
+  const [modalRiwayatTiket, setModalRiwayatTiket] = useState(null);
+  const [modalDetailMonitoring, setModalDetailMonitoring] = useState(null);
+  const [isSyncingDukcapil, setIsSyncingDukcapil] = useState(false);
+  const [toastNotification, setToastNotification] = useState(null);
+
+
   // Filter PPh 21 Periode / Bulanan (TER & P17)
   const [filterBulanDari, setFilterBulanDari] = useState("Januari");
   const [filterBulanSampai, setFilterBulanSampai] = useState("Juli");
@@ -79,500 +99,57 @@ export const Perpajakan = () => {
     "Desember",
   ];
 
-  // Master Data Peserta Pensiun untuk Simulasi Perpajakan (Lengkap dengan NRP, NOPENS, Kode Jiwa, TER, P17, Tunjuk Silang, dan Pemadanan NIK)
-  const masterPesertaPajak = [
-    {
-      id: 1,
-      nik: "3171012304650001",
-      nrp: "1965042301",
-      nopens: "196504230101",
-      nama: "Mayjen TNI (Purn) Soedirman H.",
-      jabatan: "Perwira Tinggi (Pati) Mabesad",
-      satker: "TNI AD",
-      unor: "Mabesad",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/2",
-      ptkp: 67500000,
-      kategoriTER: "TER B",
-      tarifTER: 0.015, // 1.5%
-      gpPensiun: 14500000,
-      tunjanganKeluarga: 1450000,
-      tunjanganBeras: 850000,
-      tunjanganLain: 2200000,
-      brutoBulanan: 19000000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "01.234.567.8-011.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 2,
-      nik: "3273024508680003",
-      nrp: "1968081202",
-      nopens: "196808120201",
-      nama: "Kolonel Laut (Purn) Bambang S.",
-      jabatan: "Perwira Menengah (Pamen) Koarmada I",
-      satker: "TNI AL",
-      unor: "Koarmada I",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/1",
-      ptkp: 63000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.01, // 1.0%
-      gpPensiun: 9200000,
-      tunjanganKeluarga: 920000,
-      tunjanganBeras: 580000,
-      tunjanganLain: 1300000,
-      brutoBulanan: 12000000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "02.345.678.9-021.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 3,
-      nik: "3175085409700002",
-      nrp: "1970091503",
-      nopens: "197009150301",
-      nama: "Kombes Pol (Purn) Dra. Hj. Ratna S.",
-      jabatan: "Perwira Menengah (Pamen) Polda Metro",
-      satker: "POLRI",
-      unor: "Polda Metro",
-      mak: "513123",
-      dapem: "Dapem Induk (NOPENS Utama)",
-      kodeJiwa: "K/3",
-      ptkp: 72000000,
-      kategoriTER: "TER C",
-      tarifTER: 0.02, // 2.0%
-      gpPensiun: 11500000,
-      tunjanganKeluarga: 1150000,
-      tunjanganBeras: 850000,
-      tunjanganLain: 1800000,
-      brutoBulanan: 15300000,
-      terStatus: "Tunjuk Silang (NOPENS Utama)",
-      tunjukSilang: true,
-      isNopensUtama: true,
-      isBebasPajakTunjukSilang: false,
-      nopensPasangan: "197009150302",
-      sumberPensiunGanda: "Tunjuk Silang (NOPENS Utama): Hak Pens. Sendiri POLRI. NOPENS Pasangan: 197009150302 (Pens. Janda TNI AD - Bebas PPh 21)",
-      npwp: "03.456.789.0-031.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 16,
-      nik: "3175085409700002",
-      nrp: "1970091503",
-      nopens: "197009150302",
-      nama: "Kombes Pol (Purn) Dra. Hj. Ratna S.",
-      jabatan: "Penerima Pensiun Janda Alm. Kolonel Inf Soewondo",
-      satker: "TNI AD",
-      unor: "Ditajenad",
-      mak: "513122",
-      dapem: "Dapem Janda (Tunjuk Silang)",
-      kodeJiwa: "TK/0",
-      ptkp: 54000000,
-      kategoriTER: "TER Bebas (TS)",
-      tarifTER: 0.0, // 0.0% (Pajak Kosong / Bebas PPh 21 Tunjuk Silang)
-      gpPensiun: 3800000,
-      tunjanganKeluarga: 0,
-      tunjanganBeras: 290000,
-      tunjanganLain: 410000,
-      brutoBulanan: 4500000,
-      terStatus: "Tunjuk Silang (Bebas PPh 21 / Pajak Kosong)",
-      tunjukSilang: true,
-      isNopensUtama: false,
-      isBebasPajakTunjukSilang: true,
-      nopensPasangan: "197009150301",
-      sumberPensiunGanda: "Tunjuk Silang (NOPENS Pasangan): Hak Pens. Janda TNI AD. Pajak KOSONG (Rp 0) karena seluruh pemotongan PPh 21 telah disatukan pada NOPENS Utama 197009150301",
-      npwp: "03.456.789.0-031.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 4,
-      nik: "3172031102720005",
-      nrp: "1972021104",
-      nopens: "197202110401",
-      nama: "Pembina Tk.I (Purn) Ir. Hendro W.",
-      jabatan: "PNS Ditjen Strahan (Gol. IV/b)",
-      satker: "ASN Kemenhan",
-      unor: "Ditjen Strahan",
-      mak: "513113",
-      dapem: "Dapem Induk",
-      kodeJiwa: "TK/0",
-      ptkp: 54000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.0075, // 0.75%
-      gpPensiun: 6800000,
-      tunjanganKeluarga: 0,
-      tunjanganBeras: 290000,
-      tunjanganLain: 910000,
-      brutoBulanan: 8000000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "04.567.890.1-041.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 5,
-      nik: "3374092205690004",
-      nrp: "1969052205",
-      nopens: "196905220501",
-      nama: "AKBP (Purn) Drs. Agus Hartono",
-      jabatan: "Perwira Menengah (Pamen) Polda Jateng",
-      satker: "POLRI",
-      unor: "Polda Jateng",
-      mak: "513123",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/2",
-      ptkp: 67500000,
-      kategoriTER: "TER B",
-      tarifTER: 0.0125, // 1.25%
-      gpPensiun: 8400000,
-      tunjanganKeluarga: 840000,
-      tunjanganBeras: 580000,
-      tunjanganLain: 1180000,
-      brutoBulanan: 11000000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "05.678.901.2-051.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 6,
-      nik: "3271046708660002",
-      nrp: "1966081406",
-      nopens: "196608140601",
-      nama: "Letkol Inf (Purn) Wirawan Hadi",
-      jabatan: "Perwira Menengah (Pamen) Kodam III/Slw",
-      satker: "TNI AD",
-      unor: "Kodam III/Slw",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/0",
-      ptkp: 58500000,
-      kategoriTER: "TER A",
-      tarifTER: 0.01, // 1.0%
-      gpPensiun: 7200000,
-      tunjanganKeluarga: 720000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 790000,
-      brutoBulanan: 9000000,
-      terStatus: "Berhenti (Wafat Maret)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "06.789.012.3-061.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: true,
-      bulanBerhentiNama: "Maret",
-      bulanBerhentiIdx: 3,
-      alasanBerhenti: "Meninggal Dunia (Wafat Maret 2026)",
-    },
-    {
-      id: 7,
-      nik: "3174051203740001",
-      nrp: "1974031207",
-      nopens: "197403120701",
-      nama: "Penata (Purn) Sri Rahayu, S.Sos",
-      jabatan: "PNS Puskeu Polri (Gol. III/c)",
-      satker: "ASN Polri",
-      unor: "Puskeu Polri",
-      mak: "513114",
-      dapem: "Dapem Induk",
-      kodeJiwa: "TK/1",
-      ptkp: 58500000,
-      kategoriTER: "TER A",
-      tarifTER: 0.005, // 0.5%
-      gpPensiun: 5500000,
-      tunjanganKeluarga: 550000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 660000,
-      brutoBulanan: 7000000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "3174051203740001 (Format NIK 16-Digit)",
-      statusNPWP: "NIK = NPWP (Normal / Bebas Sanksi 20%)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 8,
-      nik: "3578013009710006",
-      nrp: "1971093008",
-      nopens: "197109300801",
-      nama: "Mayor Mar (Purn) Wahyudi Eko",
-      jabatan: "Perwira Menengah (Pamen) Pasmar 2",
-      satker: "TNI AL",
-      unor: "Pasmar 2",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/2",
-      ptkp: 67500000,
-      kategoriTER: "TER B",
-      tarifTER: 0.0125, // 1.25%
-      gpPensiun: 7800000,
-      tunjanganKeluarga: 780000,
-      tunjanganBeras: 580000,
-      tunjanganLain: 1040000,
-      brutoBulanan: 10200000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "07.890.123.4-071.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 9,
-      nik: "3276011406670005",
-      nrp: "1967061409",
-      nopens: "196706140901",
-      nama: "Kolonel Inf (Purn) Suryanto, M.Si.",
-      jabatan: "Perwira Menengah (Pamen) Dispenad",
-      satker: "TNI AD",
-      unor: "Dispenad",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "TK/0",
-      ptkp: 54000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.015, // 1.5%
-      gpPensiun: 13800000,
-      tunjanganKeluarga: 0,
-      tunjanganBeras: 290000,
-      tunjanganLain: 3910000,
-      brutoBulanan: 18000000,
-      terStatus: "Berhenti (Masa Juli)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "08.901.234.5-081.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: true,
-      bulanBerhentiNama: "Juli",
-      bulanBerhentiIdx: 7,
-      alasanBerhenti: "Tutup Hak Pensiun / Wafat Juli 2026",
-    },
-    {
-      id: 10,
-      nik: "NIK-S-202607-0042",
-      nrp: "1973041510",
-      nopens: "197304151001",
-      nama: "Peltu (Purn) M. Yusuf",
-      jabatan: "Bintara Tinggi Lanud Hlm",
-      satker: "TNI AU",
-      unor: "Lanud Hlm",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/1",
-      ptkp: 63000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.0075, // 0.75%
-      gpPensiun: 5900000,
-      tunjanganKeluarga: 590000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 720000,
-      brutoBulanan: 7500000,
-      terStatus: "Reguler",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "NIK Sementara (Pending)",
-      statusNPWP: "NIK Sementara (Tarif Standar 100% / Tanpa Denda 20%)",
-      statusNIK: "NIK Sementara (Proses Dukcapil)",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 11,
-      nik: "3372010804710003",
-      nrp: "1971040811",
-      nopens: "197104081101",
-      nama: "Mayor Inf (Purn) Suhardi, S.E.",
-      jabatan: "Perwira Menengah (Pamen) Kodam IV/Dip",
-      satker: "TNI AD",
-      unor: "Kodam IV/Dip",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/1",
-      ptkp: 63000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.005, // 0.5%
-      gpPensiun: 5200000,
-      tunjanganKeluarga: 520000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 490000,
-      brutoBulanan: 6500000,
-      terStatus: "Berhenti (Masa Juli - Lebih Bayar)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "09.234.567.8-091.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: true,
-      bulanBerhentiNama: "Juli",
-      bulanBerhentiIdx: 7,
-      alasanBerhenti: "Habis Hak Pensiun / Wafat Juli 2026 (Dapem Terakhir)",
-    },
-    {
-      id: 12,
-      nik: "1271031505730004",
-      nrp: "1973051512",
-      nopens: "197305151201",
-      nama: "Serma (Purn) Tarigan Sembiring",
-      jabatan: "Bintara (Purn) Kodam I/BB",
-      satker: "TNI AD",
-      unor: "Kodam I/BB",
-      mak: "513122",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/2",
-      ptkp: 67500000,
-      kategoriTER: "TER B",
-      tarifTER: 0.0, // 0.0% (Bawah PTKP)
-      gpPensiun: 3900000,
-      tunjanganKeluarga: 390000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 220000,
-      brutoBulanan: 4800000,
-      terStatus: "Reguler (Nihil Pajak)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "12.345.678.9-121.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 13,
-      nik: "3175024508600001",
-      nrp: "1960081513",
-      nopens: "196008151301",
-      nama: "Ny. Hj. Aminah Subagyo",
-      jabatan: "Warakawuri TNI AU (Pens. Janda Mayor AU)",
-      satker: "TNI AU",
-      unor: "Koopsud I",
-      mak: "513122",
-      dapem: "Dapem Janda",
-      kodeJiwa: "TK/2",
-      ptkp: 63000000,
-      kategoriTER: "TER B",
-      tarifTER: 0.0, // 0.0% (Bawah PTKP)
-      gpPensiun: 3200000,
-      tunjanganKeluarga: 320000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 390000,
-      brutoBulanan: 4200000,
-      terStatus: "Pensiun Janda (Warakawuri)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "13.456.789.0-131.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: false,
-      bulanBerhentiNama: null,
-      bulanBerhentiIdx: null,
-    },
-    {
-      id: 14,
-      nik: "3275082107010005",
-      nrp: "2001072114",
-      nopens: "200107211401",
-      nama: "Reza Pratama, S.Kom.",
-      jabatan: "Penerima Pensiun Anak Yatim TNI AL",
-      satker: "TNI AL",
-      unor: "Lantamal III",
-      mak: "513122",
-      dapem: "Dapem Anak Yatim",
-      kodeJiwa: "TK/0",
-      ptkp: 54000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.005, // 0.5%
-      gpPensiun: 4500000,
-      tunjanganKeluarga: 0,
-      tunjanganBeras: 290000,
-      tunjanganLain: 1010000,
-      brutoBulanan: 5800000,
-      terStatus: "Berhenti (Habis Hak Usia 25 Thn - Lebih Bayar)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "14.567.890.1-141.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: true,
-      bulanBerhentiNama: "Juli",
-      bulanBerhentiIdx: 7,
-      alasanBerhenti: "Tutup Hak Anak Pensiun / Usia Genap 25 Tahun (Dapem Terakhir)",
-    },
-    {
-      id: 15,
-      nik: "3578021409720002",
-      nrp: "1972091415",
-      nopens: "197209141501",
-      nama: "Aiptu (Purn) Sugeng Riyadi",
-      jabatan: "Bintara (Purn) Polrestabes Surabaya",
-      satker: "POLRI",
-      unor: "Polrestabes Surabaya",
-      mak: "513123",
-      dapem: "Dapem Induk",
-      kodeJiwa: "K/1",
-      ptkp: 63000000,
-      kategoriTER: "TER A",
-      tarifTER: 0.005, // 0.5%
-      gpPensiun: 4600000,
-      tunjanganKeluarga: 460000,
-      tunjanganBeras: 290000,
-      tunjanganLain: 450000,
-      brutoBulanan: 5800000,
-      terStatus: "Reguler (Berhenti September)",
-      tunjukSilang: false,
-      sumberPensiunGanda: null,
-      npwp: "15.678.901.2-151.000",
-      statusNPWP: "NIK Terpadan Valid (PMK 168)",
-      statusNIK: "Valid Dukcapil",
-      isBerhenti: true,
-      bulanBerhentiNama: "September",
-      bulanBerhentiIdx: 9,
-      alasanBerhenti: "Tutup Hak Pensiun / Wafat September 2026",
-    }
-  ];
+  // Live Master Data Peserta Pensiun untuk Simulasi Perpajakan & Validasi NIK
+  const masterPesertaPajak = pesertaList;
+
+  const handleSaveUpdateNIK = ({ id, nik, nama, noBA, catatan }) => {
+    setPesertaList((prev) =>
+      prev.map((p) => {
+        if (p.id === id) {
+          const updatedLogs = [
+            ...(p.riwayatLog || []),
+            {
+              tgl: "08 Jul 2026",
+              aksi: "Pemutakhiran NIK Berhasil",
+              catatan: `NIK diperbarui menjadi ${nik} (${nama}) berdasarkan ${noBA}. ${catatan}`,
+              petugas: "Petugas Perpajakan & SIAK",
+            },
+          ];
+          return {
+            ...p,
+            nik,
+            nama,
+            nikValid: true,
+            statusNIK: "Valid Dukcapil",
+            statusNPWP: "NIK Terpadan Valid (PMK 168)",
+            kategoriAnomali: "Normal (Valid)",
+            statusTindakLanjut: "Selesai (Terpadan)",
+            diagnosaNIK: "Format 16-digit standar Dukcapil valid & terpadan dengan DJP Online.",
+            riwayatLog: updatedLogs,
+          };
+        }
+        return p;
+      })
+    );
+    setModalUpdateNIK(null);
+    setToastNotification({
+      type: "success",
+      message: `Pemutakhiran NIK berhasil! Data peserta telah terverifikasi valid di Dukcapil & Coretax DJP.`,
+    });
+    setTimeout(() => setToastNotification(null), 4000);
+  };
+
+  const handleSyncDukcapil = () => {
+    setIsSyncingDukcapil(true);
+    setTimeout(() => {
+      setIsSyncingDukcapil(false);
+      setToastNotification({
+        type: "info",
+        message: "Sinkronisasi selesai: Validasi NIK terhubung dengan SIAK Kemendagri & DJP Coretax.",
+      });
+      setTimeout(() => setToastNotification(null), 4000);
+    }, 1000);
+  };
 
   // Helper kalkulasi PPh Pasal 17 Tahunan (Progresif UU HPP - PMK 168/2023)
   // Sanksi tarif 20% lebih tinggi dihapuskan, tarif menggunakan 100% normal
@@ -1102,12 +679,20 @@ export const Perpajakan = () => {
   const totalPesertaP17Berhenti = filteredDataBulanan.filter((d) => d.isDapemTerakhir).length;
   const totalPesertaNonAktif = filteredDataBulanan.filter((d) => d.isPascaBerhenti).length;
 
+  const totalAnomaliNIK = masterPesertaPajak.filter((d) => !d.nikValid).length;
+
   const tabsConfig = [
     {
       id: "ter_jan_nov",
       label: "Rekap PPh 21 Bulanan (TER & P17)",
       icon: <Calculator size={15} />,
       badge: labelPeriodeShort
+    },
+    {
+      id: "validasi_nik",
+      label: "Validasi NIK & Tindak Lanjut",
+      icon: <ShieldCheck size={15} />,
+      badge: totalAnomaliNIK > 0 ? `${totalAnomaliNIK} Antrean` : "100% Valid",
     },
     {
       id: "pasal17_des",
@@ -1486,6 +1071,76 @@ export const Perpajakan = () => {
           totalRows: filteredDataKomparasi.length,
         },
       });
+    } else if (targetTab === "validasi_nik" || targetTab === "tindak_lanjut_nik") {
+      setPreview({
+        title: "Daftar Monitoring NIK Sementara & Tindak Lanjut Pemadanan Dukcapil — Divisi Kepesertaan",
+        subtitle: "Laporan Rekonsiliasi NIK Anomali & Monitoring Progres Sinkronisasi SIAK Kemendagri / Coretax DJP TA 2026",
+        type: "table",
+        fileName: "Monitoring_NIK_Sementara_Tindak_Lanjut_Kepesertaan_2026.xlsx",
+        content: {
+          columns: [
+            "No",
+            "NIK Tercatat (Anomali)",
+            "NIK Sementara (Sistem)",
+            "NRP",
+            "NOPENS",
+            "Nama Peserta Pensiun",
+            "Satker",
+            "Diagnosa Masalah Dukcapil",
+            "Status Tindak Lanjut Kepesertaan",
+            "PIC Kepesertaan",
+            "No. Nota Dinas Keuangan",
+          ],
+          alignments: [
+            "center",
+            "center",
+            "center",
+            "center",
+            "center",
+            "left",
+            "left",
+            "left",
+            "center",
+            "left",
+            "center",
+          ],
+          rows: masterPesertaPajak
+            .filter((p) => !p.nikValid)
+            .map((d, i) => [
+              i + 1,
+              d.nikAsli || d.nik,
+              d.nikSementara || d.nik,
+              d.nrp,
+              d.nopens,
+              d.nama,
+              `${d.satker} (${d.unor})`,
+              d.diagnosaNIK || d.kategoriAnomali,
+              d.statusTindakLanjut,
+              d.picKepesertaan || "Divisi Kepesertaan",
+              d.noSuratPengantar,
+            ]),
+          totalRow: [
+            {
+              colSpan: 8,
+              text: `TOTAL PESERTA NIK SEMENTARA DALAM TINDAK LANJUT (${masterPesertaPajak.filter((p) => !p.nikValid).length} PESERTA)`,
+              align: "left",
+            },
+            {
+              text: "Diproses Div. Kepesertaan",
+              align: "center",
+              color: "#1D4ED8",
+            },
+            {
+              text: "Monitoring Div. Keuangan",
+              align: "center",
+              color: "#059669",
+            },
+            { text: "—", align: "center" },
+          ],
+          totalRows: masterPesertaPajak.filter((p) => !p.nikValid).length,
+        },
+      });
+
     } else {
       setPreview({
         title: "Penerbitan Digital Bukti Potong 1721-A2 & Integrasi Coretax DJP",
@@ -1548,6 +1203,77 @@ export const Perpajakan = () => {
   return (
     <div>
       <PreviewModal preview={preview} onClose={() => setPreview(null)} />
+
+      {/* MODAL PEMUTAKHIRAN NIK (HASIL KLARIFIKASI KEPESERTAAN) */}
+      {modalUpdateNIK && (
+        <ModalUpdateNIK
+          data={modalUpdateNIK}
+          onClose={() => setModalUpdateNIK(null)}
+          onSave={handleSaveUpdateNIK}
+        />
+      )}
+
+      {/* MODAL NOTA DINAS PENGANTAR KE DIVISI KEPESERTAAN */}
+      {modalNotaDinas && (
+        <ModalNotaDinas
+          listPesertaAnomali={modalNotaDinas}
+          onClose={() => setModalNotaDinas(null)}
+          onSendElectrically={() => {
+            setToastNotification({
+              type: "success",
+              message: "Nota Dinas berhasil diteruskan secara elektronik ke Divisi Kepesertaan!",
+            });
+            setTimeout(() => setToastNotification(null), 4000);
+          }}
+        />
+      )}
+
+      {/* MODAL RIWAYAT LOG TIKET TINDAK LANJUT */}
+      {modalRiwayatTiket && (
+        <ModalRiwayatTiket
+          data={modalRiwayatTiket}
+          onClose={() => setModalRiwayatTiket(null)}
+          onOpenUpdateModal={(p) => setModalUpdateNIK(p)}
+        />
+      )}
+
+      {/* MODAL DETAIL MONITORING NIK SEMENTARA & TINDAK LANJUT KEPESERTAAN */}
+      {modalDetailMonitoring && (
+        <ModalDetailMonitoringNIK
+          data={modalDetailMonitoring}
+          onClose={() => setModalDetailMonitoring(null)}
+          onOpenRiwayatTiket={(p) => {
+            setModalDetailMonitoring(null);
+            setModalRiwayatTiket(p);
+          }}
+        />
+      )}
+
+
+      {/* TOAST NOTIFICATION */}
+      {toastNotification && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 2000,
+            background: toastNotification.type === "success" ? "#065F46" : "#1E40AF",
+            color: "#FFFFFF",
+            padding: "12px 18px",
+            borderRadius: 8,
+            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.2)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            fontSize: 13,
+            fontWeight: 600,
+          }}
+        >
+          <CheckCircle2 size={18} color="#A7F3D0" />
+          <span>{toastNotification.message}</span>
+        </div>
+      )}
 
       {/* MODAL AUDIT TRAIL / RINCIAN KALKULASI PESERTA */}
       {detailKalkulasi && (
@@ -2234,7 +1960,7 @@ export const Perpajakan = () => {
       </div>
 
       {/* FILTER CONTROLS TOOLBAR (FOR TABS 2 TO 5) */}
-      {tab !== "ter_jan_nov" && (
+      {tab !== "ter_jan_nov" && tab !== "validasi_nik" && tab !== "tindak_lanjut_nik" && (
         <div
           style={{
             background: "#FFFFFF",
@@ -2657,7 +2383,35 @@ export const Perpajakan = () => {
                           {d.mak}
                         </td>
                         <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
-                          {d.nik}
+                          <div style={{ fontWeight: !d.nikValid ? 700 : 400, color: !d.nikValid ? "#DC2626" : "#334155" }}>
+                            {d.nik}
+                          </div>
+                          {!d.nikValid && (
+                            <div style={{ marginTop: 2 }}>
+                              <button
+                                onClick={() => {
+                                  setTab("validasi_nik");
+                                  setSearchQuery(d.nik);
+                                }}
+                                title={`NIK Tidak Valid: ${d.diagnosaNIK || d.statusNIK}. Masuk List Tindak Lanjut Divisi Kepesertaan`}
+                                style={{
+                                  fontSize: 9.5,
+                                  fontWeight: 700,
+                                  background: "#FEF2F2",
+                                  color: "#B91C1C",
+                                  padding: "1px 6px",
+                                  borderRadius: 4,
+                                  border: "1px solid #FECACA",
+                                  cursor: "pointer",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                }}
+                              >
+                                <AlertTriangle size={9} /> TL Kepesertaan
+                              </button>
+                            </div>
+                          )}
                         </td>
                         <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
                           {d.nrp}
@@ -2749,24 +2503,47 @@ export const Perpajakan = () => {
                           )}
                         </td>
                         <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                          <button
-                            onClick={() => setDetailKalkulasi(d)}
-                            style={{
-                              background: "#EFF6FF",
-                              border: `1px solid #BFDBFE`,
-                              color: COLORS.blue,
-                              padding: "3px 8px",
-                              borderRadius: 4,
-                              cursor: "pointer",
-                              fontSize: 11,
-                              fontWeight: 700,
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 4,
-                            }}
-                          >
-                            <Eye size={12} /> Rincian
-                          </button>
+                          <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
+                            <button
+                              onClick={() => setDetailKalkulasi(d)}
+                              style={{
+                                background: "#EFF6FF",
+                                border: `1px solid #BFDBFE`,
+                                color: COLORS.blue,
+                                padding: "3px 8px",
+                                borderRadius: 4,
+                                cursor: "pointer",
+                                fontSize: 11,
+                                fontWeight: 700,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
+                              }}
+                            >
+                              <Eye size={12} /> Rincian
+                            </button>
+                            {!d.nikValid && (
+                              <button
+                                onClick={() => setModalUpdateNIK(d)}
+                                title="Pemutakhiran NIK Hasil Tindak Lanjut"
+                                style={{
+                                  background: "#FEF2F2",
+                                  border: `1px solid #FECACA`,
+                                  color: "#B91C1C",
+                                  padding: "3px 6px",
+                                  borderRadius: 4,
+                                  cursor: "pointer",
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                }}
+                              >
+                                <Edit3 size={11} /> Update
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -3636,30 +3413,30 @@ export const Perpajakan = () => {
                 </div>
                 <div style={{ background: "#FFFFFF", borderRadius: 8, padding: "12px 16px", border: "1px solid #E2E8F0", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 11.5, color: "#64748B", fontWeight: 600 }}>Pemadanan NIK = NPWP</span>
-                    <span style={{ fontSize: 9.5, background: "#F1F5F9", color: "#475569", padding: "1px 6px", borderRadius: 4, fontWeight: 700, border: "1px solid #CBD5E1" }}>
-                      Normal
+                    <span style={{ fontSize: 11.5, color: "#64748B", fontWeight: 600 }}>Pemadanan NIK = NPWP (Valid)</span>
+                    <span style={{ fontSize: 9.5, background: "#DCFCE7", color: "#166534", padding: "1px 6px", borderRadius: 4, fontWeight: 700, border: "1px solid #BBF7D0" }}>
+                      Siap Coretax
                     </span>
                   </div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", marginTop: 2 }}>
-                    {filteredDataTahunan.filter((d) => !d.statusNIK.includes("Sementara")).length} Dokumen
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#059669", marginTop: 2 }}>
+                    {filteredDataTahunan.filter((d) => d.nikValid).length} Dokumen
                   </div>
                   <div style={{ fontSize: 10.5, color: "#94A3B8", marginTop: 2 }}>100% Bebas Denda 20% PMK 168</div>
                 </div>
                 <div style={{ background: "#FFFFFF", borderRadius: 8, padding: "12px 16px", border: "1px solid #E2E8F0", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 11.5, color: "#64748B", fontWeight: 600 }}>NIK Sementara (Validasi)</span>
+                    <span style={{ fontSize: 11.5, color: "#64748B", fontWeight: 600 }}>Tindak Lanjut Kepesertaan</span>
                     <span
-                      title="Sesuai BRD PJK 02.3: Peserta dengan status NIK sementara dalam proses rekonsiliasi data Dukcapil tetap dilayani dengan tarif normal tanpa potongan denda."
-                      style={{ cursor: "help", display: "inline-flex", alignItems: "center" }}
+                      onClick={() => setTab("validasi_nik")}
+                      style={{ cursor: "pointer", fontSize: 9.5, background: "#FEF2F2", color: "#B91C1C", padding: "1px 6px", borderRadius: 4, fontWeight: 700, border: "1px solid #FECACA" }}
                     >
-                      <Info size={12} color="#94A3B8" />
+                      Lihat Antrean →
                     </span>
                   </div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", marginTop: 2 }}>
-                    {filteredDataTahunan.filter((d) => d.statusNIK.includes("Sementara")).length} Dokumen
+                  <div style={{ fontSize: 18, fontWeight: 800, color: filteredDataTahunan.filter((d) => !d.nikValid).length > 0 ? "#DC2626" : "#0F172A", marginTop: 2 }}>
+                    {filteredDataTahunan.filter((d) => !d.nikValid).length} Dokumen
                   </div>
-                  <div style={{ fontSize: 10.5, color: "#94A3B8", marginTop: 2 }}>BRD PJK 02.3 Validasi Dukcapil</div>
+                  <div style={{ fontSize: 10.5, color: "#94A3B8", marginTop: 2 }}>Pending Validasi Dukcapil</div>
                 </div>
               </div>
 
@@ -3707,7 +3484,28 @@ export const Perpajakan = () => {
                       >
                         <td style={{ padding: "8px 8px", textAlign: "center", color: "#64748B", borderRight: "1px solid #E2E8F0" }}>{i + 1}</td>
                         <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", color: "#334155", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
-                          {d.nik}
+                          <div style={{ fontWeight: !d.nikValid ? 700 : 400, color: !d.nikValid ? "#DC2626" : "#334155" }}>
+                            {d.nik}
+                          </div>
+                          {!d.nikValid && (
+                            <span
+                              onClick={() => setTab("validasi_nik")}
+                              style={{
+                                cursor: "pointer",
+                                fontSize: 9,
+                                fontWeight: 700,
+                                background: "#FEF2F2",
+                                color: "#B91C1C",
+                                padding: "1px 5px",
+                                borderRadius: 4,
+                                border: "1px solid #FECACA",
+                                display: "inline-block",
+                                marginTop: 2,
+                              }}
+                            >
+                              ⚠️ Anomali
+                            </span>
+                          )}
                         </td>
                         <td style={{ padding: "8px 10px", textAlign: "center", fontFamily: "monospace", fontWeight: 700, color: "#0F172A", borderRight: "1px solid #E2E8F0", fontSize: 11.5 }}>
                           {d.nrp}
@@ -3776,6 +3574,22 @@ export const Perpajakan = () => {
           )}
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* TAB 6: VALIDASI NIK & TINDAK LANJUT DIVISI KEPESERTAAN */}
+      {/* ========================================================================= */}
+      {(tab === "validasi_nik" || tab === "tindak_lanjut_nik") && (
+        <TabValidasiNIK
+          pesertaList={pesertaList}
+          onOpenDetailMonitoring={(p) => setModalDetailMonitoring(p)}
+          onOpenNotaDinasModal={(list) => setModalNotaDinas(list)}
+          onOpenRiwayatTiketModal={(p) => setModalRiwayatTiket(p)}
+          onSyncDukcapil={handleSyncDukcapil}
+          isSyncing={isSyncingDukcapil}
+          onExportPreview={() => handleExportTab("validasi_nik")}
+        />
+      )}
+
     </div>
   );
 };

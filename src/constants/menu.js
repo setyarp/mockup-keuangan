@@ -126,6 +126,7 @@ export const MENU = [
         label: "Administrasi Perpajakan",
         children: [
           { id: "pajak", label: "PPh 21 & Bukti Potong" },
+          { id: "validasi_nik", label: "Validasi NIK & Tindak Lanjut" },
           { id: "ukp", label: "Rekap Data UKP Pensiun" },
         ],
       },
