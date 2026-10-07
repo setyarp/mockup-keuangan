@@ -3386,17 +3386,14 @@ export const Perpajakan = ({ defaultTab = "ter_jan_nov" }) => {
                 <FileUp size={22} color={COLORS.blue} />
               </div>
               <div style={{ fontSize: 14.5, fontWeight: 700, color: "#0F172A" }}>
-                Sinkronisasi &amp; Impor Data Manifes Bukti Potong dari Coretax DJP
+                Impor Data Manifes Bukti Potong 1721-A2
               </div>
               <div style={{ fontSize: 12, color: "#64748B", marginTop: 4, maxWidth: 540, margin: "4px auto 0" }}>
                 Sesuai BRD PJK 03 (Line 589): Bukti Potong PPh 21 bentuk 1721-A2 otomatis diterbitkan untuk <strong>Masa Desember</strong> atau <strong>Masa Terakhir</strong> penerima pensiun yang berhenti sebelum Desember (100% tarif normal tanpa sanksi 20%).
               </div>
               <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 16, flexWrap: "wrap" }}>
                 <Btn onClick={() => setUploadStep(1)}>
-                  <Upload size={14} /> Unggah File Manifes Coretax (.XML / .ZIP)
-                </Btn>
-                <Btn variant="outline" onClick={() => setUploadStep(1)}>
-                  <RefreshCw size={14} /> Sinkronisasi API Coretax DJP
+                  <Upload size={14} /> Unggah File Manifes (.XML / .ZIP)
                 </Btn>
               </div>
             </div>
