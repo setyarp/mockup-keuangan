@@ -34,7 +34,7 @@ const PAGES = {
   upload_cms: { title: "Upload CMS Mitra Bayar — Standarisasi & Rekonsiliasi Rekening Koran", component: RekonRekeningKoran },
   standarisasi_cms: { title: "Upload CMS Mitra Bayar — Standarisasi & Rekonsiliasi Rekening Koran", component: RekonRekeningKoran },
   rekonrk: { title: "Upload CMS Mitra Bayar — Standarisasi & Rekonsiliasi Rekening Koran", component: RekonRekeningKoran },
-  kalkulator: { title: "Perhitungan Iuran Peserta", component: KalkulatorIuran },
+  kalkulator: { title: "Perhitungan Iuran Peserta", hideDefaultHeader: true, component: KalkulatorIuran },
   rekonsiliasi: { title: "Rekonsiliasi Penerimaan Dana", component: RekonsIuran },
   tagihan: { title: "Penagihan Iuran Ke Kemenkeu", component: GeneratorTagihan },
   listsp: { title: "Daftar Surat Perintah (List SP) Pembayaran Manfaat", component: () => <ListSP defaultTab="listsp" /> },
