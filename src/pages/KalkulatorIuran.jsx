@@ -39,479 +39,553 @@ const BULAN_LIST = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
-// Data master entitas pembina & instansi
+// =========================================================================
+// DATA SUB-ROWS DEFINITIONS (PRAJURIT, PNS, PPPK)
+// =========================================================================
+
+// --- TNI AD ---
+const SUB_TNI_AD_PRAJURIT = {
+  id: "TNI_AD_PRAJURIT",
+  kategori: "Prajurit",
+  jenisPersonil: "Prajurit",
+  badge: "Militer",
+  peserta: 305210,
+  tht: 37232975000,
+  pensiun: 54417425000,
+  jkk: 2749512000,
+  jkm: 2291260000,
+  total: 96691172000,
+  golonganBreakdown: [
+    { gol: "TAMTAMA (Golongan I)", peserta: 142100, gp: 426300000000, tht: 13854750000, pensiun: 20249250000, jkk: 1023120000, jkm: 852600000, total: 35979720000 },
+    { gol: "BINTARA (Golongan II)", peserta: 121500, gp: 486000000000, tht: 15795000000, pensiun: 23085000000, jkk: 1166400000, jkm: 972000000, total: 41018400000 },
+    { gol: "PAMA (Golongan III)", peserta: 29800, gp: 149000000000, tht: 4842500000, pensiun: 7077500000, jkk: 357600000, jkm: 298000000, total: 12575600000 },
+    { gol: "PAMEN (Golongan IV)", peserta: 10980, gp: 76860000000, tht: 2497950000, pensiun: 3650850000, jkk: 184464000, jkm: 153720000, total: 6486984000 },
+    { gol: "PATI (Perwira Tinggi)", peserta: 830, gp: 7470000000, tht: 242775000, pensiun: 354825000, jkk: 17928000, jkm: 14940000, total: 630468000 }
+  ]
+};
+
+const SUB_TNI_AD_PNS = {
+  id: "TNI_AD_PNS",
+  kategori: "PNS",
+  jenisPersonil: "PNS",
+  badge: "ASN",
+  peserta: 21436,
+  tht: 2771047500,
+  pensiun: 4049992500,
+  jkk: 204631200,
+  jkm: 170526000,
+  total: 7196197200,
+  golonganBreakdown: [
+    { gol: "Golongan I", peserta: 1120, gp: 3820000000, tht: 124150000, pensiun: 181450000, jkk: 9168000, jkm: 7640000, total: 322408000 },
+    { gol: "Golongan II", peserta: 8450, gp: 32540000000, tht: 1057550000, pensiun: 1545650000, jkk: 78096000, jkm: 65080000, total: 2746376000 },
+    { gol: "Golongan III", peserta: 9680, gp: 36880000000, tht: 1198600000, pensiun: 1751800000, jkk: 88512000, jkm: 73760000, total: 3112672000 },
+    { gol: "Golongan IV", peserta: 2186, gp: 12023000000, tht: 390747500, pensiun: 571092500, jkk: 28855200, jkm: 24046000, total: 1014741200 }
+  ]
+};
+
+const SUB_TNI_AD_PPPK = {
+  id: "TNI_AD_PPPK",
+  kategori: "PPPK",
+  jenisPersonil: "PPPK",
+  badge: "Non-pensiun",
+  peserta: 8635,
+  tht: null,
+  pensiun: null,
+  jkk: 99420000,
+  jkm: 82850000,
+  total: 182270000,
+  golonganBreakdown: [
+    { gol: "Golongan IX", peserta: 3200, gp: 14800000000, tht: null, pensiun: null, jkk: 35520000, jkm: 29600000, total: 65120000 },
+    { gol: "Golongan X", peserta: 3150, gp: 15200000000, tht: null, pensiun: null, jkk: 36480000, jkm: 30400000, total: 66880000 },
+    { gol: "Golongan XI", peserta: 1520, gp: 7600000000, tht: null, pensiun: null, jkk: 18240000, jkm: 15200000, total: 33440000 },
+    { gol: "Golongan XII", peserta: 765, gp: 3825000000, tht: null, pensiun: null, jkk: 9180000, jkm: 7650000, total: 16830000 }
+  ]
+};
+
+// --- TNI AL ---
+const SUB_TNI_AL_PRAJURIT = {
+  id: "TNI_AL_PRAJURIT",
+  kategori: "Prajurit",
+  jenisPersonil: "Prajurit",
+  badge: "Militer",
+  peserta: 132408,
+  tht: 16385590000,
+  pensiun: 23948170000,
+  jkk: 1210012800,
+  jkm: 1008344000,
+  total: 42552116800,
+  golonganBreakdown: [
+    { gol: "TAMTAMA (Golongan I)", peserta: 58200, gp: 174600000000, tht: 5674500000, pensiun: 8293500000, jkk: 419040000, jkm: 349200000, total: 14736240000 },
+    { gol: "BINTARA (Golongan II)", peserta: 54100, gp: 216400000000, tht: 7033000000, pensiun: 10279000000, jkk: 519360000, jkm: 432800000, total: 18264160000 },
+    { gol: "PAMA (Golongan III)", peserta: 14200, gp: 71000000000, tht: 2307500000, pensiun: 3372500000, jkk: 170400000, jkm: 142000000, total: 5992400000 },
+    { gol: "PAMEN (Golongan IV)", peserta: 5500, gp: 38500000000, tht: 1251250000, pensiun: 1828750000, jkk: 92400000, jkm: 77000000, total: 3249400000 },
+    { gol: "PATI (Perwira Tinggi)", peserta: 408, gp: 3672000000, tht: 119340000, pensiun: 174420000, jkk: 8812800, jkm: 7344000, total: 309916800 }
+  ]
+};
+
+const SUB_TNI_AL_PNS = {
+  id: "TNI_AL_PNS",
+  kategori: "PNS",
+  jenisPersonil: "PNS",
+  badge: "ASN",
+  peserta: 5922,
+  tht: 776587500,
+  pensiun: 1135012500,
+  jkk: 57348000,
+  jkm: 47790000,
+  total: 2016738000,
+  golonganBreakdown: [
+    { gol: "Golongan I", peserta: 310, gp: 1050000000, tht: 34125000, pensiun: 49875000, jkk: 2520000, jkm: 2100000, total: 88620000 },
+    { gol: "Golongan II", peserta: 2350, gp: 9100000000, tht: 295750000, pensiun: 432250000, jkk: 21840000, jkm: 18200000, total: 768040000 },
+    { gol: "Golongan III", peserta: 2680, gp: 10600000000, tht: 344500000, pensiun: 503500000, jkk: 25440000, jkm: 21200000, total: 894640000 },
+    { gol: "Golongan IV", peserta: 582, gp: 3145000000, tht: 102212500, pensiun: 149387500, jkk: 7548000, jkm: 6290000, total: 265438000 }
+  ]
+};
+
+const SUB_TNI_AL_PPPK = {
+  id: "TNI_AL_PPPK",
+  kategori: "PPPK",
+  jenisPersonil: "PPPK",
+  badge: "Non-pensiun",
+  peserta: 1512,
+  tht: null,
+  pensiun: null,
+  jkk: 18599972,
+  jkm: 15499977,
+  total: 34099949,
+  golonganBreakdown: [
+    { gol: "Golongan IX", peserta: 550, gp: 2600000000, tht: null, pensiun: null, jkk: 6240000, jkm: 5200000, total: 11440000 },
+    { gol: "Golongan X", peserta: 560, gp: 2800000000, tht: null, pensiun: null, jkk: 6720000, jkm: 5600000, total: 12320000 },
+    { gol: "Golongan XI", peserta: 280, gp: 1400000000, tht: null, pensiun: null, jkk: 3360000, jkm: 2800000, total: 6160000 },
+    { gol: "Golongan XII", peserta: 122, gp: 949988333, tht: null, pensiun: null, jkk: 2279972, jkm: 1899977, total: 4179949 }
+  ]
+};
+
+// --- TNI AU ---
+const SUB_TNI_AU_PRAJURIT = {
+  id: "TNI_AU_PRAJURIT",
+  kategori: "Prajurit",
+  jenisPersonil: "Prajurit",
+  badge: "Militer",
+  peserta: 109300,
+  tht: 13702000000,
+  pensiun: 20026000000,
+  jkk: 1011840000,
+  jkm: 843200000,
+  total: 35583040000,
+  golonganBreakdown: [
+    { gol: "TAMTAMA (Golongan I)", peserta: 45000, gp: 135000000000, tht: 4387500000, pensiun: 6412500000, jkk: 324000000, jkm: 270000000, total: 11394000000 },
+    { gol: "BINTARA (Golongan II)", peserta: 46200, gp: 184800000000, tht: 6006000000, pensiun: 8778000000, jkk: 443520000, jkm: 369600000, total: 15597120000 },
+    { gol: "PAMA (Golongan III)", peserta: 12800, gp: 64000000000, tht: 2080000000, pensiun: 3040000000, jkk: 153600000, jkm: 128000000, total: 5401600000 },
+    { gol: "PAMEN (Golongan IV)", peserta: 4950, gp: 34650000000, tht: 1126125000, pensiun: 1645875000, jkk: 83160000, jkm: 69300000, total: 2924460000 },
+    { gol: "PATI (Perwira Tinggi)", peserta: 350, gp: 3150000000, tht: 102375000, pensiun: 149625000, jkk: 7560000, jkm: 6300000, total: 265860000 }
+  ]
+};
+
+const SUB_TNI_AU_PNS = {
+  id: "TNI_AU_PNS",
+  kategori: "PNS",
+  jenisPersonil: "PNS",
+  badge: "ASN",
+  peserta: 3575,
+  tht: 467675000,
+  pensiun: 683525000,
+  jkk: 34536000,
+  jkm: 28780000,
+  total: 1214516000,
+  golonganBreakdown: [
+    { gol: "Golongan I", peserta: 180, gp: 600000000, tht: 19500000, pensiun: 28500000, jkk: 1440000, jkm: 1200000, total: 50640000 },
+    { gol: "Golongan II", peserta: 1420, gp: 5400000000, tht: 175500000, pensiun: 256500000, jkk: 12960000, jkm: 10800000, total: 455760000 },
+    { gol: "Golongan III", peserta: 1590, gp: 6300000000, tht: 204750000, pensiun: 299250000, jkk: 15120000, jkm: 12600000, total: 531720000 },
+    { gol: "Golongan IV", peserta: 385, gp: 2090000000, tht: 67925000, pensiun: 99275000, jkk: 5016000, jkm: 4180000, total: 176396000 }
+  ]
+};
+
+const SUB_TNI_AU_PPPK = {
+  id: "TNI_AU_PPPK",
+  kategori: "PPPK",
+  jenisPersonil: "PPPK",
+  badge: "Non-pensiun",
+  peserta: 1618,
+  tht: null,
+  pensiun: null,
+  jkk: 20759219,
+  jkm: 17299350,
+  total: 38058569,
+  golonganBreakdown: [
+    { gol: "Golongan IX", peserta: 610, gp: 2900000000, tht: null, pensiun: null, jkk: 6960000, jkm: 5800000, total: 12760000 },
+    { gol: "Golongan X", peserta: 580, gp: 2900000000, tht: null, pensiun: null, jkk: 6960000, jkm: 5800000, total: 12760000 },
+    { gol: "Golongan XI", peserta: 310, gp: 1600000000, tht: null, pensiun: null, jkk: 3840000, jkm: 3200000, total: 7040000 },
+    { gol: "Golongan XII", peserta: 118, gp: 1249674583, tht: null, pensiun: null, jkk: 2999219, jkm: 2499350, total: 5498569 }
+  ]
+};
+
+// --- MABES TNI ---
+const SUB_MABES_TNI_PRAJURIT = {
+  id: "MABES_TNI_PRAJURIT",
+  kategori: "Prajurit",
+  jenisPersonil: "Prajurit",
+  badge: "Militer",
+  peserta: 15420,
+  tht: 2247050000,
+  pensiun: 3284150000,
+  jkk: 165936000,
+  jkm: 138280000,
+  total: 5835416000,
+  golonganBreakdown: [
+    { gol: "TAMTAMA (Golongan I)", peserta: 3100, gp: 9300000000, tht: 302250000, pensiun: 441750000, jkk: 22320000, jkm: 18600000, total: 784920000 },
+    { gol: "BINTARA (Golongan II)", peserta: 6200, gp: 24800000000, tht: 806000000, pensiun: 1178000000, jkk: 59520000, jkm: 49600000, total: 2093120000 },
+    { gol: "PAMA (Golongan III)", peserta: 3900, gp: 19500000000, tht: 633750000, pensiun: 926250000, jkk: 46800000, jkm: 39000000, total: 1645800000 },
+    { gol: "PAMEN & PATI", peserta: 2220, gp: 15540000000, tht: 505050000, pensiun: 738150000, jkk: 37296000, jkm: 31080000, total: 1311576000 }
+  ]
+};
+
+const SUB_MABES_TNI_PNS = {
+  id: "MABES_TNI_PNS",
+  kategori: "PNS",
+  jenisPersonil: "PNS",
+  badge: "ASN",
+  peserta: 2960,
+  tht: 361493644,
+  pensiun: 528336864,
+  jkk: 26694915,
+  jkm: 22245763,
+  total: 938771186,
+  golonganBreakdown: [
+    { gol: "Golongan I", peserta: 110, gp: 400000000, tht: 13000000, pensiun: 19000000, jkk: 960000, jkm: 800000, total: 33760000 },
+    { gol: "Golongan II", peserta: 1180, gp: 4500000000, tht: 146250000, pensiun: 213750000, jkk: 10800000, jkm: 9000000, total: 379800000 },
+    { gol: "Golongan III", peserta: 1320, gp: 5100000000, tht: 165750000, pensiun: 242250000, jkk: 12240000, jkm: 10200000, total: 430440000 },
+    { gol: "Golongan IV", peserta: 350, gp: 1122881354, tht: 36493644, pensiun: 53336864, jkk: 2694915, jkm: 2245763, total: 94771186 }
+  ]
+};
+
+const SUB_MABES_TNI_PPPK = {
+  id: "MABES_TNI_PPPK",
+  kategori: "PPPK",
+  jenisPersonil: "PPPK",
+  badge: "Non-pensiun",
+  peserta: 640,
+  tht: null,
+  pensiun: null,
+  jkk: 8072727,
+  jkm: 6727273,
+  total: 14800000,
+  golonganBreakdown: [
+    { gol: "Golongan IX", peserta: 250, gp: 1200000000, tht: null, pensiun: null, jkk: 2880000, jkm: 2400000, total: 5280000 },
+    { gol: "Golongan X", peserta: 240, gp: 1200000000, tht: null, pensiun: null, jkk: 2880000, jkm: 2400000, total: 5280000 },
+    { gol: "Golongan XI", peserta: 110, gp: 600000000, tht: null, pensiun: null, jkk: 1440000, jkm: 1200000, total: 2640000 },
+    { gol: "Golongan XII", peserta: 40, gp: 363636250, tht: null, pensiun: null, jkk: 872727, jkm: 727273, total: 1600000 }
+  ]
+};
+
+// --- KEMHAN ---
+const SUB_KEMHAN_PNS = {
+  id: "KEMHAN_PNS",
+  kategori: "PNS",
+  jenisPersonil: "PNS",
+  badge: "ASN",
+  peserta: 14233,
+  tht: 1876286250,
+  pensiun: 2742263750,
+  jkk: 138543600,
+  jkm: 115453000,
+  total: 4872546600,
+  golonganBreakdown: [
+    { gol: "Golongan I", peserta: 780, gp: 2700000000, tht: 87750000, pensiun: 128250000, jkk: 6480000, jkm: 5400000, total: 227880000 },
+    { gol: "Golongan II", peserta: 5200, gp: 20100000000, tht: 653250000, pensiun: 954750000, jkk: 48240000, jkm: 40200000, total: 1696440000 },
+    { gol: "Golongan III", peserta: 6850, gp: 27200000000, tht: 884000000, pensiun: 1292000000, jkk: 65280000, jkm: 54400000, total: 2295680000 },
+    { gol: "Golongan IV", peserta: 1403, gp: 7716500000, tht: 250786250, pensiun: 366533750, jkk: 18519600, jkm: 15433000, total: 651272600 }
+  ]
+};
+
+const SUB_KEMHAN_PPPK = {
+  id: "KEMHAN_PPPK",
+  kategori: "PPPK",
+  jenisPersonil: "PPPK",
+  badge: "Non-pensiun",
+  peserta: 7732,
+  tht: null,
+  pensiun: null,
+  jkk: 21752795,
+  jkm: 18127329,
+  total: 39880124,
+  golonganBreakdown: [
+    { gol: "Golongan IX", peserta: 2950, gp: 3200000000, tht: null, pensiun: null, jkk: 7680000, jkm: 6400000, total: 14080000 },
+    { gol: "Golongan X", peserta: 2850, gp: 3200000000, tht: null, pensiun: null, jkk: 7680000, jkm: 6400000, total: 14080000 },
+    { gol: "Golongan XI", peserta: 1420, gp: 1800000000, tht: null, pensiun: null, jkk: 4320000, jkm: 3600000, total: 7920000 },
+    { gol: "Golongan XII", peserta: 512, gp: 863664583, tht: null, pensiun: null, jkk: 2072795, jkm: 1727329, total: 3800124 }
+  ]
+};
+
+// --- POLRI ---
+const SUB_POLRI_ANGGOTA = {
+  id: "POLRI_ANGGOTA_ROW",
+  kategori: "Anggota Polri",
+  jenisPersonil: "Prajurit", // Polri categorized with Militer / Prajurit filter
+  badge: "Polri",
+  peserta: 458120,
+  tht: 63044800000,
+  pensiun: 92142400000,
+  jkk: 4655616000,
+  jkm: 3879680000,
+  total: 163722496000,
+  golonganBreakdown: [
+    { gol: "TAMTAMA POLRI", peserta: 42000, gp: 126000000000, tht: 4095000000, pensiun: 5985000000, jkk: 302400000, jkm: 252000000, total: 10634400000 },
+    { gol: "BINTARA POLRI", peserta: 325000, gp: 1300000000000, tht: 42250000000, pensiun: 61750000000, jkk: 3120000000, jkm: 2600000000, total: 109720000000 },
+    { gol: "PAMA POLRI", peserta: 62000, gp: 310000000000, tht: 10075000000, pensiun: 14725000000, jkk: 744000000, jkm: 620000000, total: 26164000000 },
+    { gol: "PAMEN & PATI", peserta: 29120, gp: 203840000000, tht: 6624800000, pensiun: 9682400000, jkk: 489216000, jkm: 407680000, total: 17204096000 }
+  ]
+};
+
+const SUB_POLRI_PNS = {
+  id: "PNS_POLRI",
+  kategori: "PNS",
+  jenisPersonil: "PNS",
+  badge: "ASN",
+  peserta: 23416,
+  tht: 3087630000,
+  pensiun: 4512690000,
+  jkk: 228000000,
+  jkm: 190000000,
+  total: 8018320000,
+  golonganBreakdown: [
+    { gol: "Golongan I", peserta: 1200, gp: 4200000000, tht: 136500000, pensiun: 199500000, jkk: 10080000, jkm: 8400000, total: 354480000 },
+    { gol: "Golongan II", peserta: 9800, gp: 39200000000, tht: 1274000000, pensiun: 1862000000, jkk: 94080000, jkm: 78400000, total: 3308480000 },
+    { gol: "Golongan III", peserta: 10100, gp: 42420000000, tht: 1378650000, pensiun: 2014950000, jkk: 101808000, jkm: 84840000, total: 3580248000 },
+    { gol: "Golongan IV", peserta: 2316, gp: 9182461538, tht: 298480000, pensiun: 436240000, jkk: 22032000, jkm: 18360000, total: 775112000 }
+  ]
+};
+
+const SUB_POLRI_PPPK = {
+  id: "PPPK_POLRI",
+  kategori: "PPPK",
+  jenisPersonil: "PPPK",
+  badge: "Non-pensiun",
+  peserta: 6800,
+  tht: null,
+  pensiun: null,
+  jkk: 70800000,
+  jkm: 59000000,
+  total: 129800000,
+  golonganBreakdown: [
+    { gol: "Golongan IX", peserta: 2600, gp: 10400000000, tht: null, pensiun: null, jkk: 24960000, jkm: 20800000, total: 45760000 },
+    { gol: "Golongan X", peserta: 2500, gp: 11000000000, tht: null, pensiun: null, jkk: 26400000, jkm: 22000000, total: 48400000 },
+    { gol: "Golongan XI", peserta: 1200, gp: 5600000000, tht: null, pensiun: null, jkk: 13440000, jkm: 11200000, total: 24640000 },
+    { gol: "Golongan XII", peserta: 500, gp: 2500000000, tht: null, pensiun: null, jkk: 6000000, jkm: 5000000, total: 11000000 }
+  ]
+};
+
+// =========================================================================
+// HELPER COMPUTE FUNCTIONS
+// =========================================================================
+
+const computeInstansiTotals = (baseMeta, subRows) => {
+  let peserta = 0, tht = 0, pensiun = 0, jkk = 0, jkm = 0, total = 0;
+  subRows.forEach(sr => {
+    peserta += sr.peserta || 0;
+    tht += sr.tht || 0;
+    pensiun += sr.pensiun || 0;
+    jkk += sr.jkk || 0;
+    jkm += sr.jkm || 0;
+    total += sr.total || 0;
+  });
+  return {
+    ...baseMeta,
+    unorCount: `${subRows.length} unor`,
+    peserta,
+    tht,
+    pensiun,
+    jkk,
+    jkm,
+    total,
+    subRows
+  };
+};
+
+const computeEntityTotals = (entityMeta, instansiList) => {
+  let peserta = 0, totalIuran = 0, tht = 0, pensiun = 0, jkk = 0, jkm = 0;
+  instansiList.forEach(inst => {
+    inst.subRows.forEach(sr => {
+      peserta += sr.peserta || 0;
+      tht += sr.tht || 0;
+      pensiun += sr.pensiun || 0;
+      jkk += sr.jkk || 0;
+      jkm += sr.jkm || 0;
+      totalIuran += sr.total || 0;
+    });
+  });
+  const iuranPeserta = tht + pensiun;
+  const iuranNegara = jkk + jkm;
+  const pesertaRatio = totalIuran > 0 ? (iuranPeserta / totalIuran) * 100 : 84.0;
+  const negaraRatio = totalIuran > 0 ? (iuranNegara / totalIuran) * 100 : 16.0;
+
+  return {
+    ...entityMeta,
+    peserta,
+    totalIuran,
+    iuranPeserta,
+    iuranNegara,
+    pesertaRatio,
+    negaraRatio,
+    instansiList
+  };
+};
+
+// Base Instansi definitions
+const BASE_TNI_AD = { id: "TNI_AD", name: "TNI AD" };
+const BASE_TNI_AL = { id: "TNI_AL", name: "TNI AL" };
+const BASE_TNI_AU = { id: "TNI_AU", name: "TNI AU" };
+const BASE_MABES_TNI = { id: "MABES_TNI", name: "Mabes TNI" };
+const BASE_KEMHAN = { id: "KEMHAN", name: "Kemhan" };
+const BASE_POLRI = { id: "POLRI", name: "Kepolisian RI (POLRI)" };
+
+// =========================================================================
+// MASTER DATA FOR "ENTITAS PEMBINA" GROUPING
+// =========================================================================
+
 const MASTER_ENTITIES_DATA = {
-  ASN_KEMHAN: {
-    id: "ASN_KEMHAN",
-    title: "ASN Kemhan",
-    badgeInstansi: "5 instansi",
-    peserta: 68263,
-    totalIuran: 17153528561,
-    iuranPeserta: 14412454672, // THT + Pensiun
-    iuranNegara: 2741073889,   // JKK + JKM
-    pesertaRatio: 84.0,
-    negaraRatio: 16.0,
-    instansiList: [
-      {
-        id: "TNI_AD",
-        name: "TNI AD",
-        unorCount: "2 unor",
-        peserta: 30071,
-        tht: 2686946640,
-        pensiun: 3927075858,
-        jkk: 686621342,
-        jkm: 572184452,
-        total: 7872828292,
-        subRows: [
-          {
-            id: "TNI_AD_PNS",
-            kategori: "PNS",
-            isPPPK: false,
-            badge: null,
-            peserta: 21436,
-            tht: 2686946640,
-            pensiun: 3927075858,
-            jkk: 589545892,
-            jkm: 491288244,
-            total: 7694856634,
-            golonganBreakdown: [
-              { gol: "Golongan I", peserta: 1120, gp: 3820000000, tht: 124150000, pensiun: 181450000, jkk: 9168000, jkm: 7640000, total: 322408000 },
-              { gol: "Golongan II", peserta: 8450, gp: 32540000000, tht: 1057550000, pensiun: 1545650000, jkk: 78096000, jkm: 65080000, total: 2746376000 },
-              { gol: "Golongan III", peserta: 9680, gp: 36880000000, tht: 1198600000, pensiun: 1751800000, jkk: 88512000, jkm: 73760000, total: 3112672000 },
-              { gol: "Golongan IV", peserta: 2186, gp: 9435281231, tht: 306646640, pensiun: 448175858, jkk: 413769892, jkm: 344808244, total: 1513400634 },
-            ]
-          },
-          {
-            id: "TNI_AD_PPPK",
-            kategori: "PPPK",
-            isPPPK: true,
-            badge: "Non-pensiun",
-            peserta: 8635,
-            tht: null,
-            pensiun: null,
-            jkk: 97075450,
-            jkm: 80896208,
-            total: 177971658,
-            golonganBreakdown: [
-              { gol: "Golongan IX", peserta: 3200, gp: 14800000000, tht: null, pensiun: null, jkk: 35520000, jkm: 29600000, total: 65120000 },
-              { gol: "Golongan X", peserta: 3150, gp: 15200000000, tht: null, pensiun: null, jkk: 36480000, jkm: 30400000, total: 66880000 },
-              { gol: "Golongan XI", peserta: 1520, gp: 6848104167, tht: null, pensiun: null, jkk: 16435450, jkm: 13696208, total: 30131658 },
-              { gol: "Golongan XII", peserta: 765, gp: 3600000000, tht: null, pensiun: null, jkk: 8640000, jkm: 7200000, total: 15840000 },
-            ]
-          }
-        ]
-      },
-      {
-        id: "TNI_AL",
-        name: "TNI AL",
-        unorCount: "2 unor",
-        peserta: 7434,
-        tht: 764874200,
-        pensiun: 1117893061,
-        jkk: 187405099,
-        jkm: 156170916,
-        total: 2226343276,
-        subRows: [
-          {
-            id: "TNI_AL_PNS",
-            kategori: "PNS",
-            isPPPK: false,
-            badge: null,
-            peserta: 5922,
-            tht: 764874200,
-            pensiun: 1117893061,
-            jkk: 168805127,
-            jkm: 140670939,
-            total: 2192243327,
-            golonganBreakdown: [
-              { gol: "Golongan I", peserta: 310, gp: 1050000000, tht: 34125000, pensiun: 49875000, jkk: 2520000, jkm: 2100000, total: 88620000 },
-              { gol: "Golongan II", peserta: 2350, gp: 9100000000, tht: 295750000, pensiun: 432250000, jkk: 21840000, jkm: 18200000, total: 768040000 },
-              { gol: "Golongan III", peserta: 2680, gp: 10600000000, tht: 344500000, pensiun: 503500000, jkk: 25440000, jkm: 21200000, total: 894640000 },
-              { gol: "Golongan IV", peserta: 582, gp: 2784590769, tht: 90499200, pensiun: 132268061, jkk: 119005127, jkm: 99170939, total: 440943327 },
-            ]
-          },
-          {
-            id: "TNI_AL_PPPK",
-            kategori: "PPPK",
-            isPPPK: true,
-            badge: "Non-pensiun",
-            peserta: 1512,
-            tht: null,
-            pensiun: null,
-            jkk: 18599972,
-            jkm: 15499977,
-            total: 34099949,
-            golonganBreakdown: [
-              { gol: "Golongan IX", peserta: 550, gp: 2600000000, tht: null, pensiun: null, jkk: 6240000, jkm: 5200000, total: 11440000 },
-              { gol: "Golongan X", peserta: 560, gp: 2800000000, tht: null, pensiun: null, jkk: 6720000, jkm: 5600000, total: 12320000 },
-              { gol: "Golongan XI", peserta: 280, gp: 1400000000, tht: null, pensiun: null, jkk: 3360000, jkm: 2800000, total: 6160000 },
-              { gol: "Golongan XII", peserta: 122, gp: 949988333, tht: null, pensiun: null, jkk: 2279972, jkm: 1899977, total: 4179949 },
-            ]
-          }
-        ]
-      },
-      {
-        id: "TNI_AU",
-        name: "TNI AU",
-        unorCount: "2 unor",
-        peserta: 5193,
-        tht: 452216603,
-        pensiun: 660931958,
-        jkk: 119759461,
-        jkm: 99799551,
-        total: 1332707573,
-        subRows: [
-          {
-            id: "TNI_AU_PNS",
-            kategori: "PNS",
-            isPPPK: false,
-            badge: null,
-            peserta: 3575,
-            tht: 452216603,
-            pensiun: 660931958,
-            jkk: 99000242,
-            jkm: 82500201,
-            total: 1294649004,
-            golonganBreakdown: [
-              { gol: "Golongan I", peserta: 180, gp: 600000000, tht: 19500000, pensiun: 28500000, jkk: 1440000, jkm: 1200000, total: 50640000 },
-              { gol: "Golongan II", peserta: 1420, gp: 5400000000, tht: 175500000, pensiun: 256500000, jkk: 12960000, jkm: 10800000, total: 455760000 },
-              { gol: "Golongan III", peserta: 1590, gp: 6300000000, tht: 204750000, pensiun: 299250000, jkk: 15120000, jkm: 12600000, total: 531720000 },
-              { gol: "Golongan IV", peserta: 385, gp: 1614357015, tht: 52466603, pensiun: 76681958, jkk: 69480242, jkm: 57900201, total: 256529004 },
-            ]
-          },
-          {
-            id: "TNI_AU_PPPK",
-            kategori: "PPPK",
-            isPPPK: true,
-            badge: "Non-pensiun",
-            peserta: 1618,
-            tht: null,
-            pensiun: null,
-            jkk: 20759219,
-            jkm: 17299350,
-            total: 38058569,
-            golonganBreakdown: [
-              { gol: "Golongan IX", peserta: 610, gp: 2900000000, tht: null, pensiun: null, jkk: 6960000, jkm: 5800000, total: 12760000 },
-              { gol: "Golongan X", peserta: 580, gp: 2900000000, tht: null, pensiun: null, jkk: 6960000, jkm: 5800000, total: 12760000 },
-              { gol: "Golongan XI", peserta: 310, gp: 1600000000, tht: null, pensiun: null, jkk: 3840000, jkm: 3200000, total: 7040000 },
-              { gol: "Golongan XII", peserta: 118, gp: 1249674583, tht: null, pensiun: null, jkk: 2999219, jkm: 2499350, total: 5498569 },
-            ]
-          }
-        ]
-      },
-      {
-        id: "MABES_TNI",
-        name: "Mabes TNI",
-        unorCount: "2 unor",
-        peserta: 3600,
-        tht: 361493644,
-        pensiun: 528336864,
-        jkk: 34767642,
-        jkm: 140201850,
-        total: 1064800000,
-        subRows: [
-          {
-            id: "MABES_TNI_PNS",
-            kategori: "PNS",
-            isPPPK: false,
-            badge: null,
-            peserta: 2960,
-            tht: 361493644,
-            pensiun: 528336864,
-            jkk: 26694915,
-            jkm: 133474577,
-            total: 1050000000,
-            golonganBreakdown: [
-              { gol: "Golongan I", peserta: 110, gp: 400000000, tht: 13000000, pensiun: 19000000, jkk: 960000, jkm: 800000, total: 33760000 },
-              { gol: "Golongan II", peserta: 1180, gp: 4500000000, tht: 146250000, pensiun: 213750000, jkk: 10800000, jkm: 9000000, total: 379800000 },
-              { gol: "Golongan III", peserta: 1320, gp: 5100000000, tht: 165750000, pensiun: 242250000, jkk: 12240000, jkm: 10200000, total: 430440000 },
-              { gol: "Golongan IV", peserta: 350, gp: 1122881354, tht: 36493644, pensiun: 53336864, jkk: 2694915, jkm: 113474577, total: 206000000 },
-            ]
-          },
-          {
-            id: "MABES_TNI_PPPK",
-            kategori: "PPPK",
-            isPPPK: true,
-            badge: "Non-pensiun",
-            peserta: 640,
-            tht: null,
-            pensiun: null,
-            jkk: 8072727,
-            jkm: 6727273,
-            total: 14800000,
-            golonganBreakdown: [
-              { gol: "Golongan IX", peserta: 250, gp: 1200000000, tht: null, pensiun: null, jkk: 2880000, jkm: 2400000, total: 5280000 },
-              { gol: "Golongan X", peserta: 240, gp: 1200000000, tht: null, pensiun: null, jkk: 2880000, jkm: 2400000, total: 5280000 },
-              { gol: "Golongan XI", peserta: 110, gp: 600000000, tht: null, pensiun: null, jkk: 1440000, jkm: 1200000, total: 2640000 },
-              { gol: "Golongan XII", peserta: 40, gp: 363636250, tht: null, pensiun: null, jkk: 872727, jkm: 727273, total: 1600000 },
-            ]
-          }
-        ]
-      },
-      {
-        id: "KEMHAN",
-        name: "Kemhan",
-        unorCount: "2 unor",
-        peserta: 21965,
-        tht: 1589528624,
-        pensiun: 2323157220,
-        jkk: 139133370,
-        jkm: 605030206,
-        total: 4656849420,
-        subRows: [
-          {
-            id: "KEMHAN_PNS",
-            kategori: "PNS",
-            isPPPK: false,
-            badge: null,
-            peserta: 14233,
-            tht: 1589528624,
-            pensiun: 2323157220,
-            jkk: 117380575,
-            jkm: 586902877,
-            total: 4616969296,
-            golonganBreakdown: [
-              { gol: "Golongan I", peserta: 780, gp: 2700000000, tht: 87750000, pensiun: 128250000, jkk: 6480000, jkm: 5400000, total: 227880000 },
-              { gol: "Golongan II", peserta: 5200, gp: 20100000000, tht: 653250000, pensiun: 954750000, jkk: 48240000, jkm: 40200000, total: 1696440000 },
-              { gol: "Golongan III", peserta: 6850, gp: 27200000000, tht: 884000000, pensiun: 1292000000, jkk: 65280000, jkm: 54400000, total: 2295680000 },
-              { gol: "Golongan IV", peserta: 1403, gp: -1191590892, tht: -35471376, pensiun: -51842780, jkk: -2619425, jkm: 486902877, total: 396969296 },
-            ]
-          },
-          {
-            id: "KEMHAN_PPPK",
-            kategori: "PPPK",
-            isPPPK: true,
-            badge: "Non-pensiun",
-            peserta: 7732,
-            tht: null,
-            pensiun: null,
-            jkk: 21752795,
-            jkm: 18127329,
-            total: 39880124,
-            golonganBreakdown: [
-              { gol: "Golongan IX", peserta: 2950, gp: 3200000000, tht: null, pensiun: null, jkk: 7680000, jkm: 6400000, total: 14080000 },
-              { gol: "Golongan X", peserta: 2850, gp: 3200000000, tht: null, pensiun: null, jkk: 7680000, jkm: 6400000, total: 14080000 },
-              { gol: "Golongan XI", peserta: 1420, gp: 1800000000, tht: null, pensiun: null, jkk: 4320000, jkm: 3600000, total: 7920000 },
-              { gol: "Golongan XII", peserta: 512, gp: 863664583, tht: null, pensiun: null, jkk: 2072795, jkm: 1727329, total: 3800124 },
-            ]
-          }
-        ]
-      }
+  TNI_KEMHAN: computeEntityTotals(
+    {
+      id: "TNI_KEMHAN",
+      title: "Prajurit TNI & ASN Kemhan",
+      badgeInstansi: "5 instansi (AD, AL, AU, Mabes, Kemhan)"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AD, [SUB_TNI_AD_PRAJURIT, SUB_TNI_AD_PNS, SUB_TNI_AD_PPPK]),
+      computeInstansiTotals(BASE_TNI_AL, [SUB_TNI_AL_PRAJURIT, SUB_TNI_AL_PNS, SUB_TNI_AL_PPPK]),
+      computeInstansiTotals(BASE_TNI_AU, [SUB_TNI_AU_PRAJURIT, SUB_TNI_AU_PNS, SUB_TNI_AU_PPPK]),
+      computeInstansiTotals(BASE_MABES_TNI, [SUB_MABES_TNI_PRAJURIT, SUB_MABES_TNI_PNS, SUB_MABES_TNI_PPPK]),
+      computeInstansiTotals(BASE_KEMHAN, [SUB_KEMHAN_PNS, SUB_KEMHAN_PPPK])
     ]
-  },
-  TNI: {
-    id: "TNI",
-    title: "TNI",
-    badgeInstansi: "3 instansi",
-    peserta: 546918,
-    totalIuran: 147788451954,
-    iuranPeserta: 124142300000,
-    iuranNegara: 23646151954,
-    pesertaRatio: 84.0,
-    negaraRatio: 16.0,
-    instansiList: [
-      {
-        id: "TNI_AD_MILITER",
-        name: "TNI AD (Militer)",
-        unorCount: "1 unor",
-        peserta: 305210,
-        tht: 37150840120,
-        pensiun: 54298150940,
-        jkk: 2743484320,
-        jkm: 2286236933,
-        total: 96478712313,
-        subRows: [
-          {
-            id: "TNI_AD_MIL",
-            kategori: "Militer AD",
-            isPPPK: false,
-            badge: null,
-            peserta: 305210,
-            tht: 37150840120,
-            pensiun: 54298150940,
-            jkk: 2743484320,
-            jkm: 2286236933,
-            total: 96478712313,
-            golonganBreakdown: [
-              { gol: "TAMTAMA (Golongan I)", peserta: 142100, gp: 426300000000, tht: 13854750000, pensiun: 20249250000, jkk: 1023120000, jkm: 852600000, total: 35979720000 },
-              { gol: "BINTARA (Golongan II)", peserta: 121500, gp: 486000000000, tht: 15795000000, pensiun: 23085000000, jkk: 1166400000, jkm: 972000000, total: 41018400000 },
-              { gol: "PAMA (Golongan III)", peserta: 29800, gp: 149000000000, tht: 4842500000, pensiun: 7077500000, jkk: 357600000, jkm: 298000000, total: 12575600000 },
-              { gol: "PAMEN (Golongan IV)", peserta: 10980, gp: 76860000000, tht: 2497950000, pensiun: 3650850000, jkk: 184464000, jkm: 153720000, total: 6486984000 },
-              { gol: "PATI (Perwira Tinggi)", peserta: 830, gp: 4941234462, tht: 160590120, pensiun: 235550940, jkk: 11900320, jkm: 9916933, total: 418008313 }
-            ]
-          }
-        ]
-      },
-      {
-        id: "TNI_AL_MILITER",
-        name: "TNI AL (Militer)",
-        unorCount: "1 unor",
-        peserta: 132408,
-        tht: 11240500000,
-        pensiun: 16428423080,
-        jkk: 829800000,
-        jkm: 691500000,
-        total: 29190223080,
-        subRows: [
-          {
-            id: "TNI_AL_MIL",
-            kategori: "Militer AL",
-            isPPPK: false,
-            badge: null,
-            peserta: 132408,
-            tht: 11240500000,
-            pensiun: 16428423080,
-            jkk: 829800000,
-            jkm: 691500000,
-            total: 29190223080,
-            golonganBreakdown: [
-              { gol: "TAMTAMA (Golongan I)", peserta: 58200, gp: 174600000000, tht: 5674500000, pensiun: 8293500000, jkk: 419040000, jkm: 349200000, total: 14736240000 },
-              { gol: "BINTARA (Golongan II)", peserta: 54100, gp: 216400000000, tht: 7033000000, pensiun: 10279000000, jkk: 519360000, jkm: 432800000, total: 18264160000 },
-              { gol: "PAMA (Golongan III)", peserta: 14200, gp: 71000000000, tht: 2307500000, pensiun: 3372500000, jkk: 170400000, jkm: 142000000, total: 5992400000 },
-              { gol: "PAMEN & PATI", peserta: 5908, gp: -1161423077, tht: -3774500000, pensiun: -5516576920, jkk: -278960000, jkm: -232500000, total: -9802576920 }
-            ]
-          }
-        ]
-      },
-      {
-        id: "TNI_AU_MILITER",
-        name: "TNI AU (Militer)",
-        unorCount: "1 unor",
-        peserta: 109300,
-        tht: 8520150000,
-        pensiun: 12452880000,
-        jkk: 629180000,
-        jkm: 517306561,
-        total: 22119516561,
-        subRows: [
-          {
-            id: "TNI_AU_MIL",
-            kategori: "Militer AU",
-            isPPPK: false,
-            badge: null,
-            peserta: 109300,
-            tht: 8520150000,
-            pensiun: 12452880000,
-            jkk: 629180000,
-            jkm: 517306561,
-            total: 22119516561,
-            golonganBreakdown: [
-              { gol: "TAMTAMA (Golongan I)", peserta: 45000, gp: 135000000000, tht: 4387500000, pensiun: 6412500000, jkk: 324000000, jkm: 270000000, total: 11394000000 },
-              { gol: "BINTARA (Golongan II)", peserta: 46200, gp: 184800000000, tht: 6006000000, pensiun: 8778000000, jkk: 443520000, jkm: 369600000, total: 15597120000 },
-              { gol: "PAMA (Golongan III)", peserta: 12800, gp: 64000000000, tht: 2080000000, pensiun: 3040000000, jkk: 153600000, jkm: 128000000, total: 5401600000 },
-              { gol: "PAMEN & PATI", peserta: 5300, gp: -121650000000, tht: -3953350000, pensiun: -5777620000, jkk: -291940000, jkm: -250293439, total: -10273203439 }
-            ]
-          }
-        ]
-      }
+  ),
+
+  PRAJURIT_TNI: computeEntityTotals(
+    {
+      id: "PRAJURIT_TNI",
+      title: "Prajurit TNI",
+      badgeInstansi: "4 matra/kotama (AD, AL, AU, Mabes)"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AD, [SUB_TNI_AD_PRAJURIT]),
+      computeInstansiTotals(BASE_TNI_AL, [SUB_TNI_AL_PRAJURIT]),
+      computeInstansiTotals(BASE_TNI_AU, [SUB_TNI_AU_PRAJURIT]),
+      computeInstansiTotals(BASE_MABES_TNI, [SUB_MABES_TNI_PRAJURIT])
     ]
-  },
-  POLRI: {
-    id: "POLRI",
-    title: "POLRI",
-    badgeInstansi: "1 instansi",
-    peserta: 458120,
-    totalIuran: 151231447732,
-    iuranPeserta: 127034416095,
-    iuranNegara: 24197031637,
-    pesertaRatio: 84.0,
-    negaraRatio: 16.0,
-    instansiList: [
-      {
-        id: "POLRI_ANGGOTA",
-        name: "POLRI (Anggota & Brimob)",
-        unorCount: "1 unor",
-        peserta: 458120,
-        tht: 51607731539,
-        pensiun: 75426684556,
-        jkk: 3810021500,
-        jkm: 3175010137,
-        total: 151231447732,
-        subRows: [
-          {
-            id: "POLRI_ANGGOTA_ROW",
-            kategori: "Anggota Polri",
-            isPPPK: false,
-            badge: null,
-            peserta: 458120,
-            tht: 51607731539,
-            pensiun: 75426684556,
-            jkk: 3810021500,
-            jkm: 3175010137,
-            total: 151231447732,
-            golonganBreakdown: [
-              { gol: "TAMTAMA POLRI", peserta: 42000, gp: 126000000000, tht: 4095000000, pensiun: 5985000000, jkk: 302400000, jkm: 252000000, total: 10634400000 },
-              { gol: "BINTARA POLRI", peserta: 325000, gp: 1300000000000, tht: 42250000000, pensiun: 61750000000, jkk: 3120000000, jkm: 2600000000, total: 109720000000 },
-              { gol: "PAMA POLRI", peserta: 62000, gp: 310000000000, tht: 10075000000, pensiun: 14725000000, jkk: 744000000, jkm: 620000000, total: 26164000000 },
-              { gol: "PAMEN & PATI", peserta: 29120, gp: -147960000000, tht: -4812268461, pensiun: -7033315444, jkk: -356378500, jkm: -296989863, total: 4713047732 }
-            ]
-          }
-        ]
-      }
+  ),
+
+  ASN_KEMHAN: computeEntityTotals(
+    {
+      id: "ASN_KEMHAN",
+      title: "ASN Kemhan",
+      badgeInstansi: "5 instansi (PNS & PPPK)"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AD, [SUB_TNI_AD_PNS, SUB_TNI_AD_PPPK]),
+      computeInstansiTotals(BASE_TNI_AL, [SUB_TNI_AL_PNS, SUB_TNI_AL_PPPK]),
+      computeInstansiTotals(BASE_TNI_AU, [SUB_TNI_AU_PNS, SUB_TNI_AU_PPPK]),
+      computeInstansiTotals(BASE_MABES_TNI, [SUB_MABES_TNI_PNS, SUB_MABES_TNI_PPPK]),
+      computeInstansiTotals(BASE_KEMHAN, [SUB_KEMHAN_PNS, SUB_KEMHAN_PPPK])
     ]
-  },
-  ASN_POLRI: {
-    id: "ASN_POLRI",
-    title: "ASN Polri",
-    badgeInstansi: "1 instansi",
-    peserta: 30216,
-    totalIuran: 9048000000,
-    iuranPeserta: 7600320000,
-    iuranNegara: 1447680000,
-    pesertaRatio: 84.0,
-    negaraRatio: 16.0,
-    instansiList: [
-      {
-        id: "POLRI_ASN",
-        name: "Mabes & Polda (ASN Polri)",
-        unorCount: "2 unor",
-        peserta: 30216,
-        tht: 3087630000,
-        pensiun: 4512690000,
-        jkk: 789600000,
-        jkm: 658080000,
-        total: 9048000000,
-        subRows: [
-          {
-            id: "PNS_POLRI",
-            kategori: "PNS",
-            isPPPK: false,
-            badge: null,
-            peserta: 23416,
-            tht: 3087630000,
-            pensiun: 4512690000,
-            jkk: 686520000,
-            jkm: 572100000,
-            total: 8858940000,
-            golonganBreakdown: [
-              { gol: "Golongan I", peserta: 1200, gp: 4200000000, tht: 136500000, pensiun: 199500000, jkk: 10080000, jkm: 8400000, total: 354480000 },
-              { gol: "Golongan II", peserta: 9800, gp: 39200000000, tht: 1274000000, pensiun: 1862000000, jkk: 94080000, jkm: 78400000, total: 3308480000 },
-              { gol: "Golongan III", peserta: 10100, gp: 42420000000, tht: 1378650000, pensiun: 2014950000, jkk: 101808000, jkm: 84840000, total: 3580248000 },
-              { gol: "Golongan IV", peserta: 2316, gp: 9182461538, tht: 298480000, pensiun: 436240000, jkk: 480552000, jkm: 400460000, total: 1615732000 }
-            ]
-          },
-          {
-            id: "PPPK_POLRI",
-            kategori: "PPPK",
-            isPPPK: true,
-            badge: "Non-pensiun",
-            peserta: 6800,
-            tht: null,
-            pensiun: null,
-            jkk: 103080000,
-            jkm: 85980000,
-            total: 189060000,
-            golonganBreakdown: [
-              { gol: "Golongan IX", peserta: 2600, gp: 10400000000, tht: null, pensiun: null, jkk: 24960000, jkm: 20800000, total: 45760000 },
-              { gol: "Golongan X", peserta: 2500, gp: 11000000000, tht: null, pensiun: null, jkk: 26400000, jkm: 22000000, total: 48400000 },
-              { gol: "Golongan XI", peserta: 1200, gp: 5600000000, tht: null, pensiun: null, jkk: 13440000, jkm: 11200000, total: 24640000 },
-              { gol: "Golongan XII", peserta: 500, gp: 2500000000, tht: null, pensiun: null, jkk: 6000000, jkm: 5000000, total: 11000000 }
-            ]
-          }
-        ]
-      }
+  ),
+
+  POLRI: computeEntityTotals(
+    {
+      id: "POLRI",
+      title: "POLRI & ASN Polri",
+      badgeInstansi: "1 instansi (Anggota & ASN)"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA, SUB_POLRI_PNS, SUB_POLRI_PPPK])
     ]
-  }
+  )
+};
+
+// =========================================================================
+// MASTER DATA FOR "INSTANSI" GROUPING
+// =========================================================================
+
+const MASTER_INSTANSI_DATA = {
+  INST_ALL: computeEntityTotals(
+    {
+      id: "INST_ALL",
+      title: "Semua Instansi",
+      badgeInstansi: "6 instansi gabungan"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AD, [SUB_TNI_AD_PRAJURIT, SUB_TNI_AD_PNS, SUB_TNI_AD_PPPK]),
+      computeInstansiTotals(BASE_TNI_AL, [SUB_TNI_AL_PRAJURIT, SUB_TNI_AL_PNS, SUB_TNI_AL_PPPK]),
+      computeInstansiTotals(BASE_TNI_AU, [SUB_TNI_AU_PRAJURIT, SUB_TNI_AU_PNS, SUB_TNI_AU_PPPK]),
+      computeInstansiTotals(BASE_MABES_TNI, [SUB_MABES_TNI_PRAJURIT, SUB_MABES_TNI_PNS, SUB_MABES_TNI_PPPK]),
+      computeInstansiTotals(BASE_KEMHAN, [SUB_KEMHAN_PNS, SUB_KEMHAN_PPPK]),
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA, SUB_POLRI_PNS, SUB_POLRI_PPPK])
+    ]
+  ),
+
+  INST_TNI_AD: computeEntityTotals(
+    {
+      id: "INST_TNI_AD",
+      title: "TNI AD",
+      badgeInstansi: "Prajurit, PNS, PPPK"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AD, [SUB_TNI_AD_PRAJURIT, SUB_TNI_AD_PNS, SUB_TNI_AD_PPPK])
+    ]
+  ),
+
+  INST_TNI_AL: computeEntityTotals(
+    {
+      id: "INST_TNI_AL",
+      title: "TNI AL",
+      badgeInstansi: "Prajurit, PNS, PPPK"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AL, [SUB_TNI_AL_PRAJURIT, SUB_TNI_AL_PNS, SUB_TNI_AL_PPPK])
+    ]
+  ),
+
+  INST_TNI_AU: computeEntityTotals(
+    {
+      id: "INST_TNI_AU",
+      title: "TNI AU",
+      badgeInstansi: "Prajurit, PNS, PPPK"
+    },
+    [
+      computeInstansiTotals(BASE_TNI_AU, [SUB_TNI_AU_PRAJURIT, SUB_TNI_AU_PNS, SUB_TNI_AU_PPPK])
+    ]
+  ),
+
+  INST_MABES_TNI: computeEntityTotals(
+    {
+      id: "INST_MABES_TNI",
+      title: "Mabes TNI",
+      badgeInstansi: "Prajurit, PNS, PPPK"
+    },
+    [
+      computeInstansiTotals(BASE_MABES_TNI, [SUB_MABES_TNI_PRAJURIT, SUB_MABES_TNI_PNS, SUB_MABES_TNI_PPPK])
+    ]
+  ),
+
+  INST_KEMHAN: computeEntityTotals(
+    {
+      id: "INST_KEMHAN",
+      title: "Kemhan",
+      badgeInstansi: "PNS & PPPK"
+    },
+    [
+      computeInstansiTotals(BASE_KEMHAN, [SUB_KEMHAN_PNS, SUB_KEMHAN_PPPK])
+    ]
+  ),
+
+  INST_POLRI: computeEntityTotals(
+    {
+      id: "INST_POLRI",
+      title: "POLRI",
+      badgeInstansi: "Anggota & ASN"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA, SUB_POLRI_PNS, SUB_POLRI_PPPK])
+    ]
+  )
 };
 
 export const KalkulatorIuran = () => {
@@ -524,9 +598,10 @@ export const KalkulatorIuran = () => {
   const [kelompokkanPer, setKelompokkanPer] = useState("entitas");
 
   // Selected Entity Card
-  const [selectedEntityId, setSelectedEntityId] = useState("ASN_KEMHAN");
+  const [selectedEntityId, setSelectedEntityId] = useState("TNI_KEMHAN");
+  const [selectedInstansiId, setSelectedInstansiId] = useState("INST_ALL");
 
-  // Filter Pill: "Semua" | "PNS" | "PPPK"
+  // Filter Pill: "Semua" | "Prajurit" | "PNS" | "PPPK"
   const [filterPill, setFilterPill] = useState("Semua");
 
   // Search Input
@@ -539,11 +614,7 @@ export const KalkulatorIuran = () => {
     TNI_AU: true,
     MABES_TNI: true,
     KEMHAN: true,
-    TNI_AD_MILITER: true,
-    TNI_AL_MILITER: true,
-    TNI_AU_MILITER: true,
-    POLRI_ANGGOTA: true,
-    POLRI_ASN: true
+    POLRI: true
   });
 
   // Modal Detail Rincian Golongan
@@ -585,51 +656,69 @@ export const KalkulatorIuran = () => {
     }));
   };
 
-  // Check if all are currently expanded
+  // Active Entity Data based on grouping
+  const activeEntity = useMemo(() => {
+    if (kelompokkanPer === "instansi") {
+      return MASTER_INSTANSI_DATA[selectedInstansiId] || MASTER_INSTANSI_DATA.INST_ALL;
+    }
+    return MASTER_ENTITIES_DATA[selectedEntityId] || MASTER_ENTITIES_DATA.TNI_KEMHAN;
+  }, [kelompokkanPer, selectedEntityId, selectedInstansiId]);
+
+  // Check if all rows are currently expanded
   const areAllExpanded = useMemo(() => {
-    const currentEntity = MASTER_ENTITIES_DATA[selectedEntityId];
-    if (!currentEntity) return true;
-    return currentEntity.instansiList.every(inst => expandedRows[inst.id]);
-  }, [selectedEntityId, expandedRows]);
+    if (!activeEntity || !activeEntity.instansiList) return true;
+    return activeEntity.instansiList.every(inst => expandedRows[inst.id]);
+  }, [activeEntity, expandedRows]);
 
   // Toggle all rows
   const handleToggleAll = () => {
-    const currentEntity = MASTER_ENTITIES_DATA[selectedEntityId];
-    if (!currentEntity) return;
+    if (!activeEntity || !activeEntity.instansiList) return;
     const nextState = !areAllExpanded;
     const updated = { ...expandedRows };
-    currentEntity.instansiList.forEach(inst => {
+    activeEntity.instansiList.forEach(inst => {
       updated[inst.id] = nextState;
     });
     setExpandedRows(updated);
   };
 
-  // Active Entity Data
-  const activeEntity = useMemo(() => {
-    return MASTER_ENTITIES_DATA[selectedEntityId] || MASTER_ENTITIES_DATA.ASN_KEMHAN;
-  }, [selectedEntityId]);
-
-  // Filtered rows based on Pill filter (PNS / PPPK) & Search Query
+  // Filtered rows based on Pill filter (Prajurit / PNS / PPPK) & Search Query
   const filteredInstansiList = useMemo(() => {
     return activeEntity.instansiList.map(inst => {
-      // Filter subRows
       let filteredSubRows = inst.subRows;
-      if (filterPill === "PNS") {
-        filteredSubRows = filteredSubRows.filter(sr => sr.kategori === "PNS" || !sr.isPPPK);
+
+      if (filterPill === "Prajurit") {
+        filteredSubRows = filteredSubRows.filter(sr =>
+          sr.jenisPersonil === "Prajurit" ||
+          sr.kategori === "Prajurit" ||
+          sr.kategori?.includes("Anggota") ||
+          sr.kategori?.includes("Militer")
+        );
+      } else if (filterPill === "PNS") {
+        filteredSubRows = filteredSubRows.filter(sr =>
+          sr.jenisPersonil === "PNS" || sr.kategori === "PNS"
+        );
       } else if (filterPill === "PPPK") {
-        filteredSubRows = filteredSubRows.filter(sr => sr.kategori === "PPPK" || sr.isPPPK);
+        filteredSubRows = filteredSubRows.filter(sr =>
+          sr.jenisPersonil === "PPPK" || sr.kategori === "PPPK"
+        );
       }
 
       // Filter by search query if present
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const instMatch = inst.name.toLowerCase().includes(q);
-        const subMatch = filteredSubRows.some(sr => sr.kategori.toLowerCase().includes(q));
+        const subMatch = filteredSubRows.some(sr =>
+          sr.kategori.toLowerCase().includes(q) ||
+          (sr.badge && sr.badge.toLowerCase().includes(q))
+        );
         if (!instMatch && !subMatch) {
           return null;
         }
         if (!instMatch && subMatch) {
-          filteredSubRows = filteredSubRows.filter(sr => sr.kategori.toLowerCase().includes(q));
+          filteredSubRows = filteredSubRows.filter(sr =>
+            sr.kategori.toLowerCase().includes(q) ||
+            (sr.badge && sr.badge.toLowerCase().includes(q))
+          );
         }
       }
 
@@ -637,14 +726,29 @@ export const KalkulatorIuran = () => {
         return null;
       }
 
+      // Calculate dynamic parent totals based on filtered subRows
+      const pPeserta = filteredSubRows.reduce((a, b) => a + (b.peserta || 0), 0);
+      const pTht = filteredSubRows.reduce((a, b) => a + (b.tht || 0), 0);
+      const pPensiun = filteredSubRows.reduce((a, b) => a + (b.pensiun || 0), 0);
+      const pJkk = filteredSubRows.reduce((a, b) => a + (b.jkk || 0), 0);
+      const pJkm = filteredSubRows.reduce((a, b) => a + (b.jkm || 0), 0);
+      const pTotal = filteredSubRows.reduce((a, b) => a + (b.total || 0), 0);
+
       return {
         ...inst,
+        unorCount: `${filteredSubRows.length} unor`,
+        peserta: pPeserta,
+        tht: pTht,
+        pensiun: pPensiun,
+        jkk: pJkk,
+        jkm: pJkm,
+        total: pTotal,
         subRows: filteredSubRows
       };
     }).filter(Boolean);
   }, [activeEntity, filterPill, searchQuery]);
 
-  // Calculate dynamic subtotal based on filtered rows
+  // Dynamic subtotal across filtered visible rows
   const currentSubtotal = useMemo(() => {
     let peserta = 0;
     let tht = 0;
@@ -677,20 +781,22 @@ export const KalkulatorIuran = () => {
     const isExcel = format === "excel";
     const columns = [
       "Instansi / Kategori",
+      "Status Personil",
       "Peserta",
       "THT 3,25%",
       "Pensiun 4,75%",
       "JKK 0,24%",
       "JKM 0,20%",
-      "Total"
+      "Total Iuran"
     ];
-    const alignments = ["left", "right", "right", "right", "right", "right", "right"];
+    const alignments = ["left", "left", "right", "right", "right", "right", "right", "right"];
 
     const rows = [];
     filteredInstansiList.forEach(inst => {
       // Parent Row
       rows.push([
         `${inst.name} (${inst.unorCount})`,
+        "Induk Satker",
         fmtNum(inst.peserta),
         fmtRupiah(inst.tht),
         fmtRupiah(inst.pensiun),
@@ -702,7 +808,8 @@ export const KalkulatorIuran = () => {
       // Sub Rows
       inst.subRows.forEach(sr => {
         rows.push([
-          `   ${sr.kategori}${sr.badge ? ` (${sr.badge})` : ""}`,
+          `   ${sr.kategori}`,
+          sr.badge ? sr.badge : "Reguler",
           fmtNum(sr.peserta),
           sr.tht ? fmtRupiah(sr.tht) : "—",
           sr.pensiun ? fmtRupiah(sr.pensiun) : "—",
@@ -714,7 +821,8 @@ export const KalkulatorIuran = () => {
     });
 
     const totalRow = [
-      { text: `Subtotal ${activeEntity.title}`, colSpan: 1, align: "left" },
+      { text: `Subtotal ${activeEntity.title}`, colSpan: 2, align: "left" },
+      "",
       fmtNum(currentSubtotal.peserta),
       fmtRupiah(currentSubtotal.tht),
       fmtRupiah(currentSubtotal.pensiun),
@@ -738,7 +846,7 @@ export const KalkulatorIuran = () => {
     });
   };
 
-  // Open detail breakdown modal for a subRow or parent row
+  // Open detail breakdown modal for a subRow
   const handleOpenRowDetail = (instName, subRow) => {
     setModalGolonganData({
       instansiName: instName,
@@ -753,6 +861,59 @@ export const KalkulatorIuran = () => {
       breakdown: subRow.golonganBreakdown || []
     });
   };
+
+  // Badge pill styling helper
+  const renderSubRowBadge = (badge, kategori) => {
+    if (!badge && !kategori) return null;
+    let bg = "#F1F5F9";
+    let color = COLORS.gray700;
+    let border = "#E2E8F0";
+
+    if (kategori === "Prajurit" || badge === "Militer") {
+      bg = "#ECFDF5";
+      color = "#047857";
+      border = "#A7F3D0";
+    } else if (kategori === "PNS" || badge === "ASN") {
+      bg = "#EFF6FF";
+      color = "#1D4ED8";
+      border = "#BFDBFE";
+    } else if (kategori === "PPPK" || badge === "Non-pensiun") {
+      bg = "#FEF3C7";
+      color = "#B45309";
+      border = "#FDE68A";
+    } else if (kategori?.includes("Polri") || badge === "Polri") {
+      bg = "#EEF2FF";
+      color = "#4338CA";
+      border = "#C7D2FE";
+    }
+
+    return (
+      <span
+        style={{
+          fontSize: 11,
+          color,
+          background: bg,
+          border: `1px solid ${border}`,
+          padding: "1px 8px",
+          borderRadius: 9999,
+          fontWeight: 600,
+          letterSpacing: 0.2
+        }}
+      >
+        {badge || kategori}
+      </span>
+    );
+  };
+
+  // Active cards list to display
+  const currentCards = useMemo(() => {
+    if (kelompokkanPer === "instansi") {
+      return Object.values(MASTER_INSTANSI_DATA);
+    }
+    return Object.values(MASTER_ENTITIES_DATA);
+  }, [kelompokkanPer]);
+
+  const activeCardId = kelompokkanPer === "instansi" ? selectedInstansiId : selectedEntityId;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: "inherit" }}>
@@ -989,27 +1150,37 @@ export const KalkulatorIuran = () => {
         </div>
 
         <span style={{ fontSize: 12.5, color: COLORS.gray500 }}>
-          {kelompokkanPer === "entitas" ? "Siapa pembina & penanggung iurannya" : "Rincian langsung per induk kementerian / lembaga"}
+          {kelompokkanPer === "entitas"
+            ? "Mencakup Prajurit TNI & ASN Kemhan, Prajurit TNI, ASN Kemhan, serta POLRI"
+            : "Rincian langsung per induk matra (TNI AD, TNI AL, TNI AU, Mabes TNI, Kemhan, POLRI)"}
         </span>
       </div>
 
       {/* =========================================================================
-          HORIZONTAL ROW OF 4 ENTITY CARDS
+          HORIZONTAL ROW OF ENTITY / INSTANSI CARDS
          ========================================================================= */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+          gridTemplateColumns: kelompokkanPer === "instansi"
+            ? "repeat(auto-fit, minmax(180px, 1fr))"
+            : "repeat(auto-fit, minmax(240px, 1fr))",
           gap: 14
         }}
       >
-        {Object.values(MASTER_ENTITIES_DATA).map((ent) => {
-          const isSelected = selectedEntityId === ent.id;
+        {currentCards.map((ent) => {
+          const isSelected = activeCardId === ent.id;
 
           return (
             <div
               key={ent.id}
-              onClick={() => setSelectedEntityId(ent.id)}
+              onClick={() => {
+                if (kelompokkanPer === "instansi") {
+                  setSelectedInstansiId(ent.id);
+                } else {
+                  setSelectedEntityId(ent.id);
+                }
+              }}
               style={{
                 borderRadius: 12,
                 padding: "16px 20px",
@@ -1044,7 +1215,7 @@ export const KalkulatorIuran = () => {
 
                 <span
                   style={{
-                    fontSize: 11.5,
+                    fontSize: 11,
                     color: isSelected ? "#94A3B8" : COLORS.gray500,
                     fontWeight: 500
                   }}
@@ -1056,7 +1227,7 @@ export const KalkulatorIuran = () => {
               {/* Main Total Amount */}
               <div
                 style={{
-                  fontSize: 19,
+                  fontSize: 18,
                   fontWeight: 800,
                   letterSpacing: -0.3,
                   marginBottom: 4,
@@ -1124,7 +1295,7 @@ export const KalkulatorIuran = () => {
                 height: "100%",
                 borderRadius: "9999px 0 0 9999px"
               }}
-              title={`Iuran peserta: ${activeEntity.pesertaRatio}%`}
+              title={`Iuran peserta (THT + Pensiun): ${activeEntity.pesertaRatio.toFixed(1)}%`}
             />
             <div
               style={{
@@ -1133,7 +1304,7 @@ export const KalkulatorIuran = () => {
                 height: "100%",
                 borderRadius: "0 9999px 9999px 0"
               }}
-              title={`Iuran negara: ${activeEntity.negaraRatio}%`}
+              title={`Iuran negara (JKK + JKM): ${activeEntity.negaraRatio.toFixed(1)}%`}
             />
           </div>
         </div>
@@ -1199,9 +1370,9 @@ export const KalkulatorIuran = () => {
           gap: 12
         }}
       >
-        {/* Left Filter Pills: Semua / PNS / PPPK */}
+        {/* Left Filter Pills: Semua / Prajurit / PNS / PPPK */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {["Semua", "PNS", "PPPK"].map((pill) => {
+          {["Semua", "Prajurit", "PNS", "PPPK"].map((pill) => {
             const isActive = filterPill === pill;
             return (
               <button
@@ -1230,7 +1401,7 @@ export const KalkulatorIuran = () => {
         {/* Right: Search Box & Tutup/Buka Semua Button */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* Search Input */}
-          <div style={{ position: "relative", width: 240 }}>
+          <div style={{ position: "relative", width: 260 }}>
             <Search
               size={15}
               color={COLORS.gray400}
@@ -1238,7 +1409,7 @@ export const KalkulatorIuran = () => {
             />
             <input
               type="text"
-              placeholder="Cari instansi atau kategori..."
+              placeholder="Cari instansi, prajurit, PNS..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -1394,7 +1565,7 @@ export const KalkulatorIuran = () => {
               {filteredInstansiList.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ padding: "40px 20px", textAlign: "center", color: COLORS.gray500 }}>
-                    Tidak ada instansi yang cocok dengan filter atau pencarian saat ini.
+                    Tidak ada instansi atau kategori yang cocok dengan filter saat ini.
                   </td>
                 </tr>
               ) : (
@@ -1489,7 +1660,7 @@ export const KalkulatorIuran = () => {
                         </td>
                       </tr>
 
-                      {/* SUB-ROWS (PNS & PPPK) - Displayed if expanded */}
+                      {/* SUB-ROWS (Prajurit, PNS, & PPPK) - Displayed if expanded */}
                       {isExpanded &&
                         inst.subRows.map((sr) => (
                           <tr
@@ -1502,12 +1673,12 @@ export const KalkulatorIuran = () => {
                             onMouseEnter={(e) => { e.currentTarget.style.background = "#F8FAFC"; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.white; }}
                           >
-                            {/* Kategori Name (PNS / PPPK) */}
+                            {/* Kategori Name (Prajurit / PNS / PPPK) */}
                             <td style={{ padding: "12px 18px 12px 42px" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <span
                                   onClick={() => handleOpenRowDetail(inst.name, sr)}
-                                  title="Klik untuk rincian per golongan"
+                                  title="Klik untuk rincian per golongan / pangkat"
                                   style={{
                                     color: "#2563EB",
                                     fontWeight: 600,
@@ -1519,20 +1690,7 @@ export const KalkulatorIuran = () => {
                                 >
                                   {sr.kategori}
                                 </span>
-                                {sr.badge && (
-                                  <span
-                                    style={{
-                                      fontSize: 11,
-                                      color: COLORS.gray500,
-                                      border: "1px dashed #CBD5E1",
-                                      padding: "1px 8px",
-                                      borderRadius: 9999,
-                                      fontWeight: 500
-                                    }}
-                                  >
-                                    {sr.badge}
-                                  </span>
-                                )}
+                                {renderSubRowBadge(sr.badge, sr.kategori)}
                               </div>
                             </td>
 
@@ -1622,15 +1780,15 @@ export const KalkulatorIuran = () => {
             borderTop: `1px solid ${COLORS.gray100}`
           }}
         >
-          <span>Menampilkan {totalUnorCount} dari {totalUnorCount} unor</span>
+          <span>Menampilkan {totalUnorCount} dari {totalUnorCount} unor aktif</span>
           <span style={{ fontStyle: "normal", color: COLORS.gray500 }}>
-            Klik baris untuk rincian per golongan
+            Klik nama kategori (Prajurit / PNS / PPPK) untuk rincian per pangkat &amp; golongan
           </span>
         </div>
       </div>
 
       {/* =========================================================================
-          MODAL RINCIAN PER GOLONGAN
+          MODAL RINCIAN PER GOLONGAN / PANGKAT
          ========================================================================= */}
       {modalGolonganData && (
         <div
@@ -1675,34 +1833,21 @@ export const KalkulatorIuran = () => {
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: COLORS.gray900 }}>
-                    Rincian Per Golongan — {modalGolonganData.instansiName}
+                    Rincian Per Golongan / Pangkat — {modalGolonganData.instansiName}
                   </h3>
                   <span
                     style={{
                       padding: "2px 8px",
                       borderRadius: 6,
-                      background: "#EFF6FF",
-                      color: "#1D4ED8",
+                      background: modalGolonganData.kategori === "Prajurit" ? "#ECFDF5" : "#EFF6FF",
+                      color: modalGolonganData.kategori === "Prajurit" ? "#047857" : "#1D4ED8",
                       fontSize: 12,
                       fontWeight: 700
                     }}
                   >
                     {modalGolonganData.kategori}
                   </span>
-                  {modalGolonganData.badge && (
-                    <span
-                      style={{
-                        padding: "2px 8px",
-                        borderRadius: 12,
-                        border: "1px dashed #CBD5E1",
-                        color: COLORS.gray600,
-                        fontSize: 11,
-                        fontWeight: 600
-                      }}
-                    >
-                      {modalGolonganData.badge}
-                    </span>
-                  )}
+                  {modalGolonganData.badge && renderSubRowBadge(modalGolonganData.badge, modalGolonganData.kategori)}
                 </div>
                 <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 4 }}>
                   Masa Rekonsiliasi: <strong>{periodeLabel}</strong> • Total {fmtNum(modalGolonganData.peserta)} Peserta Aktif
@@ -1724,12 +1869,12 @@ export const KalkulatorIuran = () => {
               </button>
             </div>
 
-            {/* Modal Body: Table of Golongan Breakdown */}
+            {/* Modal Body: Table of Golongan / Pangkat Breakdown */}
             <div style={{ padding: "20px 24px", overflowY: "auto", flex: 1 }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
                 <thead>
                   <tr style={{ background: "#F1F5F9", color: COLORS.gray700 }}>
-                    <th style={{ padding: "10px 12px", textAlign: "left", borderRadius: "6px 0 0 6px" }}>Golongan</th>
+                    <th style={{ padding: "10px 12px", textAlign: "left", borderRadius: "6px 0 0 6px" }}>Pangkat / Golongan</th>
                     <th style={{ padding: "10px 12px", textAlign: "right" }}>Peserta</th>
                     <th style={{ padding: "10px 12px", textAlign: "right" }}>Gaji Pokok &amp; Tunj.</th>
                     <th style={{ padding: "10px 12px", textAlign: "right" }}>THT (3,25%)</th>
