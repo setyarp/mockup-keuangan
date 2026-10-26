@@ -16,7 +16,12 @@ import {
   X,
   ExternalLink,
   Info,
-  Calendar
+  Calendar,
+  Calculator,
+  Sparkles,
+  Copy,
+  Check,
+  RotateCcw
 } from "lucide-react";
 import { COLORS } from "../constants/colors";
 import { PreviewModal } from "../components/common/PreviewModal";
@@ -40,13 +45,13 @@ const BULAN_LIST = [
 ];
 
 // =========================================================================
-// DATA SUB-ROWS DEFINITIONS (PRAJURIT, PNS, PPPK)
+// DATA SUB-ROWS DEFINITIONS (PRAJURIT, PNS, PPPK / PPK)
 // =========================================================================
 
 // --- TNI AD ---
 const SUB_TNI_AD_PRAJURIT = {
   id: "TNI_AD_PRAJURIT",
-  kategori: "Prajurit",
+  kategori: "Prajurit TNI AD",
   jenisPersonil: "Prajurit",
   badge: "Militer",
   peserta: 305210,
@@ -66,7 +71,7 @@ const SUB_TNI_AD_PRAJURIT = {
 
 const SUB_TNI_AD_PNS = {
   id: "TNI_AD_PNS",
-  kategori: "PNS",
+  kategori: "PNS TNI AD",
   jenisPersonil: "PNS",
   badge: "ASN",
   peserta: 21436,
@@ -85,9 +90,9 @@ const SUB_TNI_AD_PNS = {
 
 const SUB_TNI_AD_PPPK = {
   id: "TNI_AD_PPPK",
-  kategori: "PPPK",
+  kategori: "PPPK TNI AD",
   jenisPersonil: "PPPK",
-  badge: "Non-pensiun",
+  badge: "PPK / Non-pensiun",
   peserta: 8635,
   tht: null,
   pensiun: null,
@@ -105,7 +110,7 @@ const SUB_TNI_AD_PPPK = {
 // --- TNI AL ---
 const SUB_TNI_AL_PRAJURIT = {
   id: "TNI_AL_PRAJURIT",
-  kategori: "Prajurit",
+  kategori: "Prajurit TNI AL",
   jenisPersonil: "Prajurit",
   badge: "Militer",
   peserta: 132408,
@@ -125,7 +130,7 @@ const SUB_TNI_AL_PRAJURIT = {
 
 const SUB_TNI_AL_PNS = {
   id: "TNI_AL_PNS",
-  kategori: "PNS",
+  kategori: "PNS TNI AL",
   jenisPersonil: "PNS",
   badge: "ASN",
   peserta: 5922,
@@ -144,9 +149,9 @@ const SUB_TNI_AL_PNS = {
 
 const SUB_TNI_AL_PPPK = {
   id: "TNI_AL_PPPK",
-  kategori: "PPPK",
+  kategori: "PPPK TNI AL",
   jenisPersonil: "PPPK",
-  badge: "Non-pensiun",
+  badge: "PPK / Non-pensiun",
   peserta: 1512,
   tht: null,
   pensiun: null,
@@ -164,7 +169,7 @@ const SUB_TNI_AL_PPPK = {
 // --- TNI AU ---
 const SUB_TNI_AU_PRAJURIT = {
   id: "TNI_AU_PRAJURIT",
-  kategori: "Prajurit",
+  kategori: "Prajurit TNI AU",
   jenisPersonil: "Prajurit",
   badge: "Militer",
   peserta: 109300,
@@ -184,7 +189,7 @@ const SUB_TNI_AU_PRAJURIT = {
 
 const SUB_TNI_AU_PNS = {
   id: "TNI_AU_PNS",
-  kategori: "PNS",
+  kategori: "PNS TNI AU",
   jenisPersonil: "PNS",
   badge: "ASN",
   peserta: 3575,
@@ -203,9 +208,9 @@ const SUB_TNI_AU_PNS = {
 
 const SUB_TNI_AU_PPPK = {
   id: "TNI_AU_PPPK",
-  kategori: "PPPK",
+  kategori: "PPPK TNI AU",
   jenisPersonil: "PPPK",
-  badge: "Non-pensiun",
+  badge: "PPK / Non-pensiun",
   peserta: 1618,
   tht: null,
   pensiun: null,
@@ -223,7 +228,7 @@ const SUB_TNI_AU_PPPK = {
 // --- MABES TNI ---
 const SUB_MABES_TNI_PRAJURIT = {
   id: "MABES_TNI_PRAJURIT",
-  kategori: "Prajurit",
+  kategori: "Prajurit Mabes TNI",
   jenisPersonil: "Prajurit",
   badge: "Militer",
   peserta: 15420,
@@ -242,7 +247,7 @@ const SUB_MABES_TNI_PRAJURIT = {
 
 const SUB_MABES_TNI_PNS = {
   id: "MABES_TNI_PNS",
-  kategori: "PNS",
+  kategori: "PNS Mabes TNI",
   jenisPersonil: "PNS",
   badge: "ASN",
   peserta: 2960,
@@ -261,9 +266,9 @@ const SUB_MABES_TNI_PNS = {
 
 const SUB_MABES_TNI_PPPK = {
   id: "MABES_TNI_PPPK",
-  kategori: "PPPK",
+  kategori: "PPPK Mabes TNI",
   jenisPersonil: "PPPK",
-  badge: "Non-pensiun",
+  badge: "PPK / Non-pensiun",
   peserta: 640,
   tht: null,
   pensiun: null,
@@ -281,7 +286,7 @@ const SUB_MABES_TNI_PPPK = {
 // --- KEMHAN ---
 const SUB_KEMHAN_PNS = {
   id: "KEMHAN_PNS",
-  kategori: "PNS",
+  kategori: "PNS Kemhan",
   jenisPersonil: "PNS",
   badge: "ASN",
   peserta: 14233,
@@ -300,9 +305,9 @@ const SUB_KEMHAN_PNS = {
 
 const SUB_KEMHAN_PPPK = {
   id: "KEMHAN_PPPK",
-  kategori: "PPPK",
+  kategori: "PPPK Kemhan",
   jenisPersonil: "PPPK",
-  badge: "Non-pensiun",
+  badge: "PPK / Non-pensiun",
   peserta: 7732,
   tht: null,
   pensiun: null,
@@ -317,12 +322,12 @@ const SUB_KEMHAN_PPPK = {
   ]
 };
 
-// --- POLRI ---
+// --- POLRI (KEPOLISIAN REPUBLIK INDONESIA) ---
 const SUB_POLRI_ANGGOTA = {
   id: "POLRI_ANGGOTA_ROW",
-  kategori: "Anggota Polri",
-  jenisPersonil: "Prajurit", // Polri categorized with Militer / Prajurit filter
-  badge: "Polri",
+  kategori: "Prajurit / Anggota Polri",
+  jenisPersonil: "Prajurit",
+  badge: "Prajurit Polri",
   peserta: 458120,
   tht: 63044800000,
   pensiun: 92142400000,
@@ -330,18 +335,19 @@ const SUB_POLRI_ANGGOTA = {
   jkm: 3879680000,
   total: 163722496000,
   golonganBreakdown: [
-    { gol: "TAMTAMA POLRI", peserta: 42000, gp: 126000000000, tht: 4095000000, pensiun: 5985000000, jkk: 302400000, jkm: 252000000, total: 10634400000 },
-    { gol: "BINTARA POLRI", peserta: 325000, gp: 1300000000000, tht: 42250000000, pensiun: 61750000000, jkk: 3120000000, jkm: 2600000000, total: 109720000000 },
-    { gol: "PAMA POLRI", peserta: 62000, gp: 310000000000, tht: 10075000000, pensiun: 14725000000, jkk: 744000000, jkm: 620000000, total: 26164000000 },
-    { gol: "PAMEN & PATI", peserta: 29120, gp: 203840000000, tht: 6624800000, pensiun: 9682400000, jkk: 489216000, jkm: 407680000, total: 17204096000 }
+    { gol: "TAMTAMA POLRI (Bharada s.d. Abripol)", peserta: 42000, gp: 126000000000, tht: 4095000000, pensiun: 5985000000, jkk: 302400000, jkm: 252000000, total: 10634400000 },
+    { gol: "BINTARA POLRI (Bripda s.d. Aiptu)", peserta: 325000, gp: 1300000000000, tht: 42250000000, pensiun: 61750000000, jkk: 3120000000, jkm: 2600000000, total: 109720000000 },
+    { gol: "PAMA POLRI (Ipda s.d. AKP)", peserta: 62000, gp: 310000000000, tht: 10075000000, pensiun: 14725000000, jkk: 744000000, jkm: 620000000, total: 26164000000 },
+    { gol: "PAMEN POLRI (Kompol s.d. Kombes)", peserta: 28500, gp: 196650000000, tht: 6391125000, pensiun: 9340875000, jkk: 471960000, jkm: 393300000, total: 16597260000 },
+    { gol: "PATI POLRI (Brigjen s.d. Jenderal)", peserta: 620, gp: 7190000000, tht: 233675000, pensiun: 341525000, jkk: 17256000, jkm: 14380000, total: 606836000 }
   ]
 };
 
 const SUB_POLRI_PNS = {
   id: "PNS_POLRI",
-  kategori: "PNS",
+  kategori: "ASN Polri (PNS)",
   jenisPersonil: "PNS",
-  badge: "ASN",
+  badge: "ASN Polri",
   peserta: 23416,
   tht: 3087630000,
   pensiun: 4512690000,
@@ -349,18 +355,18 @@ const SUB_POLRI_PNS = {
   jkm: 190000000,
   total: 8018320000,
   golonganBreakdown: [
-    { gol: "Golongan I", peserta: 1200, gp: 4200000000, tht: 136500000, pensiun: 199500000, jkk: 10080000, jkm: 8400000, total: 354480000 },
-    { gol: "Golongan II", peserta: 9800, gp: 39200000000, tht: 1274000000, pensiun: 1862000000, jkk: 94080000, jkm: 78400000, total: 3308480000 },
-    { gol: "Golongan III", peserta: 10100, gp: 42420000000, tht: 1378650000, pensiun: 2014950000, jkk: 101808000, jkm: 84840000, total: 3580248000 },
-    { gol: "Golongan IV", peserta: 2316, gp: 9182461538, tht: 298480000, pensiun: 436240000, jkk: 22032000, jkm: 18360000, total: 775112000 }
+    { gol: "Golongan I (Juru)", peserta: 1200, gp: 4200000000, tht: 136500000, pensiun: 199500000, jkk: 10080000, jkm: 8400000, total: 354480000 },
+    { gol: "Golongan II (Pengatur)", peserta: 9800, gp: 39200000000, tht: 1274000000, pensiun: 1862000000, jkk: 94080000, jkm: 78400000, total: 3308480000 },
+    { gol: "Golongan III (Penata)", peserta: 10100, gp: 42420000000, tht: 1378650000, pensiun: 2014950000, jkk: 101808000, jkm: 84840000, total: 3580248000 },
+    { gol: "Golongan IV (Pembina)", peserta: 2316, gp: 9182461538, tht: 298480000, pensiun: 436240000, jkk: 22032000, jkm: 18360000, total: 775112000 }
   ]
 };
 
 const SUB_POLRI_PPPK = {
   id: "PPPK_POLRI",
-  kategori: "PPPK",
+  kategori: "PPK Polri (PPPK)",
   jenisPersonil: "PPPK",
-  badge: "Non-pensiun",
+  badge: "PPK Polri",
   peserta: 6800,
   tht: null,
   pensiun: null,
@@ -368,10 +374,10 @@ const SUB_POLRI_PPPK = {
   jkm: 59000000,
   total: 129800000,
   golonganBreakdown: [
-    { gol: "Golongan IX", peserta: 2600, gp: 10400000000, tht: null, pensiun: null, jkk: 24960000, jkm: 20800000, total: 45760000 },
-    { gol: "Golongan X", peserta: 2500, gp: 11000000000, tht: null, pensiun: null, jkk: 26400000, jkm: 22000000, total: 48400000 },
-    { gol: "Golongan XI", peserta: 1200, gp: 5600000000, tht: null, pensiun: null, jkk: 13440000, jkm: 11200000, total: 24640000 },
-    { gol: "Golongan XII", peserta: 500, gp: 2500000000, tht: null, pensiun: null, jkk: 6000000, jkm: 5000000, total: 11000000 }
+    { gol: "Golongan IX (Ahli Pertama)", peserta: 2600, gp: 10400000000, tht: null, pensiun: null, jkk: 24960000, jkm: 20800000, total: 45760000 },
+    { gol: "Golongan X (Ahli Pertama)", peserta: 2500, gp: 11000000000, tht: null, pensiun: null, jkk: 26400000, jkm: 22000000, total: 48400000 },
+    { gol: "Golongan XI (Ahli Muda)", peserta: 1200, gp: 5600000000, tht: null, pensiun: null, jkk: 13440000, jkm: 11200000, total: 24640000 },
+    { gol: "Golongan XII (Ahli Madya)", peserta: 500, gp: 2500000000, tht: null, pensiun: null, jkk: 6000000, jkm: 5000000, total: 11000000 }
   ]
 };
 
@@ -391,7 +397,7 @@ const computeInstansiTotals = (baseMeta, subRows) => {
   });
   return {
     ...baseMeta,
-    unorCount: `${subRows.length} unor`,
+    unorCount: `${subRows.length} kategori`,
     peserta,
     tht,
     pensiun,
@@ -437,16 +443,18 @@ const BASE_TNI_AL = { id: "TNI_AL", name: "TNI AL" };
 const BASE_TNI_AU = { id: "TNI_AU", name: "TNI AU" };
 const BASE_MABES_TNI = { id: "MABES_TNI", name: "Mabes TNI" };
 const BASE_KEMHAN = { id: "KEMHAN", name: "Kemhan" };
-const BASE_POLRI = { id: "POLRI", name: "Kepolisian RI (POLRI)" };
+const BASE_POLRI = { id: "POLRI", name: "Kepolisian Republik Indonesia (POLRI)" };
 
 // =========================================================================
 // MASTER DATA FOR "ENTITAS PEMBINA" GROUPING
 // =========================================================================
 
 const MASTER_ENTITIES_DATA = {
+  // --- KELOMPOK TNI & KEMHAN ---
   TNI_KEMHAN: computeEntityTotals(
     {
       id: "TNI_KEMHAN",
+      kluster: "TNI_KEMHAN",
       title: "Prajurit TNI & ASN Kemhan",
       badgeInstansi: "5 instansi (AD, AL, AU, Mabes, Kemhan)"
     },
@@ -462,6 +470,7 @@ const MASTER_ENTITIES_DATA = {
   PRAJURIT_TNI: computeEntityTotals(
     {
       id: "PRAJURIT_TNI",
+      kluster: "TNI_KEMHAN",
       title: "Prajurit TNI",
       badgeInstansi: "4 matra/kotama (AD, AL, AU, Mabes)"
     },
@@ -476,6 +485,7 @@ const MASTER_ENTITIES_DATA = {
   ASN_KEMHAN: computeEntityTotals(
     {
       id: "ASN_KEMHAN",
+      kluster: "TNI_KEMHAN",
       title: "ASN Kemhan",
       badgeInstansi: "5 instansi (PNS & PPPK)"
     },
@@ -488,14 +498,64 @@ const MASTER_ENTITIES_DATA = {
     ]
   ),
 
+  // --- KELOMPOK KEPOLISIAN RI (POLRI) ---
   POLRI: computeEntityTotals(
     {
       id: "POLRI",
-      title: "POLRI & ASN Polri",
-      badgeInstansi: "1 instansi (Anggota & ASN)"
+      kluster: "POLRI",
+      title: "POLRI & ASN Polri (Semua)",
+      badgeInstansi: "Prajurit, ASN & PPK Polri"
     },
     [
       computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA, SUB_POLRI_PNS, SUB_POLRI_PPPK])
+    ]
+  ),
+
+  POLRI_PRAJURIT: computeEntityTotals(
+    {
+      id: "POLRI_PRAJURIT",
+      kluster: "POLRI",
+      title: "Prajurit / Anggota Polri",
+      badgeInstansi: "Khusus Prajurit/Anggota Polri"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA])
+    ]
+  ),
+
+  POLRI_ASN: computeEntityTotals(
+    {
+      id: "POLRI_ASN",
+      kluster: "POLRI",
+      title: "ASN Polri (PNS)",
+      badgeInstansi: "Khusus Pegawai Negeri Sipil"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_PNS])
+    ]
+  ),
+
+  POLRI_PPK: computeEntityTotals(
+    {
+      id: "POLRI_PPK",
+      kluster: "POLRI",
+      title: "PPK Polri (PPPK)",
+      badgeInstansi: "Khusus Perjanjian Kerja"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_PPPK])
+    ]
+  ),
+
+  POLRI_ASN_PPK: computeEntityTotals(
+    {
+      id: "POLRI_ASN_PPK",
+      kluster: "POLRI",
+      title: "ASN & PPK Polri",
+      badgeInstansi: "Gabungan ASN & PPK Polri"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_PNS, SUB_POLRI_PPPK])
     ]
   )
 };
@@ -579,35 +639,121 @@ const MASTER_INSTANSI_DATA = {
   INST_POLRI: computeEntityTotals(
     {
       id: "INST_POLRI",
-      title: "POLRI",
-      badgeInstansi: "Anggota & ASN"
+      title: "POLRI (Semua)",
+      badgeInstansi: "Prajurit, ASN & PPK"
     },
     [
       computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA, SUB_POLRI_PNS, SUB_POLRI_PPPK])
     ]
+  ),
+
+  INST_POLRI_PRAJURIT: computeEntityTotals(
+    {
+      id: "INST_POLRI_PRAJURIT",
+      title: "Polri — Prajurit",
+      badgeInstansi: "Khusus Anggota Polri"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_ANGGOTA])
+    ]
+  ),
+
+  INST_POLRI_ASN: computeEntityTotals(
+    {
+      id: "INST_POLRI_ASN",
+      title: "Polri — ASN",
+      badgeInstansi: "Khusus PNS Polri"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_PNS])
+    ]
+  ),
+
+  INST_POLRI_PPK: computeEntityTotals(
+    {
+      id: "INST_POLRI_PPK",
+      title: "Polri — PPK",
+      badgeInstansi: "Khusus PPPK Polri"
+    },
+    [
+      computeInstansiTotals(BASE_POLRI, [SUB_POLRI_PPPK])
+    ]
   )
 };
 
+// =========================================================================
+// PRESET SALARY DATA FOR INTERACTIVE CALCULATOR (SIMULASI)
+// =========================================================================
+
+const POLRI_PRESETS = {
+  PRAJURIT: [
+    { label: "Bharada (Bhayangkara Dua)", gp: 1775000, gol: "TAMTAMA" },
+    { label: "Bharatu (Bhayangkara Satu)", gp: 1830500, gol: "TAMTAMA" },
+    { label: "Bharaka (Bhayangkara Kepala)", gp: 1887800, gol: "TAMTAMA" },
+    { label: "Abripda (Ajun Brigadir Polisi Dua)", gp: 1946800, gol: "TAMTAMA" },
+    { label: "Abriptu (Ajun Brigadir Polisi Satu)", gp: 2007700, gol: "TAMTAMA" },
+    { label: "Abripol (Ajun Brigadir Polisi)", gp: 2070500, gol: "TAMTAMA" },
+    { label: "Bripda (Brigadir Polisi Dua)", gp: 2272100, gol: "BINTARA" },
+    { label: "Briptu (Brigadir Polisi Satu)", gp: 2343100, gol: "BINTARA" },
+    { label: "Brigpol (Brigadir Polisi)", gp: 2416400, gol: "BINTARA" },
+    { label: "Bripka (Brigadir Polisi Kepala)", gp: 2492000, gol: "BINTARA" },
+    { label: "Aipda (Ajun Inspektur Polisi Dua)", gp: 2570000, gol: "BINTARA" },
+    { label: "Aiptu (Ajun Inspektur Polisi Satu)", gp: 2650300, gol: "BINTARA" },
+    { label: "Ipda (Inspektur Polisi Dua)", gp: 2954200, gol: "PAMA" },
+    { label: "Iptu (Inspektur Polisi Satu)", gp: 3046600, gol: "PAMA" },
+    { label: "AKP (Ajun Komisaris Polisi)", gp: 3141900, gol: "PAMA" },
+    { label: "Kompol (Komisaris Polisi)", gp: 3240200, gol: "PAMEN" },
+    { label: "AKBP (Ajun Komisaris Besar Polisi)", gp: 3341500, gol: "PAMEN" },
+    { label: "Kombes Pol (Komisaris Besar Polisi)", gp: 3446000, gol: "PAMEN" },
+    { label: "Brigjen Pol (Brigadir Jenderal Polisi)", gp: 3553800, gol: "PATI" },
+    { label: "Irjen Pol (Inspektur Jenderal Polisi)", gp: 3665000, gol: "PATI" },
+    { label: "Komjen Pol (Komisaris Jenderal Polisi)", gp: 5485800, gol: "PATI" },
+    { label: "Jenderal Polisi", gp: 6405500, gol: "PATI" },
+  ],
+  PNS: [
+    { label: "Golongan I/a (Juru Muda)", gp: 1685700, gol: "GOL I" },
+    { label: "Golongan I/d (Juru Tingkat I)", gp: 2901400, gol: "GOL I" },
+    { label: "Golongan II/a (Pengatur Muda)", gp: 2184000, gol: "GOL II" },
+    { label: "Golongan II/d (Pengatur Tingkat I)", gp: 4125600, gol: "GOL II" },
+    { label: "Golongan III/a (Penata Muda)", gp: 2785700, gol: "GOL III" },
+    { label: "Golongan III/d (Penata Tingkat I)", gp: 5180700, gol: "GOL III" },
+    { label: "Golongan IV/a (Pembina)", gp: 3287800, gol: "GOL IV" },
+    { label: "Golongan IV/e (Pembina Utama)", gp: 6373200, gol: "GOL IV" },
+  ],
+  PPPK: [
+    { label: "Golongan IX (Ahli Pertama)", gp: 3203600, gol: "PPK IX" },
+    { label: "Golongan X (Ahli Pertama)", gp: 3339100, gol: "PPK X" },
+    { label: "Golongan XI (Ahli Muda)", gp: 3480300, gol: "PPK XI" },
+    { label: "Golongan XII (Ahli Madya)", gp: 3627500, gol: "PPK XII" },
+  ]
+};
+
 export const KalkulatorIuran = () => {
+  // Main view mode: "rekap" (Rekapitulasi Iuran & Monitoring) | "simulasi" (Kalkulator Simulasi Interaktif)
+  const [activeTab, setActiveTab] = useState("rekap");
+
   // Navigation / Date states
   const [currentMonthIdx, setCurrentMonthIdx] = useState(9); // 9 = Oktober
   const [currentYear, setCurrentYear] = useState(2026);
-  const [statusPeriode, setStatusPeriode] = useState("Rekonsiliasi"); // "Rekonsiliasi" | "Telah Difinalisasi"
+  const [statusPeriode, setStatusPeriode] = useState("Rekonsiliasi");
 
   // Grouping state: "entitas" (Entitas pembina) | "instansi" (Instansi)
   const [kelompokkanPer, setKelompokkanPer] = useState("entitas");
 
-  // Selected Entity Card
-  const [selectedEntityId, setSelectedEntityId] = useState("TNI_KEMHAN");
-  const [selectedInstansiId, setSelectedInstansiId] = useState("INST_ALL");
+  // Kluster filter for "entitas": "all" | "tni" | "polri"
+  const [klusterFilter, setKlusterFilter] = useState("all");
 
-  // Filter Pill: "Semua" | "Prajurit" | "PNS" | "PPPK"
+  // Selected Entity Card
+  const [selectedEntityId, setSelectedEntityId] = useState("POLRI");
+  const [selectedInstansiId, setSelectedInstansiId] = useState("INST_POLRI");
+
+  // Filter Pill: "Semua" | "Prajurit / Anggota" | "PNS (ASN)" | "PPK (PPPK)"
   const [filterPill, setFilterPill] = useState("Semua");
 
   // Search Input
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Accordion Expand/Collapse state (all open by default)
+  // Accordion Expand/Collapse state
   const [expandedRows, setExpandedRows] = useState({
     TNI_AD: true,
     TNI_AL: true,
@@ -625,6 +771,19 @@ export const KalkulatorIuran = () => {
 
   // Modal Preview Export
   const [preview, setPreview] = useState(null);
+
+  // =========================================================================
+  // STATE UNTUK SIMULASI KALKULATOR INTERAKTIF
+  // =========================================================================
+  const [simInstitusi, setSimInstitusi] = useState("POLRI"); // "POLRI" | "TNI"
+  const [simKategori, setSimKategori] = useState("Prajurit"); // "Prajurit" | "PNS" | "PPPK"
+  const [simPresetIdx, setSimPresetIdx] = useState(6); // Default: Bripda
+  const [simGajiPokok, setSimGajiPokok] = useState(2272100);
+  const [simStatusKawin, setSimStatusKawin] = useState(true); // Tunj. Istri/Suami 10%
+  const [simJmlAnak, setSimJmlAnak] = useState(1); // Tunj. Anak 2% per anak (max 2)
+  const [simJmlPersonil, setSimJmlPersonil] = useState(1); // 1 = perorangan, > 1 = simulasi satker
+  const [simNamaSatker, setSimNamaSatker] = useState("Polres Metro Jakarta Selatan");
+  const [simCopied, setSimCopied] = useState(false);
 
   // Current Period Label
   const periodeLabel = `${BULAN_LIST[currentMonthIdx]} ${currentYear}`;
@@ -661,7 +820,7 @@ export const KalkulatorIuran = () => {
     if (kelompokkanPer === "instansi") {
       return MASTER_INSTANSI_DATA[selectedInstansiId] || MASTER_INSTANSI_DATA.INST_ALL;
     }
-    return MASTER_ENTITIES_DATA[selectedEntityId] || MASTER_ENTITIES_DATA.TNI_KEMHAN;
+    return MASTER_ENTITIES_DATA[selectedEntityId] || MASTER_ENTITIES_DATA.POLRI;
   }, [kelompokkanPer, selectedEntityId, selectedInstansiId]);
 
   // Check if all rows are currently expanded
@@ -681,25 +840,31 @@ export const KalkulatorIuran = () => {
     setExpandedRows(updated);
   };
 
-  // Filtered rows based on Pill filter (Prajurit / PNS / PPPK) & Search Query
+  // Filtered rows based on Pill filter & Search Query
   const filteredInstansiList = useMemo(() => {
     return activeEntity.instansiList.map(inst => {
       let filteredSubRows = inst.subRows;
 
-      if (filterPill === "Prajurit") {
+      if (filterPill === "Prajurit / Anggota" || filterPill === "Prajurit") {
         filteredSubRows = filteredSubRows.filter(sr =>
           sr.jenisPersonil === "Prajurit" ||
-          sr.kategori === "Prajurit" ||
-          sr.kategori?.includes("Anggota") ||
-          sr.kategori?.includes("Militer")
+          sr.kategori?.toLowerCase().includes("prajurit") ||
+          sr.kategori?.toLowerCase().includes("anggota") ||
+          sr.badge?.toLowerCase().includes("polri") ||
+          sr.badge?.toLowerCase().includes("militer")
         );
-      } else if (filterPill === "PNS") {
+      } else if (filterPill === "PNS (ASN)" || filterPill === "PNS") {
         filteredSubRows = filteredSubRows.filter(sr =>
-          sr.jenisPersonil === "PNS" || sr.kategori === "PNS"
+          sr.jenisPersonil === "PNS" ||
+          sr.kategori?.toLowerCase().includes("pns") ||
+          sr.badge?.toLowerCase().includes("asn")
         );
-      } else if (filterPill === "PPPK") {
+      } else if (filterPill === "PPK (PPPK)" || filterPill === "PPPK") {
         filteredSubRows = filteredSubRows.filter(sr =>
-          sr.jenisPersonil === "PPPK" || sr.kategori === "PPPK"
+          sr.jenisPersonil === "PPPK" ||
+          sr.kategori?.toLowerCase().includes("ppk") ||
+          sr.kategori?.toLowerCase().includes("pppk") ||
+          sr.badge?.toLowerCase().includes("non-pensiun")
         );
       }
 
@@ -736,7 +901,7 @@ export const KalkulatorIuran = () => {
 
       return {
         ...inst,
-        unorCount: `${filteredSubRows.length} unor`,
+        unorCount: `${filteredSubRows.length} kategori`,
         peserta: pPeserta,
         tht: pTht,
         pensiun: pPensiun,
@@ -869,22 +1034,25 @@ export const KalkulatorIuran = () => {
     let color = COLORS.gray700;
     let border = "#E2E8F0";
 
-    if (kategori === "Prajurit" || badge === "Militer") {
-      bg = "#ECFDF5";
-      color = "#047857";
-      border = "#A7F3D0";
-    } else if (kategori === "PNS" || badge === "ASN") {
-      bg = "#EFF6FF";
-      color = "#1D4ED8";
-      border = "#BFDBFE";
-    } else if (kategori === "PPPK" || badge === "Non-pensiun") {
-      bg = "#FEF3C7";
-      color = "#B45309";
-      border = "#FDE68A";
-    } else if (kategori?.includes("Polri") || badge === "Polri") {
+    const bLower = (badge || "").toLowerCase();
+    const kLower = (kategori || "").toLowerCase();
+
+    if (bLower.includes("polri") || kLower.includes("polri")) {
       bg = "#EEF2FF";
       color = "#4338CA";
       border = "#C7D2FE";
+    } else if (kLower.includes("prajurit") || bLower.includes("militer")) {
+      bg = "#ECFDF5";
+      color = "#047857";
+      border = "#A7F3D0";
+    } else if (kLower.includes("pns") || bLower.includes("asn")) {
+      bg = "#EFF6FF";
+      color = "#1D4ED8";
+      border = "#BFDBFE";
+    } else if (kLower.includes("ppk") || kLower.includes("pppk") || bLower.includes("non-pensiun")) {
+      bg = "#FEF3C7";
+      color = "#B45309";
+      border = "#FDE68A";
     }
 
     return (
@@ -910,10 +1078,139 @@ export const KalkulatorIuran = () => {
     if (kelompokkanPer === "instansi") {
       return Object.values(MASTER_INSTANSI_DATA);
     }
-    return Object.values(MASTER_ENTITIES_DATA);
-  }, [kelompokkanPer]);
+    const all = Object.values(MASTER_ENTITIES_DATA);
+    if (klusterFilter === "tni") return all.filter(c => c.kluster === "TNI_KEMHAN");
+    if (klusterFilter === "polri") return all.filter(c => c.kluster === "POLRI");
+    return all;
+  }, [kelompokkanPer, klusterFilter]);
 
   const activeCardId = kelompokkanPer === "instansi" ? selectedInstansiId : selectedEntityId;
+
+  // =========================================================================
+  // SIMULATION CALCULATION LOGIC
+  // =========================================================================
+  const simCurrentPresets = useMemo(() => {
+    if (simKategori === "Prajurit") return POLRI_PRESETS.PRAJURIT;
+    if (simKategori === "PNS") return POLRI_PRESETS.PNS;
+    return POLRI_PRESETS.PPPK;
+  }, [simKategori]);
+
+  const handlePresetChange = (idx) => {
+    setSimPresetIdx(idx);
+    const item = simCurrentPresets[idx];
+    if (item) {
+      setSimGajiPokok(item.gp);
+    }
+  };
+
+  const simResult = useMemo(() => {
+    const gp = Number(simGajiPokok) || 0;
+    const tunjIstri = simStatusKawin ? gp * 0.10 : 0;
+    const tunjAnak = gp * 0.02 * Math.min(2, Math.max(0, simJmlAnak));
+    const penghasilanTetap = gp + tunjIstri + tunjAnak; // Dasar Pengenaan THT & Pensiun
+    const dasarJKK_JKM = gp; // Dasar Pengenaan JKK & JKM adalah Gaji Pokok
+
+    const isPPPK = simKategori === "PPPK";
+
+    // Rate perhitungan sesuai PP 102/2015 jo PP 54/2020:
+    // THT: 3,25% dari (GP + Tunj. Keluarga)
+    // Pensiun: 4,75% dari (GP + Tunj. Keluarga)
+    // JKK: 0,24% dari GP (APBN)
+    // JKM: 0,20% dari GP (APBN)
+    // PPPK: THT = 0, Pensiun = 0 (hanya JKK & JKM)
+    const thtPerPerson = isPPPK ? 0 : Math.round(penghasilanTetap * 0.0325);
+    const pensiunPerPerson = isPPPK ? 0 : Math.round(penghasilanTetap * 0.0475);
+    const jkkPerPerson = Math.round(dasarJKK_JKM * 0.0024);
+    const jkmPerPerson = Math.round(dasarJKK_JKM * 0.0020);
+
+    const iuranPesertaPerPerson = thtPerPerson + pensiunPerPerson;
+    const iuranNegaraPerPerson = jkkPerPerson + jkmPerPerson;
+    const totalIuranPerPerson = iuranPesertaPerPerson + iuranNegaraPerPerson;
+
+    const n = Math.max(1, Number(simJmlPersonil) || 1);
+
+    return {
+      gp,
+      tunjIstri,
+      tunjAnak,
+      penghasilanTetap,
+      dasarJKK_JKM,
+      thtPerPerson,
+      pensiunPerPerson,
+      jkkPerPerson,
+      jkmPerPerson,
+      iuranPesertaPerPerson,
+      iuranNegaraPerPerson,
+      totalIuranPerPerson,
+      n,
+      thtTotal: thtPerPerson * n,
+      pensiunTotal: pensiunPerPerson * n,
+      jkkTotal: jkkPerPerson * n,
+      jkmTotal: jkmPerPerson * n,
+      iuranPesertaTotal: iuranPesertaPerPerson * n,
+      iuranNegaraTotal: iuranNegaraPerPerson * n,
+      totalKeseluruhan: totalIuranPerPerson * n,
+      tahunan: totalIuranPerPerson * n * 12
+    };
+  }, [simGajiPokok, simStatusKawin, simJmlAnak, simKategori, simJmlPersonil]);
+
+  const handleCopySimulasi = () => {
+    const text = `=== SIMULASI IURAN ASABRI ===
+Institusi: ${simInstitusi}
+Kategori: ${simKategori} ${simInstitusi === "POLRI" ? "Polri" : ""}
+Pangkat / Golongan: ${simCurrentPresets[simPresetIdx]?.label || "Kustom"}
+Jumlah Personil: ${simResult.n} Orang
+Gaji Pokok: ${fmtRupiah(simResult.gp)}
+Tunjangan Keluarga: ${fmtRupiah(simResult.tunjIstri + simResult.tunjAnak)}
+
+[POTONGAN PESERTA (8,00%)]
+- THT (3,25%): ${fmtRupiah(simResult.thtTotal)}
+- Pensiun (4,75%): ${fmtRupiah(simResult.pensiunTotal)}
+Total Potongan Peserta: ${fmtRupiah(simResult.iuranPesertaTotal)}
+
+[IURAN DITANGGUNG NEGARA/APBN (0,44%)]
+- JKK (0,24%): ${fmtRupiah(simResult.jkkTotal)}
+- JKM (0,20%): ${fmtRupiah(simResult.jkmTotal)}
+Total Iuran Negara: ${fmtRupiah(simResult.iuranNegaraTotal)}
+
+TOTAL IURAN BULANAN: ${fmtRupiah(simResult.totalKeseluruhan)}
+PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
+
+    navigator.clipboard.writeText(text);
+    setSimCopied(true);
+    setTimeout(() => setSimCopied(false), 2500);
+  };
+
+  const handleExportSimulasi = () => {
+    const columns = ["Komponen Iuran", "Dasar Perhitungan", "Tarif Regulasi", "Nominal Per Personil", `Total (${simResult.n} Personil)`];
+    const rows = [
+      ["THT (Tabungan Hari Tua)", "Gaji Pokok + Tunj. Keluarga", simKategori === "PPPK" ? "0% (Non-pensiun)" : "3,25%", fmtRupiah(simResult.thtPerPerson), fmtRupiah(simResult.thtTotal)],
+      ["Jaminan Pensiun", "Gaji Pokok + Tunj. Keluarga", simKategori === "PPPK" ? "0% (Non-pensiun)" : "4,75%", fmtRupiah(simResult.pensiunPerPerson), fmtRupiah(simResult.pensiunTotal)],
+      ["JKK (Kecelakaan Kerja)", "Gaji Pokok", "0,24% (APBN)", fmtRupiah(simResult.jkkPerPerson), fmtRupiah(simResult.jkkTotal)],
+      ["JKM (Kematian)", "Gaji Pokok", "0,20% (APBN)", fmtRupiah(simResult.jkmPerPerson), fmtRupiah(simResult.jkmTotal)]
+    ];
+    const totalRow = [
+      { text: "TOTAL IURAN BULANAN", colSpan: 3, align: "left" },
+      "",
+      "",
+      fmtRupiah(simResult.totalIuranPerPerson),
+      fmtRupiah(simResult.totalKeseluruhan)
+    ];
+
+    setPreview({
+      title: `Hasil Simulasi Kalkulator Iuran — ${simInstitusi} (${simKategori})`,
+      subtitle: `Pangkat/Golongan: ${simCurrentPresets[simPresetIdx]?.label || "Kustom"} • Satker: ${simNamaSatker}`,
+      type: "table",
+      fileName: `Simulasi_Iuran_${simInstitusi}_${simKategori}.xlsx`,
+      content: {
+        columns,
+        alignments: ["left", "left", "center", "right", "right"],
+        rows,
+        totalRow,
+        totalRows: rows.length
+      }
+    });
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: "inherit" }}>
@@ -928,7 +1225,9 @@ export const KalkulatorIuran = () => {
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: COLORS.gray500, marginBottom: 8 }}>
           <span style={{ cursor: "pointer", color: COLORS.gray600, fontWeight: 500 }}>Perhitungan Iuran</span>
           <span style={{ color: COLORS.gray400 }}>/</span>
-          <span style={{ color: COLORS.gray800, fontWeight: 600 }}>{periodeLabel}</span>
+          <span style={{ color: COLORS.gray800, fontWeight: 600 }}>
+            {activeTab === "rekap" ? `Rekapitulasi ${periodeLabel}` : "Kalkulator & Simulasi Iuran"}
+          </span>
         </div>
 
         {/* Title, Month Selector & Action Buttons Row */}
@@ -1020,21 +1319,78 @@ export const KalkulatorIuran = () => {
             </div>
           </div>
 
-          {/* Right: Action Buttons */}
+          {/* Right: Tab Mode Switcher & Export Buttons */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* View Mode Toggle: Rekapitulasi vs Simulasi */}
+            <div
+              style={{
+                background: "#E2E8F0",
+                padding: 3,
+                borderRadius: 8,
+                display: "inline-flex",
+                gap: 2
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setActiveTab("rekap")}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 14px",
+                  borderRadius: 6,
+                  border: "none",
+                  fontSize: 12.5,
+                  fontWeight: activeTab === "rekap" ? 700 : 500,
+                  background: activeTab === "rekap" ? COLORS.white : "transparent",
+                  color: activeTab === "rekap" ? COLORS.gray900 : COLORS.gray600,
+                  boxShadow: activeTab === "rekap" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease"
+                }}
+              >
+                <Layers size={14} color={activeTab === "rekap" ? "#2563EB" : COLORS.gray500} />
+                Rekapitulasi Iuran
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("simulasi")}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 14px",
+                  borderRadius: 6,
+                  border: "none",
+                  fontSize: 12.5,
+                  fontWeight: activeTab === "simulasi" ? 700 : 500,
+                  background: activeTab === "simulasi" ? COLORS.white : "transparent",
+                  color: activeTab === "simulasi" ? COLORS.gray900 : COLORS.gray600,
+                  boxShadow: activeTab === "simulasi" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease"
+                }}
+              >
+                <Calculator size={14} color={activeTab === "simulasi" ? "#059669" : COLORS.gray500} />
+                Simulasi Hitung (Polri &amp; TNI)
+              </button>
+            </div>
+
             {/* Ekspor Excel */}
             <button
-              onClick={() => handleExport("excel")}
+              onClick={() => (activeTab === "rekap" ? handleExport("excel") : handleExportSimulasi())}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "8px 16px",
+                padding: "8px 14px",
                 background: COLORS.white,
                 border: `1px solid ${COLORS.gray300}`,
                 borderRadius: 8,
                 color: COLORS.gray700,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: 600,
                 cursor: "pointer",
                 boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
@@ -1045,747 +1401,1334 @@ export const KalkulatorIuran = () => {
               Ekspor Excel
             </button>
 
-            {/* Ekspor PDF */}
-            <button
-              onClick={() => handleExport("pdf")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 16px",
-                background: COLORS.white,
-                border: `1px solid ${COLORS.gray300}`,
-                borderRadius: 8,
-                color: COLORS.gray700,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
-                transition: "all 0.15s ease"
-              }}
-            >
-              <FileText size={15} color="#DC2626" />
-              Ekspor PDF
-            </button>
-
-            {/* Finalisasi periode */}
-            <button
-              onClick={() => setShowFinalizeModal(true)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 18px",
-                background: statusPeriode === "Telah Difinalisasi" ? "#047857" : "#1E293B",
-                border: "none",
-                borderRadius: 8,
-                color: COLORS.white,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "0 2px 4px rgba(15, 23, 42, 0.15)",
-                transition: "all 0.15s ease"
-              }}
-            >
-              <Lock size={14} />
-              {statusPeriode === "Telah Difinalisasi" ? "Periode Terkunci" : "Finalisasi periode"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          GROUPING TOGGLE ROW ("Kelompokkan per")
-         ========================================================================= */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: COLORS.gray600 }}>Kelompokkan per</span>
-
-        <div
-          style={{
-            background: "#F1F5F9",
-            padding: 3,
-            borderRadius: 8,
-            display: "inline-flex",
-            gap: 2,
-            border: "1px solid #E2E8F0"
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setKelompokkanPer("entitas")}
-            style={{
-              padding: "5px 14px",
-              borderRadius: 6,
-              border: "none",
-              fontSize: 13,
-              fontWeight: kelompokkanPer === "entitas" ? 600 : 500,
-              background: kelompokkanPer === "entitas" ? COLORS.white : "transparent",
-              color: kelompokkanPer === "entitas" ? COLORS.gray900 : COLORS.gray500,
-              boxShadow: kelompokkanPer === "entitas" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
-              cursor: "pointer",
-              transition: "all 0.15s ease"
-            }}
-          >
-            Entitas pembina
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setKelompokkanPer("instansi")}
-            style={{
-              padding: "5px 14px",
-              borderRadius: 6,
-              border: "none",
-              fontSize: 13,
-              fontWeight: kelompokkanPer === "instansi" ? 600 : 500,
-              background: kelompokkanPer === "instansi" ? COLORS.white : "transparent",
-              color: kelompokkanPer === "instansi" ? COLORS.gray900 : COLORS.gray500,
-              boxShadow: kelompokkanPer === "instansi" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
-              cursor: "pointer",
-              transition: "all 0.15s ease"
-            }}
-          >
-            Instansi
-          </button>
-        </div>
-
-        <span style={{ fontSize: 12.5, color: COLORS.gray500 }}>
-          {kelompokkanPer === "entitas"
-            ? "Mencakup Prajurit TNI & ASN Kemhan, Prajurit TNI, ASN Kemhan, serta POLRI"
-            : "Rincian langsung per induk matra (TNI AD, TNI AL, TNI AU, Mabes TNI, Kemhan, POLRI)"}
-        </span>
-      </div>
-
-      {/* =========================================================================
-          HORIZONTAL ROW OF ENTITY / INSTANSI CARDS
-         ========================================================================= */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: kelompokkanPer === "instansi"
-            ? "repeat(auto-fit, minmax(180px, 1fr))"
-            : "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 14
-        }}
-      >
-        {currentCards.map((ent) => {
-          const isSelected = activeCardId === ent.id;
-
-          return (
-            <div
-              key={ent.id}
-              onClick={() => {
-                if (kelompokkanPer === "instansi") {
-                  setSelectedInstansiId(ent.id);
-                } else {
-                  setSelectedEntityId(ent.id);
-                }
-              }}
-              style={{
-                borderRadius: 12,
-                padding: "16px 20px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                background: isSelected ? "#1E293B" : COLORS.white,
-                color: isSelected ? COLORS.white : COLORS.gray900,
-                border: isSelected ? "1px solid #1E293B" : `1px solid ${COLORS.gray200}`,
-                boxShadow: isSelected
-                  ? "0 4px 14px rgba(15, 23, 42, 0.15)"
-                  : "0 1px 3px rgba(0,0,0,0.02)"
-              }}
-            >
-              {/* Top Row: Entity Name & Instansi Count Badge */}
-              <div
+            {/* Finalisasi periode (hanya di rekap) */}
+            {activeTab === "rekap" && (
+              <button
+                onClick={() => setShowFinalizeModal(true)}
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
+                  display: "inline-flex",
                   alignItems: "center",
-                  marginBottom: 10
+                  gap: 6,
+                  padding: "8px 16px",
+                  background: statusPeriode === "Telah Difinalisasi" ? "#047857" : "#1E293B",
+                  border: "none",
+                  borderRadius: 8,
+                  color: COLORS.white,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  boxShadow: "0 2px 4px rgba(15, 23, 42, 0.15)",
+                  transition: "all 0.15s ease"
                 }}
               >
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 800,
-                    color: isSelected ? COLORS.white : COLORS.gray900
-                  }}
-                >
-                  {ent.title}
-                </span>
-
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: isSelected ? "#94A3B8" : COLORS.gray500,
-                    fontWeight: 500
-                  }}
-                >
-                  {ent.badgeInstansi}
-                </span>
-              </div>
-
-              {/* Main Total Amount */}
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 800,
-                  letterSpacing: -0.3,
-                  marginBottom: 4,
-                  color: isSelected ? COLORS.white : COLORS.gray900
-                }}
-              >
-                {fmtRupiah(ent.totalIuran)}
-              </div>
-
-              {/* Peserta Count Subtext */}
-              <div
-                style={{
-                  fontSize: 12,
-                  color: isSelected ? "#94A3B8" : COLORS.gray500,
-                  fontWeight: 500
-                }}
-              >
-                {fmtNum(ent.peserta)} peserta
-              </div>
-            </div>
-          );
-        })}
+                <Lock size={14} />
+                {statusPeriode === "Telah Difinalisasi" ? "Periode Terkunci" : "Finalisasi"}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* =========================================================================
-          SUMMARY BREAKDOWN CARD (3 SECTIONS WITH PROGRESS BAR)
+          VIEW TAB 1: REKAPITULASI IURAN (TABEL LENGKAP DENGAN RINCIAN POLRI)
          ========================================================================= */}
-      <div
-        style={{
-          background: COLORS.white,
-          borderRadius: 12,
-          padding: "20px 24px",
-          border: `1px solid ${COLORS.gray200}`,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-          display: "grid",
-          gridTemplateColumns: "1.2fr 1fr 1fr",
-          gap: 28,
-          alignItems: "center"
-        }}
-      >
-        {/* Left Column: Total Iuran with Split Bar */}
-        <div>
-          <div style={{ fontSize: 12.5, fontWeight: 500, color: COLORS.gray500, marginBottom: 4 }}>
-            Total iuran {activeEntity.title}
-          </div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: "#2563EB", letterSpacing: -0.5 }}>
-            {fmtRupiah(activeEntity.totalIuran)}
-          </div>
-          {/* Split 2-color Progress Bar */}
+      {activeTab === "rekap" && (
+        <>
+          {/* GROUPING TOGGLE ROW ("Kelompokkan per") */}
           <div
             style={{
-              height: 6,
-              background: "#E2E8F0",
-              borderRadius: 9999,
-              overflow: "hidden",
               display: "flex",
-              marginTop: 10,
-              width: "90%"
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 12,
+              padding: "12px 16px",
+              background: COLORS.white,
+              borderRadius: 10,
+              border: `1px solid ${COLORS.gray200}`
             }}
           >
-            <div
-              style={{
-                width: `${activeEntity.pesertaRatio}%`,
-                background: "#2563EB",
-                height: "100%",
-                borderRadius: "9999px 0 0 9999px"
-              }}
-              title={`Iuran peserta (THT + Pensiun): ${activeEntity.pesertaRatio.toFixed(1)}%`}
-            />
-            <div
-              style={{
-                width: `${activeEntity.negaraRatio}%`,
-                background: "#F97316",
-                height: "100%",
-                borderRadius: "0 9999px 9999px 0"
-              }}
-              title={`Iuran negara (JKK + JKM): ${activeEntity.negaraRatio.toFixed(1)}%`}
-            />
-          </div>
-        </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray700 }}>
+                Kelompokkan per:
+              </span>
 
-        {/* Middle Column: Iuran Peserta (THT + Pensiun) */}
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#2563EB",
-                display: "inline-block"
-              }}
-            />
-            <span style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.gray700 }}>
-              Iuran peserta · THT + Pensiun
-            </span>
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.gray900, letterSpacing: -0.4 }}>
-            {fmtRupiah(activeEntity.iuranPeserta)}
-          </div>
-          <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
-            {activeEntity.pesertaRatio.toFixed(1)}% dari total
-          </div>
-        </div>
-
-        {/* Right Column: Iuran Negara (JKK + JKM) */}
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#F97316",
-                display: "inline-block"
-              }}
-            />
-            <span style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.gray700 }}>
-              Iuran negara · JKK + JKM
-            </span>
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.gray900, letterSpacing: -0.4 }}>
-            {fmtRupiah(activeEntity.iuranNegara)}
-          </div>
-          <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
-            {activeEntity.negaraRatio.toFixed(1)}% dari total
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          FILTER PILLS & SEARCH / TOGGLE TOOLBAR
-         ========================================================================= */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12
-        }}
-      >
-        {/* Left Filter Pills: Semua / Prajurit / PNS / PPPK */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {["Semua", "Prajurit", "PNS", "PPPK"].map((pill) => {
-            const isActive = filterPill === pill;
-            return (
-              <button
-                key={pill}
-                type="button"
-                onClick={() => setFilterPill(pill)}
+              <div
                 style={{
-                  padding: "6px 18px",
-                  borderRadius: 9999,
-                  fontSize: 13,
-                  fontWeight: isActive ? 600 : 500,
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  background: isActive ? "#0F172A" : COLORS.white,
-                  color: isActive ? COLORS.white : COLORS.gray700,
-                  border: isActive ? "1px solid #0F172A" : `1px solid ${COLORS.gray300}`,
-                  boxShadow: isActive ? "0 2px 4px rgba(15, 23, 42, 0.12)" : "none"
+                  background: "#F1F5F9",
+                  padding: 3,
+                  borderRadius: 8,
+                  display: "inline-flex",
+                  gap: 2,
+                  border: "1px solid #E2E8F0"
                 }}
               >
-                {pill}
-              </button>
-            );
-          })}
-        </div>
+                <button
+                  type="button"
+                  onClick={() => setKelompokkanPer("entitas")}
+                  style={{
+                    padding: "5px 14px",
+                    borderRadius: 6,
+                    border: "none",
+                    fontSize: 13,
+                    fontWeight: kelompokkanPer === "entitas" ? 700 : 500,
+                    background: kelompokkanPer === "entitas" ? COLORS.white : "transparent",
+                    color: kelompokkanPer === "entitas" ? COLORS.gray900 : COLORS.gray500,
+                    boxShadow: kelompokkanPer === "entitas" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  Entitas pembina
+                </button>
 
-        {/* Right: Search Box & Tutup/Buka Semua Button */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Search Input */}
-          <div style={{ position: "relative", width: 260 }}>
-            <Search
-              size={15}
-              color={COLORS.gray400}
-              style={{ position: "absolute", left: 10, top: 10 }}
-            />
-            <input
-              type="text"
-              placeholder="Cari instansi, prajurit, PNS..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "7px 12px 7px 32px",
-                borderRadius: 8,
-                border: `1px solid ${COLORS.gray200}`,
-                fontSize: 12.5,
-                background: COLORS.white,
-                outline: "none",
-                color: COLORS.gray800,
-                boxSizing: "border-box"
-              }}
-            />
+                <button
+                  type="button"
+                  onClick={() => setKelompokkanPer("instansi")}
+                  style={{
+                    padding: "5px 14px",
+                    borderRadius: 6,
+                    border: "none",
+                    fontSize: 13,
+                    fontWeight: kelompokkanPer === "instansi" ? 700 : 500,
+                    background: kelompokkanPer === "instansi" ? COLORS.white : "transparent",
+                    color: kelompokkanPer === "instansi" ? COLORS.gray900 : COLORS.gray500,
+                    boxShadow: kelompokkanPer === "instansi" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  Instansi Matra / Satker
+                </button>
+              </div>
+
+              {/* Sub-filter Kluster jika Entitas dipilih */}
+              {kelompokkanPer === "entitas" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8 }}>
+                  <span style={{ fontSize: 12, color: COLORS.gray500 }}>Filter Kluster:</span>
+                  {[
+                    { id: "all", label: "Semua (8)" },
+                    { id: "polri", label: "Kepolisian RI / POLRI (5)" },
+                    { id: "tni", label: "TNI & Kemhan (3)" },
+                  ].map(btn => (
+                    <button
+                      key={btn.id}
+                      type="button"
+                      onClick={() => setKlusterFilter(btn.id)}
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: 6,
+                        border: klusterFilter === btn.id ? "1px solid #3B82F6" : `1px solid ${COLORS.gray200}`,
+                        background: klusterFilter === btn.id ? "#EFF6FF" : COLORS.white,
+                        color: klusterFilter === btn.id ? "#1D4ED8" : COLORS.gray600,
+                        fontSize: 12,
+                        fontWeight: klusterFilter === btn.id ? 700 : 500,
+                        cursor: "pointer"
+                      }}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <span style={{ fontSize: 12, color: COLORS.gray500 }}>
+              {kelompokkanPer === "entitas"
+                ? "Menampilkan entitas pembina Prajurit TNI, ASN Kemhan, serta Kluster POLRI (Prajurit, ASN, dan PPK)"
+                : "Rincian langsung per induk instansi (TNI AD, AL, AU, Mabes TNI, Kemhan, dan POLRI)"}
+            </span>
           </div>
 
-          {/* Tutup / Buka Semua Button */}
-          <button
-            type="button"
-            onClick={handleToggleAll}
+          {/* HORIZONTAL ROW OF ENTITY / INSTANSI CARDS */}
+          <div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  kelompokkanPer === "instansi"
+                    ? "repeat(auto-fit, minmax(170px, 1fr))"
+                    : "repeat(auto-fit, minmax(225px, 1fr))",
+                gap: 12
+              }}
+            >
+              {currentCards.map((ent) => {
+                const isSelected = activeCardId === ent.id;
+                const isPolri = ent.id.includes("POLRI");
+
+                return (
+                  <div
+                    key={ent.id}
+                    onClick={() => {
+                      if (kelompokkanPer === "instansi") {
+                        setSelectedInstansiId(ent.id);
+                      } else {
+                        setSelectedEntityId(ent.id);
+                      }
+                    }}
+                    style={{
+                      borderRadius: 12,
+                      padding: "14px 16px",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      background: isSelected ? (isPolri ? "#1E1B4B" : "#1E293B") : COLORS.white,
+                      color: isSelected ? COLORS.white : COLORS.gray900,
+                      border: isSelected
+                        ? isPolri
+                          ? "1px solid #4338CA"
+                          : "1px solid #1E293B"
+                        : `1px solid ${isPolri ? "#E0E7FF" : COLORS.gray200}`,
+                      boxShadow: isSelected
+                        ? "0 4px 14px rgba(15, 23, 42, 0.15)"
+                        : "0 1px 3px rgba(0,0,0,0.02)",
+                      position: "relative",
+                      overflow: "hidden"
+                    }}
+                  >
+                    {/* Top Row: Entity Name & Instansi Count Badge */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: 8,
+                        gap: 6
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 13.5,
+                          fontWeight: 800,
+                          color: isSelected ? COLORS.white : isPolri ? "#3730A3" : COLORS.gray900,
+                          lineHeight: 1.3
+                        }}
+                      >
+                        {ent.title}
+                      </span>
+
+                      <span
+                        style={{
+                          fontSize: 10.5,
+                          color: isSelected ? "#C7D2FE" : isPolri ? "#4338CA" : COLORS.gray500,
+                          fontWeight: 600,
+                          background: isSelected ? "rgba(255,255,255,0.12)" : isPolri ? "#EEF2FF" : "#F1F5F9",
+                          padding: "2px 6px",
+                          borderRadius: 4,
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        {ent.badgeInstansi}
+                      </span>
+                    </div>
+
+                    {/* Main Total Amount */}
+                    <div
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 800,
+                        letterSpacing: -0.3,
+                        marginBottom: 4,
+                        color: isSelected ? (isPolri ? "#A5B4FC" : COLORS.white) : "#0F172A"
+                      }}
+                    >
+                      {fmtRupiah(ent.totalIuran)}
+                    </div>
+
+                    {/* Peserta Count Subtext */}
+                    <div
+                      style={{
+                        fontSize: 11.5,
+                        color: isSelected ? "#94A3B8" : COLORS.gray500,
+                        fontWeight: 500,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}
+                    >
+                      <span>{fmtNum(ent.peserta)} peserta</span>
+                      {isPolri && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: isSelected ? "#FCD34D" : "#4338CA"
+                          }}
+                        >
+                          POLRI
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SUMMARY BREAKDOWN CARD (3 SECTIONS WITH PROGRESS BAR) */}
+          <div
             style={{
-              padding: "7px 14px",
-              borderRadius: 8,
-              border: `1px solid ${COLORS.gray300}`,
               background: COLORS.white,
-              color: COLORS.gray700,
-              fontSize: 12.5,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.02)"
+              borderRadius: 12,
+              padding: "20px 24px",
+              border: `1px solid ${COLORS.gray200}`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+              display: "grid",
+              gridTemplateColumns: "1.2fr 1fr 1fr",
+              gap: 28,
+              alignItems: "center"
             }}
           >
-            {areAllExpanded ? "Tutup semua" : "Buka semua"}
-          </button>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          GROUPED MULTI-HEADER TABLE
-         ========================================================================= */}
-      <div
-        style={{
-          background: COLORS.white,
-          borderRadius: 12,
-          border: `1px solid ${COLORS.gray200}`,
-          overflow: "hidden",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
-        }}
-      >
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            {/* Table Head with Multi-level Headers */}
-            <thead>
-              {/* Row 1: Subheader group lines for Iuran Peserta & Iuran Negara */}
-              <tr style={{ background: COLORS.white }}>
-                <th
-                  rowSpan={2}
+            {/* Left Column: Total Iuran with Split Bar */}
+            <div>
+              <div style={{ fontSize: 12.5, fontWeight: 500, color: COLORS.gray500, marginBottom: 4 }}>
+                Total iuran {activeEntity.title}
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#2563EB", letterSpacing: -0.5 }}>
+                {fmtRupiah(activeEntity.totalIuran)}
+              </div>
+              {/* Split 2-color Progress Bar */}
+              <div
+                style={{
+                  height: 6,
+                  background: "#E2E8F0",
+                  borderRadius: 9999,
+                  overflow: "hidden",
+                  display: "flex",
+                  marginTop: 10,
+                  width: "90%"
+                }}
+              >
+                <div
                   style={{
-                    padding: "16px 18px",
-                    textAlign: "left",
-                    color: COLORS.gray600,
-                    fontWeight: 600,
+                    width: `${activeEntity.pesertaRatio}%`,
+                    background: "#2563EB",
+                    height: "100%",
+                    borderRadius: "9999px 0 0 9999px"
+                  }}
+                  title={`Iuran peserta (THT + Pensiun): ${activeEntity.pesertaRatio.toFixed(1)}%`}
+                />
+                <div
+                  style={{
+                    width: `${activeEntity.negaraRatio}%`,
+                    background: "#F97316",
+                    height: "100%",
+                    borderRadius: "0 9999px 9999px 0"
+                  }}
+                  title={`Iuran negara (JKK + JKM): ${activeEntity.negaraRatio.toFixed(1)}%`}
+                />
+              </div>
+            </div>
+
+            {/* Middle Column: Iuran Peserta (THT + Pensiun) */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: "#2563EB",
+                    display: "inline-block"
+                  }}
+                />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.gray700 }}>
+                  Iuran peserta · THT + Pensiun
+                </span>
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.gray900, letterSpacing: -0.4 }}>
+                {fmtRupiah(activeEntity.iuranPeserta)}
+              </div>
+              <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
+                {activeEntity.pesertaRatio.toFixed(1)}% dari total iuran
+              </div>
+            </div>
+
+            {/* Right Column: Iuran Negara (JKK + JKM) */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: "#F97316",
+                    display: "inline-block"
+                  }}
+                />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.gray700 }}>
+                  Iuran negara · JKK + JKM
+                </span>
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.gray900, letterSpacing: -0.4 }}>
+                {fmtRupiah(activeEntity.iuranNegara)}
+              </div>
+              <div style={{ fontSize: 12, color: COLORS.gray500, marginTop: 2 }}>
+                {activeEntity.negaraRatio.toFixed(1)}% dari total iuran
+              </div>
+            </div>
+          </div>
+
+          {/* FILTER PILLS & SEARCH / TOGGLE TOOLBAR */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 12
+            }}
+          >
+            {/* Left Filter Pills: Semua / Prajurit / PNS / PPPK */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              {[
+                { id: "Semua", label: "Semua Kategori" },
+                { id: "Prajurit / Anggota", label: "Prajurit / Anggota Polri & TNI" },
+                { id: "PNS (ASN)", label: "PNS (ASN Polri & Kemhan)" },
+                { id: "PPK (PPPK)", label: "PPK / PPPK (Non-pensiun)" }
+              ].map((pill) => {
+                const isActive = filterPill === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => setFilterPill(pill.id)}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 9999,
+                      fontSize: 12.5,
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      background: isActive ? "#0F172A" : COLORS.white,
+                      color: isActive ? COLORS.white : COLORS.gray700,
+                      border: isActive ? "1px solid #0F172A" : `1px solid ${COLORS.gray300}`,
+                      boxShadow: isActive ? "0 2px 4px rgba(15, 23, 42, 0.12)" : "none"
+                    }}
+                  >
+                    {pill.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right: Search Box & Tutup/Buka Semua Button */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {/* Search Input */}
+              <div style={{ position: "relative", width: 270 }}>
+                <Search
+                  size={15}
+                  color={COLORS.gray400}
+                  style={{ position: "absolute", left: 10, top: 10 }}
+                />
+                <input
+                  type="text"
+                  placeholder="Cari instansi, prajurit, polri, ASN..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "7px 12px 7px 32px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray200}`,
                     fontSize: 12.5,
-                    borderBottom: `1px solid ${COLORS.gray200}`,
-                    width: "24%"
+                    background: COLORS.white,
+                    outline: "none",
+                    color: COLORS.gray800,
+                    boxSizing: "border-box"
                   }}
-                >
-                  Instansi / Kategori
-                </th>
-                <th
-                  rowSpan={2}
-                  style={{
-                    padding: "16px 14px",
-                    textAlign: "right",
-                    color: COLORS.gray600,
-                    fontWeight: 600,
-                    fontSize: 12.5,
-                    borderBottom: `1px solid ${COLORS.gray200}`,
-                    width: "9%"
-                  }}
-                >
-                  Peserta
-                </th>
+                />
+              </div>
 
-                {/* Header Group: Iuran Peserta */}
-                <th
-                  colSpan={2}
-                  style={{
-                    padding: "12px 14px 6px",
-                    textAlign: "center",
-                    borderBottom: `2px solid #2563EB`,
-                    color: "#2563EB",
-                    fontWeight: 700,
-                    fontSize: 11,
-                    letterSpacing: 0.5
-                  }}
-                >
-                  IURAN PESERTA
-                </th>
+              {/* Tutup / Buka Semua Button */}
+              <button
+                type="button"
+                onClick={handleToggleAll}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: 8,
+                  border: `1px solid ${COLORS.gray300}`,
+                  background: COLORS.white,
+                  color: COLORS.gray700,
+                  fontSize: 12.5,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.02)"
+                }}
+              >
+                {areAllExpanded ? "Tutup semua" : "Buka semua"}
+              </button>
+            </div>
+          </div>
 
-                {/* Header Group: Iuran Negara */}
-                <th
-                  colSpan={2}
-                  style={{
-                    padding: "12px 14px 6px",
-                    textAlign: "center",
-                    borderBottom: `2px solid #EA580C`,
-                    color: "#EA580C",
-                    fontWeight: 700,
-                    fontSize: 11,
-                    letterSpacing: 0.5
-                  }}
-                >
-                  IURAN NEGARA
-                </th>
+          {/* GROUPED MULTI-HEADER TABLE */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 12,
+              border: `1px solid ${COLORS.gray200}`,
+              overflow: "hidden",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+            }}
+          >
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                {/* Table Head with Multi-level Headers */}
+                <thead>
+                  <tr style={{ background: COLORS.white }}>
+                    <th
+                      rowSpan={2}
+                      style={{
+                        padding: "16px 18px",
+                        textAlign: "left",
+                        color: COLORS.gray600,
+                        fontWeight: 600,
+                        fontSize: 12.5,
+                        borderBottom: `1px solid ${COLORS.gray200}`,
+                        width: "25%"
+                      }}
+                    >
+                      Instansi / Kategori Personil
+                    </th>
+                    <th
+                      rowSpan={2}
+                      style={{
+                        padding: "16px 14px",
+                        textAlign: "right",
+                        color: COLORS.gray600,
+                        fontWeight: 600,
+                        fontSize: 12.5,
+                        borderBottom: `1px solid ${COLORS.gray200}`,
+                        width: "9%"
+                      }}
+                    >
+                      Peserta
+                    </th>
 
-                <th
-                  rowSpan={2}
-                  style={{
-                    padding: "16px 18px",
-                    textAlign: "right",
-                    color: COLORS.gray600,
-                    fontWeight: 600,
-                    fontSize: 12.5,
-                    borderBottom: `1px solid ${COLORS.gray200}`,
-                    width: "15%"
-                  }}
-                >
-                  Total
-                </th>
-              </tr>
+                    {/* Header Group: Iuran Peserta */}
+                    <th
+                      colSpan={2}
+                      style={{
+                        padding: "12px 14px 6px",
+                        textAlign: "center",
+                        borderBottom: `2px solid #2563EB`,
+                        color: "#2563EB",
+                        fontWeight: 700,
+                        fontSize: 11,
+                        letterSpacing: 0.5
+                      }}
+                    >
+                      IURAN PESERTA (POTONGAN GAJI)
+                    </th>
 
-              {/* Row 2: Sub-columns */}
-              <tr style={{ background: COLORS.white, color: COLORS.gray600, fontSize: 12, fontWeight: 600 }}>
-                <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "13%" }}>
-                  THT 3,25%
-                </th>
-                <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "13%" }}>
-                  Pensiun 4,75%
-                </th>
-                <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "13%" }}>
-                  JKK 0,24%
-                </th>
-                <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "13%" }}>
-                  JKM 0,20%
-                </th>
-              </tr>
-            </thead>
+                    {/* Header Group: Iuran Negara */}
+                    <th
+                      colSpan={2}
+                      style={{
+                        padding: "12px 14px 6px",
+                        textAlign: "center",
+                        borderBottom: `2px solid #EA580C`,
+                        color: "#EA580C",
+                        fontWeight: 700,
+                        fontSize: 11,
+                        letterSpacing: 0.5
+                      }}
+                    >
+                      IURAN NEGARA (BEBAN APBN)
+                    </th>
 
-            {/* Table Body */}
-            <tbody>
-              {filteredInstansiList.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ padding: "40px 20px", textAlign: "center", color: COLORS.gray500 }}>
-                    Tidak ada instansi atau kategori yang cocok dengan filter saat ini.
-                  </td>
-                </tr>
-              ) : (
-                filteredInstansiList.map((inst) => {
-                  const isExpanded = !!expandedRows[inst.id];
+                    <th
+                      rowSpan={2}
+                      style={{
+                        padding: "16px 18px",
+                        textAlign: "right",
+                        color: COLORS.gray600,
+                        fontWeight: 600,
+                        fontSize: 12.5,
+                        borderBottom: `1px solid ${COLORS.gray200}`,
+                        width: "15%"
+                      }}
+                    >
+                      Total Iuran
+                    </th>
+                  </tr>
 
-                  return (
-                    <Fragment key={inst.id}>
-                      {/* PARENT ROW: Instansi Accordion */}
-                      <tr
-                        style={{
-                          borderBottom: `1px solid ${COLORS.gray100}`,
-                          background: "#FFFFFF",
-                          transition: "background 0.15s ease",
-                          cursor: "pointer"
-                        }}
-                        onClick={() => toggleRow(inst.id)}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#F8FAFC"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; }}
-                      >
-                        {/* Instansi Name + Chevron + Unor badge */}
-                        <td style={{ padding: "14px 18px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleRow(inst.id);
-                              }}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                padding: 0,
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                color: COLORS.gray700
-                              }}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown size={17} color={COLORS.gray700} />
-                              ) : (
-                                <ChevronRight size={17} color={COLORS.gray700} />
-                              )}
-                            </button>
-                            <span style={{ fontWeight: 800, color: COLORS.gray900, fontSize: 13.5 }}>
-                              {inst.name}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: 11,
-                                color: COLORS.gray500,
-                                background: "#F1F5F9",
-                                padding: "2px 7px",
-                                borderRadius: 4,
-                                fontWeight: 500
-                              }}
-                            >
-                              {inst.unorCount}
-                            </span>
-                          </div>
-                        </td>
+                  {/* Row 2: Sub-columns */}
+                  <tr style={{ background: COLORS.white, color: COLORS.gray600, fontSize: 12, fontWeight: 600 }}>
+                    <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "13%" }}>
+                      THT 3,25%
+                    </th>
+                    <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "13%" }}>
+                      Pensiun 4,75%
+                    </th>
+                    <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "12%" }}>
+                      JKK 0,24%
+                    </th>
+                    <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "12%" }}>
+                      JKM 0,20%
+                    </th>
+                  </tr>
+                </thead>
 
-                        {/* Peserta */}
-                        <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 800, color: COLORS.gray900 }}>
-                          {fmtNum(inst.peserta)}
-                        </td>
+                {/* Table Body */}
+                <tbody>
+                  {filteredInstansiList.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "40px 20px", textAlign: "center", color: COLORS.gray500 }}>
+                        Tidak ada instansi atau kategori yang cocok dengan filter saat ini.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredInstansiList.map((inst) => {
+                      const isExpanded = !!expandedRows[inst.id];
+                      const isPolri = inst.id.includes("POLRI");
 
-                        {/* THT 3,25% */}
-                        <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
-                          {fmtRupiah(inst.tht)}
-                        </td>
-
-                        {/* Pensiun 4,75% */}
-                        <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
-                          {fmtRupiah(inst.pensiun)}
-                        </td>
-
-                        {/* JKK 0,24% */}
-                        <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
-                          {fmtRupiah(inst.jkk)}
-                        </td>
-
-                        {/* JKM 0,20% */}
-                        <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
-                          {fmtRupiah(inst.jkm)}
-                        </td>
-
-                        {/* Total (Vibrant Blue) */}
-                        <td style={{ padding: "14px 18px", textAlign: "right", fontWeight: 800, color: "#2563EB", fontSize: 13.5 }}>
-                          {fmtRupiah(inst.total)}
-                        </td>
-                      </tr>
-
-                      {/* SUB-ROWS (Prajurit, PNS, & PPPK) - Displayed if expanded */}
-                      {isExpanded &&
-                        inst.subRows.map((sr) => (
+                      return (
+                        <Fragment key={inst.id}>
+                          {/* PARENT ROW: Instansi Accordion */}
                           <tr
-                            key={sr.id}
                             style={{
                               borderBottom: `1px solid ${COLORS.gray100}`,
-                              background: COLORS.white,
-                              transition: "background 0.15s ease"
+                              background: isPolri ? "#F8FAFF" : "#FFFFFF",
+                              transition: "background 0.15s ease",
+                              cursor: "pointer"
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = "#F8FAFC"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = COLORS.white; }}
+                            onClick={() => toggleRow(inst.id)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = isPolri ? "#EEF2FF" : "#F8FAFC";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = isPolri ? "#F8FAFF" : "#FFFFFF";
+                            }}
                           >
-                            {/* Kategori Name (Prajurit / PNS / PPPK) */}
-                            <td style={{ padding: "12px 18px 12px 42px" }}>
+                            {/* Instansi Name + Chevron + Badge */}
+                            <td style={{ padding: "14px 18px" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <span
-                                  onClick={() => handleOpenRowDetail(inst.name, sr)}
-                                  title="Klik untuk rincian per golongan / pangkat"
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleRow(inst.id);
+                                  }}
                                   style={{
-                                    color: "#2563EB",
-                                    fontWeight: 600,
-                                    fontSize: 13,
+                                    background: "none",
+                                    border: "none",
+                                    padding: 0,
                                     cursor: "pointer",
-                                    textDecoration: "underline",
-                                    textUnderlineOffset: 3
+                                    display: "flex",
+                                    alignItems: "center",
+                                    color: COLORS.gray700
                                   }}
                                 >
-                                  {sr.kategori}
+                                  {isExpanded ? (
+                                    <ChevronDown size={17} color={isPolri ? "#4338CA" : COLORS.gray700} />
+                                  ) : (
+                                    <ChevronRight size={17} color={isPolri ? "#4338CA" : COLORS.gray700} />
+                                  )}
+                                </button>
+                                <span
+                                  style={{
+                                    fontWeight: 800,
+                                    color: isPolri ? "#1E1B4B" : COLORS.gray900,
+                                    fontSize: 13.5
+                                  }}
+                                >
+                                  {inst.name}
                                 </span>
-                                {renderSubRowBadge(sr.badge, sr.kategori)}
+                                <span
+                                  style={{
+                                    fontSize: 11,
+                                    color: isPolri ? "#4338CA" : COLORS.gray500,
+                                    background: isPolri ? "#EEF2FF" : "#F1F5F9",
+                                    padding: "2px 7px",
+                                    borderRadius: 4,
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  {inst.unorCount}
+                                </span>
                               </div>
                             </td>
 
                             {/* Peserta */}
-                            <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray700, fontWeight: 500 }}>
-                              {fmtNum(sr.peserta)}
+                            <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 800, color: COLORS.gray900 }}>
+                              {fmtNum(inst.peserta)}
                             </td>
 
                             {/* THT 3,25% */}
-                            <td style={{ padding: "12px 14px", textAlign: "right", color: sr.tht ? COLORS.gray800 : COLORS.gray400 }}>
-                              {sr.tht ? fmtRupiah(sr.tht) : "—"}
+                            <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
+                              {fmtRupiah(inst.tht)}
                             </td>
 
                             {/* Pensiun 4,75% */}
-                            <td style={{ padding: "12px 14px", textAlign: "right", color: sr.pensiun ? COLORS.gray800 : COLORS.gray400 }}>
-                              {sr.pensiun ? fmtRupiah(sr.pensiun) : "—"}
+                            <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
+                              {fmtRupiah(inst.pensiun)}
                             </td>
 
                             {/* JKK 0,24% */}
-                            <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray800 }}>
-                              {fmtRupiah(sr.jkk)}
+                            <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
+                              {fmtRupiah(inst.jkk)}
                             </td>
 
                             {/* JKM 0,20% */}
-                            <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray800 }}>
-                              {fmtRupiah(sr.jkm)}
+                            <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
+                              {fmtRupiah(inst.jkm)}
                             </td>
 
-                            {/* Total Sub-row */}
-                            <td style={{ padding: "12px 18px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
-                              {fmtRupiah(sr.total)}
+                            {/* Total */}
+                            <td
+                              style={{
+                                padding: "14px 18px",
+                                textAlign: "right",
+                                fontWeight: 800,
+                                color: isPolri ? "#3730A3" : "#2563EB",
+                                fontSize: 13.5
+                              }}
+                            >
+                              {fmtRupiah(inst.total)}
                             </td>
                           </tr>
-                        ))}
-                    </Fragment>
-                  );
-                })
-              )}
-            </tbody>
 
-            {/* Subtotal Row */}
-            <tfoot>
-              <tr
+                          {/* SUB-ROWS: Prajurit, PNS, & PPPK / PPK */}
+                          {isExpanded &&
+                            inst.subRows.map((sr) => (
+                              <tr
+                                key={sr.id}
+                                style={{
+                                  borderBottom: `1px solid ${COLORS.gray100}`,
+                                  background: COLORS.white,
+                                  transition: "background 0.15s ease"
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = "#F8FAFC";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = COLORS.white;
+                                }}
+                              >
+                                {/* Kategori Name (Prajurit / PNS / PPK) */}
+                                <td style={{ padding: "12px 18px 12px 42px" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <span
+                                      onClick={() => handleOpenRowDetail(inst.name, sr)}
+                                      title="Klik untuk rincian per golongan / pangkat"
+                                      style={{
+                                        color: isPolri ? "#3730A3" : "#2563EB",
+                                        fontWeight: 600,
+                                        fontSize: 13,
+                                        cursor: "pointer",
+                                        textDecoration: "underline",
+                                        textUnderlineOffset: 3
+                                      }}
+                                    >
+                                      {sr.kategori}
+                                    </span>
+                                    {renderSubRowBadge(sr.badge, sr.kategori)}
+                                  </div>
+                                </td>
+
+                                {/* Peserta */}
+                                <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray700, fontWeight: 500 }}>
+                                  {fmtNum(sr.peserta)}
+                                </td>
+
+                                {/* THT 3,25% */}
+                                <td style={{ padding: "12px 14px", textAlign: "right", color: sr.tht ? COLORS.gray800 : COLORS.gray400 }}>
+                                  {sr.tht ? fmtRupiah(sr.tht) : "—"}
+                                </td>
+
+                                {/* Pensiun 4,75% */}
+                                <td style={{ padding: "12px 14px", textAlign: "right", color: sr.pensiun ? COLORS.gray800 : COLORS.gray400 }}>
+                                  {sr.pensiun ? fmtRupiah(sr.pensiun) : "—"}
+                                </td>
+
+                                {/* JKK 0,24% */}
+                                <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray800 }}>
+                                  {fmtRupiah(sr.jkk)}
+                                </td>
+
+                                {/* JKM 0,20% */}
+                                <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray800 }}>
+                                  {fmtRupiah(sr.jkm)}
+                                </td>
+
+                                {/* Total Sub-row */}
+                                <td style={{ padding: "12px 18px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
+                                  {fmtRupiah(sr.total)}
+                                </td>
+                              </tr>
+                            ))}
+                        </Fragment>
+                      );
+                    })
+                  )}
+                </tbody>
+
+                {/* Subtotal Row */}
+                <tfoot>
+                  <tr
+                    style={{
+                      background: "#F0F7FF",
+                      borderTop: "2px solid #BFDBFE",
+                      borderBottom: "2px solid #BFDBFE",
+                      fontWeight: 800
+                    }}
+                  >
+                    <td style={{ padding: "14px 18px", color: COLORS.gray900, fontSize: 13.5 }}>
+                      Subtotal {activeEntity.title}
+                    </td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
+                      {fmtNum(currentSubtotal.peserta)}
+                    </td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
+                      {fmtRupiah(currentSubtotal.tht)}
+                    </td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
+                      {fmtRupiah(currentSubtotal.pensiun)}
+                    </td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
+                      {fmtRupiah(currentSubtotal.jkk)}
+                    </td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
+                      {fmtRupiah(currentSubtotal.jkm)}
+                    </td>
+                    <td style={{ padding: "14px 18px", textAlign: "right", color: "#2563EB", fontSize: 14.5 }}>
+                      {fmtRupiah(currentSubtotal.total)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            {/* Bottom Status Bar */}
+            <div
+              style={{
+                padding: "12px 18px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                fontSize: 12.5,
+                color: COLORS.gray500,
+                background: COLORS.white,
+                borderTop: `1px solid ${COLORS.gray100}`
+              }}
+            >
+              <span>Menampilkan {totalUnorCount} kategori personil aktif</span>
+              <span style={{ fontStyle: "normal", color: COLORS.gray500 }}>
+                💡 Klik nama kategori personil (Prajurit / ASN / PPK) untuk melihat rincian breakdown per pangkat/golongan
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* =========================================================================
+          VIEW TAB 2: KALKULATOR & SIMULASI IURAN INTERAKTIF (POLRI & TNI)
+         ========================================================================= */}
+      {activeTab === "simulasi" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 20 }}>
+          {/* LEFT: FORM INPUT PARAMETERS */}
+          <div
+            style={{
+              background: COLORS.white,
+              borderRadius: 12,
+              padding: "24px",
+              border: `1px solid ${COLORS.gray200}`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 18
+            }}
+          >
+            <div style={{ borderBottom: `1px solid ${COLORS.gray200}`, paddingBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: "#EEF2FF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#4338CA"
+                  }}
+                >
+                  <Calculator size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: COLORS.gray900 }}>
+                    Parameter Simulasi Iuran
+                  </h3>
+                  <span style={{ fontSize: 12, color: COLORS.gray500 }}>
+                    Perhitungan otomatis berdasarkan PP No. 102 Tahun 2015 jo PP No. 54 Tahun 2020
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 1. Pilih Institusi */}
+            <div>
+              <label style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 8 }}>
+                1. Institusi Pembina
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => setSimInstitusi("POLRI")}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: simInstitusi === "POLRI" ? "2px solid #4338CA" : `1px solid ${COLORS.gray300}`,
+                    background: simInstitusi === "POLRI" ? "#EEF2FF" : COLORS.white,
+                    color: simInstitusi === "POLRI" ? "#312E81" : COLORS.gray700,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between"
+                  }}
+                >
+                  <span>Kepolisian RI (POLRI)</span>
+                  {simInstitusi === "POLRI" && <CheckCircle2 size={16} color="#4338CA" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSimInstitusi("TNI")}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: simInstitusi === "TNI" ? "2px solid #059669" : `1px solid ${COLORS.gray300}`,
+                    background: simInstitusi === "TNI" ? "#ECFDF5" : COLORS.white,
+                    color: simInstitusi === "TNI" ? "#065F46" : COLORS.gray700,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between"
+                  }}
+                >
+                  <span>TNI &amp; Kemhan</span>
+                  {simInstitusi === "TNI" && <CheckCircle2 size={16} color="#059669" />}
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Pilih Status / Kategori Personil */}
+            <div>
+              <label style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: COLORS.gray700, marginBottom: 8 }}>
+                2. Kategori Personil
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                {[
+                  { id: "Prajurit", label: simInstitusi === "POLRI" ? "Prajurit / Anggota" : "Prajurit TNI", sub: "THT + Pensiun + JKK/JKM" },
+                  { id: "PNS", label: "ASN (PNS)", sub: "THT + Pensiun + JKK/JKM" },
+                  { id: "PPPK", label: "PPK (PPPK)", sub: "Khusus JKK/JKM (Non-pensiun)" }
+                ].map(kat => (
+                  <button
+                    key={kat.id}
+                    type="button"
+                    onClick={() => {
+                      setSimKategori(kat.id);
+                      setSimPresetIdx(0);
+                      const presets = kat.id === "Prajurit" ? POLRI_PRESETS.PRAJURIT : (kat.id === "PNS" ? POLRI_PRESETS.PNS : POLRI_PRESETS.PPPK);
+                      if (presets[0]) setSimGajiPokok(presets[0].gp);
+                    }}
+                    style={{
+                      padding: "10px",
+                      borderRadius: 8,
+                      border: simKategori === kat.id ? "2px solid #2563EB" : `1px solid ${COLORS.gray200}`,
+                      background: simKategori === kat.id ? "#EFF6FF" : COLORS.white,
+                      color: simKategori === kat.id ? "#1D4ED8" : COLORS.gray700,
+                      cursor: "pointer",
+                      textAlign: "center"
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: 12.5 }}>{kat.label}</div>
+                    <div style={{ fontSize: 10, color: COLORS.gray500, marginTop: 2 }}>{kat.sub}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Preset Pangkat / Golongan */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <label style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.gray700 }}>
+                  3. Pangkat / Golongan Standar
+                </label>
+                <span style={{ fontSize: 11, color: COLORS.gray500 }}>Otomatis mengisi gaji pokok acuan</span>
+              </div>
+              <select
+                value={simPresetIdx}
+                onChange={(e) => handlePresetChange(Number(e.target.value))}
                 style={{
-                  background: "#F0F7FF",
-                  borderTop: "2px solid #BFDBFE",
-                  borderBottom: "2px solid #BFDBFE",
-                  fontWeight: 800
+                  width: "100%",
+                  padding: "9px 12px",
+                  borderRadius: 8,
+                  border: `1px solid ${COLORS.gray300}`,
+                  fontSize: 13,
+                  color: COLORS.gray800,
+                  outline: "none",
+                  background: COLORS.white
                 }}
               >
-                <td style={{ padding: "14px 18px", color: COLORS.gray900, fontSize: 13.5 }}>
-                  Subtotal {activeEntity.title}
-                </td>
-                <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
-                  {fmtNum(currentSubtotal.peserta)}
-                </td>
-                <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
-                  {fmtRupiah(currentSubtotal.tht)}
-                </td>
-                <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
-                  {fmtRupiah(currentSubtotal.pensiun)}
-                </td>
-                <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
-                  {fmtRupiah(currentSubtotal.jkk)}
-                </td>
-                <td style={{ padding: "14px 14px", textAlign: "right", color: COLORS.gray900, fontSize: 13.5 }}>
-                  {fmtRupiah(currentSubtotal.jkm)}
-                </td>
-                <td style={{ padding: "14px 18px", textAlign: "right", color: "#2563EB", fontSize: 14.5 }}>
-                  {fmtRupiah(currentSubtotal.total)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+                {simCurrentPresets.map((p, idx) => (
+                  <option key={idx} value={idx}>
+                    {p.label} — Gaji Pokok Acuan: {fmtRupiah(p.gp)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Bottom Status Bar */}
-        <div
-          style={{
-            padding: "12px 18px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            fontSize: 12.5,
-            color: COLORS.gray500,
-            background: COLORS.white,
-            borderTop: `1px solid ${COLORS.gray100}`
-          }}
-        >
-          <span>Menampilkan {totalUnorCount} dari {totalUnorCount} unor aktif</span>
-          <span style={{ fontStyle: "normal", color: COLORS.gray500 }}>
-            Klik nama kategori (Prajurit / PNS / PPPK) untuk rincian per pangkat &amp; golongan
-          </span>
+            {/* 4. Gaji Pokok & Tunjangan Keluarga */}
+            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 14 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: COLORS.gray700, marginBottom: 4 }}>
+                  Gaji Pokok (Rp)
+                </label>
+                <input
+                  type="number"
+                  value={simGajiPokok}
+                  onChange={(e) => setSimGajiPokok(Math.max(0, Number(e.target.value)))}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: COLORS.gray700, marginBottom: 4 }}>
+                  Status Pernikahan
+                </label>
+                <select
+                  value={simStatusKawin ? "kawin" : "lajang"}
+                  onChange={(e) => setSimStatusKawin(e.target.value === "kawin")}
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 13,
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                >
+                  <option value="kawin">Kawin (+10% Istri/Suami)</option>
+                  <option value="lajang">Tidak Kawin (0%)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: COLORS.gray700, marginBottom: 4 }}>
+                  Tanggungan Anak (Maks 2)
+                </label>
+                <select
+                  value={simJmlAnak}
+                  onChange={(e) => setSimJmlAnak(Number(e.target.value))}
+                  style={{
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 13,
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                >
+                  <option value={0}>0 Anak (0%)</option>
+                  <option value={1}>1 Anak (+2% GP)</option>
+                  <option value={2}>2 Anak (+4% GP)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: COLORS.gray700, marginBottom: 4 }}>
+                  Skala Simulasi (Personil)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={simJmlPersonil}
+                  onChange={(e) => setSimJmlPersonil(Math.max(1, Number(e.target.value)))}
+                  placeholder="1 untuk individu"
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.gray300}`,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Nama Satker / Keterangan */}
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: COLORS.gray700, marginBottom: 4 }}>
+                Satker / Satuan Kerja Acuan
+              </label>
+              <input
+                type="text"
+                value={simNamaSatker}
+                onChange={(e) => setSimNamaSatker(e.target.value)}
+                placeholder="Contoh: Polres Metro Jakarta Selatan, Ditlantas, dll."
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: `1px solid ${COLORS.gray200}`,
+                  fontSize: 12.5,
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+          </div>
+
+          {/* RIGHT: HASIL KALKULASI & BREAKDOWN */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* CARD 1: POTONGAN PESERTA (8,00%) */}
+            <div
+              style={{
+                background: COLORS.white,
+                borderRadius: 12,
+                padding: "20px 22px",
+                border: `1px solid #BFDBFE`,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#2563EB" }} />
+                  <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
+                    IURAN PESERTA (POTONGAN GAJI)
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    background: "#EFF6FF",
+                    color: "#1D4ED8",
+                    padding: "2px 8px",
+                    borderRadius: 9999
+                  }}
+                >
+                  {simKategori === "PPPK" ? "0% (Non-Pensiun)" : "8,00% Penghasilan Tetap"}
+                </span>
+              </div>
+
+              {simKategori === "PPPK" ? (
+                <div
+                  style={{
+                    background: "#FEF3C7",
+                    borderRadius: 8,
+                    padding: "12px 14px",
+                    fontSize: 12,
+                    color: "#92400E",
+                    lineHeight: 1.5
+                  }}
+                >
+                  ℹ️ Berdasarkan regulasi ASABRI (PP No. 102/2015 jo PP No. 54/2020), personil <strong>PPK / PPPK</strong> tidak dipotong iuran THT (3,25%) dan Pensiun (4,75%). Jaminan kecelakaan kerja dan kematian ditanggung oleh Negara.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                    <span style={{ color: COLORS.gray600 }}>THT (Tabungan Hari Tua · 3,25%):</span>
+                    <strong style={{ color: COLORS.gray900 }}>{fmtRupiah(simResult.thtTotal)}</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                    <span style={{ color: COLORS.gray600 }}>Jaminan Pensiun (4,75%):</span>
+                    <strong style={{ color: COLORS.gray900 }}>{fmtRupiah(simResult.pensiunTotal)}</strong>
+                  </div>
+                  <div
+                    style={{
+                      borderTop: `1px dashed ${COLORS.gray200}`,
+                      paddingTop: 8,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 14,
+                      fontWeight: 800
+                    }}
+                  >
+                    <span style={{ color: "#1D4ED8" }}>Subtotal Potongan Peserta:</span>
+                    <span style={{ color: "#1D4ED8" }}>{fmtRupiah(simResult.iuranPesertaTotal)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* CARD 2: IURAN DITANGGUNG NEGARA (0,44%) */}
+            <div
+              style={{
+                background: COLORS.white,
+                borderRadius: 12,
+                padding: "20px 22px",
+                border: `1px solid #FED7AA`,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#EA580C" }} />
+                  <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.gray900 }}>
+                    IURAN DITANGGUNG NEGARA (APBN)
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    background: "#FFF7ED",
+                    color: "#C2410C",
+                    padding: "2px 8px",
+                    borderRadius: 9999
+                  }}
+                >
+                  0,44% Gaji Pokok
+                </span>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                  <span style={{ color: COLORS.gray600 }}>JKK (Jaminan Kecelakaan Kerja · 0,24%):</span>
+                  <strong style={{ color: COLORS.gray900 }}>{fmtRupiah(simResult.jkkTotal)}</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                  <span style={{ color: COLORS.gray600 }}>JKM (Jaminan Kematian · 0,20%):</span>
+                  <strong style={{ color: COLORS.gray900 }}>{fmtRupiah(simResult.jkmTotal)}</strong>
+                </div>
+                <div
+                  style={{
+                    borderTop: `1px dashed ${COLORS.gray200}`,
+                    paddingTop: 8,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                    fontWeight: 800
+                  }}
+                >
+                  <span style={{ color: "#EA580C" }}>Subtotal Iuran Negara:</span>
+                  <span style={{ color: "#EA580C" }}>{fmtRupiah(simResult.iuranNegaraTotal)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 3: GRAND TOTAL SUMMARY */}
+            <div
+              style={{
+                background: "#0F172A",
+                color: COLORS.white,
+                borderRadius: 12,
+                padding: "20px 24px",
+                boxShadow: "0 10px 25px rgba(15, 23, 42, 0.2)"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 12, color: "#94A3B8" }}>
+                    TOTAL IURAN BULANAN ({simResult.n} PERSONIL)
+                  </div>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: "#38BDF8", letterSpacing: -0.5 }}>
+                    {fmtRupiah(simResult.totalKeseluruhan)}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 11, color: "#94A3B8" }}>PROYEKSI 1 TAHUN</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#FDE047" }}>
+                    {fmtRupiah(simResult.tahunan)}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  fontSize: 11.5,
+                  color: "#CBD5E1",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 16
+                }}
+              >
+                <span>Satker: <strong>{simNamaSatker}</strong></span>
+                <span>Pangkat: <strong>{simCurrentPresets[simPresetIdx]?.label || "Kustom"}</strong></span>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={handleCopySimulasi}
+                  style={{
+                    flex: 1,
+                    padding: "9px 12px",
+                    borderRadius: 8,
+                    background: simCopied ? "#059669" : "rgba(255,255,255,0.15)",
+                    border: "none",
+                    color: COLORS.white,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    transition: "all 0.15s ease"
+                  }}
+                >
+                  {simCopied ? <Check size={14} /> : <Copy size={14} />}
+                  {simCopied ? "Tersalin!" : "Salin Rincian"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportSimulasi}
+                  style={{
+                    flex: 1,
+                    padding: "9px 12px",
+                    borderRadius: 8,
+                    background: "#2563EB",
+                    border: "none",
+                    color: COLORS.white,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6
+                  }}
+                >
+                  <FileText size={14} />
+                  Pratinjau &amp; Cetak
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* =========================================================================
           MODAL RINCIAN PER GOLONGAN / PANGKAT
@@ -1810,7 +2753,7 @@ export const KalkulatorIuran = () => {
             style={{
               background: COLORS.white,
               borderRadius: 14,
-              width: 880,
+              width: 900,
               maxWidth: "96vw",
               maxHeight: "90vh",
               display: "flex",
@@ -1839,8 +2782,8 @@ export const KalkulatorIuran = () => {
                     style={{
                       padding: "2px 8px",
                       borderRadius: 6,
-                      background: modalGolonganData.kategori === "Prajurit" ? "#ECFDF5" : "#EFF6FF",
-                      color: modalGolonganData.kategori === "Prajurit" ? "#047857" : "#1D4ED8",
+                      background: modalGolonganData.kategori.includes("Polri") ? "#EEF2FF" : "#EFF6FF",
+                      color: modalGolonganData.kategori.includes("Polri") ? "#3730A3" : "#1D4ED8",
                       fontSize: 12,
                       fontWeight: 700
                     }}
