@@ -1,7 +1,7 @@
-import { Download, FileText, Printer, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Download, FileText, Printer, CheckCircle2, ArrowLeft, Paperclip, FileCheck } from "lucide-react";
 import { COLORS } from "../../constants/colors";
 import { Btn } from "./Btn";
-import { SuratTagihanKemenkeu } from "./SuratTagihanKemenkeu";
+import { SuratTagihanKemenkeu, AsabriOfficialStampAndSignature } from "./SuratTagihanKemenkeu";
 
 export const PreviewModal = ({ preview, onClose }) => {
   if (!preview) return null;
@@ -87,6 +87,30 @@ export const PreviewModal = ({ preview, onClose }) => {
                       <strong>Dasar Penagihan (SKP-PFK Kemenkeu):</strong><br />
                       Menindaklanjuti Surat Ketetapan Perhitungan (SKP-PFK) Direktorat Jenderal Perbendaharaan Kementerian Keuangan RI Nomor: <strong style={{ color: "#1D4ED8" }}>{content.dasarSKP.noSurat || content.dasarSKP}</strong> {content.dasarSKP.tglSurat ? `tertanggal ${content.dasarSKP.tglSurat}` : ""} hal Penetapan Perhitungan Fihak Ketiga (PFK) Iuran Tabungan Hari Tua (THT) dan Pensiun.
                     </div>
+                  ) : (content?.noNotaDinas || content?.noSPDipa) ? (
+                    <div style={{ marginTop: 14, padding: "12px 14px", background: "#F0FDF4", borderLeft: "4px solid #16A34A", borderRadius: 4, fontSize: 11.5 }}>
+                      <strong style={{ color: "#15803D", fontSize: 12 }}>Dasar Penagihan & Kelengkapan Administrasi:</strong>
+                      <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                        {content.noNotaDinas && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span>• Nomor Nota Dinas Divisi Kepesertaan :</span>
+                            <strong style={{ fontFamily: "monospace", color: "#166534" }}>{content.noNotaDinas}</strong>
+                            {content.namaNotaDinas && (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", background: "#DCFCE7", color: "#15803D", borderRadius: 4, fontSize: 10.5 }}>
+                                <Paperclip size={11} /> {content.namaNotaDinas}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {content.noSPDipa && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span>• Nomor Surat Perintah (SP) DIPA :</span>
+                            <strong style={{ fontFamily: "monospace", color: "#166534" }}>{content.noSPDipa}</strong>
+                          </div>
+                        )}
+                      </div>
+                      <p style={{ marginTop: 8, marginBottom: 0 }}>Berdasarkan dokumen kelengkapan kepesertaan di atas, bersama ini kami sampaikan tagihan iuran resmi untuk periode <strong>{content?.periode || "Juli 2026"}</strong> dengan rincian perhitungan sebagai berikut:</p>
+                    </div>
                   ) : (
                     <p style={{ marginTop: 12 }}>Berdasarkan data kepesertaan per tanggal cut-off <strong>{content?.cutoff || "25 Juni 2026"}</strong> (Sistem Otomasi ASABRI), bersama ini kami sampaikan tagihan iuran untuk periode <strong>{content?.periode || "Juli 2026"}</strong> dengan rincian sebagai berikut:</p>
                   )}
@@ -101,8 +125,8 @@ export const PreviewModal = ({ preview, onClose }) => {
                       {(content?.items || [
                         { jenis: "THT (3,25%)", peserta: "14.328", nominal: "Rp 35.760.000.000" },
                         { jenis: "Pensiun (4,75%)", peserta: "14.328", nominal: "Rp 52.250.000.000" },
-                        { jenis: "JKK (0,24%)", peserta: "14.328", nominal: "Rp 2.630.000.000" },
-                        { jenis: "JKm (0,20%)", peserta: "14.328", nominal: "Rp 2.210.000.000" },
+                        { jenis: "JKK (0,62%)", peserta: "14.328", nominal: "Rp 2.630.000.000" },
+                        { jenis: "JKm (0,81%)", peserta: "14.328", nominal: "Rp 2.210.000.000" },
                       ]).map((it, i) => (
                         <tr key={i}><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6 }}>{it.jenis}</td><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right" }}>{it.peserta}</td><td style={{ border: `1px solid ${COLORS.gray300}`, padding: 6, textAlign: "right", fontWeight: 700 }}>{it.nominal}</td></tr>
                       ))}
@@ -168,18 +192,14 @@ export const PreviewModal = ({ preview, onClose }) => {
 
                   <p>Demikian surat tagihan ini kami sampaikan untuk dapat diproses penyalurannya sesuai ketentuan yang berlaku. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
                   
-                  <div style={{ marginTop: 24, textAlign: "right" }}>
-                    <div>Jakarta, {content?.tanggal || "26 Juli 2026"}</div>
-                    <div style={{ marginTop: 6, fontWeight: 700 }}>
-                      {content?.jabatan || content?.jabatanDirektur || "Direktur Keuangan dan Manajemen Resiko"}
+                  <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ marginBottom: 10, fontSize: 12 }}>Jakarta, {content?.tanggal || "26 Juli 2026"}</div>
+                      <AsabriOfficialStampAndSignature
+                        nama={content?.namaPejabat || content?.namaDirektur || "HELMI I. SATRIYONO"}
+                        jabatan={content?.jabatan || content?.jabatanDirektur || "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO"}
+                      />
                     </div>
-                    <div style={{ height: 50, display: "flex", alignItems: "center", justifyContent: "flex-end", color: "#94A3B8", fontStyle: "italic", fontSize: 11 }}>
-                      [ Tanda Tangan Basah Manual ]
-                    </div>
-                    <div style={{ fontWeight: 700, textDecoration: "underline" }}>
-                      {content?.namaPejabat || content?.namaDirektur || "Helmi I Satriyo"}
-                    </div>
-                    <div style={{ fontSize: 11, color: COLORS.gray500 }}>PT ASABRI (Persero)</div>
                   </div>
                 </div>
               </div>

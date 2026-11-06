@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Printer, Download, Copy, Check, FileText, ChevronLeft, ChevronRight, Layers, Eye } from "lucide-react";
+import { Printer, Download, Copy, Check, FileText, Layers, Eye, ShieldCheck } from "lucide-react";
 import { COLORS } from "../../constants/colors";
 import { Btn } from "./Btn";
 
@@ -64,7 +64,88 @@ export const AsabriLogoHeader = ({ height = 48 }) => (
   </div>
 );
 
-// Footer Paraf Kedinasan (Sesper, Kadiv Keu, Kabid Bend)
+// Stempel & Tanda Tangan Resmi Direksi ASABRI (Replikasi Presisi Sesuai Dokumen Resmi)
+export const AsabriOfficialStampAndSignature = ({
+  nama = "HELMI I. SATRIYONO",
+  jabatan = "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO"
+}) => (
+  <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", minWidth: 260, position: "relative" }}>
+    <div style={{ fontWeight: 700, fontSize: 13, letterSpacing: 1, marginBottom: 8, color: "#0F172A", alignSelf: "center" }}>
+      DIREKSI,
+    </div>
+
+    {/* Area Tumpang-Tindih Stempel Ungu & Tanda Tangan Tinta Biru */}
+    <div style={{ position: "relative", width: 220, height: 96, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {/* 1. Stempel Bulat Keunguan ASABRI */}
+      <div
+        style={{
+          position: "absolute",
+          left: 14,
+          top: 2,
+          opacity: 0.85,
+          transform: "rotate(-6deg)",
+          pointerEvents: "none"
+        }}
+      >
+        <svg width="96" height="96" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="56" fill="none" stroke="#6D28D9" strokeWidth="2.5" />
+          <circle cx="60" cy="60" r="51" fill="none" stroke="#6D28D9" strokeWidth="1.2" strokeDasharray="3 1.5" />
+          <circle cx="60" cy="60" r="38" fill="none" stroke="#6D28D9" strokeWidth="1.5" />
+          <path id="stamp-arc-top-c" d="M 18,60 A 42,42 0 1,1 102,60" fill="none" />
+          <text fill="#6D28D9" fontSize="8" fontWeight="900" letterSpacing="2.2" fontFamily="sans-serif">
+            <textPath href="#stamp-arc-top-c" startOffset="50%" textAnchor="middle">
+              PT ASABRI (PERSERO)
+            </textPath>
+          </text>
+          <g transform="translate(45, 38) scale(0.25)">
+            <path d="M60 6 L100 24 L100 58 C100 82 60 96 60 96 C60 96 20 82 20 58 L20 24 Z" fill="none" stroke="#6D28D9" strokeWidth="6" />
+            <polygon points="60,26 66,42 83,42 69,53 74,69 60,59 46,69 51,53 37,42 54,42" fill="#6D28D9" />
+          </g>
+          <rect x="22" y="66" width="76" height="15" rx="2.5" fill="#6D28D9" opacity="0.92" />
+          <text x="60" y="77" fill="#FFFFFF" fontSize="9" fontWeight="900" textAnchor="middle" letterSpacing="2.5" fontFamily="sans-serif">
+            DIREKSI
+          </text>
+        </svg>
+      </div>
+
+      {/* 2. Tanda Tangan Tinta Biru Otentik */}
+      <div style={{ position: "absolute", left: 30, top: 6, zIndex: 3, pointerEvents: "none" }}>
+        <svg width="165" height="80" viewBox="0 0 170 85" fill="none">
+          <path
+            d="M18 64 C24 44, 30 18, 40 16 C48 14, 44 48, 50 54 C56 59, 70 24, 80 20 C90 17, 76 56, 86 50 C96 44, 116 26, 130 30 C138 32, 124 58, 140 46 C150 40, 162 28, 166 33"
+            stroke="#1D4ED8"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M22 48 Q 58 40 158 44"
+            stroke="#1D4ED8"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M8 68 Q 22 62 28 72"
+            stroke="#1D4ED8"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+          <circle cx="164" cy="45" r="2.5" fill="#1D4ED8" />
+        </svg>
+      </div>
+    </div>
+
+    {/* Nama & Jabatan Pejabat */}
+    <div style={{ fontWeight: 800, fontSize: 13, textDecoration: "none", color: "#0F172A", marginTop: 4, letterSpacing: 0.5 }}>
+      {nama}
+    </div>
+    <div style={{ fontWeight: 700, fontSize: 11.5, color: "#0F172A" }}>
+      {jabatan}
+    </div>
+  </div>
+);
+
+// Footer Paraf Kedinasan (Opsional untuk Lembar Internal / Minuta)
 export const ParafFooterBox = ({ sesper = "Cikik J.", kadivKeu = "Widya D.S.", kabidBend = "Dita M." }) => (
   <div style={{ display: "inline-block", border: "1px solid #1E293B", fontSize: 10, background: "#FFFFFF", fontFamily: "'Times New Roman', serif" }}>
     <table style={{ borderCollapse: "collapse", textAlign: "center", minWidth: 260 }}>
@@ -88,16 +169,16 @@ export const ParafFooterBox = ({ sesper = "Cikik J.", kadivKeu = "Widya D.S.", k
 
 // Footer Kop Bawah Resmi & Ornamen Pojok Kanan Bawah
 export const AsabriLetterFooter = () => (
-  <div style={{ marginTop: "auto", paddingTop: 18, borderTop: "1px solid #CBD5E1", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative" }}>
-    <div style={{ fontSize: 9.5, color: "#475569", lineHeight: 1.4, fontFamily: "'Times New Roman', serif" }}>
+  <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid #CBD5E1", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative" }}>
+    <div style={{ fontSize: 9.5, color: "#475569", lineHeight: 1.45, fontFamily: "'Times New Roman', serif" }}>
       <div style={{ fontWeight: 700, color: "#0F172A" }}>PT ASABRI (Persero)</div>
       <div>Jl. Mayjen Sutoyo No.11 Jakarta 13630</div>
       <div>P : 021 8094140 &nbsp;&nbsp;|&nbsp;&nbsp; F : 021 8012313</div>
       <div style={{ color: "#0284C7" }}>asabri@asabri.co.id &nbsp;&nbsp;|&nbsp;&nbsp; www.asabri.co.id</div>
     </div>
 
-    {/* Graphic Ribbon Bottom-Right Accent */}
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 3, marginBottom: -6 }}>
+    {/* Graphic Ribbon Bottom-Right Accent (Persis Sesuai PDF Surat Tagihan ASABRI) */}
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 3, marginBottom: -4 }}>
       <div style={{ width: 0, height: 0, borderBottom: "36px solid #D97706", borderLeft: "26px solid transparent" }} />
       <div style={{ width: 0, height: 0, borderBottom: "52px solid #0284C7", borderLeft: "34px solid transparent" }} />
     </div>
@@ -109,37 +190,43 @@ export const SuratTagihanKemenkeu = ({
   onClose,
   showActions = true
 }) => {
-  // Pilihan Halaman Aktif: "all" (Semua Halaman) | 1 (Halaman 1) | 2 (Halaman 2) | 3 (Halaman 3: Kuitansi)
+  // Pilihan Tampilan Halaman: "all" (2 Halaman Surat Lengkap) | 1 (Halaman 1) | 2 (Halaman 2) | 3 (Halaman 3: Kuitansi)
   const [activePage, setActivePage] = useState("all");
+  const [showParafInternal, setShowParafInternal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Parsing parameter data penagihan
-  const program = data.program || "THT TNI"; // "THT TNI" | "THT POLRI" | "Pensiun POLRI" | "Pensiun TNI"
+  const program = data.program || "Pensiun TNI"; // "Pensiun TNI" | "THT TNI" | "Pensiun POLRI" | "THT POLRI"
   const isTHT = program.startsWith("THT");
   const isPolri = program.includes("POLRI");
   const tarif = isTHT ? "3,25%" : "4,75%";
-  const akunMAK = isTHT ? "821134" : "821135";
+  const akunMAK = data.akunMAK || (isTHT ? "821134" : "821135");
 
-  const namaProgramFull = isTHT
-    ? (isPolri ? "Tunjangan Hari Tua Anggota POLRI & PNS Polri" : "Tunjangan Hari Tua Prajurit TNI & ASN Kemhan")
-    : (isPolri ? "Pensiun Anggota POLRI & PNS Polri" : "Pensiun Prajurit TNI & ASN Kemhan");
+  // Nama Hal & Program Sesuai Dokumen Resmi PDF
+  const halProgram = data.halProgram || (isTHT
+    ? (isPolri ? "THT POLRI" : "THT TNI")
+    : (isPolri ? "Pensiun POLRI" : "Dapen TNI"));
 
-  const halProgram = isTHT
-    ? (isPolri ? "THT POLRI" : "THT")
-    : (isPolri ? "Pensiun POLRI" : "Pensiun TNI");
+  const namaProgramFull = data.namaProgramFull || (isTHT
+    ? (isPolri ? "Dana THT POLRI" : "Dana THT TNI")
+    : (isPolri ? "Dana Pensiun POLRI" : "Dana Pensiun TNI"));
 
-  const noSurat = data.noSurat || `S-1190/KU.06.06/KMR.N/X/2024`;
-  const tanggalSurat = data.tanggalSurat || data.tanggal || "Oktober 2024";
-  const tglCutoff = data.tglCutoff || "10 Oktober 2024";
-  const noKEP = data.noKEP || "KEP-41/PB/PB.3/2024";
-  const tglKEP = data.tglKEP || "14 Oktober 2024";
-  const tahunAnggaran = data.tahunAnggaran || data.ta || "2024";
+  const noSurat = data.noSurat || (isTHT
+    ? (isPolri ? "S-1157/KU.06.06/KMR.N/V/2026" : "S-1155/KU.06.06/KMR.N/V/2026")
+    : (isPolri ? "S-1158/KU.06.06/KMR.N/V/2026" : "S-1156/KU.06.06/KMR.N/V/2026"));
 
-  // Nominal Tagihan
-  const nominalIniNum = Number(data.nominalNum || data.nominalIni || (isTHT ? 1121913428 : 20805000000));
-  const nominalLaluNum = Number(data.nominalLalu || (isTHT ? 1059518554039 : 812490210000));
+  const tanggalSurat = data.tanggalSurat || data.tanggal || "12 Mei 2026";
+  const tglCutoff = data.tglCutoff || "10 Mei 2026";
+  const noKEP = data.noKEP || "KEP-16/PB/PB.3/2026";
+  const tglKEP = data.tglKEP || "11 Mei 2026";
+  const tahunAnggaran = data.tahunAnggaran || data.ta || "2026";
+
+  // Nominal Tagihan Sesuai PDF (Rp3.002.772.913,00)
+  const nominalIniNum = Number(data.nominalNum || data.nominalIni || (isTHT ? 2055120400 : 3002772913));
+  const nominalLaluNum = Number(data.nominalLalu || (isTHT ? 284150320000 : 414729482733));
   const nominalTotalNum = nominalLaluNum + nominalIniNum;
 
+  // Format Rupiah Resmi Kemenkeu: Rp3.002.772.913,00 (tanpa spasi setelah Rp, dengan desimal ,00)
   const fmtRupiah = (n) => `Rp${Number(n || 0).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const nominalIniStr = data.nominalStr || fmtRupiah(nominalIniNum);
   const nominalLaluStr = fmtRupiah(nominalLaluNum);
@@ -147,17 +234,25 @@ export const SuratTagihanKemenkeu = ({
 
   const terbilangStr = data.terbilang || `(${terbilang(nominalIniNum)})`;
 
-  // Info Rekening Penampung
-  const namaRekening = data.namaRekening || (isTHT ? "THT Umum ASABRI" : "Pensiun ASABRI");
-  const noRekening = data.noRekening || (isTHT ? "0261-01-000004-30-9" : "0261-01-000005-30-5");
+  // Info Rekening Penampung Sesuai Dokumen Resmi PDF
+  const namaRekening = data.namaRekening || (isTHT
+    ? (isPolri ? "THT POLRI ASABRI" : "THT TNI ASABRI")
+    : (isPolri ? "Dapen POLRI ASABRI" : "Dapen TNI ASABRI"));
+
+  const noRekening = data.noRekening || (isTHT
+    ? (isPolri ? "0261-01-000005-30-5" : "0261-01-000004-30-9")
+    : (isPolri ? "0261-01-000629-30-3" : "0261-01-000628-30-7"));
+
   const namaBank = data.namaBank || "BRI Kantor Cabang Jakarta Krekot";
 
   // Nomor Bukti Kuitansi (Page 3)
-  const noBukti = data.noBukti || (isTHT ? (isPolri ? "22/PFK.THT-POLRI/X/2024-Keu" : "21/PFK.THT-AS/X/2024-Keu") : (isPolri ? "23/PFK.PEN-POLRI/X/2024-Keu" : "24/PFK.PEN-TNI/X/2024-Keu"));
+  const noBukti = data.noBukti || (isTHT
+    ? (isPolri ? "22/PFK.THT-POLRI/V/2026-Keu" : "21/PFK.THT-AS/V/2026-Keu")
+    : (isPolri ? "23/PFK.PEN-POLRI/V/2026-Keu" : "24/PFK.PEN-TNI/V/2026-Keu"));
 
-  // Pejabat Penandatangan
-  const namaDirektur = data.namaPejabat || data.namaDirektur || "Helmi I Satriyo";
-  const jabatanDirektur = data.jabatan || data.jabatanDirektur || "Direktur Keuangan dan Manajemen Resiko";
+  // Pejabat Penandatangan Resmi (Sesuai PDF: HELMI I. SATRIYONO)
+  const namaDirektur = data.namaPejabat || data.namaDirektur || "HELMI I. SATRIYONO";
+  const jabatanDirektur = data.jabatan || data.jabatanDirektur || "DIREKTUR KEUANGAN DAN MANAJEMEN RISIKO";
   const namaPPK = data.namaPPK || "Nazif Azhari";
 
   const handleCopyNoSurat = () => {
@@ -187,6 +282,7 @@ export const SuratTagihanKemenkeu = ({
     table { border-collapse: collapse; }
     @media print {
       body { padding: 0; }
+      .no-print { display: none !important; }
       .page-break { page-break-after: always; break-after: page; }
     }
   </style>
@@ -245,7 +341,7 @@ export const SuratTagihanKemenkeu = ({
                 gap: 5
               }}
             >
-              <Layers size={13} /> Semua Halaman (3 Hal)
+              <Layers size={13} /> Dokumen Lengkap (2 Hal Surat + Kuitansi)
             </button>
             <button
               onClick={() => setActivePage(1)}
@@ -275,7 +371,7 @@ export const SuratTagihanKemenkeu = ({
                 cursor: "pointer"
               }}
             >
-              Hal 2 (Rincian & TTD)
+              Hal 2 (Rincian & TTD Direksi)
             </button>
             <button
               onClick={() => setActivePage(3)}
@@ -290,12 +386,34 @@ export const SuratTagihanKemenkeu = ({
                 cursor: "pointer"
               }}
             >
-              Hal 3 (Kuitansi / Bukti Bayar)
+              Hal 3 (Kuitansi / Lampiran 5.a)
             </button>
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons & Paraf Toggle */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                fontSize: 11.5,
+                color: COLORS.gray700,
+                cursor: "pointer",
+                marginRight: 6,
+                userSelect: "none"
+              }}
+              title="Centang untuk menampilkan kotak paraf kedinasan (minuta internal)"
+            >
+              <input
+                type="checkbox"
+                checked={showParafInternal}
+                onChange={(e) => setShowParafInternal(e.target.checked)}
+                style={{ cursor: "pointer" }}
+              />
+              <span>Paraf Minuta</span>
+            </label>
+
             <button
               onClick={handleCopyNoSurat}
               style={{
@@ -343,13 +461,14 @@ export const SuratTagihanKemenkeu = ({
       >
         {/* =====================================================================
             HALAMAN 1: SURAT PERMINTAAN PEMBAYARAN DANA PFK (SURAT PENGANTAR)
+            Persis Sesuai SuratTagihan_PensiunTNI.pdf Halaman 1
            ===================================================================== */}
         {(activePage === "all" || activePage === 1) && (
           <div
             style={{
               width: "100%",
               maxWidth: 820,
-              minHeight: 1080,
+              minHeight: 1120,
               background: "#FFFFFF",
               padding: "48px 56px",
               boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
@@ -363,35 +482,35 @@ export const SuratTagihanKemenkeu = ({
               position: "relative"
             }}
           >
-            {/* Header: Logo ASABRI */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+            {/* Header: Logo ASABRI di Kiri Atas */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
               <AsabriLogoHeader height={44} />
             </div>
 
-            {/* Metadata Surat (Nomor, Sifat, Lampiran, Hal, Tanggal) */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-              <div style={{ width: "62%" }}>
+            {/* Metadata Surat: Kiri (Nomor, Sifat, Lampiran, Hal) & Kanan (Tanggal Surat) */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+              <div style={{ width: "66%" }}>
                 <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12.5 }}>
                   <tbody>
                     <tr>
-                      <td style={{ width: 80, verticalAlign: "top" }}>Nomor</td>
-                      <td style={{ width: 15, verticalAlign: "top" }}>:</td>
-                      <td style={{ verticalAlign: "top", fontWeight: 700 }}>{noSurat}</td>
+                      <td style={{ width: 80, verticalAlign: "top", paddingBottom: 2 }}>Nomor</td>
+                      <td style={{ width: 15, verticalAlign: "top", paddingBottom: 2 }}>:</td>
+                      <td style={{ verticalAlign: "top", fontWeight: 700, paddingBottom: 2 }}>{noSurat}</td>
                     </tr>
                     <tr>
-                      <td style={{ verticalAlign: "top" }}>Sifat</td>
-                      <td style={{ verticalAlign: "top" }}>:</td>
-                      <td style={{ verticalAlign: "top" }}>Biasa</td>
+                      <td style={{ verticalAlign: "top", paddingBottom: 2 }}>Sifat</td>
+                      <td style={{ verticalAlign: "top", paddingBottom: 2 }}>:</td>
+                      <td style={{ verticalAlign: "top", paddingBottom: 2 }}>Biasa</td>
                     </tr>
                     <tr>
-                      <td style={{ verticalAlign: "top" }}>Lampiran</td>
-                      <td style={{ verticalAlign: "top" }}>:</td>
-                      <td style={{ verticalAlign: "top" }}>1 (satu) berkas</td>
+                      <td style={{ verticalAlign: "top", paddingBottom: 2 }}>Lampiran</td>
+                      <td style={{ verticalAlign: "top", paddingBottom: 2 }}>:</td>
+                      <td style={{ verticalAlign: "top", paddingBottom: 2 }}>2 (dua) berkas</td>
                     </tr>
                     <tr>
                       <td style={{ verticalAlign: "top" }}>Hal</td>
                       <td style={{ verticalAlign: "top" }}>:</td>
-                      <td style={{ verticalAlign: "top", fontWeight: 700 }}>
+                      <td style={{ verticalAlign: "top", fontWeight: 700, textAlign: "justify" }}>
                         {data.perihal || `Tagihan/Permintaan Pembayaran Dana PFK ${tarif} untuk ${halProgram} s.d. Tanggal ${tglCutoff}`}
                       </td>
                     </tr>
@@ -399,14 +518,14 @@ export const SuratTagihanKemenkeu = ({
                 </table>
               </div>
 
-              {/* Tanggal Surat di Kanan */}
-              <div style={{ width: "35%", textAlign: "left", paddingLeft: 20 }}>
-                <div style={{ fontSize: 12.5 }}>{tanggalSurat}</div>
+              {/* Tanggal Surat Sejajar dengan Nomor di Pojok Kanan */}
+              <div style={{ width: "30%", textAlign: "right" }}>
+                <div style={{ fontSize: 12.5, color: "#0F172A" }}>{tanggalSurat}</div>
               </div>
             </div>
 
             {/* Alamat Tujuan Surat (Kemenkeu Satker 440780) */}
-            <div style={{ marginBottom: 20, lineHeight: 1.45 }}>
+            <div style={{ marginBottom: 20, lineHeight: 1.45, fontSize: 12.5 }}>
               <div>Yth. Kuasa Pengguna Anggaran</div>
               <div style={{ fontWeight: 700 }}>Satker (440780)</div>
               <div>Pengembalian Penerimaan Perhitungan Fihak Ketiga (PFK)</div>
@@ -416,11 +535,11 @@ export const SuratTagihanKemenkeu = ({
               <div>u.p. Pejabat Pembuat Komitmen</div>
               <div>Gedung Prijadi Praptosuhardjo IIIA Lantai 4</div>
               <div>Jalan Budi Utomo Nomor 6</div>
-              <div>DKI Jakarta - 10710</div>
+              <div>Jakarta - 10710</div>
             </div>
 
             {/* Dasar Hukum (Konsideran) */}
-            <div style={{ marginBottom: 16, textAlign: "justify" }}>
+            <div style={{ marginBottom: 16, textAlign: "justify", fontSize: 12.5 }}>
               <div style={{ marginBottom: 4 }}>Berdasarkan:</div>
               <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
                 <span style={{ minWidth: 16 }}>1.</span>
@@ -436,8 +555,8 @@ export const SuratTagihanKemenkeu = ({
               </div>
             </div>
 
-            {/* Isi Surat Pengajuan */}
-            <div style={{ marginBottom: 18, textAlign: "justify" }}>
+            {/* Isi Pengajuan Tagihan */}
+            <div style={{ marginBottom: 18, textAlign: "justify", fontSize: 12.5 }}>
               <div style={{ marginBottom: 6 }}>
                 Dengan ini kami mengajukan tagihan/permintaan pembayaran Dana Perhitungan Fihak Ketiga (PFK) sebagai berikut:
               </div>
@@ -460,34 +579,34 @@ export const SuratTagihanKemenkeu = ({
               <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
                 <span style={{ minWidth: 16 }}>3.</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ marginBottom: 4 }}>Rincian Penerima :</div>
-                  <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12.5, marginLeft: 12 }}>
+                  <div style={{ marginBottom: 4 }}>Rincian Penerima</div>
+                  <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12.5, marginLeft: 14 }}>
                     <tbody>
                       <tr>
-                        <td style={{ width: 24, verticalAlign: "top" }}>a.</td>
-                        <td style={{ width: 140, verticalAlign: "top" }}>Jumlah Uang</td>
-                        <td style={{ width: 15, verticalAlign: "top" }}>:</td>
-                        <td style={{ verticalAlign: "top", fontWeight: 700 }}>{nominalIniStr}</td>
+                        <td style={{ width: 22, verticalAlign: "top", paddingBottom: 3 }}>a.</td>
+                        <td style={{ width: 140, verticalAlign: "top", paddingBottom: 3 }}>Jumlah Uang</td>
+                        <td style={{ width: 15, verticalAlign: "top", paddingBottom: 3 }}>:</td>
+                        <td style={{ verticalAlign: "top", fontWeight: 700, paddingBottom: 3 }}>{nominalIniStr}</td>
                       </tr>
                       <tr>
-                        <td style={{ verticalAlign: "top" }}>b.</td>
-                        <td style={{ verticalAlign: "top" }}>Uraian Pembayaran</td>
-                        <td style={{ verticalAlign: "top" }}>:</td>
-                        <td style={{ verticalAlign: "top", textAlign: "justify" }}>
-                          Pembayaran Dana Perhitungan Fihak Ketiga (PFK) {tarif} Gaji untuk {namaProgramFull} berdasarkan realisasi penerimaan PFK sampai dengan tanggal {tglCutoff}.
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>b.</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>Uraian Pembayaran</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>:</td>
+                        <td style={{ verticalAlign: "top", textAlign: "justify", paddingBottom: 3 }}>
+                          {data.uraian || `Pembayaran Dana Perhitungan Fihak Ketiga (PFK) ${tarif} Gaji untuk ${namaProgramFull} berdasarkan realisasi penerimaan PFK sampai dengan tanggal ${tglCutoff}.`}
                         </td>
                       </tr>
                       <tr>
-                        <td style={{ verticalAlign: "top" }}>c.</td>
-                        <td style={{ verticalAlign: "top" }}>Nama</td>
-                        <td style={{ verticalAlign: "top" }}>:</td>
-                        <td style={{ verticalAlign: "top", fontWeight: 700 }}>PT ASABRI (Persero)</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>c.</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>Nama</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>:</td>
+                        <td style={{ verticalAlign: "top", fontWeight: 700, paddingBottom: 3 }}>PT ASABRI (Persero)</td>
                       </tr>
                       <tr>
-                        <td style={{ verticalAlign: "top" }}>d.</td>
-                        <td style={{ verticalAlign: "top" }}>Alamat</td>
-                        <td style={{ verticalAlign: "top" }}>:</td>
-                        <td style={{ verticalAlign: "top" }}>Jalan Mayjen Sutoyo Nomor 11 Jakarta Timur</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>d.</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>Alamat</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>:</td>
+                        <td style={{ verticalAlign: "top", paddingBottom: 3 }}>Jalan Mayjen Sutoyo Nomor 11 Jakarta Timur</td>
                       </tr>
                       <tr>
                         <td style={{ verticalAlign: "top" }}>e.</td>
@@ -501,11 +620,13 @@ export const SuratTagihanKemenkeu = ({
               </div>
             </div>
 
-            {/* Footer Paraf & Footer Kop Alamat */}
+            {/* Footer Paraf (Hanya jika dicentang) & Footer Kop Alamat */}
             <div style={{ marginTop: "auto" }}>
-              <div style={{ marginBottom: 12 }}>
-                <ParafFooterBox />
-              </div>
+              {showParafInternal && (
+                <div style={{ marginBottom: 12 }}>
+                  <ParafFooterBox />
+                </div>
+              )}
               <AsabriLetterFooter />
             </div>
           </div>
@@ -513,13 +634,14 @@ export const SuratTagihanKemenkeu = ({
 
         {/* =====================================================================
             HALAMAN 2: RINCIAN PERHITUNGAN AKUN & TANDA TANGAN DIREKSI
+            Persis Sesuai SuratTagihan_PensiunTNI.pdf Halaman 2
            ===================================================================== */}
         {(activePage === "all" || activePage === 2) && (
           <div
             style={{
               width: "100%",
               maxWidth: 820,
-              minHeight: 1080,
+              minHeight: 1120,
               background: "#FFFFFF",
               padding: "48px 56px",
               boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
@@ -533,44 +655,44 @@ export const SuratTagihanKemenkeu = ({
               position: "relative"
             }}
           >
-            {/* Nomor Halaman 2 */}
-            <div style={{ textAlign: "center", fontSize: 12, marginBottom: 16, color: "#475569" }}>
+            {/* Nomor Halaman 2 di Tengah Atas */}
+            <div style={{ textAlign: "center", fontSize: 12.5, marginBottom: 20, color: "#0F172A" }}>
               2
             </div>
 
             {/* Poin 4: Rincian Perhitungan dan Rekening Penerima */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
-                <span style={{ minWidth: 16, fontWeight: 700 }}>4.</span>
-                <span style={{ fontWeight: 700 }}>Rincian Perhitungan dan Rekening Penerima:</span>
+              <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                <span style={{ minWidth: 16 }}>4.</span>
+                <span>Rincian Perhitungan dan Rekening Penerima:</span>
               </div>
 
-              {/* Tabel Akun 5 Kolom Sesuai Format Kemenkeu */}
-              <div style={{ marginLeft: 26, marginBottom: 16 }}>
+              {/* Tabel Akun 5 Kolom Persis Sesuai PDF */}
+              <div style={{ marginLeft: 26, marginBottom: 18 }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000000", fontSize: 11.5, textAlign: "center" }}>
                   <thead>
-                    <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #000000" }}>
-                      <th style={{ border: "1px solid #000000", padding: "6px 8px", width: 40 }}>No</th>
-                      <th style={{ border: "1px solid #000000", padding: "6px 8px", width: 80 }}>Akun</th>
+                    <tr style={{ background: "#FFFFFF", borderBottom: "1px solid #000000" }}>
+                      <th style={{ border: "1px solid #000000", padding: "6px 8px", width: 42 }}>No</th>
+                      <th style={{ border: "1px solid #000000", padding: "6px 8px", width: 75 }}>Akun</th>
                       <th style={{ border: "1px solid #000000", padding: "6px 8px" }}>Jumlah Tagihan<br />s.d. Yang Lalu</th>
                       <th style={{ border: "1px solid #000000", padding: "6px 8px" }}>Jumlah<br />Tagihan ini</th>
                       <th style={{ border: "1px solid #000000", padding: "6px 8px" }}>Jumlah<br />s.d. Tagihan ini</th>
                     </tr>
-                    <tr style={{ background: "#F1F5F9", fontSize: 10.5, borderBottom: "1px solid #000000" }}>
+                    <tr style={{ background: "#FFFFFF", fontSize: 10.5, borderBottom: "1px solid #000000" }}>
                       <th style={{ border: "1px solid #000000", padding: "3px" }}>(1)</th>
                       <th style={{ border: "1px solid #000000", padding: "3px" }}>(2)</th>
                       <th style={{ border: "1px solid #000000", padding: "3px" }}>(3)</th>
                       <th style={{ border: "1px solid #000000", padding: "3px" }}>(4)</th>
-                      <th style={{ border: "1px solid #000000", padding: "3px" }}>(5) = (3) + (4)</th>
+                      <th style={{ border: "1px solid #000000", padding: "3px" }}>(5) = (3)+(4)</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{ border: "1px solid #000000", padding: "8px 6px" }}>1</td>
-                      <td style={{ border: "1px solid #000000", padding: "8px 6px", fontWeight: 700, fontFamily: "monospace" }}>{akunMAK}</td>
-                      <td style={{ border: "1px solid #000000", padding: "8px 8px", textAlign: "right" }}>{nominalLaluStr}</td>
-                      <td style={{ border: "1px solid #000000", padding: "8px 8px", textAlign: "right", fontWeight: 700 }}>{nominalIniStr}</td>
-                      <td style={{ border: "1px solid #000000", padding: "8px 8px", textAlign: "right", fontWeight: 700 }}>{nominalTotalStr}</td>
+                      <td style={{ border: "1px solid #000000", padding: "9px 6px" }}>1</td>
+                      <td style={{ border: "1px solid #000000", padding: "9px 6px", fontFamily: "monospace", fontSize: 12 }}>{akunMAK}</td>
+                      <td style={{ border: "1px solid #000000", padding: "9px 8px", textAlign: "right" }}>{nominalLaluStr}</td>
+                      <td style={{ border: "1px solid #000000", padding: "9px 8px", textAlign: "right" }}>{nominalIniStr}</td>
+                      <td style={{ border: "1px solid #000000", padding: "9px 8px", textAlign: "right" }}>{nominalTotalStr}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -578,11 +700,11 @@ export const SuratTagihanKemenkeu = ({
 
               {/* Rekening Tujuan Transfer */}
               <div style={{ marginLeft: 26, marginBottom: 18, lineHeight: 1.5 }}>
-                <div>Jumlah tagihan tersebut agar ditransfer ke rekening:</div>
-                <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12.5, marginTop: 4 }}>
+                <div style={{ marginBottom: 4 }}>Jumlah tagihan tersebut agar ditransfer ke rekening:</div>
+                <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12.5 }}>
                   <tbody>
                     <tr>
-                      <td style={{ width: 24 }}>a.</td>
+                      <td style={{ width: 22 }}>a.</td>
                       <td style={{ width: 140 }}>Nama Rekening</td>
                       <td style={{ width: 15 }}>:</td>
                       <td style={{ fontWeight: 700 }}>{namaRekening}</td>
@@ -607,8 +729,8 @@ export const SuratTagihanKemenkeu = ({
             {/* Poin 5: Lampiran */}
             <div style={{ marginBottom: 20 }}>
               <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
-                <span style={{ minWidth: 16, fontWeight: 700 }}>5.</span>
-                <span style={{ fontWeight: 700 }}>Lampiran :</span>
+                <span style={{ minWidth: 16 }}>5.</span>
+                <span>Lampiran:</span>
               </div>
               <div style={{ marginLeft: 26, textAlign: "justify" }}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
@@ -624,37 +746,29 @@ export const SuratTagihanKemenkeu = ({
               </div>
             </div>
 
-            {/* Penutup Surat & Kolom Tanda Tangan Direksi */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ textAlign: "justify", marginBottom: 28 }}>
-                Demikian kami sampaikan. Atas perhatian dan kerja sama Saudara, kami mengucapkan terima kasih.
-              </div>
-
-              {/* Tanda Tangan Direksi ASABRI */}
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <div style={{ width: "55%", textAlign: "center" }}>
-                  <div style={{ fontWeight: 700, letterSpacing: 1, marginBottom: 50 }}>DIREKSI</div>
-                  <div style={{ fontWeight: 700, textDecoration: "underline", fontSize: 13 }}>
-                    {namaDirektur}
-                  </div>
-                  <div style={{ fontWeight: 700, fontSize: 11.5 }}>
-                    {jabatanDirektur}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tembusan */}
-              <div style={{ marginTop: 24, fontSize: 11.5 }}>
-                <div style={{ fontWeight: 700 }}>Tembusan:</div>
-                <div>Direksi PT ASABRI (Persero)</div>
-              </div>
+            {/* Penutup Surat */}
+            <div style={{ marginBottom: 30, textAlign: "justify" }}>
+              Demikian kami sampaikan. Atas perhatian dan kerja sama Saudara, kami mengucapkan terima kasih.
             </div>
 
-            {/* Footer Paraf & Footer Kop Alamat */}
+            {/* Area Tanda Tangan Direksi ASABRI dengan Stempel Ungu & Tanda Tangan Tinta Biru */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 24 }}>
+              <AsabriOfficialStampAndSignature nama={namaDirektur} jabatan={jabatanDirektur} />
+            </div>
+
+            {/* Tembusan di Kiri Bawah */}
+            <div style={{ fontSize: 11.5, marginBottom: 20 }}>
+              <div style={{ fontWeight: 700 }}>Tembusan:</div>
+              <div>Direksi PT ASABRI (Persero).</div>
+            </div>
+
+            {/* Footer Paraf (Hanya jika dicentang) & Footer Kop Alamat */}
             <div style={{ marginTop: "auto" }}>
-              <div style={{ marginBottom: 12 }}>
-                <ParafFooterBox />
-              </div>
+              {showParafInternal && (
+                <div style={{ marginBottom: 12 }}>
+                  <ParafFooterBox />
+                </div>
+              )}
               <AsabriLetterFooter />
             </div>
           </div>
@@ -662,13 +776,14 @@ export const SuratTagihanKemenkeu = ({
 
         {/* =====================================================================
             HALAMAN 3: LAMPIRAN KUITANSI / BUKTI PEMBAYARAN RESMI KEMENKEU
+            (Lampiran 5.a Sesuai Poin 5 di Surat Tagihan)
            ===================================================================== */}
         {(activePage === "all" || activePage === 3) && (
           <div
             style={{
               width: "100%",
               maxWidth: 820,
-              minHeight: 1080,
+              minHeight: 1120,
               background: "#FFFFFF",
               padding: "48px 56px",
               boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
@@ -748,7 +863,7 @@ export const SuratTagihanKemenkeu = ({
               </table>
             </div>
 
-            {/* Kolom Tanda Tangan Ganda (Direksi ASABRI & PPK Kemenkeu) */}
+            {/* Kolom Tanda Tangan Ganda (PPK Kemenkeu & Direksi ASABRI) */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30, marginTop: 20, marginBottom: 24 }}>
               {/* Kiri: Persetujuan PPK Kemenkeu */}
               <div style={{ textAlign: "center" }}>
@@ -775,7 +890,8 @@ export const SuratTagihanKemenkeu = ({
 
             {/* Footer Paraf */}
             <div style={{ marginTop: "auto" }}>
-              <ParafFooterBox />
+              {showParafInternal && <ParafFooterBox />}
+              <AsabriLetterFooter />
             </div>
           </div>
         )}

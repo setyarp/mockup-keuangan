@@ -950,8 +950,8 @@ export const KalkulatorIuran = () => {
       "Peserta",
       "THT 3,25%",
       "Pensiun 4,75%",
-      "JKK 0,24%",
-      "JKM 0,20%",
+      "JKK 0,62%",
+      "JKM 0,81%",
       "Total Iuran"
     ];
     const alignments = ["left", "left", "right", "right", "right", "right", "right", "right"];
@@ -1115,13 +1115,13 @@ export const KalkulatorIuran = () => {
     // Rate perhitungan sesuai PP 102/2015 jo PP 54/2020:
     // THT: 3,25% dari (GP + Tunj. Keluarga)
     // Pensiun: 4,75% dari (GP + Tunj. Keluarga)
-    // JKK: 0,24% dari GP (APBN)
-    // JKM: 0,20% dari GP (APBN)
+    // JKK: 0,62% dari GP (APBN)
+    // JKM: 0,81% dari GP (APBN)
     // PPPK: THT = 0, Pensiun = 0 (hanya JKK & JKM)
     const thtPerPerson = isPPPK ? 0 : Math.round(penghasilanTetap * 0.0325);
     const pensiunPerPerson = isPPPK ? 0 : Math.round(penghasilanTetap * 0.0475);
-    const jkkPerPerson = Math.round(dasarJKK_JKM * 0.0024);
-    const jkmPerPerson = Math.round(dasarJKK_JKM * 0.0020);
+    const jkkPerPerson = Math.round(dasarJKK_JKM * 0.0062);
+    const jkmPerPerson = Math.round(dasarJKK_JKM * 0.0081);
 
     const iuranPesertaPerPerson = thtPerPerson + pensiunPerPerson;
     const iuranNegaraPerPerson = jkkPerPerson + jkmPerPerson;
@@ -1168,9 +1168,9 @@ Tunjangan Keluarga: ${fmtRupiah(simResult.tunjIstri + simResult.tunjAnak)}
 - Pensiun (4,75%): ${fmtRupiah(simResult.pensiunTotal)}
 Total Potongan Peserta: ${fmtRupiah(simResult.iuranPesertaTotal)}
 
-[IURAN DITANGGUNG NEGARA/APBN (0,44%)]
-- JKK (0,24%): ${fmtRupiah(simResult.jkkTotal)}
-- JKM (0,20%): ${fmtRupiah(simResult.jkmTotal)}
+[IURAN DITANGGUNG NEGARA/APBN (1,43%)]
+- JKK (0,62%): ${fmtRupiah(simResult.jkkTotal)}
+- JKM (0,81%): ${fmtRupiah(simResult.jkmTotal)}
 Total Iuran Negara: ${fmtRupiah(simResult.iuranNegaraTotal)}
 
 TOTAL IURAN BULANAN: ${fmtRupiah(simResult.totalKeseluruhan)}
@@ -1186,8 +1186,8 @@ PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
     const rows = [
       ["THT (Tabungan Hari Tua)", "Gaji Pokok + Tunj. Keluarga", simKategori === "PPPK" ? "0% (Non-pensiun)" : "3,25%", fmtRupiah(simResult.thtPerPerson), fmtRupiah(simResult.thtTotal)],
       ["Jaminan Pensiun", "Gaji Pokok + Tunj. Keluarga", simKategori === "PPPK" ? "0% (Non-pensiun)" : "4,75%", fmtRupiah(simResult.pensiunPerPerson), fmtRupiah(simResult.pensiunTotal)],
-      ["JKK (Kecelakaan Kerja)", "Gaji Pokok", "0,24% (APBN)", fmtRupiah(simResult.jkkPerPerson), fmtRupiah(simResult.jkkTotal)],
-      ["JKM (Kematian)", "Gaji Pokok", "0,20% (APBN)", fmtRupiah(simResult.jkmPerPerson), fmtRupiah(simResult.jkmTotal)]
+      ["JKK (Kecelakaan Kerja)", "Gaji Pokok", "0,62% (APBN)", fmtRupiah(simResult.jkkPerPerson), fmtRupiah(simResult.jkkTotal)],
+      ["JKM (Kematian)", "Gaji Pokok", "0,81% (APBN)", fmtRupiah(simResult.jkmPerPerson), fmtRupiah(simResult.jkmTotal)]
     ];
     const totalRow = [
       { text: "TOTAL IURAN BULANAN", colSpan: 3, align: "left" },
@@ -1962,10 +1962,10 @@ PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
                       Pensiun 4,75%
                     </th>
                     <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "12%" }}>
-                      JKK 0,24%
+                      JKK 0,62%
                     </th>
                     <th style={{ padding: "8px 14px 14px", textAlign: "right", borderBottom: `1px solid ${COLORS.gray200}`, width: "12%" }}>
-                      JKM 0,20%
+                      JKM 0,81%
                     </th>
                   </tr>
                 </thead>
@@ -2065,12 +2065,12 @@ PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
                               {fmtRupiah(inst.pensiun)}
                             </td>
 
-                            {/* JKK 0,24% */}
+                            {/* JKK 0,62% */}
                             <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
                               {fmtRupiah(inst.jkk)}
                             </td>
 
-                            {/* JKM 0,20% */}
+                            {/* JKM 0,81% */}
                             <td style={{ padding: "14px 14px", textAlign: "right", fontWeight: 700, color: COLORS.gray900 }}>
                               {fmtRupiah(inst.jkm)}
                             </td>
@@ -2142,12 +2142,12 @@ PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
                                   {sr.pensiun ? fmtRupiah(sr.pensiun) : "—"}
                                 </td>
 
-                                {/* JKK 0,24% */}
+                                {/* JKK 0,62% */}
                                 <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray800 }}>
                                   {fmtRupiah(sr.jkk)}
                                 </td>
 
-                                {/* JKM 0,20% */}
+                                {/* JKM 0,81% */}
                                 <td style={{ padding: "12px 14px", textAlign: "right", color: COLORS.gray800 }}>
                                   {fmtRupiah(sr.jkm)}
                                 </td>
@@ -2603,17 +2603,17 @@ PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
                     borderRadius: 9999
                   }}
                 >
-                  0,44% Gaji Pokok
+                  1,43% Gaji Pokok
                 </span>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                  <span style={{ color: COLORS.gray600 }}>JKK (Jaminan Kecelakaan Kerja · 0,24%):</span>
+                  <span style={{ color: COLORS.gray600 }}>JKK (Jaminan Kecelakaan Kerja · 0,62%):</span>
                   <strong style={{ color: COLORS.gray900 }}>{fmtRupiah(simResult.jkkTotal)}</strong>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                  <span style={{ color: COLORS.gray600 }}>JKM (Jaminan Kematian · 0,20%):</span>
+                  <span style={{ color: COLORS.gray600 }}>JKM (Jaminan Kematian · 0,81%):</span>
                   <strong style={{ color: COLORS.gray900 }}>{fmtRupiah(simResult.jkmTotal)}</strong>
                 </div>
                 <div
@@ -2822,8 +2822,8 @@ PROYEKSI 1 TAHUN: ${fmtRupiah(simResult.tahunan)}`;
                     <th style={{ padding: "10px 12px", textAlign: "right" }}>Gaji Pokok &amp; Tunj.</th>
                     <th style={{ padding: "10px 12px", textAlign: "right" }}>THT (3,25%)</th>
                     <th style={{ padding: "10px 12px", textAlign: "right" }}>Pensiun (4,75%)</th>
-                    <th style={{ padding: "10px 12px", textAlign: "right" }}>JKK (0,24%)</th>
-                    <th style={{ padding: "10px 12px", textAlign: "right" }}>JKM (0,20%)</th>
+                    <th style={{ padding: "10px 12px", textAlign: "right" }}>JKK (0,62%)</th>
+                    <th style={{ padding: "10px 12px", textAlign: "right" }}>JKM (0,81%)</th>
                     <th style={{ padding: "10px 12px", textAlign: "right", borderRadius: "0 6px 6px 0" }}>Total Iuran</th>
                   </tr>
                 </thead>

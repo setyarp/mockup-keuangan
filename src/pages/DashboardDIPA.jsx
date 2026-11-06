@@ -338,7 +338,7 @@ export const DashboardDIPA = () => {
   const activeMonthData = activeIdx !== null ? pembayaranBulanan[activeIdx] : null;
 
   // ==========================================
-  // DATASET 2: IURAN JKK (0,24% APBN)
+  // DATASET 2: IURAN JKK (0,62% APBN)
   // ==========================================
   const paguJKKTotal = 31_560_000_000;
   const realisasiJKKTotal = 18_410_000_000;
@@ -365,7 +365,7 @@ export const DashboardDIPA = () => {
   ];
 
   // ==========================================
-  // DATASET 3: IURAN JKM (0,20% APBN)
+  // DATASET 3: IURAN JKM (0,81% APBN)
   // ==========================================
   const paguJKMTotal = 26_520_000_000;
   const realisasiJKMTotal = 15_470_000_000;
@@ -451,7 +451,7 @@ export const DashboardDIPA = () => {
     },
     {
       id: "jkk",
-      nama: "Iuran JKK (0,24%)",
+      nama: "Iuran JKK (0,62%)",
       deskripsi: "Iuran Jaminan Kecelakaan Kerja Peserta Aktif TNI, Kemhan, & POLRI",
       pagu: paguJKKTotal,
       real: realisasiJKKTotal,
@@ -465,7 +465,7 @@ export const DashboardDIPA = () => {
     },
     {
       id: "jkm",
-      nama: "Iuran JKM (0,20%)",
+      nama: "Iuran JKM (0,81%)",
       deskripsi: "Iuran Jaminan Kematian Peserta Aktif TNI, Kemhan, & POLRI",
       pagu: paguJKMTotal,
       real: realisasiJKMTotal,
@@ -553,8 +553,8 @@ export const DashboardDIPA = () => {
         {[
           { id: "konsolidasi", label: "🌐 Konsolidasi Seluruh Pagu DIPA", badge: "4 Pilar", color: "#1E293B" },
           { id: "pensiun", label: "🎖️ Belanja Pensiun (DAPEM)", badge: `${pctPensiunUsed}%`, color: "#0141A8", alertDot: isPensiunAlert },
-          { id: "jkk", label: "🛡️ Iuran JKK (0,24%)", badge: `${pctJKKUsed}%`, color: "#059669" },
-          { id: "jkm", label: "🕊️ Iuran JKM (0,20%)", badge: `${pctJKMUsed}%`, color: "#0D9488" },
+          { id: "jkk", label: "🛡️ Iuran JKK (0,62%)", badge: `${pctJKKUsed}%`, color: "#059669" },
+          { id: "jkm", label: "🕊️ Iuran JKM (0,81%)", badge: `${pctJKMUsed}%`, color: "#0D9488" },
           { id: "bop", label: "🏢 Biaya Operasional (BOP)", badge: `${pctBOPUsed}%`, color: "#7C3AED" },
         ].map(t => {
           const isActive = activeProgramTab === t.id;
@@ -1644,7 +1644,7 @@ export const DashboardDIPA = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* PROGRAM 3: IURAN JKK (0,24% APBN) */}
+      {/* PROGRAM 3: IURAN JKK (0,62% APBN) */}
       {/* ========================================================================= */}
       {activeProgramTab === "jkk" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -1669,10 +1669,10 @@ export const DashboardDIPA = () => {
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 13.5, fontWeight: 800, color: "#065F46" }}>
-                    Program DIPA Iuran Jaminan Kecelakaan Kerja (JKK - 0,24%)
+                    Program DIPA Iuran Jaminan Kecelakaan Kerja (JKK - 0,62%)
                   </span>
                   <span style={{ background: "#D1FAE5", color: "#059669", padding: "1px 7px", borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
-                    Tarif 0,24% Gaji Pokok + Tunjangan Keluarga
+                    Tarif 0,62% Gaji Pokok + Tunjangan Keluarga
                   </span>
                 </div>
                 <div style={{ fontSize: 12, color: "#047857", marginTop: 3 }}>
@@ -1741,7 +1741,7 @@ export const DashboardDIPA = () => {
                   Distribusi Pagu & Realisasi SP2D Iuran JKK per Satker
                 </div>
                 <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 2 }}>
-                  Rincian alokasi tarif 0,24% berdasarkan DIPA Belanja Pegawai masing-masing instansi pertahanan & kepolisian
+                  Rincian alokasi tarif 0,62% berdasarkan DIPA Belanja Pegawai masing-masing instansi pertahanan & kepolisian
                 </div>
               </div>
 
@@ -1770,7 +1770,7 @@ export const DashboardDIPA = () => {
 
                 <Btn variant="outline" size="sm" onClick={() => setPreview({
                   title: "Rincian Pagu & Realisasi Iuran JKK TA 2026",
-                  subtitle: "Distribusi DIPA Belanja Pegawai JKK 0,24% per Satker",
+                  subtitle: "Distribusi DIPA Belanja Pegawai JKK 0,62% per Satker",
                   type: "table",
                   fileName: "Pagu_Realisasi_JKK_2026.xlsx",
                   content: {
@@ -1893,7 +1893,7 @@ export const DashboardDIPA = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* PROGRAM 4: IURAN JKM (0,20% APBN) */}
+      {/* PROGRAM 4: IURAN JKM (0,81% APBN) */}
       {/* ========================================================================= */}
       {activeProgramTab === "jkm" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -1918,10 +1918,10 @@ export const DashboardDIPA = () => {
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 13.5, fontWeight: 800, color: "#115E59" }}>
-                    Program DIPA Iuran Jaminan Kematian (JKM - 0,20%)
+                    Program DIPA Iuran Jaminan Kematian (JKM - 0,81%)
                   </span>
                   <span style={{ background: "#CCFBF1", color: "#0D9488", padding: "1px 7px", borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
-                    Tarif 0,20% Gaji Pokok + Tunjangan Keluarga
+                    Tarif 0,81% Gaji Pokok + Tunjangan Keluarga
                   </span>
                 </div>
                 <div style={{ fontSize: 12, color: "#0F766E", marginTop: 3 }}>
@@ -1990,7 +1990,7 @@ export const DashboardDIPA = () => {
                   Distribusi Pagu & Realisasi SP2D Iuran JKM per Satker
                 </div>
                 <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 2 }}>
-                  Rincian alokasi tarif 0,20% berdasarkan DIPA Belanja Pegawai masing-masing instansi pertahanan & kepolisian
+                  Rincian alokasi tarif 0,81% berdasarkan DIPA Belanja Pegawai masing-masing instansi pertahanan & kepolisian
                 </div>
               </div>
 
@@ -2019,7 +2019,7 @@ export const DashboardDIPA = () => {
 
                 <Btn variant="outline" size="sm" onClick={() => setPreview({
                   title: "Rincian Pagu & Realisasi Iuran JKM TA 2026",
-                  subtitle: "Distribusi DIPA Belanja Pegawai JKM 0,20% per Satker",
+                  subtitle: "Distribusi DIPA Belanja Pegawai JKM 0,81% per Satker",
                   type: "table",
                   fileName: "Pagu_Realisasi_JKM_2026.xlsx",
                   content: {
